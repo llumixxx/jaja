@@ -49,9 +49,12 @@ body {
 .sb-logo-dot{width:8px;height:8px;background:var(--a2);border-radius:50%;animation:pulse 2s infinite;}
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(2)}}
 .sb-sub{font-size:10.5px;color:var(--t3);font-family:'Nunito',sans-serif;font-weight:700;letter-spacing:.5px;}
-.sb-nav{display:flex;gap:6px;padding:12px 16px;border-bottom:1.5px solid var(--border);}
-.sb-nav a{flex:1;text-decoration:none;text-align:center;padding:9px 6px;border-radius:12px;
-  font-size:12.5px;font-weight:800;color:var(--t2);background:var(--s1);border:1.5px solid var(--border);}
+.sb-nav{display:flex;flex-direction:column;gap:5px;padding:12px 16px;border-bottom:1.5px solid var(--border);}
+.sb-nav a{display:flex;align-items:center;gap:9px;text-decoration:none;padding:10px 12px;border-radius:13px;
+  font-size:13px;font-weight:800;color:var(--t2);background:var(--s1);border:1.5px solid var(--border);
+  transition:transform .2s cubic-bezier(.34,1.56,.64,1),box-shadow .2s ease;}
+.sb-nav a:hover{transform:translateX(3px);box-shadow:0 4px 12px rgba(47,127,214,.18);}
+.sb-nav a:active{transform:scale(.97);}
 .sb-nav a.on{background:linear-gradient(135deg,var(--a1),var(--a2));color:#fff;border-color:transparent;}
 .sb-body{padding:14px 16px 16px;flex:1;overflow-y:auto;min-height:0;font-size:12.5px;color:var(--t2);line-height:1.7;}
 .sb-body::-webkit-scrollbar{width:4px;} .sb-body::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px;}
@@ -357,9 +360,18 @@ body {
 .dist-bar-row.highlight .dist-bar-label { color: var(--t1); font-weight: 800; }
 
 /* 자동 진행 */
-.auto-n-check { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 99px; border: 1.5px solid var(--border); background: var(--white); font-size: 12px; font-weight: 700; color: var(--t2); cursor: pointer; transition: all .15s; }
-.auto-n-check input { display: none; }
-.auto-n-check.active { border-color: var(--a1); background: var(--s2); color: var(--a1); }
+.toggle-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 12px; background: var(--white); border: 1.5px solid var(--border); border-radius: 12px; }
+.toggle-row-label { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.toggle-row-title { font-size: 12.5px; font-weight: 800; color: var(--t1); }
+.toggle-row-desc { font-size: 10.5px; color: var(--t3); font-weight: 600; line-height: 1.4; }
+.toggle-switch { display: flex; align-items: center; gap: 7px; cursor: pointer; user-select: none; flex-shrink: 0; }
+.toggle-switch input { display: none; }
+.toggle-track { width: 42px; height: 24px; background: var(--border2); border-radius: 99px; position: relative; transition: background .2s; flex-shrink: 0; }
+.toggle-thumb { position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; background: #fff; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,.3); transition: transform .2s cubic-bezier(.34,1.56,.64,1); }
+.toggle-switch input:checked + .toggle-track { background: linear-gradient(135deg, var(--a1), var(--a2)); }
+.toggle-switch input:checked + .toggle-track .toggle-thumb { transform: translateX(18px); }
+.toggle-state-text { font-size: 11px; font-weight: 900; font-family: 'Nunito', sans-serif; color: var(--t3); min-width: 24px; }
+.toggle-switch input:checked ~ .toggle-state-text { color: var(--a1); }
 
 @media(max-width:520px){ .page-title{font-size:28px;} }
 </style>
@@ -474,13 +486,16 @@ body {
         <button id="btn-auto-skip" class="btn-go" style="display:none;padding:8px 14px;font-size:12px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#5a4015;" onclick="skipToResult()">⏩ 결과 바로보기</button>
         <span id="auto-help-text" style="font-size:11px;color:var(--t3);font-weight:700;">알아서 초기화/도전/펫구매 반복</span>
       </div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
-        <span style="font-size:11px;font-weight:800;color:var(--t3);letter-spacing:0.5px;">구슬 사용:</span>
-        <label class="auto-n-check active" id="auto-orb-reset-label">
+      <div class="toggle-row">
+        <div class="toggle-row-label">
+          <span class="toggle-row-title">📊 초기화 구슬 자동 사용</span>
+          <span class="toggle-row-desc" id="auto-orb-reset-desc">켜짐 — 5번까지 초기화하며 도전, 다 쓰면 새 펫 구매</span>
+        </div>
+        <label class="toggle-switch">
           <input type="checkbox" id="auto-orb-reset" checked />
-          <span>📊 초기화 구슬</span>
+          <span class="toggle-track"><span class="toggle-thumb"></span></span>
+          <span class="toggle-state-text" id="auto-orb-reset-state">ON</span>
         </label>
-        <span style="font-size:10px;color:var(--t3);font-weight:600;">ⓘ 일반 포획펫은 꺼주세요</span>
       </div>
     </div>
   </div>
@@ -526,8 +541,8 @@ body {
     <div class="stat-rolls" id="stat-rolls">
       <div class="stat-roll-cell"><div class="srl-label">공격</div><div class="srl-val" id="srl-atk">−</div><div class="srl-diff" id="srl-diff-atk"></div></div>
       <div class="stat-roll-cell"><div class="srl-label">방어</div><div class="srl-val" id="srl-def">−</div><div class="srl-diff" id="srl-diff-def"></div></div>
-      <div class="stat-roll-cell"><div class="srl-label">민첩</div><div class="srl-val" id="srl-agi">−</div><div class="srl-diff" id="srl-diff-agi"></div></div>
-      <div class="stat-roll-cell"><div class="srl-label">체력</div><div class="srl-val" id="srl-hp">−</div><div class="srl-diff" id="srl-diff-hp"></div></div>
+      <div class="stat-roll-cell"><div class="srl-label">순발</div><div class="srl-val" id="srl-agi">−</div><div class="srl-diff" id="srl-diff-agi"></div></div>
+      <div class="stat-roll-cell"><div class="srl-label">내구</div><div class="srl-val" id="srl-hp">−</div><div class="srl-diff" id="srl-diff-hp"></div></div>
     </div>
 
     <div style="text-align:center;margin-top:-6px;margin-bottom:8px;">
@@ -918,7 +933,7 @@ function updateGoButton() {
 }
 $('pet-price').addEventListener('input', () => { $('vip-auto').style.display = 'none'; });
 
-['log-check', 'sound-check', 'auto-orb-reset'].forEach(id => {
+['log-check', 'sound-check'].forEach(id => {
   const cb = $(id); const lb = $(id + '-label');
   if (!cb) return;
   cb.addEventListener('change', () => {
@@ -930,6 +945,14 @@ $('pet-price').addEventListener('input', () => { $('vip-auto').style.display = '
       if (soundOn) { ensureAudio(); sfxClick(); }
     }
   });
+});
+$('auto-orb-reset').addEventListener('change', () => {
+  const on = $('auto-orb-reset').checked;
+  $('auto-orb-reset-state').textContent = on ? 'ON' : 'OFF';
+  $('auto-orb-reset-desc').textContent = on
+    ? '켜짐 — 5번까지 초기화하며 도전, 다 쓰면 새 펫 구매'
+    : '꺼짐 — 초기화 없이 바로바로 새 펫 구매 (일반 포획펫용)';
+  sfxClick();
 });
 try {
   const s = localStorage.getItem('sa_sim_sound');
@@ -1050,7 +1073,7 @@ async function rerollStats() {
   logSim(`📊 초기화 ${s.currentPetResets}/${MAX_RESETS} → 추첨 중...`);
   $('sim-actions').style.display = 'none';
   await rollNewPetStats();
-  logSim(`스탯: 공${s.currentStats.atk}/방${s.currentStats.def}/민${s.currentStats.agi}/체${s.currentStats.hp} · 환각 ${formatPct(s.currentStats.prob * 100)}`);
+  logSim(`스탯: 공${s.currentStats.atk}/방${s.currentStats.def}/순${s.currentStats.agi}/내${s.currentStats.hp} · 환각 ${formatPct(s.currentStats.prob * 100)}`);
   s.history.push({ type: 'reroll', petIdx: s.petsBought, resetCount: s.currentPetResets, prob: s.currentStats.prob, stats: { ...s.currentStats } });
   setPetBubble(petBubbleForProb(s.currentStats.prob), 'normal');
 }
@@ -1067,7 +1090,7 @@ async function rerollStats5() {
     s.currentPetResets++; s.resetOrbsUsed++; s.hallFailedThisStats = false;
     logSim(`📊 [⚡연속] 초기화 ${s.currentPetResets}/${MAX_RESETS} → 추첨 중...`);
     await rollNewPetStatsQuick();
-    logSim(`스탯: 공${s.currentStats.atk}/방${s.currentStats.def}/민${s.currentStats.agi}/체${s.currentStats.hp} · 환각 ${formatPct(s.currentStats.prob * 100)}`);
+    logSim(`스탯: 공${s.currentStats.atk}/방${s.currentStats.def}/순${s.currentStats.agi}/내${s.currentStats.hp} · 환각 ${formatPct(s.currentStats.prob * 100)}`);
     s.history.push({ type: 'reroll', petIdx: s.petsBought, resetCount: s.currentPetResets, prob: s.currentStats.prob, stats: { ...s.currentStats } });
     if (s.currentStats.prob > 0) {
       logSim(`⏸ 환각 가능 확률 발견! 자동 정지`); toast(`✨ ${formatPct(s.currentStats.prob * 100)} 확률 발견! 자동 정지`);
@@ -1337,7 +1360,7 @@ function showSuccessResult() {
       <div class="result-grand-label">만에 8등급 환각 성공! ✨</div>
       <div style="margin-top:8px;font-size:12px;color:var(--t3);">펫 ${s.petsBought}마리 · 초기화 ${s.resetOrbsUsed}회</div>
       <div style="margin-top:10px;font-size:13px;color:var(--t2);font-weight:700;">최종 펫의 환각 확률: <strong style="color:var(--a1);">${formatPct(finalProb * 100)}</strong></div>
-      <div style="margin-top:4px;font-size:12px;color:var(--t3);font-weight:600;">공${s.currentStats.atk} · 방${s.currentStats.def} · 민${s.currentStats.agi} · 체${s.currentStats.hp}</div>
+      <div style="margin-top:4px;font-size:12px;color:var(--t3);font-weight:600;">공${s.currentStats.atk} · 방${s.currentStats.def} · 순${s.currentStats.agi} · 내${s.currentStats.hp}</div>
       ${totalCost > 0 ? `<div class="result-grand-cost">💰 ${totalCost.toLocaleString()} vip 사용</div>` : ''}
     </div>
     ${theoryHTML}${luckHTML}${historyHTML}${breakdownHTML}
