@@ -209,27 +209,29 @@ body {
   background-image: url('jyajyagotchi.png');
   background-size: contain; background-repeat: no-repeat; background-position: center;
 }
-/* 화면(LCD) 영역 - 이미지 속 사각형 위치에 맞춰 % 좌표로 정확히 배치 */
+/* 화면(LCD) 영역 - 새 이미지(공룡화석 테마) 속 사각형 위치에 맞춰 % 좌표로 재산출 */
 .device-screen {
   position: absolute;
-  left: 22%; top: 19.8%; width: 55%; height: 48.2%;
+  left: 28.5%; top: 27%; width: 45.5%; height: 43.6%;
   overflow: hidden;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   gap: 3%; padding: 4%;
 }
-/* SELECT / DECIDE / CANCEL - 이미지에 이미 그려진 버튼 위에 투명 클릭영역만 배치 */
+/* 시작하기 / 초기화구슬 / 환각도전 / 자동뽑기 / 처음부터 - 이미지 속 버튼 5개 위치에 맞춤 */
 .device-hitzone {
-  position: absolute; top: 81.3%;
+  position: absolute; top: 84%;
   width: 13%; aspect-ratio: 1/1;
   border-radius: 50%; background: transparent; border: none;
   cursor: pointer; transform: translate(-50%, -50%);
   transition: background .15s;
 }
-.device-hitzone:hover { background: rgba(255,255,255,.18); }
-.device-hitzone:active { background: rgba(255,255,255,.32); }
-.device-hitzone.hz-select { left: 29.3%; }
-.device-hitzone.hz-decide { left: 49.8%; }
-.device-hitzone.hz-cancel { left: 70.3%; }
+.device-hitzone:hover { background: rgba(255,255,255,.22); }
+.device-hitzone:active { background: rgba(255,255,255,.38); }
+.device-hitzone.hz-start { left: 14%; }
+.device-hitzone.hz-reset { left: 32%; }
+.device-hitzone.hz-hall { left: 50%; }
+.device-hitzone.hz-auto { left: 68%; }
+.device-hitzone.hz-restart { left: 86%; }
 
 /* 다마고치 펫 + 말풍선 (화면 안, 세로 배치로 좁은 화면에 최적화) */
 .tamago-area { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; position: relative; width: 100%; }
@@ -531,9 +533,11 @@ body {
         </div>
       </div>
 
-      <button class="device-hitzone hz-select" onclick="deviceSelect()" aria-label="SELECT" title="SELECT · 다른 펫 고르기"></button>
-      <button class="device-hitzone hz-decide" onclick="deviceDecide()" aria-label="DECIDE" title="DECIDE · 다음 행동"></button>
-      <button class="device-hitzone hz-cancel" onclick="deviceCancel()" aria-label="CANCEL" title="CANCEL · 처음부터"></button>
+      <button class="device-hitzone hz-start" onclick="deviceStart()" aria-label="시작하기" title="시작하기"></button>
+      <button class="device-hitzone hz-reset" onclick="deviceResetOrb()" aria-label="초기화구슬" title="초기화구슬 · 초구 다시 돌리기"></button>
+      <button class="device-hitzone hz-hall" onclick="deviceHallChallenge()" aria-label="환각도전" title="환각도전"></button>
+      <button class="device-hitzone hz-auto" onclick="deviceAutoRoll()" aria-label="자동뽑기" title="자동뽑기 · 좋은 확률 나올 때까지 연속 초기화"></button>
+      <button class="device-hitzone hz-restart" onclick="deviceRestart()" aria-label="처음부터" title="처음부터 다시하기"></button>
     </div>
 
     <div class="stat-rolls" id="stat-rolls">
@@ -1269,26 +1273,35 @@ function simulateRestOfRun(s, useReset) {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   다마고치 디바이스 버튼 (SELECT / DECIDE / CANCEL)
+   다마고치 디바이스 버튼 (시작하기 / 초기화구슬 / 환각도전 / 자동뽑기 / 처음부터)
    ═══════════════════════════════════════════════════════════ */
-function deviceSelect() {
-  sfxClick();
-  document.getElementById('pet-input').scrollIntoView({ behavior: 'smooth', block: 'center' });
-  document.getElementById('pet-input').focus();
-  toast('🔍 다른 펫을 선택해보세요');
+function deviceStart() {
+  if (!simState || simState.finished) {
+    if (!$('btn-go').disabled) { runSimulation(); }
+    else { sfxClick(); toast('먼저 펫을 선택해주세요'); }
+  } else {
+    sfxClick();
+    toast('이미 진행 중이에요! 다른 버튼을 눌러봐');
+  }
 }
-function deviceDecide() {
-  sfxClick();
-  if (!simState) { if (!$('btn-go').disabled) runSimulation(); else toast('먼저 펫을 선택해주세요'); return; }
-  const s = simState;
-  if (s.currentStats && s.currentStats.prob > 0 && !s.hallFailedThisStats) { tryHallChallenge(); return; }
-  if (s.currentPetResets < MAX_RESETS) { rerollStats(); return; }
-  buyNewPet();
+function deviceResetOrb() {
+  if (!simState || simState.finished) { sfxClick(); toast('먼저 시작하기를 눌러줘'); return; }
+  rerollStats();
 }
-function deviceCancel() {
+function deviceHallChallenge() {
+  if (!simState || !simState.currentStats || simState.finished) { sfxClick(); toast('먼저 시작하기를 눌러줘'); return; }
+  if (simState.currentStats.prob <= 0 || simState.hallFailedThisStats) { sfxClick(); toast('지금 확률로는 도전할 수 없어요'); return; }
+  tryHallChallenge();
+}
+function deviceAutoRoll() {
+  if (!simState || simState.finished) { sfxClick(); toast('먼저 시작하기를 눌러줘'); return; }
+  rerollStats5();
+}
+function deviceRestart() {
   sfxClick();
   if (simState) restartSimulation();
-  else toast('취소할 진행이 없어요');
+  else if (!$('btn-go').disabled) runSimulation();
+  else toast('먼저 펫을 선택해주세요');
 }
 
 /* ═══════════════════════════════════════════════════════════
