@@ -61,6 +61,15 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--t1);
   border-radius:10px;font-size:11.5px;cursor:pointer;font-weight:700;}
 .f-seg button.active{background:linear-gradient(135deg,var(--a1),var(--a2));color:#fff;border-color:transparent;}
 .f-chip-wrap{display:flex;flex-wrap:wrap;gap:6px;}
+.attr-slider-row{margin-bottom:12px;}
+.attr-slider-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;}
+.attr-slider-head .lbl{font-size:12px;font-weight:800;color:var(--t2);}
+.attr-slider-head .val{font-size:11.5px;font-weight:800;font-family:'Nunito',sans-serif;padding:2px 8px;border-radius:10px;background:var(--s1);color:var(--t3);}
+.attr-slider-head .val.on{background:linear-gradient(135deg,var(--a1),var(--a2));color:#fff;}
+.attr-slider-row input[type=range]{width:100%;accent-color:var(--a1);cursor:pointer;}
+.attr-filter-reset{width:100%;margin-top:2px;background:var(--s1);border:1.5px solid var(--border);color:var(--t3);
+  padding:7px;border-radius:10px;font-size:11.5px;font-weight:700;cursor:pointer;}
+.attr-filter-reset:hover{border-color:var(--a1);color:var(--a1);}
 .f-chip{background:var(--s1);border:1.5px solid var(--border);color:var(--t3);padding:6px 12px;
   border-radius:20px;font-size:11.5px;cursor:pointer;font-weight:700;}
 .f-chip.is-on{background:linear-gradient(135deg,var(--a1),var(--a2));border-color:transparent;color:#fff;}
@@ -172,6 +181,13 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--t1);
 .modal-calc-link{display:block;text-align:center;margin-top:14px;background:linear-gradient(135deg,var(--a1),var(--a2));
   color:#fff;padding:12px;border-radius:12px;font-weight:800;font-size:14px;text-decoration:none;}
 .modal-calc-link:hover{filter:brightness(1.07);}
+.skin-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:8px;}
+.skin-card{background:var(--s1);border:1.5px solid var(--border);border-radius:12px;padding:8px 6px;text-align:center;}
+.skin-img{width:100%;aspect-ratio:1;border-radius:8px;overflow:hidden;background:var(--white);
+  display:flex;align-items:center;justify-content:center;margin-bottom:5px;border:1px solid var(--border);}
+.skin-img img{width:80%;height:80%;object-fit:contain;image-rendering:pixelated;}
+.skin-title{font-size:10px;font-weight:800;color:var(--t2);}
+.skin-ride{font-size:9px;color:var(--t4);margin-top:2px;}
 
 footer{text-align:center;padding:30px;color:var(--t3);font-size:11px;font-family:'Nunito',sans-serif;}
 @media(max-width:640px){ .page-title{font-size:28px;} #grid{grid-template-columns:repeat(auto-fill,minmax(130px,1fr));} .main-inner{padding-top:70px;} }
@@ -197,11 +213,14 @@ footer{text-align:center;padding:30px;color:var(--t3);font-size:11px;font-family
     <div class="f-section">속성</div>
     <div class="f-seg" id="attrSeg">
       <button data-v="all" class="active">전체</button>
-      <button data-v="earth">토</button>
+      <button data-v="earth">지</button>
       <button data-v="water">수</button>
       <button data-v="fire">화</button>
       <button data-v="wind">풍</button>
     </div>
+
+    <div class="f-section">속성값 정확 필터</div>
+    <div id="attrSliders"></div>
 
     <div class="f-section">정렬</div>
     <select id="sortSel" class="f-select">
@@ -295,6 +314,14 @@ footer{text-align:center;padding:30px;color:var(--t3);font-size:11px;font-family
           <div class="modal-stat-box stat-hp"><span class="modal-stat-label">HP 내구</span><span class="modal-stat-val" id="miHp">—</span></div>
         </div>
       </div>
+      <div class="modal-section" id="mountSection" style="display:none;">
+        <div class="modal-section-title">탑승 가능 캐릭터</div>
+        <div id="mountGrid" class="skin-grid"></div>
+      </div>
+      <div class="modal-section" id="skinSection" style="display:none;">
+        <div class="modal-section-title">스킨</div>
+        <div id="skinGrid" class="skin-grid"></div>
+      </div>
       <a class="modal-calc-link" id="modalCalcLink" href="#">🎲 이 펫으로 환각 계산기 열기</a>
     </div>
   </div>
@@ -336,7 +363,102 @@ function petIdNumber(r){ const raw=String(r.id||r.imageCode||"").trim(); const m
 function isOldPet(r){ const n=petIdNumber(r); return n>=1 && n<=334; }
 function rarityText(v){ v=String(v||"").trim(); if(v==="0")return "일반등급"; if(v==="1")return "2등급(돈펫)"; if(v==="2")return "1등급(돈펫)"; return v||"-"; }
 
-const attrMeta = { earth:{label:"토",color:"var(--a4)"}, water:{label:"수",color:"var(--a3)"}, fire:{label:"화",color:"var(--err)"}, wind:{label:"풍",color:"var(--a5)"} };
+
+/* ===== 탑승 캐릭터 정적 데이터 (mount.php 기준) ===== */
+var CHARACTER_NAMES = ["남꼬맹이", "석기미남", "어리버리", "불량소년", "곰아저씨", "돌쇠", "여꼬맹이", "물개소년", "내숭소녀", "귀염둥이", "터프소녀", "몸짱아줌마", "툰가", "산적", "사자소년", "울보소녀", "정글소녀", "바람소년"];
+var MOUNT_ROWS = [{"name":"우리","images":[200430,0,0,0,0,0,200431,0,0,0,0,0,0,0,0,0,0,0],"base":100250},{"name":"두리","images":[200432,0,0,0,0,0,200433,0,0,0,0,0,0,0,0,0,0,0],"base":100251},{"name":"실버우리","images":[200434,0,0,0,0,0,200435,0,0,0,0,0,0,0,0,0,0,0],"base":100388},{"name":"얼룩우리","images":[200662,0,0,0,0,0,200663,0,0,0,0,0,0,0,0,0,0,0],"base":100252},{"name":"푸우리","images":[200436,0,0,0,0,0,200437,0,0,0,0,0,0,0,0,0,0,0],"base":100821},{"name":"녹우리","images":[200438,0,0,0,0,0,200439,0,0,0,0,0,0,0,0,0,0,0],"base":100822},{"name":"복우리","images":[200712,0,0,0,0,0,200713,0,0,0,0,0,0,0,0,0,0,0],"base":100820},{"name":"부비","images":[0,0,0,0,0,0,0,0,0,0,200230,0,200231,0,0,0,0,0],"base":100254},{"name":"부이","images":[0,0,0,0,0,0,0,0,0,0,200234,0,200235,0,0,0,0,0],"base":100256},{"name":"골드부비","images":[0,0,0,0,0,0,0,0,0,0,200232,0,200233,0,0,0,0,0],"base":100255},{"name":"부이비","images":[0,0,0,0,0,0,0,0,0,0,200236,0,200237,0,0,0,0,0],"base":100257},{"name":"우푸","images":[200441,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"base":100264},{"name":"오투투","images":[200443,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"base":100266},{"name":"푸푸","images":[200440,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"base":100263},{"name":"투투","images":[200442,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"base":100265},{"name":"노투투","images":[200446,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"base":100832},{"name":"푸투투","images":[200445,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"base":100831},{"name":"포포","images":[200444,0,0,0,0,0,110468,0,0,0,0,0,0,0,0,0,0,0],"base":100830},{"name":"푸투","images":[200447,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"base":100833},{"name":"베론","images":[200276,200278,0,0,0,0,200277,200279,0,0,0,0,0,0,0,0,0,0],"base":100267},{"name":"베로로크","images":[200284,200286,0,0,0,0,200285,200287,0,0,0,0,0,0,0,0,0,0],"base":100268},{"name":"베로포리","images":[200264,200266,0,0,0,0,200265,200267,0,0,0,0,0,0,0,0,0,0],"base":100270},{"name":"베로보크","images":[200272,200274,0,0,0,0,200273,200275,0,0,0,0,0,0,0,0,0,0],"base":100269},{"name":"베톤","images":[200260,200262,0,0,0,0,200261,200263,0,0,0,0,0,0,0,0,0,0],"base":100835},{"name":"베노투리","images":[200280,200282,0,0,0,0,200281,200283,0,0,0,0,0,0,0,0,0,0],"base":100836},{"name":"베로노크","images":[200270,200269,0,0,0,0,200268,200271,0,0,0,0,0,0,0,0,0,0],"base":100834},{"name":"베로바드","images":[200256,200258,0,0,0,0,200257,200259,0,0,0,0,0,0,0,0,0,0],"base":100837},{"name":"돌북이","images":[110253,110254,110255,110256,110257,110258,110259,110260,110261,110262,110263,110264,0,0,0,0,0,0],"base":100274},{"name":"북이","images":[0,200418,0,0,0,0,0,0,0,0,0,200419,0,0,0,0,0,0],"base":100272},{"name":"깡북이","images":[0,200420,0,0,0,0,0,0,0,0,0,200421,0,0,0,0,0,0],"base":100273},{"name":"노북이","images":[0,200416,0,0,0,0,0,0,0,0,0,200417,0,0,0,0,0,0],"base":100271},{"name":"자라북","images":[0,200428,0,0,0,0,0,0,0,0,0,200429,0,0,0,0,0,0],"base":100841},{"name":"꼬북이","images":[0,200424,0,0,0,0,0,0,0,0,0,200425,0,0,0,0,0,0],"base":100839},{"name":"철북이","images":[0,200426,0,0,0,0,0,0,0,0,0,200427,0,0,0,0,0,0],"base":100840},{"name":"물북이","images":[0,200422,0,0,0,0,0,0,0,0,0,200423,0,0,0,0,0,0],"base":100838},{"name":"아고아","images":[0,0,0,200304,200307,0,0,200306,200305,0,0,0,0,0,0,0,0,0],"base":100275},{"name":"타로곤","images":[0,0,0,200316,200319,0,0,200318,200317,0,0,0,0,0,0,0,0,0],"base":100277},{"name":"다고스","images":[0,0,0,200308,200311,0,0,200310,200309,0,0,0,0,0,0,0,0,0],"base":100278},{"name":"네고스","images":[0,0,0,200312,200315,0,0,200314,200313,0,0,0,0,0,0,0,0,0],"base":100276},{"name":"라고고","images":[101308,101316,101324,101332,101340,101348,101356,101364,101372,101380,101388,101396,125602,0,133111,133112,133183,133187],"base":100279},{"name":"토루루","images":[125245,125246,125247,125248,125249,125250,125251,125252,125253,125254,125255,125256,0,0,0,0,0,0],"base":100281},{"name":"루니","images":[200341,200340,200338,0,0,0,0,200343,200339,0,0,200342,0,0,0,0,0,0],"base":100282},{"name":"후바바","images":[200333,200335,200332,0,0,0,0,200337,200334,0,0,200336,0,0,0,0,0,0],"base":100280},{"name":"카타르카스","images":[101310,101318,101326,101334,101342,101350,101358,101366,101374,101382,101390,101398,0,0,0,0,0,0],"base":100283},{"name":"로기안","images":[200504,200507,0,200505,0,0,0,0,200506,0,0,0,0,0,0,0,0,0],"base":100286},{"name":"카르기안","images":[200508,200511,0,200509,0,0,0,0,200510,0,0,0,0,0,0,0,0,0],"base":100392},{"name":"쿠카스","images":[200500,200503,0,200501,0,0,0,0,200502,0,0,0,0,0,0,0,0,0],"base":100284},{"name":"아이카스","images":[200496,200499,0,200497,0,0,0,0,200498,0,0,0,0,0,0,0,0,0],"base":100390},{"name":"쿠타스","images":[200488,200491,0,200489,0,0,0,0,200490,0,0,0,0,0,0,0,0,0],"base":100391},{"name":"코로카스","images":[200484,200487,0,200485,0,0,0,0,200486,0,0,0,0,0,0,0,0,0],"base":100285},{"name":"램가스","images":[200492,200495,0,200493,0,0,0,0,200494,0,0,0,0,0,0,0,0,0],"base":100389},{"name":"얀기로","images":[101309,101317,101325,101333,101341,101349,101357,101365,101373,101381,101389,101397,0,0,133123,133124,0,0],"base":100288},{"name":"리비노","images":[200668,0,110129,0,0,0,200669,0,0,110128,110127,0,0,0,0,0,0,0],"base":100287},{"name":"반기노","images":[110130,110132,0,0,0,0,110131,0,0,0,0,0,0,0,0,0,0,0],"base":100290},{"name":"반보로","images":[200674,0,0,110133,0,0,200675,0,0,0,0,0,0,0,0,0,133199,133198],"base":100289},{"name":"부르돈","images":[200672,0,0,0,110135,0,200673,110136,0,0,0,110134,0,0,0,0,0,0],"base":100394},{"name":"기라노","images":[110511,110512,110513,110514,110515,110516,110517,110518,110519,110520,110521,110522,0,0,0,0,0,0],"base":100849},{"name":"기비노","images":[200449,0,0,0,0,0,200448,0,0,0,0,0,0,0,0,0,0,0],"base":100850},{"name":"프로돈","images":[200451,0,0,0,0,0,200450,0,0,0,0,0,0,0,0,0,0,0],"base":100851},{"name":"고르돈","images":[110060,110061,110062,110063,110064,110065,110066,110067,110068,110069,110070,110071,125601,0,133109,133110,133182,133186],"base":100307},{"name":"고르고","images":[101312,101320,101328,101336,101344,101352,101360,101368,101376,101384,101392,101400,0,0,0,0,0,0],"base":100310},{"name":"투르돈","images":[200371,200375,0,0,0,200370,0,0,200373,200372,200374,0,0,0,0,0,0,0],"base":100309},{"name":"기라돈","images":[200365,200369,0,0,0,200364,0,0,200367,200366,200368,0,0,0,0,0,0,0],"base":100308},{"name":"바카","images":[0,200291,0,200289,0,0,0,0,0,200288,200290,0,0,0,0,0,0,0],"base":100324},{"name":"카우","images":[0,200299,0,200297,0,0,0,0,0,200296,200298,0,0,0,0,0,0,0],"base":100326},{"name":"카쿠","images":[0,200295,0,200293,0,0,0,0,0,200292,200294,0,0,0,0,0,0,0],"base":100323},{"name":"바우","images":[0,200303,0,200301,0,0,0,0,0,200300,200302,0,0,0,0,0,0,0],"base":100325},{"name":"베르가","images":[101005,101016,101026,101035,101045,101057,101064,101074,101086,101097,101106,101115,0,0,133125,133126,0,0],"base":100327},{"name":"베르가(날개)","images":[133471,133472,133473,133474,133475,133476,133477,133478,133479,133480,133481,133482,0,0,0,0,0,0],"base":120057},{"name":"베루루","images":[101007,101014,101024,101037,101044,101055,101066,101077,101087,101094,101105,101117,125580,0,0,0,0,0],"base":100328},{"name":"베루루(날개)","images":[133483,133484,133485,133486,133487,133488,133489,133490,133491,133492,133493,133494,0,0,0,0,0,0],"base":120058},{"name":"고르고르","images":[101004,101015,101027,101034,101047,101054,101067,101075,101085,101096,101104,101116,0,0,0,0,133188,133189],"base":100329},{"name":"고르고르(날개)","images":[133495,133496,133497,133498,133499,133500,133501,133502,133503,133504,133505,133506,0,0,0,0,0,0],"base":120059},{"name":"노르노르","images":[101006,101017,101025,101036,101046,101056,101065,101076,101084,101095,101107,101114,0,0,0,133128,133201,0],"base":100330},{"name":"노르노르(날개)","images":[133507,133508,133509,133510,133511,133512,133513,133514,133515,133516,133517,133518,0,0,0,0,0,0],"base":120060},{"name":"성호","images":[110000,110001,110002,110003,110004,110005,110006,110007,110008,110009,110010,110011,0,0,0,0,0,0],"base":100872},{"name":"도르도르","images":[200638,200639,200640,200641,200642,200643,200644,200645,200646,200647,200648,200649,0,0,0,0,0,0],"base":100871},{"name":"페루루","images":[200626,200627,200628,200629,200630,200631,200632,200633,200634,200635,200636,200637,0,0,0,0,0,0],"base":100874},{"name":"고루루","images":[200650,200651,200652,200653,200654,200655,200656,200657,200658,200659,200660,200661,0,0,0,0,0,0],"base":100873},{"name":"펜타스","images":[0,200358,200356,0,0,0,0,0,0,200357,0,200359,0,0,0,0,0,0],"base":100336},{"name":"토리케라","images":[0,200362,200360,0,0,0,0,0,0,200361,0,200363,0,0,0,0,0,0],"base":100337},{"name":"토르프스","images":[0,200354,200352,0,0,0,0,0,0,200353,0,200355,0,0,0,0,0,0],"base":100338},{"name":"토리노프스","images":[0,200350,200348,0,0,0,0,0,0,200349,0,200351,0,0,0,0,0,0],"base":100335},{"name":"코발스","images":[0,0,133451,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"base":133462},{"name":"가가로스","images":[101311,101319,101327,101335,101343,101351,101359,101367,101375,101383,101391,101399,0,0,0,0,0,0],"base":100346},{"name":"비트로스","images":[0,0,0,0,200537,0,0,0,200536,0,0,0,0,0,0,0,0,0],"base":100345},{"name":"기트로스","images":[0,0,0,0,200547,0,0,0,200546,0,0,0,0,0,0,0,0,0],"base":100884},{"name":"라가로스","images":[0,0,0,0,200549,0,0,0,200548,0,0,0,0,0,0,0,0,0],"base":100883},{"name":"돌가로스","images":[0,0,0,0,200539,0,0,0,200538,0,0,0,0,0,0,0,0,0],"base":100886},{"name":"노트로스","images":[0,0,0,0,200541,0,0,0,200540,0,0,0,0,0,0,0,0,0],"base":100885},{"name":"기가로스","images":[0,0,0,0,200543,0,0,0,200542,0,0,0,0,0,0,0,0,0],"base":100343},{"name":"무이","images":[110072,110073,110074,110075,110076,110077,110078,110079,110080,110081,110082,110083,125600,0,133107,133108,133181,133185],"base":100348},{"name":"루이","images":[0,200393,0,0,200395,0,0,0,0,0,200392,200394,0,0,0,0,0,0],"base":100347},{"name":"투이","images":[0,200377,0,0,200379,0,0,0,0,0,200376,200378,0,0,0,0,0,0],"base":100350},{"name":"가이","images":[0,200389,0,0,200391,0,0,0,0,0,200388,200390,0,0,0,0,0,0],"base":100888},{"name":"노보스","images":[0,200380,0,0,200382,0,0,0,0,0,200383,200381,0,0,0,0,0,0],"base":100890},{"name":"루보스","images":[0,200397,0,0,200399,0,0,0,0,0,200396,200398,0,0,0,0,0,0],"base":100889},{"name":"다이노스","images":[101000,0,0,0,0,0,0,0,101080,0,0,0,0,0,0,0,0,0],"base":100352},{"name":"프리토스","images":[0,101010,0,0,101040,0,0,0,0,0,0,101110,0,0,0,0,0,0],"base":100396},{"name":"다이노","images":[0,0,101020,0,0,0,0,0,0,101090,0,0,0,0,0,0,0,0],"base":100351},{"name":"스텐토스","images":[0,0,0,0,0,0,101060,101070,0,0,0,0,0,0,0,0,0,0],"base":100354},{"name":"프라키토스","images":[0,0,0,101030,0,101050,0,0,0,0,101100,0,0,0,0,0,0,0],"base":100353},{"name":"메카토스","images":[125193,125194,125195,125196,125197,125198,125199,125200,125201,125202,125203,125204,0,0,0,0,0,0],"base":125205},{"name":"푸비토스","images":[200512,200513,200514,200515,200516,200517,200518,200519,200520,200521,0,200523,0,0,0,0,0,0],"base":100891},{"name":"노라키토스","images":[0,200525,200526,200527,200528,200529,200530,200531,200532,200533,0,200535,0,0,0,0,0,0],"base":100893},{"name":"만모로스","images":[101306,101314,101322,101330,101338,101346,101354,101362,101370,101378,101386,101394,0,0,0,0,0,0],"base":100358},{"name":"만모","images":[0,0,200329,200330,0,0,0,200331,0,200328,0,0,0,0,0,0,0,0],"base":100355},{"name":"마모나스","images":[0,0,200324,200326,0,0,0,200327,0,200325,0,0,0,0,0,0,0,0],"base":100357},{"name":"만모르","images":[0,0,200322,200323,0,0,0,200321,0,200320,0,0,0,0,0,0,0,0],"base":100356},{"name":"아이스만모","images":[0,0,0,0,110363,0,0,0,0,0,0,110364,0,0,0,0,0,0],"base":120063},{"name":"도라비스","images":[101307,101315,101323,101331,101339,101347,101355,101363,101371,101379,101387,101395,125599,0,133105,133106,133180,133184],"base":100362},{"name":"테라곤","images":[200681,110469,0,0,0,0,0,0,110470,0,0,200680,0,0,0,0,0,0],"base":100359},{"name":"카르곤","images":[133252,133253,133254,133255,133256,133257,133258,133259,133260,133261,133262,133263,0,0,0,0,0,0],"base":100360},{"name":"포이비스","images":[200347,0,0,0,0,0,0,0,0,0,0,200346,0,0,0,0,0,0],"base":100361},{"name":"푸테라","images":[200344,0,0,0,0,0,0,0,0,0,0,200345,0,0,0,0,0,0],"base":100898},{"name":"호르쿠","images":[0,100420,0,0,0,0,0,0,0,0,0,200703,0,0,0,0,0,0],"base":100369},{"name":"카키","images":[0,100425,0,0,0,0,0,0,0,0,0,200699,0,0,0,0,0,0],"base":100370},{"name":"쿠쿠","images":[0,129019,0,0,0,0,0,0,0,0,0,200701,0,0,0,0,0,0],"base":100368},{"name":"흑카키","images":[0,100441,0,0,0,0,0,0,0,0,0,200697,0,0,0,0,0,0],"base":100904},{"name":"타키","images":[0,200229,0,0,0,0,0,0,0,0,0,200228,0,0,0,0,0,0],"base":100367},{"name":"골로스","images":[200769,200770,200771,200772,200773,200774,200775,200776,200777,200778,200779,200780,125578,0,133122,133121,133196,133197],"base":100374},{"name":"오르곤","images":[200813,200814,200815,200816,200817,200818,200819,200820,200821,200822,200823,200824,0,0,0,0,0,0],"base":100372},{"name":"모가로스","images":[200799,200800,200801,200802,200803,200804,200805,200806,200807,200808,200809,200810,0,0,133119,133120,133195,133194],"base":100373},{"name":"오가로스","images":[200566,200567,200568,200569,200570,200571,110126,200573,200574,200575,200576,200577,125577,0,0,0,0,0],"base":100371},{"name":"노르곤","images":[200614,200615,200616,200617,200618,200619,200620,200621,200622,200623,200624,200625,0,0,0,0,0,0],"base":100907},{"name":"지가로스","images":[200590,200591,200592,200593,200594,200595,200596,200597,200598,200599,200600,200601,0,0,0,0,0,0],"base":100908},{"name":"푸룡","images":[200602,200603,200604,200605,200606,200607,200608,200609,200610,200611,200612,200613,0,0,0,0,0,0],"base":100909},{"name":"칼로스","images":[200578,200579,200580,200581,200582,200583,200584,200585,200586,200587,200588,200589,0,0,0,0,0,0],"base":100906},{"name":"녹룡","images":[125079,125080,125081,125082,125083,125084,125085,125086,125087,125088,125089,125090,0,0,0,0,0,0],"base":128014},{"name":"아토라지","images":[200456,200459,0,0,0,0,200457,0,0,0,200458,0,0,0,0,0,0,0],"base":100380},{"name":"스토라지","images":[200452,200455,0,0,0,0,200453,0,0,0,200454,0,0,0,0,0,0,0],"base":100379},{"name":"타르노로스","images":[200468,200471,0,0,0,0,200469,0,0,0,200470,0,0,0,0,0,0,0],"base":100383},{"name":"다이노로스","images":[200464,200467,0,0,0,0,200465,0,0,0,200466,0,0,0,0,0,0,0],"base":100382},{"name":"아리노스","images":[200460,200463,0,0,0,0,200461,0,0,0,200462,0,0,0,0,0,0,0],"base":100381},{"name":"아리노로스","images":[200472,200475,0,0,0,0,200473,0,0,0,200474,0,0,0,0,0,0,0],"base":100913},{"name":"푸토라지","images":[200476,200479,0,0,0,0,200477,0,0,0,200478,0,0,0,0,0,0,0],"base":100914},{"name":"다리노스","images":[200480,200483,0,0,0,0,200481,0,0,0,200482,0,0,0,0,0,0,0],"base":100915},{"name":"바로로크스","images":[200412,0,0,0,0,0,200413,200414,0,0,0,0,200415,0,0,0,0,0],"base":100384},{"name":"란베르스","images":[200404,0,0,0,0,0,200405,200406,0,0,0,0,200407,0,0,0,0,0],"base":100385},{"name":"코리토로스","images":[200408,0,0,0,0,0,200409,200410,0,0,0,0,200411,0,0,0,0,0],"base":100386},{"name":"노스토로스","images":[200400,0,0,0,0,0,200401,200402,0,0,0,0,200403,0,0,0,0,0],"base":100387},{"name":"갈푸스","images":[0,200564,0,110299,0,0,0,0,0,0,0,200565,0,0,0,0,0,0],"base":120094},{"name":"베르푸스 (어린외형)","images":[0,200254,200250,200251,0,0,0,0,200252,0,200253,200255,0,0,0,0,0,0],"base":120099},{"name":"베르푸스","images":[0,200560,0,0,0,0,0,0,0,110297,110298,200561,0,0,0,0,0,0],"base":120090},{"name":"울푸스 (어린외형)","images":[0,200242,200238,200239,0,0,0,0,200240,0,200241,200243,0,0,0,0,0,0],"base":120100},{"name":"갈푸스 (어린외형)","images":[0,200249,200246,200247,0,0,0,0,200248,0,200244,200245,0,0,0,0,0,0],"base":120103},{"name":"울푸스","images":[0,200562,0,0,0,0,0,110300,0,0,0,200563,0,0,0,0,0,0],"base":120091},{"name":"카우거","images":[0,0,0,110337,110339,0,0,110338,0,110340,110341,110342,0,0,0,0,133202,133203],"base":120109},{"name":"크루거","images":[110343,110344,110345,110346,110347,110348,0,0,0,0,0,0,125581,0,133127,0,0,0],"base":120108},{"name":"샤크론","images":[110291,0,0,110292,0,0,110293,110294,110295,110296,0,0,0,0,0,0,133220,133221],"base":120128},{"name":"바우트","images":[0,110351,110352,0,110353,110354,0,0,0,0,110355,110356,125590,0,133146,133145,0,0],"base":120161},{"name":"흑기린","images":[0,110331,0,0,0,110332,0,110333,110334,110335,0,110336,125591,0,0,0,0,0],"base":120192},{"name":"노바티","images":[200705,0,0,0,200704,0,0,200707,200706,0,0,0,0,0,0,0,0,0],"base":200184},{"name":"후바티","images":[200708,0,0,0,200711,0,0,200710,200709,0,0,0,0,0,0,0,0,0],"base":200183},{"name":"라그노스","images":[0,110379,0,0,110380,110381,110382,0,110383,0,110384,0,0,0,0,0,133230,133231],"base":120219},{"name":"포세이온","images":[0,0,0,125605,0,0,0,0,0,0,125606,0,0,0,0,0,0,0],"base":129815},{"name":"태룡","images":[133068,0,0,0,0,0,0,133069,0,0,0,0,0,0,0,0,0,0],"base":200177},{"name":"노르푸스","images":[0,0,0,133081,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"base":133080},{"name":"테라시온","images":[0,0,0,125607,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"base":129814},{"name":"테이루스","images":[120566,120567,120568,120569,120570,120571,120572,120573,120574,120575,120576,120577,0,0,0,0,0,0],"base":120579},{"name":"피닉스","images":[0,0,0,133072,0,0,0,0,0,0,0,133073,0,0,0,0,0,0],"base":200176},{"name":"풍백","images":[0,133002,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"base":120210},{"name":"실프리온","images":[0,125608,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"base":129816},{"name":"케로베로스","images":[0,133434,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"base":129860},{"name":"천호","images":[0,133580,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"base":133466},{"name":"그린고르","images":[0,0,133652,0,0,0,0,0,133454,0,0,0,0,0,0,0,0,0],"base":120040},{"name":"고루바","images":[0,0,133652,0,0,0,0,0,133455,0,0,0,0,0,0,0,0,0],"base":120042},{"name":"바로스","images":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,133637,133638,133469,133639],"base":120067},{"name":"메가죠","images":[133467,0,0,0,0,0,0,0,0,0,0,0,0,0,0,133468,0,0],"base":120349},{"name":"샤베르","images":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,133654],"base":120559},{"name":"백기린","images":[133304,0,133306,133305,133307,0,133308,0,0,0,133309,0,0,0,133310,133311,0,133312],"base":133303},{"name":"리바이어던","images":[0,133665,0,0,0,0,0,0,133666,0,0,0,0,0,0,0,0,0],"base":120451},{"name":"토우트","images":[0,0,0,0,0,0,0,0,0,0,0,0,133682,133683,0,0,0,0],"base":120163},{"name":"엘크룬","images":[133285,133286,133287,133288,133289,133290,133291,133292,133293,133294,133302,133295,133300,133301,133296,133297,133298,133299],"base":133284},{"name":"페가수스","images":[133667,133668,133669,133670,133671,133672,133673,133674,133675,133676,133677,133678,133679,133680,133158,133157,133232,133233],"base":133681},{"name":"토룡","images":[133365,133366,133367,133368,133369,133370,133371,133372,133373,133374,133375,133376,0,0,0,0,0,0],"base":133364},{"name":"타노프스","images":[0,0,0,0,0,0,0,0,0,133449,0,0,0,0,0,0,0,0],"base":133460},{"name":"백골로스","images":[133613,133614,133615,133616,133617,133618,133619,133620,133621,133622,133623,133624,0,0,0,0,0,0],"base":133612},{"name":"블랙드래곤","images":[0,0,0,0,0,0,0,0,0,0,0,0,133168,133167,0,0,0,0],"base":120236},{"name":"청룡","images":[0,133005,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"base":120206},{"name":"이그니온","images":[0,0,0,125609,0,0,0,0,0,0,125610,0,0,0,0,0,0,0],"base":129813},{"name":"볼케","images":[110357,110358,110359,0,0,110360,110361,0,110362,0,0,0,0,0,133130,133129,0,0],"base":120110},{"name":"적호","images":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,133656,133655],"base":120114},{"name":"청호","images":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,133659,133660,133658,133657],"base":120117},{"name":"황호","images":[0,0,0,0,0,0,0,0,0,0,0,0,133661,133662,0,0,0,0],"base":120113},{"name":"흑룡","images":[0,133004,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"base":120208},{"name":"백호","images":[110406,110407,110408,110409,110410,110411,110412,110413,110414,110415,110416,110417,125603,0,133114,133113,133190,133191],"base":120112},{"name":"로데오","images":[110418,110419,110420,110421,110422,110423,110424,110425,110426,110427,110428,110429,125604,0,133118,133117,133192,133193],"base":120116},{"name":"흑귀","images":[0,0,0,0,0,110365,0,0,0,0,0,0,0,0,0,0,0,0],"base":120068},{"name":"베라라","images":[133241,133242,133243,133244,0,133245,133246,0,133247,133248,133249,133250,0,0,0,133251,0,0],"base":120046},{"name":"타우트","images":[0,133396,133397,0,133398,133399,0,0,0,0,133400,133401,133404,133405,133402,133403,0,0],"base":133395},{"name":"아스타로","images":[0,133702,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"base":133703},{"name":"화이토스","images":[125066,125067,125068,125069,125070,125071,125072,125073,125074,125075,125076,125077,0,0,0,0,0,0],"base":125078},{"name":"골드드래곤","images":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,133163,133164,133161,133162],"base":120235},{"name":"부루마루","images":[110430,110431,110432,110433,110434,110435,110436,110437,110438,110439,110440,110441,125592,0,133150,133149,133222,133223],"base":120166},{"name":"베르마루","images":[125387,125388,125389,125390,125391,125392,125393,125394,125395,125396,125397,125398,125399,125400,125404,125403,125401,125402],"base":125386},{"name":"메카르노","images":[0,133706,0,0,0,0,0,0,0,0,0,0,0,0,0,133707,0,0],"base":133705},{"name":"본드래곤","images":[0,0,133714,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"base":120241},{"name":"어스드래곤","images":[133713,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"base":120237},{"name":"메르메르","images":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,133697,0,0],"base":133090},{"name":"다크론","images":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,133116,133115,0,0],"base":120129},{"name":"크로톤","images":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,133230,133231],"base":120218},{"name":"설표","images":[110277,110278,110279,110280,110281,110282,110283,110284,110285,110286,110287,110288,0,0,0,0,139136,139137],"base":110290},{"name":"마크론","images":[110442,110443,110444,110445,110446,110447,110448,110449,110450,110451,110452,110453,125593,0,133152,133151,133224,133225],"base":120130},{"name":"샤우트","images":[110454,110455,110456,110457,110458,110459,110460,110461,110462,110463,110464,110465,125594,0,133154,133153,133226,133227],"base":120162},{"name":"철기돈","images":[125169,125170,125171,125172,125173,125174,125175,125176,125177,125178,125179,125180,0,0,0,0,0,0],"base":100860},{"name":"흑무이","images":[125458,125459,125460,125461,125462,125463,125464,125465,125466,125467,125468,125469,125474,125475,125470,125471,125472,125473],"base":133323},{"name":"데블로스","images":[110349,0,0,0,0,0,110350,0,0,0,0,0,0,0,0,0,0,0],"base":120080},{"name":"테르가","images":[125206,125207,125208,125209,125210,125211,125212,125213,125214,125215,125216,125217,0,0,0,0,0,0],"base":125218},{"name":"쥬르곤","images":[133418,133419,133420,133421,133422,133423,133424,133425,133426,133427,133428,133429,0,0,0,0,0,0],"base":133430},{"name":"황기린","images":[133378,0,133379,133380,133381,0,133382,0,0,0,133383,0,133384,133385,0,0,0,0],"base":133377},{"name":"제르가","images":[110138,110139,110140,110141,110142,110143,110144,110145,110146,110147,110148,110149,0,0,0,0,0,0],"base":110137},{"name":"쿠로로","images":[110084,110085,110086,110087,110088,110089,110090,110091,110092,110093,110094,110095,139120,139121,139125,139124,139122,139123],"base":110096},{"name":"흑호","images":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,139139,139138,139141,139140],"base":120118},{"name":"백카키","images":[0,170024,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"base":170023},{"name":"아이로스","images":[0,0,0,0,0,0,170027,0,0,0,0,0,0,0,0,0,0,0],"base":170026},{"name":"카이로스","images":[170029,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"base":170028},{"name":"아카로스","images":[0,170030,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"base":170031},{"name":"세라곤","images":[170047,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"base":170046},{"name":"카라곤","images":[170049,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"base":170048},{"name":"푸라곤","images":[170042,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"base":170051},{"name":"시라곤","images":[170052,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"base":170041},{"name":"흑만모","images":[0,0,170121,0,0,0,0,170120,0,0,0,0,0,0,0,0,0,0],"base":170119},{"name":"쥬키","images":[0,0,0,0,0,0,0,0,0,0,0,170124,0,0,0,0,0,0],"base":100905},{"name":"만모드","images":[0,0,170096,0,0,0,0,170095,0,0,0,0,0,0,0,0,0,0],"base":100896},{"name":"푸모나스","images":[0,0,170098,0,0,0,0,170097,0,0,0,0,0,0,0,0,0,0],"base":100895},{"name":"라이비","images":[170043,0,0,0,0,0,0,0,170044,0,0,0,0,0,0,0,0,0],"base":129008},{"name":"아이스드래곤","images":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,133172,133173,0,133171],"base":0},{"name":"레드드래곤","images":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,133165,133166],"base":0},{"name":"카가로스","images":[0,0,0,0,0,0,0,0,0,0,0,0,133635,133636,0,0,0,0],"base":0}];
+var SAWORLD_IMG_BASE = "https://saworld.net/PetAnimation/";
+
+function findMountRowForPet(r){
+  if(!r) return null;
+  const nm = normalizedName(r).replace(/\s+/g,"").toLowerCase();
+  for(let i=0;i<MOUNT_ROWS.length;i++){
+    if(String(MOUNT_ROWS[i].name).replace(/\s+/g,"").toLowerCase() === nm) return MOUNT_ROWS[i];
+  }
+  const pid = petIdNumber(r);
+  if(pid){
+    for(let j=0;j<MOUNT_ROWS.length;j++){
+      if(Number(MOUNT_ROWS[j].base) === pid) return MOUNT_ROWS[j];
+    }
+  }
+  return null;
+}
+function mountRideList(r){
+  const row = findMountRowForPet(r);
+  const list = [];
+  if(!row) return list;
+  for(let i=0;i<CHARACTER_NAMES.length;i++){
+    const code = Number(row.images[i]) || 0;
+    if(code > 0) list.push({ name: CHARACTER_NAMES[i], code: code });
+  }
+  return list;
+}
+function mountAnimTag(code){
+  return `<img src="${IMG_BASE}${code}.png" loading="lazy"
+    onerror="this.onerror=function(){this.onerror=null;this.src='${SAWORLD_IMG_BASE}${code}.gif';};this.src='${IMG_BASE}${code}.gif';" />`;
+}
+
+/* ===== 펫 스킨 CSV 연동 ===== */
+let SKIN_ROWS = [];
+function parseCsvLine(line){
+  const out = []; let cur = ""; let inQuote = false;
+  for(let i=0;i<line.length;i++){
+    const ch = line.charAt(i);
+    if(ch === '"'){
+      if(inQuote && line.charAt(i+1) === '"'){ cur += '"'; i++; }
+      else inQuote = !inQuote;
+    } else if(ch === "," && !inQuote){ out.push(cur); cur = ""; }
+    else cur += ch;
+  }
+  out.push(cur);
+  return out;
+}
+function normalizeSkinCode(v){
+  v = String(v===null||v===undefined?"":v).trim();
+  if(!v || v==="0" || v==="-" || v.toLowerCase()==="null") return "";
+  return v;
+}
+function parsePetSkinCsv(text){
+  const rows = [];
+  text = String(text||"").replace(/^\uFEFF/, "");
+  const lines = text.split(/\r?\n/);
+  const skinLabels = ["기본스킨","스킨1","스킨2","스킨3","스킨4"];
+  for(let i=0;i<lines.length;i++){
+    const line = String(lines[i]||"").trim();
+    if(!line) continue;
+    const cols = parseCsvLine(line);
+    if(!cols.length) continue;
+    const petCode = normalizeSkinCode(cols[0]);
+    if(!petCode || petCode.toUpperCase()==="PETCODE") continue;
+    for(let k=0;k<5;k++){
+      const imageCode = normalizeSkinCode(cols[1+k]);
+      if(!imageCode) continue;
+      const rideValue = String(cols[6+k]||"0").trim();
+      rows.push({ petCode: petCode, imageCode: imageCode, skinName: skinLabels[k], ride: rideValue==="1"?"탑승 가능":"탑승 불가", sort: k });
+    }
+  }
+  return rows;
+}
+function getDetailSkins(r){
+  const pid = String(r.id||"").trim();
+  return SKIN_ROWS.filter(s => s.petCode === pid);
+}
+async function loadSkinData(){
+  try{
+    let res = await fetch("./pet_skin.csv?ts=" + Date.now(), {cache:"no-store"});
+    if(!res.ok) throw new Error("local 404");
+    const text = await res.text();
+    SKIN_ROWS = parsePetSkinCsv(text);
+  }catch(e){
+    try{
+      const res2 = await fetch("https://sa000001.com/sa2/info/data/SA_PET_IMAGE.csv?ts=" + Date.now(), {cache:"no-store"});
+      if(res2.ok){ const text2 = await res2.text(); SKIN_ROWS = parsePetSkinCsv(text2); }
+    }catch(e2){ SKIN_ROWS = []; }
+  }
+}
+
+const attrMeta = { earth:{label:"지",color:"var(--a4)"}, water:{label:"수",color:"var(--a3)"}, fire:{label:"화",color:"var(--err)"}, wind:{label:"풍",color:"var(--a5)"} };
+function attrPoint(v){ return Math.round(num(v)/10); }
 function normalizedName(p){ return String(p.name||"").replace(/^\uFEFF/, ""); }
 function imgTag(code, cls){
   return `<img class="${cls||''}" src="${IMG_BASE}${code}.png" loading="lazy"
@@ -344,11 +466,11 @@ function imgTag(code, cls){
 }
 function attrChipsHTML(p, small){
   return ["earth","water","fire","wind"].filter(k=>p[k]>0).map(k=>
-    `<span class="${small?'pic-attr-chip':'modal-attr-chip'}" style="background:${attrMeta[k].color}">${small?'':'<span class=\"chip-num\">'+p[k]+'%</span>'}${attrMeta[k].label}${small?' '+p[k]+'%':''}</span>`
+    `<span class="${small?'pic-attr-chip':'modal-attr-chip'}" style="background:${attrMeta[k].color}">${attrMeta[k].label}속성${attrPoint(p[k])}</span>`
   ).join("");
 }
 
-let state = { q:"", attr:"all", how:"ALL", sort:"default", shown:60 };
+let state = { q:"", attr:"all", how:"ALL", sort:"default", shown:60, attrVal:{earth:-1,water:-1,fire:-1,wind:-1} };
 
 const sidebar = document.getElementById("sidebar");
 const toggleBtn = document.getElementById("toggleBtn");
@@ -375,6 +497,9 @@ function matchesFilter(p){
   else if(state.how === "신펫" && isOldPet(p)) return false;
   else if(state.how === "탑승가능" && mountText(p.mount) !== "가능") return false;
   else if(state.how !== "ALL" && state.how !== "돈펫" && state.how !== "구펫" && state.how !== "신펫" && state.how !== "탑승가능" && howType(p.how) !== state.how) return false;
+  for(const k of ["earth","water","fire","wind"]){
+    if(state.attrVal[k] !== -1 && attrPoint(p[k]) !== state.attrVal[k]) return false;
+  }
   return true;
 }
 function sortList(list){
@@ -385,6 +510,37 @@ function sortList(list){
   return [...list].sort((a,b)=> calcStats(b).growth[key] - calcStats(a).growth[key]);
 }
 function getFiltered(){ return sortList(PETS.filter(matchesFilter)); }
+
+/* ===== 속성값 정확 필터 슬라이더 (지수화풍 0~10, -1=전체) ===== */
+function renderAttrSliders(){
+  const box = document.getElementById("attrSliders");
+  box.innerHTML = ["earth","water","fire","wind"].map(k=>{
+    const v = state.attrVal[k];
+    const label = attrMeta[k].label;
+    return `<div class="attr-slider-row">
+      <div class="attr-slider-head"><span class="lbl">${label}속성</span><span class="val ${v!==-1?'on':''}" id="attrValTxt-${k}">${v===-1?'전체':v}</span></div>
+      <input type="range" min="-1" max="10" step="1" value="${v}" data-k="${k}" id="attrSlider-${k}">
+    </div>`;
+  }).join("") + `<button class="attr-filter-reset" id="attrResetBtn">필터 초기화</button>`;
+
+  ["earth","water","fire","wind"].forEach(k=>{
+    document.getElementById(`attrSlider-${k}`).addEventListener("input", e=>{
+      const v = parseInt(e.target.value, 10);
+      state.attrVal[k] = v;
+      const txt = document.getElementById(`attrValTxt-${k}`);
+      txt.textContent = v === -1 ? "전체" : v;
+      txt.classList.toggle("on", v !== -1);
+      state.shown = 60;
+      render();
+    });
+  });
+  document.getElementById("attrResetBtn").addEventListener("click", ()=>{
+    state.attrVal = { earth:-1, water:-1, fire:-1, wind:-1 };
+    renderAttrSliders();
+    state.shown = 60;
+    render();
+  });
+}
 
 function cardHTML(p, idx){
   const name = normalizedName(p);
@@ -435,6 +591,34 @@ function openModal(idx){
   document.getElementById("miDef").textContent = cut2(st.init.d);
   document.getElementById("miAgi").textContent = cut2(st.init.s);
   document.getElementById("miHp").textContent = cut2(st.init.h);
+
+  const mounts = mountRideList(p);
+  const mountSection = document.getElementById("mountSection");
+  if(mounts.length){
+    mountSection.style.display = "block";
+    document.getElementById("mountGrid").innerHTML = mounts.map(m => `
+      <div class="skin-card">
+        <div class="skin-img">${mountAnimTag(m.code)}</div>
+        <div class="skin-title">${m.name}</div>
+      </div>`).join("");
+  } else {
+    mountSection.style.display = "none";
+  }
+
+  const skins = getDetailSkins(p);
+  const skinSection = document.getElementById("skinSection");
+  if(skins.length){
+    skinSection.style.display = "block";
+    document.getElementById("skinGrid").innerHTML = skins.sort((a,b)=>a.sort-b.sort).map(s => `
+      <div class="skin-card">
+        <div class="skin-img">${imgTag(s.imageCode)}</div>
+        <div class="skin-title">${s.skinName}</div>
+        <div class="skin-ride">${s.ride}</div>
+      </div>`).join("");
+  } else {
+    skinSection.style.display = "none";
+  }
+
   document.getElementById("modalCalcLink").href = "index.html?pet=" + encodeURIComponent(name);
   document.getElementById("pet-modal").classList.add("open");
 }
@@ -494,8 +678,10 @@ async function loadLive(){
   applyData(PETS);
   setStatus(`${PETS.length}종 · 내장 샘플`);
 }
+renderAttrSliders();
 render();
 loadLive();
+loadSkinData();
 </script>
 </body>
 </html>
