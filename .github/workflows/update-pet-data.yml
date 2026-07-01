@@ -17,14 +17,16 @@ jobs:
       - name: Fetch latest pet data from sa000001.com
         run: |
           curl -sf "https://sa000001.com/sa2/info/api/pet_data.php" -o pet_data.json
-          echo "다운로드 완료, 크기:"
+          echo "펫 데이터 다운로드 완료, 크기:"
           wc -c pet_data.json
+          curl -sf "https://sa000001.com/sa2/info/data/SA_PET_IMAGE.csv" -o pet_skin.csv || echo "스킨 CSV 없음 (건너뜀)"
+          if [ -f pet_skin.csv ]; then echo "스킨 CSV 다운로드 완료, 크기:"; wc -c pet_skin.csv; fi
 
       - name: Commit if changed
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add pet_data.json
+          git add pet_data.json pet_skin.csv
           if git diff --staged --quiet; then
             echo "변경 없음 - 커밋 스킵"
           else
