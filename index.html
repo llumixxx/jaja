@@ -356,26 +356,20 @@ function renderStatInputs(){
   const p = selectedPet;
   const st = calcStats(p);
   document.getElementById("statInputWrap").innerHTML = `
-    <div class="fill-btn" id="calcFill">✨ S급 초기치로 채우기</div>
     <div class="stat-input-grid">
       <div class="stat-input-box stat-hp"><div class="lbl">HP 내구력</div>
-        <div class="stepper"><button data-t="calcHp" data-d="-1">−</button><input type="number" id="calcHp" value=""><button data-t="calcHp" data-d="1">+</button></div></div>
+        <div class="stepper"><button data-t="calcHp" data-d="-1">−</button><input type="number" id="calcHp" value="${dropDecimalInt(st.init.h)}"><button data-t="calcHp" data-d="1">+</button></div></div>
       <div class="stat-input-box stat-atk"><div class="lbl">ATK 공격력</div>
-        <div class="stepper"><button data-t="calcAtk" data-d="-1">−</button><input type="number" id="calcAtk" value=""><button data-t="calcAtk" data-d="1">+</button></div></div>
+        <div class="stepper"><button data-t="calcAtk" data-d="-1">−</button><input type="number" id="calcAtk" value="${dropDecimalInt(st.init.a)}"><button data-t="calcAtk" data-d="1">+</button></div></div>
       <div class="stat-input-box stat-def"><div class="lbl">DEF 방어력</div>
-        <div class="stepper"><button data-t="calcDef" data-d="-1">−</button><input type="number" id="calcDef" value=""><button data-t="calcDef" data-d="1">+</button></div></div>
+        <div class="stepper"><button data-t="calcDef" data-d="-1">−</button><input type="number" id="calcDef" value="${dropDecimalInt(st.init.d)}"><button data-t="calcDef" data-d="1">+</button></div></div>
       <div class="stat-input-box stat-agi"><div class="lbl">AGI 순발력</div>
-        <div class="stepper"><button data-t="calcDex" data-d="-1">−</button><input type="number" id="calcDex" value=""><button data-t="calcDex" data-d="1">+</button></div></div>
+        <div class="stepper"><button data-t="calcDex" data-d="-1">−</button><input type="number" id="calcDex" value="${dropDecimalInt(st.init.s)}"><button data-t="calcDex" data-d="1">+</button></div></div>
     </div>
+    <div class="result-note" style="margin-bottom:14px;">입력칸은 S급(롤 없음) 기준값으로 시작해. 실제 게임에서 잡은 펫의 Lv.1 초기치로 바꿔서 계산해줘 — 실제 초기치는 배분치(+10)가 항상 더해지기 때문에 이 기준값보다 대부분 높게 나와.</div>
     <button class="calc-btn" id="calcRun">🎲 계산하기</button>
   `;
 
-  document.getElementById("calcFill").addEventListener("click", ()=>{
-    document.getElementById("calcHp").value = dropDecimalInt(st.init.h);
-    document.getElementById("calcAtk").value = dropDecimalInt(st.init.a);
-    document.getElementById("calcDef").value = dropDecimalInt(st.init.d);
-    document.getElementById("calcDex").value = dropDecimalInt(st.init.s);
-  });
   document.querySelectorAll(".stepper button").forEach(btn=>{
     btn.addEventListener("click", ()=>{
       const inp = document.getElementById(btn.dataset.t);
