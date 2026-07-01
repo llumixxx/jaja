@@ -209,15 +209,15 @@ body {
   background-image: url('jyajyagotchi.png');
   background-size: contain; background-repeat: no-repeat; background-position: center;
 }
-/* 화면(LCD) 영역 - 새 이미지(공룡화석 테마) 속 사각형 위치에 맞춰 % 좌표로 재산출 */
+/* 화면(LCD) 영역 - 새 이미지(v3) 기준 재산출 */
 .device-screen {
   position: absolute;
-  left: 28.5%; top: 27%; width: 45.5%; height: 43.6%;
+  left: 25.6%; top: 24.8%; width: 50.7%; height: 47.1%;
   overflow: hidden;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 3%; padding: 4%;
+  gap: 2.5%; padding: 4%;
 }
-/* 시작하기 / 초기화구슬 / 환각도전 / 자동뽑기 / 처음부터 - 이미지 속 버튼 5개 위치에 맞춤 */
+/* 시작하기 / 초기화구슬 / 환각도전 / 자동뽑기 / 새펫사기 - 이미지 속 버튼 5개 위치에 맞춤 */
 .device-hitzone {
   position: absolute; top: 84%;
   width: 13%; aspect-ratio: 1/1;
@@ -231,7 +231,9 @@ body {
 .device-hitzone.hz-reset { left: 32%; }
 .device-hitzone.hz-hall { left: 50%; }
 .device-hitzone.hz-auto { left: 68%; }
-.device-hitzone.hz-restart { left: 86%; }
+.device-hitzone.hz-buynewpet { left: 86%; }
+.device-stats-line { font-family: 'Nunito', sans-serif; font-size: 8.5px; font-weight: 800; color: #4c6a55;
+  text-align: center; white-space: nowrap; opacity: .9; }
 
 /* 다마고치 펫 + 말풍선 (화면 안, 세로 배치로 좁은 화면에 최적화) */
 .tamago-area { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; position: relative; width: 100%; }
@@ -531,13 +533,15 @@ body {
         <div class="sim-rolling" id="sim-rolling">
           <span style="color:#4c6a55;font-size:10.5px;font-weight:800;">펫을 선택해주세요</span>
         </div>
+
+        <div class="device-stats-line" id="device-stats-line">초기화 0/5 · 0 vip</div>
       </div>
 
       <button class="device-hitzone hz-start" onclick="deviceStart()" aria-label="시작하기" title="시작하기"></button>
       <button class="device-hitzone hz-reset" onclick="deviceResetOrb()" aria-label="초기화구슬" title="초기화구슬 · 초구 다시 돌리기"></button>
       <button class="device-hitzone hz-hall" onclick="deviceHallChallenge()" aria-label="환각도전" title="환각도전"></button>
       <button class="device-hitzone hz-auto" onclick="deviceAutoRoll()" aria-label="자동뽑기" title="자동뽑기 · 좋은 확률 나올 때까지 연속 초기화"></button>
-      <button class="device-hitzone hz-restart" onclick="deviceRestart()" aria-label="처음부터" title="처음부터 다시하기"></button>
+      <button class="device-hitzone hz-buynewpet" onclick="deviceBuyNewPet()" aria-label="새펫사기" title="새펫사기"></button>
     </div>
 
     <div class="stat-rolls" id="stat-rolls">
@@ -896,6 +900,7 @@ function selectPet(name) {
     $('sim-life-status').textContent = '-';
     setPetBubble(`${name}, 잡으러 가볼까? ▶`, 'normal');
     $('sim-rolling').innerHTML = `<span style="color:#4c6a55;font-size:10.5px;font-weight:800;">아래에서 시작 버튼을 눌러줘</span>`;
+    $('device-stats-line').textContent = `초기화 0/${MAX_RESETS} · 0 vip`;
   }
 }
 
@@ -1048,6 +1053,8 @@ function updateMainDisplay() {
   $('sim-cost-small').innerHTML = totalCost > 0
     ? `💰 누적 비용: <strong style="color:#a85c00;font-family:'Nunito',sans-serif;">${totalCost.toLocaleString()}</strong> vip · 환각 도전 ${s.hallAttempts}회`
     : `환각 도전 ${s.hallAttempts}회`;
+
+  $('device-stats-line').textContent = `초기화 ${s.currentPetResets}/${MAX_RESETS} · ${totalCost.toLocaleString()} vip`;
 }
 
 function showActionButtons() {
@@ -1297,11 +1304,9 @@ function deviceAutoRoll() {
   if (!simState || simState.finished) { sfxClick(); toast('먼저 시작하기를 눌러줘'); return; }
   rerollStats5();
 }
-function deviceRestart() {
-  sfxClick();
-  if (simState) restartSimulation();
-  else if (!$('btn-go').disabled) runSimulation();
-  else toast('먼저 펫을 선택해주세요');
+function deviceBuyNewPet() {
+  if (!simState || simState.finished) { sfxClick(); toast('먼저 시작하기를 눌러줘'); return; }
+  buyNewPet();
 }
 
 /* ═══════════════════════════════════════════════════════════
