@@ -121,7 +121,7 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--t1);
 .field{margin-bottom:0;position:relative;}
 .field-label{font-size:12px;font-weight:700;color:var(--t2);margin-bottom:5px;display:block;letter-spacing:.3px;}
 .field-input{width:100%;padding:11px 14px;background:var(--s1);border:1.5px solid var(--border);
-  border-radius:12px;color:var(--t1);font-size:15px;font-family:'Noto Sans KR',sans-serif;
+  border-radius:12px;color:var(--t1);font-size:16px;font-family:'Noto Sans KR',sans-serif;
   transition:border-color .18s,box-shadow .18s,background .18s;}
 .field-input:focus{outline:none;border-color:var(--a1);background:#fff;box-shadow:0 0 0 4px rgba(47,127,214,.1);}
 .field-input::placeholder{color:var(--t4);}
@@ -306,6 +306,11 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--t1);
 
 footer{text-align:center;padding:30px;color:var(--t3);font-size:11px;font-family:'Nunito',sans-serif;}
 @media(max-width:640px){ .page-title{font-size:26px;} }
+@media(max-width:480px){
+  .stat-input-grid{grid-template-columns:1fr 1fr;gap:9px;}
+  .stat-input-box{padding:10px 11px;}
+  .main-inner{padding:16px 14px 60px;}
+}
 </style>
 </head>
 <body>
