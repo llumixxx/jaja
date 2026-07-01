@@ -5,104 +5,121 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>쟈쟈서버 환각 계산기</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg:#faf9ff; --bg2:#f3f0ff; --white:#ffffff;
-  --s1:#f8f7ff; --s2:#f0eeff;
-  --border:#e8e3ff; --border2:#d4cbff;
-  --a1:#9b87f5; --a2:#f587b8; --a3:#87d4f5; --a4:#f5c887; --a5:#87f5c0;
-  --t1:#3d3560; --t2:#7b72a8; --t3:#b0a8d4; --t4:#d4cff0;
-  --ok:#6dd5a0; --err:#f57878;
-  --shadow:0 4px 24px rgba(155,135,245,0.12);
-  --shadow2:0 8px 32px rgba(155,135,245,0.18);
+  --bg:#f2f7fd; --bg2:#e8f2fc; --white:#ffffff;
+  --s1:#f0f7fd; --s2:#e3f0fb;
+  --border:#dbe9f7; --border2:#bcd8f2;
+  --a1:#2f7fd6; --a2:#22b6c9; --a3:#5aa8ea; --a4:#f5a623; --a5:#6fd0a0;
+  --t1:#12253f; --t2:#4c6a8c; --t3:#8ea6c2; --t4:#c7dcf0;
+  --ok:#3d9e6e; --err:#e05a5a;
+  --shadow:0 4px 24px rgba(47,127,214,0.12);
+  --shadow2:0 8px 32px rgba(47,127,214,0.18);
 }
 [data-theme="dark"] {
-  --bg:#0f0f1a; --bg2:#1a1a2e; --white:#252540;
-  --s1:#2a2a45; --s2:#353555;
-  --border:#404060; --border2:#505080;
-  --t1:#e8e8f0; --t2:#b0b0c8; --t3:#8080a0; --t4:#606080;
+  --bg:#0a1420; --bg2:#0f1e30; --white:#132335;
+  --s1:#16283c; --s2:#1c3149;
+  --border:#233c56; --border2:#2c4a68;
+  --t1:#e6f0fb; --t2:#a9c2dc; --t3:#7391b0; --t4:#4a637d;
   --shadow:0 4px 24px rgba(0,0,0,0.4);
   --shadow2:0 8px 32px rgba(0,0,0,0.5);
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--t1);min-height:100vh;
-  background-image:radial-gradient(circle at 15% 20%, rgba(155,135,245,0.08) 0%, transparent 50%),
-    radial-gradient(circle at 85% 80%, rgba(245,135,184,0.07) 0%, transparent 50%);}
+  background-image:radial-gradient(circle at 12% 8%, rgba(47,127,214,0.08) 0%, transparent 50%),
+    radial-gradient(circle at 88% 90%, rgba(34,182,201,0.07) 0%, transparent 50%);}
 
-.dark-toggle{position:fixed;top:14px;right:14px;width:40px;height:40px;border-radius:50%;
-  border:2px solid var(--border2);background:var(--white);cursor:pointer;font-size:1.2rem;
-  display:flex;align-items:center;justify-content:center;transition:all .3s;z-index:1000;box-shadow:var(--shadow);}
+/* ===== 사이드바 ===== */
+.sidebar{width:300px;min-height:100vh;background:var(--white);border-right:1.5px solid var(--border);
+  display:flex;flex-direction:column;position:fixed;left:-300px;top:0;z-index:200;
+  transition:left .32s cubic-bezier(.4,0,.2,1);box-shadow:4px 0 24px rgba(47,127,214,0.08);}
+.sidebar.open{left:0;}
+.sb-head{padding:20px 16px 14px;border-bottom:1.5px solid var(--border);}
+.sb-logo{display:flex;align-items:center;gap:8px;font-family:'Nunito',sans-serif;font-weight:900;
+  font-size:16px;color:var(--a1);margin-bottom:4px;}
+.sb-logo-dot{width:8px;height:8px;background:var(--a2);border-radius:50%;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(2)}}
+.sb-sub{font-size:10.5px;color:var(--t3);font-family:'Nunito',sans-serif;font-weight:700;letter-spacing:.5px;}
+.sb-nav{display:flex;gap:6px;padding:12px 16px;border-bottom:1.5px solid var(--border);}
+.sb-nav a{flex:1;text-decoration:none;text-align:center;padding:9px 6px;border-radius:12px;
+  font-size:12.5px;font-weight:800;color:var(--t2);background:var(--s1);border:1.5px solid var(--border);}
+.sb-nav a.on{background:linear-gradient(135deg,var(--a1),var(--a2));color:#fff;border-color:transparent;}
+.sb-search{padding:12px 16px 8px;}
+.sb-search input{width:100%;padding:10px 14px;background:var(--s1);border:1.5px solid var(--border);
+  border-radius:20px;font-family:inherit;font-size:13px;color:var(--t1);outline:none;}
+.sb-search input:focus{border-color:var(--a1);}
+.pet-section{padding:6px 12px 16px;flex:1;overflow-y:auto;min-height:0;}
+.pet-section::-webkit-scrollbar{width:4px;}
+.pet-section::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px;}
+.pet-sec-title{font-size:10px;letter-spacing:2px;color:var(--t3);text-transform:uppercase;
+  margin:8px 4px;font-family:'Nunito',sans-serif;font-weight:800;}
+.pet-item{display:flex;align-items:center;gap:9px;padding:8px 10px;margin-bottom:5px;
+  background:var(--white);border:1.5px solid var(--border);border-radius:12px;cursor:pointer;transition:all .15s;}
+.pet-item:hover{border-color:var(--a1);box-shadow:0 3px 12px rgba(47,127,214,.12);transform:translateY(-1px);}
+.pet-item.active{border-color:var(--a1);background:var(--s2);box-shadow:0 3px 14px rgba(47,127,214,.15);}
+.pet-item img{width:28px;height:28px;object-fit:contain;image-rendering:pixelated;border-radius:6px;background:var(--s1);flex-shrink:0;}
+.pet-item-name{font-size:12.5px;font-weight:700;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--t1);}
+.sb-footer{padding:12px 16px;border-top:1.5px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+.sb-footer-txt{font-size:10.5px;color:var(--t3);}
+
+.toggle-btn{position:fixed;top:16px;left:16px;z-index:300;width:42px;height:42px;background:var(--white);
+  border:1.5px solid var(--border);border-radius:12px;color:var(--a1);font-size:19px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;transition:all .18s;box-shadow:var(--shadow);}
+.toggle-btn:hover{border-color:var(--a1);box-shadow:var(--shadow2);transform:scale(1.05);}
+.toggle-btn.sb-open{left:314px;}
+.dark-toggle{width:36px;height:36px;border-radius:50%;border:2px solid var(--border2);background:var(--white);
+  cursor:pointer;font-size:1.05rem;display:flex;align-items:center;justify-content:center;transition:all .3s;}
 .dark-toggle:hover{transform:scale(1.1) rotate(-8deg);border-color:var(--a1);}
 [data-theme="dark"] .toggle-moon{display:inline;} [data-theme="dark"] .toggle-sun{display:none !important;}
 [data-theme="light"] .toggle-moon{display:none !important;} [data-theme="light"] .toggle-sun{display:inline;}
 
-.nav-pill{position:fixed;top:14px;left:14px;z-index:1000;display:flex;gap:6px;}
-.nav-pill a{text-decoration:none;background:var(--white);border:1.5px solid var(--border2);
-  border-radius:20px;padding:8px 15px;font-size:12.5px;font-weight:800;color:var(--t2);box-shadow:var(--shadow);}
-.nav-pill a.on{background:linear-gradient(135deg,var(--a1),var(--a2));color:#fff;border-color:transparent;}
+.main{flex:1;min-height:100vh;}
+.main.shifted{margin-left:300px;}
+@media(max-width:820px){ .main.shifted{margin-left:0;} .toggle-btn.sb-open{left:auto;right:16px;} }
 
-.main-inner{max-width:920px;margin:0 auto;padding:70px 20px 80px;}
+.main-inner{max-width:760px;margin:0 auto;padding:70px 20px 80px;}
 .page-head{text-align:center;padding:6px 0 26px;}
-.wind-badge{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#f0eeff,#ffeef6);
-  border:1.5px solid var(--border2);border-radius:20px;padding:6px 14px;margin-bottom:12px;box-shadow:0 4px 12px rgba(155,135,245,.12);}
+.wind-badge{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,var(--s2),#e0f7fa);
+  border:1.5px solid var(--border2);border-radius:20px;padding:6px 14px;margin-bottom:12px;box-shadow:0 4px 12px rgba(47,127,214,.12);}
 .wind-badge-dot{width:7px;height:7px;background:var(--a2);border-radius:50%;animation:pulse 2s infinite;}
-@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(2)}}
 .wind-badge span{font-size:11px;font-weight:800;color:var(--t2);font-family:'Nunito',sans-serif;letter-spacing:.5px;}
 .page-title{font-family:'Nunito',sans-serif;font-size:34px;font-weight:900;letter-spacing:-1px;
-  background:linear-gradient(135deg,var(--a1) 0%,var(--a2) 60%,var(--a4) 100%);
+  background:linear-gradient(135deg,var(--a1) 0%,var(--a2) 70%,var(--a5) 100%);
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
-  line-height:1.15;margin-bottom:6px;filter:drop-shadow(0 2px 4px rgba(155,135,245,.15));}
+  line-height:1.15;margin-bottom:6px;filter:drop-shadow(0 2px 4px rgba(47,127,214,.15));}
 .page-sub{font-size:12px;color:var(--t3);font-family:'Nunito',sans-serif;font-weight:700;letter-spacing:1px;}
 #loadStatus{font-size:11.5px;color:var(--t3);margin-top:10px;}
 
-.calc-grid-layout{display:grid;grid-template-columns:340px 1fr;gap:16px;align-items:start;}
-@media(max-width:820px){ .calc-grid-layout{grid-template-columns:1fr;} }
+.card{background:var(--white);border:1.5px solid var(--border);border-radius:24px;padding:20px;
+  box-shadow:0 8px 24px rgba(47,127,214,0.08);margin-bottom:16px;}
 
-.card{background:var(--white);border:3px solid #fff;outline:2px solid var(--border);border-radius:24px;
-  padding:20px;box-shadow:0 8px 24px rgba(155,135,245,0.12),inset 0 -3px 0 rgba(155,135,245,0.05);}
+.empty-state{text-align:center;padding:36px 10px;color:var(--t3);font-size:12.5px;}
+.empty-state .g{font-size:32px;margin-bottom:8px;opacity:.5;}
 
-/* 왼쪽: 펫 검색/선택 */
-.search-input{width:100%;padding:11px 16px;border:1.5px solid var(--border);border-radius:20px;
-  font-family:inherit;font-size:14px;background:var(--s1);color:var(--t1);outline:none;margin-bottom:10px;}
-.search-input:focus{border-color:var(--a1);}
-.pet-suggest{max-height:220px;overflow-y:auto;border-radius:14px;}
-.pet-suggest-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:12px;cursor:pointer;}
-.pet-suggest-item:hover{background:var(--s1);}
-.pet-suggest-item img{width:32px;height:32px;object-fit:contain;image-rendering:pixelated;border-radius:8px;background:var(--s1);}
-.pet-suggest-item .n{font-size:13px;font-weight:700;color:var(--t1);}
-.pet-suggest-item .h{font-size:10px;color:var(--t3);}
-
-.selected-pet-box{margin-top:14px;}
-.skeleton{background:linear-gradient(90deg,var(--s1) 25%,var(--s2) 37%,var(--s1) 63%);background-size:400% 100%;
-  animation:sk 1.4s infinite; border-radius:12px;}
-@keyframes sk{0%{background-position:100% 50%}100%{background-position:0 50%}}
-.empty-state{text-align:center;padding:30px 10px;color:var(--t3);font-size:12.5px;}
-.empty-state .g{font-size:30px;margin-bottom:8px;opacity:.5;}
-
-.sel-pet-hero{display:flex;gap:12px;align-items:center;margin-bottom:12px;}
-.sel-pet-img{width:60px;height:60px;border-radius:14px;background:var(--s1);border:2px solid var(--border2);
+.sel-pet-hero{display:flex;gap:12px;align-items:center;margin-bottom:14px;}
+.sel-pet-img{width:64px;height:64px;border-radius:16px;background:var(--s1);border:2px solid var(--border2);
   display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;}
-.sel-pet-img img{width:52px;height:52px;object-fit:contain;image-rendering:pixelated;}
-.sel-pet-name{font-size:17px;font-weight:900;font-family:'Nunito',sans-serif;color:var(--t1);}
+.sel-pet-img img{width:56px;height:56px;object-fit:contain;image-rendering:pixelated;}
+.sel-pet-name{font-size:18px;font-weight:900;font-family:'Nunito',sans-serif;color:var(--t1);}
 .sel-pet-how{font-size:11px;color:var(--t3);margin-top:2px;}
 
-.mini-pair-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px;}
-.mini-pair-box{background:var(--s1);border:1.5px solid var(--border);border-radius:10px;padding:8px 10px;}
-.mini-pair-box .t{font-size:9px;color:var(--t3);font-weight:800;letter-spacing:1px;margin-bottom:4px;font-family:'Nunito',sans-serif;}
-.mini-pair-line{display:flex;justify-content:space-between;font-size:11.5px;padding:1px 0;}
+.mini-pair-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.mini-pair-box{background:var(--s1);border:1.5px solid var(--border);border-radius:12px;padding:9px 12px;}
+.mini-pair-box .t{font-size:9.5px;color:var(--t3);font-weight:800;letter-spacing:1px;margin-bottom:5px;font-family:'Nunito',sans-serif;}
+.mini-pair-line{display:flex;justify-content:space-between;font-size:12px;padding:1.5px 0;}
 .mini-pair-line span:first-child{color:var(--t3);}
 .mini-pair-line b{color:var(--a1);font-family:'Nunito',sans-serif;}
-.total-pill{margin-top:8px;text-align:center;background:linear-gradient(135deg,var(--s2),#ffeef6);
-  border:1.5px solid var(--border2);border-radius:10px;padding:8px;}
-.total-pill .v{font-size:19px;font-weight:900;font-family:'Nunito',sans-serif;color:var(--a1);}
+.total-pill{margin-top:8px;text-align:center;background:linear-gradient(135deg,var(--s2),#e0f7fa);
+  border:1.5px solid var(--border2);border-radius:10px;padding:9px;}
+.total-pill .v{font-size:20px;font-weight:900;font-family:'Nunito',sans-serif;color:var(--a1);}
 .total-pill .l{font-size:9.5px;color:var(--t2);font-weight:800;}
 
-/* 오른쪽: 스탯 입력 */
 .section-title{font-size:10px;letter-spacing:2px;color:var(--t3);font-family:'Nunito',sans-serif;
   font-weight:800;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:6px;}
 .section-title::before{content:'';display:block;width:3px;height:14px;
   background:linear-gradient(135deg,var(--a1),var(--a2));border-radius:2px;}
+
 .stat-input-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;}
 .stat-input-box{background:var(--s1);border:1.5px solid var(--border);border-radius:16px;padding:12px 14px;}
 .stat-input-box .lbl{font-size:11px;color:var(--t3);font-weight:800;margin-bottom:8px;font-family:'Nunito',sans-serif;}
@@ -112,74 +129,129 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--t1);
 .stepper button:hover{background:var(--a1);color:#fff;}
 .stepper input{width:100%;text-align:center;border:none;background:transparent;font-size:19px;
   font-weight:900;font-family:'Nunito',sans-serif;color:var(--t1);outline:none;}
-.stat-atk .lbl{color:#e07db8;} .stat-def .lbl{color:var(--a1);} .stat-agi .lbl{color:#3fae8a;} .stat-hp .lbl{color:#c4822a;}
+.stat-atk .lbl{color:var(--a2);} .stat-def .lbl{color:var(--a1);} .stat-agi .lbl{color:var(--a5);} .stat-hp .lbl{color:var(--a4);}
 
 .calc-btn{width:100%;background:linear-gradient(135deg,var(--a1),var(--a2));color:#fff;border:none;
   padding:14px;border-radius:16px;font-weight:900;font-size:15px;cursor:pointer;font-family:'Nunito',sans-serif;
-  letter-spacing:.5px;box-shadow:0 6px 18px rgba(155,135,245,.3);}
+  letter-spacing:.5px;box-shadow:0 6px 18px rgba(47,127,214,.3);}
 .calc-btn:hover{filter:brightness(1.06);transform:translateY(-1px);}
 .calc-btn:active{transform:scale(.98);}
 .fill-btn{width:100%;background:var(--white);border:1.5px solid var(--border2);color:var(--t2);
   padding:11px;border-radius:16px;font-weight:800;font-size:12.5px;cursor:pointer;margin-bottom:10px;}
 .fill-btn:hover{border-color:var(--a1);color:var(--a1);}
 
-#calcResult{margin-top:18px;}
-.result-empty{text-align:center;padding:26px 10px;color:var(--t3);font-size:12.5px;}
-.result-empty .g{font-size:28px;margin-bottom:8px;opacity:.5;}
-.grade-badge{display:inline-block;padding:8px 20px;border-radius:20px;font-weight:900;font-size:18px;
-  font-family:'Nunito',sans-serif;background:linear-gradient(135deg,var(--s2),#ffeef6);border:2px solid var(--a1);color:var(--a1);}
-.grade-badge.hall{border-color:#f5a623;color:#f5a623;background:linear-gradient(135deg,#fff6e0,#ffeecb);}
-.result-msg{font-size:12.5px;color:var(--t2);margin:8px 0 12px;}
-.result-note{font-size:11px;color:var(--t3);margin-bottom:10px;line-height:1.6;background:var(--s1);
-  border-radius:10px;padding:8px 12px;border:1.5px solid var(--border);}
-.dist-row{display:flex;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);font-size:11.5px;}
-.dist-label{flex:0 0 78px;font-weight:900;color:var(--a1);font-family:'Nunito',sans-serif;}
-.dist-label.hall{color:#f5a623;}
-.dist-meta{color:var(--t2);font-variant-numeric:tabular-nums;font-size:11px;}
+/* ===== 결과 카드 ===== */
+.result-strip{height:4px;border-radius:99px;background:linear-gradient(90deg,var(--a1),var(--a2),var(--a4));margin-bottom:20px;}
+.result-inner{display:grid;grid-template-columns:1fr 1fr;gap:0 20px;}
+@media(max-width:600px){ .result-inner{grid-template-columns:1fr;} }
+.result-left{display:flex;flex-direction:column;}
+.result-right{display:flex;flex-direction:column;border-left:1.5px solid var(--border);padding-left:20px;}
+@media(max-width:600px){ .result-right{border-left:none;border-top:1.5px solid var(--border);padding-left:0;padding-top:16px;margin-top:8px;} }
+.res-badge{display:inline-block;padding:5px 13px;background:linear-gradient(135deg,var(--a1),var(--a2));
+  color:#fff;border-radius:99px;font-size:13px;font-weight:800;letter-spacing:.5px;}
+.res-prob-big{font-size:60px;font-weight:900;line-height:1.05;font-family:'Nunito',sans-serif;
+  background:linear-gradient(135deg,var(--a1),var(--a2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;margin:8px 0 12px;}
+.res-prob-unit{font-size:32px;}
+.res-prob-gold{background:linear-gradient(135deg,#f5a623,#fdd835) !important;-webkit-background-clip:text !important;background-clip:text !important;}
+.res-sub-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;}
+.res-sub-label{font-size:13px;color:var(--t3);font-weight:600;}
+.res-sub-val{font-size:14px;font-weight:800;color:var(--t1);font-family:'Nunito',sans-serif;}
+.res-msg-wrap{margin-top:10px;padding:9px 12px;border-radius:12px;background:var(--s1);border:1.5px solid var(--border);
+  display:flex;align-items:center;gap:10px;text-align:center;justify-content:center;}
+.res-msg-emoji{font-size:22px;display:inline-block;flex-shrink:0;}
+.res-msg-text{font-size:13px;font-weight:700;color:var(--t1);line-height:1.5;}
+@keyframes emoji-cry{0%,100%{transform:rotate(0deg)}25%{transform:rotate(-5deg)}75%{transform:rotate(5deg)}}
+@keyframes emoji-sprout{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+@keyframes emoji-swing{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(6deg)}}
+@keyframes emoji-fire{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
+@keyframes emoji-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes emoji-star{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
+@keyframes rainbow{0%{background-position:0% 50%}100%{background-position:200% 50%}}
+.anim-cry .res-msg-emoji{animation:emoji-cry 1.8s ease-in-out infinite;}
+.anim-sprout .res-msg-emoji{animation:emoji-sprout 2.0s ease-in-out infinite;}
+.anim-swing .res-msg-emoji{animation:emoji-swing 2.0s ease-in-out infinite;}
+.anim-fire .res-msg-emoji{animation:emoji-fire 1.6s ease-in-out infinite;}
+.anim-float .res-msg-emoji{animation:emoji-float 2.4s ease-in-out infinite;}
+.anim-star .res-msg-emoji{animation:emoji-star 2.0s ease-in-out infinite;}
+.msg-lv6{border-color:var(--a4);background:linear-gradient(270deg,#fff9ee,#fff3d4,#fff5d4,#fff9ee);background-size:300% 300%;animation:rainbow 3s ease-in-out infinite;}
+.msg-lv7{background:linear-gradient(270deg,var(--a4),var(--a2),var(--a1),var(--a3));background-size:300% 300%;animation:rainbow 2s linear infinite;border:none;}
+.msg-lv7 .res-msg-text{color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.2);}
+.grade-dist{flex:1;}
+.grade-dist-title{font-size:13px;font-weight:800;color:var(--t2);letter-spacing:1px;margin-bottom:10px;}
+.grade-dist-total{font-size:11px;font-weight:600;color:var(--t4);font-family:'Nunito',sans-serif;margin-bottom:10px;}
+.grade-row{display:flex;align-items:center;gap:6px;margin-bottom:7px;}
+.grade-lbl{font-size:12px;font-weight:700;color:var(--t3);min-width:36px;text-align:right;font-family:'Nunito',sans-serif;}
+.grade-lbl-hall{font-size:12px;font-weight:900;color:#e8962a;min-width:36px;text-align:right;font-family:'Nunito',sans-serif;}
+.grade-bar-wrap{flex:1;background:var(--s1);border-radius:99px;height:12px;overflow:hidden;position:relative;}
+.grade-bar{height:100%;border-radius:99px;transition:width .4s ease;}
+.grade-bar-8{background:linear-gradient(90deg,#f5a623,#fdd835);}
+.grade-bar-pos{background:linear-gradient(90deg,var(--a1),var(--a3));}
+.grade-bar-zero{background:linear-gradient(90deg,var(--border2),var(--t4));}
+.grade-bar-neg{background:linear-gradient(90deg,var(--t4),var(--border2));}
+.grade-meta{display:flex;flex-direction:column;align-items:flex-end;gap:1px;min-width:48px;}
+.grade-cnt{font-size:12px;font-weight:700;color:var(--t2);font-family:'Nunito',sans-serif;}
+.grade-pct{font-size:11px;font-weight:600;color:var(--t4);font-family:'Nunito',sans-serif;}
+.result-err{color:var(--err);text-align:center;font-size:14px;padding:8px 0;font-weight:600;}
+.result-note{font-size:11px;color:var(--t3);margin-top:14px;line-height:1.6;background:var(--s1);
+  border-radius:10px;padding:8px 12px;border:1.5px solid var(--border);grid-column:1/-1;}
 
 footer{text-align:center;padding:30px;color:var(--t3);font-size:11px;font-family:'Nunito',sans-serif;}
-@media(max-width:640px){ .page-title{font-size:24px;} .nav-pill{position:static;justify-content:center;margin-bottom:10px;} .main-inner{padding-top:16px;} }
+@media(max-width:640px){ .page-title{font-size:24px;} .main-inner{padding-top:70px;} }
 </style>
 </head>
 <body>
 
-<div class="nav-pill">
-  <a href="index.html" class="on">🎲 계산기</a>
-  <a href="pokedex.html">🐾 도감</a>
-</div>
-<button class="dark-toggle" onclick="toggleDark()"><span class="toggle-moon">🌙</span><span class="toggle-sun">☀️</span></button>
+<button class="toggle-btn" id="toggleBtn">☰</button>
 
-<div class="main-inner">
-  <div class="page-head">
-    <div class="wind-badge"><span class="wind-badge-dot"></span><span>SA JYAJYA SERVER</span></div>
-    <div class="page-title">쟈쟈 환각 계산기</div>
-    <div class="page-sub">Lv.1 초기치로 환각(8등급) 가능성을 확인해보세요</div>
-    <div id="loadStatus"></div>
+<div class="sidebar" id="sidebar">
+  <div class="sb-head">
+    <div class="sb-logo"><span class="sb-logo-dot"></span>SA 쟈쟈</div>
+    <div class="sb-sub">JYAJYA SERVER TOOLS</div>
   </div>
+  <div class="sb-nav">
+    <a href="index.html" class="on">🎲 계산기</a>
+    <a href="pokedex.html">🐾 도감</a>
+  </div>
+  <div class="sb-search">
+    <input type="text" id="petSearch" placeholder="펫 이름 검색..." autocomplete="off" />
+  </div>
+  <div class="pet-section" id="petSection">
+    <div class="pet-sec-title">전체 펫 목록</div>
+    <div id="petList"></div>
+  </div>
+  <div class="sb-footer">
+    <span class="sb-footer-txt" id="loadStatusSb">로딩중...</span>
+    <button class="dark-toggle" onclick="toggleDark()"><span class="toggle-moon">🌙</span><span class="toggle-sun">☀️</span></button>
+  </div>
+</div>
 
-  <div class="calc-grid-layout">
-    <!-- 왼쪽: 펫 선택 -->
-    <div class="card">
+<div class="main" id="main">
+  <div class="main-inner">
+    <div class="page-head">
+      <div class="wind-badge"><span class="wind-badge-dot"></span><span>SA JYAJYA SERVER</span></div>
+      <div class="page-title">쟈쟈 환각 계산기</div>
+      <div class="page-sub">Lv.1 초기치로 환각(8등급) 확률을 계산해보세요</div>
+    </div>
+
+    <div class="card" id="selectedCard">
       <div class="section-title">펫 선택</div>
-      <input type="text" id="petSearch" class="search-input" placeholder="펫 이름 검색..." autocomplete="off" />
-      <div class="pet-suggest" id="petSuggest"></div>
-
-      <div class="selected-pet-box" id="selectedBox">
-        <div class="empty-state"><div class="g">🐾</div>펫을 검색해서 선택해줘</div>
+      <div id="selectedBox">
+        <div class="empty-state"><div class="g">🐾</div>왼쪽 ☰ 메뉴에서 펫을 검색해서 선택해줘</div>
       </div>
     </div>
 
-    <!-- 오른쪽: 스탯 입력 + 결과 -->
     <div class="card">
       <div class="section-title">Lv.1 초기치 입력</div>
       <div id="statInputWrap">
         <div class="empty-state"><div class="g">✏️</div>펫을 먼저 선택해줘</div>
       </div>
     </div>
-  </div>
-</div>
 
-<footer>SA 쟈쟈서버 비공식 팬 도구 · made by 루믹스</footer>
+    <div class="card" id="resultCard" style="display:none;"></div>
+  </div>
+  <footer>SA 쟈쟈서버 비공식 팬 도구 · made by 루믹스</footer>
+</div>
 
 <script>
 const API_URL = "https://sa000001.com/sa2/info/api/pet_data.php";
@@ -209,29 +281,48 @@ function imgTag(code, cls){
 
 let selectedPet = null;
 
-/* ===== 펫 검색 ===== */
-function renderSuggest(q){
-  const box = document.getElementById("petSuggest");
-  if(!q){ box.innerHTML = ""; return; }
-  const hits = PETS.filter(p => normalizedName(p).includes(q)).slice(0, 12);
-  if(!hits.length){ box.innerHTML = '<div style="padding:10px;color:var(--t3);font-size:12px;">검색 결과 없음</div>'; return; }
-  box.innerHTML = hits.map(p => {
+/* ===== 사이드바 토글 ===== */
+const sidebar = document.getElementById("sidebar");
+const toggleBtn = document.getElementById("toggleBtn");
+const mainEl = document.getElementById("main");
+function setSidebar(open){
+  sidebar.classList.toggle("open", open);
+  toggleBtn.classList.toggle("sb-open", open);
+  mainEl.classList.toggle("shifted", open);
+  toggleBtn.textContent = open ? "✕" : "☰";
+  try{ localStorage.setItem('sa2-sb', open ? '1' : '0'); }catch(e){}
+}
+toggleBtn.addEventListener("click", ()=> setSidebar(!sidebar.classList.contains("open")));
+try{
+  const sbSaved = localStorage.getItem('sa2-sb');
+  setSidebar(sbSaved === null ? window.innerWidth > 820 : sbSaved === '1');
+}catch(e){ setSidebar(window.innerWidth > 820); }
+
+/* ===== 펫 목록 ===== */
+function renderPetList(filterQ){
+  const box = document.getElementById("petList");
+  const q = (filterQ||"").trim();
+  const list = q ? PETS.filter(p => normalizedName(p).includes(q)) : PETS;
+  if(!list.length){ box.innerHTML = '<div style="padding:10px;color:var(--t3);font-size:12px;">검색 결과 없음</div>'; return; }
+  box.innerHTML = list.map(p => {
     const idx = PETS.indexOf(p);
-    return `<div class="pet-suggest-item" data-idx="${idx}">${imgTag(p.imageCode)}<div><div class="n">${normalizedName(p)}</div><div class="h">${p.how||""}</div></div></div>`;
+    const isActive = selectedPet && normalizedName(selectedPet) === normalizedName(p);
+    return `<div class="pet-item ${isActive?'active':''}" data-idx="${idx}">${imgTag(p.imageCode)}<span class="pet-item-name">${normalizedName(p)}</span></div>`;
   }).join("");
 }
-document.getElementById("petSearch").addEventListener("input", e=>{ renderSuggest(e.target.value.trim()); });
-document.getElementById("petSuggest").addEventListener("click", e=>{
-  const item = e.target.closest(".pet-suggest-item"); if(!item) return;
+document.getElementById("petSearch").addEventListener("input", e=>{ renderPetList(e.target.value); });
+document.getElementById("petList").addEventListener("click", e=>{
+  const item = e.target.closest(".pet-item"); if(!item) return;
   selectPet(parseInt(item.dataset.idx));
-  document.getElementById("petSuggest").innerHTML = "";
-  document.getElementById("petSearch").value = "";
+  if(window.innerWidth <= 820) setSidebar(false);
 });
 
 function selectPet(idx){
   selectedPet = PETS[idx];
+  renderPetList(document.getElementById("petSearch").value);
   renderSelectedBox();
   renderStatInputs();
+  document.getElementById("resultCard").style.display = "none";
 }
 
 function renderSelectedBox(){
@@ -277,9 +368,6 @@ function renderStatInputs(){
         <div class="stepper"><button data-t="calcDex" data-d="-1">−</button><input type="number" id="calcDex" value=""><button data-t="calcDex" data-d="1">+</button></div></div>
     </div>
     <button class="calc-btn" id="calcRun">🎲 계산하기</button>
-    <div id="calcResult">
-      <div class="result-empty"><div class="g">🔮</div>Lv.1 초기치를 입력하고 계산하기를 눌러주세요.<br>입력값과 가능한 초기치 조합을 비교해 8등급 환각 가능 분포를 계산합니다.</div>
-    </div>
   `;
 
   document.getElementById("calcFill").addEventListener("click", ()=>{
@@ -288,7 +376,6 @@ function renderStatInputs(){
     document.getElementById("calcDef").value = dropDecimalInt(st.init.d);
     document.getElementById("calcDex").value = dropDecimalInt(st.init.s);
   });
-
   document.querySelectorAll(".stepper button").forEach(btn=>{
     btn.addEventListener("click", ()=>{
       const inp = document.getElementById(btn.dataset.t);
@@ -296,12 +383,16 @@ function renderStatInputs(){
       inp.value = cur + parseInt(btn.dataset.d,10);
     });
   });
-
   document.getElementById("calcRun").addEventListener("click", runCalc);
+  ["calcHp","calcAtk","calcDef","calcDex"].forEach(id=>{
+    document.getElementById(id).addEventListener("keydown", e=>{ if(e.key==="Enter") runCalc(); });
+  });
 }
 
-/* ===== 환각 계산기 (원본 브루트포스 알고리즘 그대로 이식) ===== */
+/* ===== 환각 계산기 브루트포스 (실제 서버 계산 방식) ===== */
 const HWANGAK_BASE_POOL = 10;
+const HWANGAK_TOTAL_COMBOS = 178750; // 5^4(성장베이스 조합) x 286(배분치 조합)
+
 function calcInitWithRollBase(r, rh, ra, rd, rs, hb, ab, db, sb){
   const ph = num(r.h0)+num(r.lvup)+num(rh)+num(hb);
   const pa = num(r.a0)+num(r.lvup)+num(ra)+num(ab);
@@ -309,7 +400,7 @@ function calcInitWithRollBase(r, rh, ra, rd, rs, hb, ab, db, sb){
   const ps = num(r.s0)+num(r.lvup)+num(rs)+num(sb);
   return disp(num(r.initPct)*ph/100, num(r.initPct)*pa/100, num(r.initPct)*pd/100, num(r.initPct)*ps/100);
 }
-function gradeLabel(g){ if(g===8) return "8등급 환각"; if(g>=0) return g+"등급"; return String(g)+"등급"; }
+
 function getAllHwangakMatches(r, targetH, targetA, targetD, targetS){
   const matches = [];
   for(let rh=-2; rh<=2; rh++)
@@ -328,51 +419,113 @@ function getAllHwangakMatches(r, targetH, targetA, targetD, targetS){
   return matches;
 }
 
+function formatPct(n){
+  if(!isFinite(n)) return "0%";
+  if(n === 0) return "0%";
+  if(n < 0.0001) return "< 0.0001%";
+  return n.toFixed(4) + "%";
+}
+
+function getProbMsg(p){
+  const n = parseFloat(p);
+  if(n === 0) return {lv:1, anim:'anim-cry', emoji:'😭', text:'이 초기치로는 환각 확률이 없어요..ㅠ'};
+  if(n < 1) return {lv:1, anim:'anim-sprout', emoji:'🌱', text:'도전하는 자가 환각을 가진다!'};
+  if(n < 5) return {lv:2, anim:'anim-swing', emoji:'🎰', text:'슬롯머신 돌리는 기분이지만 당신이라면 뽑을 수 있어요'};
+  if(n < 10) return {lv:3, anim:'anim-fire', emoji:'🍀', text:'충분히 가능성 있어요! 도~전!'};
+  if(n < 30) return {lv:4, anim:'anim-fire', emoji:'🔥', text:'매우 좋은 확률입니다! 미리 축하해요!'};
+  if(n < 50) return {lv:5, anim:'anim-float', emoji:'💎', text:'큰 거 왔다! 이 정도면 떴다고 봐야죠!'};
+  if(n < 80) return {lv:6, anim:'anim-star', emoji:'🌟', text:'황금 손 맞으시죠?'};
+  return {lv:7, anim:'', emoji:'👑', text:'당신은 선택받은 자입니다'};
+}
+
 function runCalc(){
   const p = selectedPet;
   const hp = parseInt(document.getElementById("calcHp").value, 10);
   const atk = parseInt(document.getElementById("calcAtk").value, 10);
   const def = parseInt(document.getElementById("calcDef").value, 10);
   const dex = parseInt(document.getElementById("calcDex").value, 10);
-  const box = document.getElementById("calcResult");
+  const rc = document.getElementById("resultCard");
 
   if([hp,atk,def,dex].some(v=>!isFinite(v))){
-    box.innerHTML = '<div class="result-empty"><div class="g">⚠️</div>내구/공격/방어/순발 4칸 모두 정수로 입력해줘.</div>';
+    rc.innerHTML = '<div class="result-err">내구/공격/방어/순발 4칸 모두 정수로 입력해줘.</div>';
+    rc.style.display = "block";
     return;
   }
-  box.innerHTML = '<div class="result-empty"><div class="g">⏳</div>계산 중...</div>';
+  rc.innerHTML = '<div class="empty-state"><div class="g">⏳</div>계산 중...</div>';
+  rc.style.display = "block";
 
   setTimeout(()=>{
     const matches = getAllHwangakMatches(p, hp, atk, def, dex);
-    if(!matches.length){
-      box.innerHTML = '<div class="result-empty"><div class="g">❌</div>일치하는 조합이 없어. 입력한 초기치를 다시 확인해줘.</div>';
+    const totalCases = matches.length;
+    const totalPossible = HWANGAK_TOTAL_COMBOS;
+
+    if(totalCases === 0){
+      rc.innerHTML = '<div class="result-err">일치하는 경우가 없습니다.<br>다른 스탯 값으로 시도해 주세요</div>';
       return;
     }
-    let best = -999;
-    matches.forEach(m=>{ if(m.grade>best) best=m.grade; });
-    const picked = matches.filter(m=>m.grade===best).sort((x,y)=>(x.fh+x.fa+x.fd+x.fs)-(y.fh+y.fa+y.fd+y.fs));
 
-    let msg;
-    if(best>=8) msg="🎉 환각 가능성이 포함된 초기치입니다!";
-    else if(best>=6) msg="상위권 초기치입니다.";
-    else if(best>=3) msg="준수한 초기치입니다.";
-    else if(best>=0) msg="보통권 초기치입니다.";
-    else msg="낮은 초기치로 추정됩니다.";
+    const gradeDist = {};
+    let hallCases = 0;
+    matches.forEach(m=>{
+      gradeDist[m.grade] = (gradeDist[m.grade]||0) + 1;
+      if(m.grade === 8) hallCases++;
+    });
 
-    let html = `<div style="text-align:center;"><span class="grade-badge ${best>=8?'hall':''}">${gradeLabel(best)}</span></div>`;
-    html += `<div class="result-msg" style="text-align:center;">${msg} (일치 조합 총 ${matches.length}건)</div>`;
-    html += `<div class="result-note">표기: <b>[성장베이스](배분치)</b> · 배분치(깡스탯)는 4개 스탯에 걸쳐 총 ${HWANGAK_BASE_POOL}포인트가 무작위로 나뉘어 Lv.1 초기치에만 더해지며, 성장률에는 반영되지 않습니다.</div>`;
+    const prob = Math.min((hallCases/totalCases)*100, 99.99).toFixed(4);
+    const appear = formatPct((totalCases/totalPossible)*100);
+    const canMax = hallCases > 0;
+    const expect = canMax ? (1/(prob/100)).toFixed(2) : null;
 
-    const limit = Math.min(5, picked.length);
-    for(let j=0;j<limit;j++){
-      const m = picked[j];
-      html += `<div class="dist-row"><div class="dist-label ${best===8?'hall':''}">${gradeLabel(best)}</div>
-        <div class="dist-meta">내 [${m.h}](${m.fh}) / 공 [${m.a}](${m.fa}) / 방 [${m.d}](${m.fd}) / 순 [${m.s}](${m.fs})</div></div>`;
-    }
-    if(picked.length > limit){
-      html += `<div class="result-note">동일 최고등급 조합 ${picked.length - limit}건이 더 있습니다.</div>`;
-    }
-    box.innerHTML = html;
+    const topGrade = Object.keys(gradeDist).map(Number).sort((a,b)=>b-a)[0];
+    const isGold = topGrade === 8 && canMax;
+    const maxGradeCnt = Math.max(...Object.values(gradeDist));
+
+    const gradeRows = Object.keys(gradeDist).map(Number).sort((a,b)=>b-a).filter(g=>gradeDist[g]>0).map(g=>{
+      const cnt = gradeDist[g];
+      const pct = (cnt/totalCases*100).toFixed(1);
+      const barW = (cnt/maxGradeCnt*100).toFixed(1);
+      const isHall = g === 8;
+      const barClass = isHall ? 'grade-bar-8' : g > 0 ? 'grade-bar-pos' : g === 0 ? 'grade-bar-zero' : 'grade-bar-neg';
+      return `<div class="grade-row">
+        <span class="${isHall?'grade-lbl-hall':'grade-lbl'}">${g}등급</span>
+        <div class="grade-bar-wrap"><div class="grade-bar ${barClass}" style="width:${barW}%"></div></div>
+        <div class="grade-meta"><span class="grade-cnt">${cnt}건</span><span class="grade-pct">${pct}%</span></div>
+      </div>`;
+    }).join("");
+
+    const msg = getProbMsg(canMax ? prob : '0');
+
+    rc.innerHTML = `
+      <div class="result-strip"></div>
+      <div class="result-inner">
+        <div class="result-left">
+          <div style="margin-bottom:6px;"><span class="res-badge">✦ 8등급 환각 확률</span></div>
+          <div style="display:flex;align-items:flex-end;gap:24px;margin:8px 0 12px;">
+            <div class="res-prob-big ${isGold?'res-prob-gold':''}">${prob}<span class="res-prob-unit">%</span></div>
+            <div style="padding-bottom:14px;line-height:1.4;">
+              <div style="font-size:11px;color:var(--t2);font-weight:700;font-family:'Nunito',sans-serif;letter-spacing:.3px;text-align:center;">최고 매칭</div>
+              <div style="display:block;margin-top:3px;padding:3px 9px;text-align:center;border-radius:8px;background:${isGold?'linear-gradient(135deg,#fff5cc,#ffe988)':'var(--s2)'};border:1.5px solid ${isGold?'#f5c842':'var(--border2)'};font-size:15px;font-weight:900;color:${isGold?'#c87800':'var(--a1)'};font-family:'Nunito',sans-serif;">${topGrade}등급</div>
+            </div>
+          </div>
+          <div class="res-sub-row"><span class="res-sub-label">등장 확률</span><span class="res-sub-val">${appear}</span></div>
+          <div class="res-sub-row"><span class="res-sub-label">기대 시도 횟수</span><span class="res-sub-val">${canMax?"약 "+expect+"회":"환각 불가"}</span></div>
+          <div style="margin-top:6px;border-top:1px solid var(--border);padding-top:4px;"></div>
+          <div class="res-sub-row"><span class="res-sub-label">매칭</span><span class="res-sub-val">${totalCases}</span></div>
+          <div class="res-sub-row"><span class="res-sub-label">환각</span><span class="res-sub-val">${hallCases}</span></div>
+          <div class="res-msg-wrap msg-lv${msg.lv} ${msg.anim}">
+            <span class="res-msg-emoji">${msg.emoji}</span><span class="res-msg-text">${msg.text}</span>
+          </div>
+        </div>
+        <div class="result-right">
+          <div class="grade-dist">
+            <div class="grade-dist-title">등급 분포</div>
+            <div class="grade-dist-total">총 ${totalCases}건 / ${totalPossible.toLocaleString()}건</div>
+            ${gradeRows}
+          </div>
+        </div>
+        <div class="result-note">표기: 성장베이스(-2~+2, 4스탯 합산 = 등급) × 배분치(4스탯에 총 10포인트 무작위 배분, Lv.1 초기치에만 영향). 8등급(전스탯 +2)이 곧 환각입니다.</div>
+      </div>
+    `;
   }, 30);
 }
 
@@ -385,9 +538,12 @@ function toggleDark(){
 try{ const saved=localStorage.getItem('sa2-theme'); if(saved) document.documentElement.setAttribute('data-theme', saved); }catch(e){}
 
 /* ===== 데이터 로딩 (local json → 라이브 fetch → 내장샘플 순서, 조용히 폴백) ===== */
-function setStatus(msg){ document.getElementById("loadStatus").textContent = msg; }
+function setStatus(msg){
+  document.getElementById("loadStatusSb").textContent = msg;
+}
 function applyData(rows){
   PETS = rows.filter(p => String(p.how||"").replace(/\s+/g,"").trim() !== "미출시");
+  renderPetList("");
   const url = new URL(window.location.href);
   const wantName = url.searchParams.get("pet");
   if(wantName){
@@ -405,24 +561,22 @@ async function fetchJson(url){
 }
 async function loadLive(){
   setStatus("데이터 불러오는 중...");
-  // 1순위: 같은 레포에 있는 pet_data.json (깃허브 액션이 3시간마다 자동 갱신, CORS 문제 없음)
   try{
     const rows = await fetchJson("./pet_data.json");
     applyData(rows);
-    setStatus(`데이터 로딩 완료 · 총 ${PETS.length}종 (레포 동기화본)`);
+    setStatus(`${PETS.length}종 · 레포 동기화본`);
     return;
   }catch(e){}
-  // 2순위: sa000001.com 직접 fetch (CORS 허용되는 환경이면 성공)
   try{
     const rows = await fetchJson(API_URL);
     applyData(rows);
-    setStatus(`데이터 로딩 완료 · 총 ${PETS.length}종 (실시간 직접연동)`);
+    setStatus(`${PETS.length}종 · 실시간 직접연동`);
     return;
   }catch(e){}
-  // 3순위: 내장 샘플
   applyData(PETS);
-  setStatus(`내장 샘플 ${PETS.length}종으로 표시 중`);
+  setStatus(`${PETS.length}종 · 내장 샘플`);
 }
+renderPetList("");
 loadLive();
 </script>
 </body>
