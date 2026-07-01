@@ -370,6 +370,15 @@ function renderSuggest(q){
 }
 document.getElementById("petSearch").addEventListener("input", e=>{ renderSuggest(e.target.value); });
 document.getElementById("petSearch").addEventListener("focus", e=>{ if(e.target.value.trim()) renderSuggest(e.target.value); });
+document.getElementById("petSearch").addEventListener("keydown", e=>{
+  if(e.key !== "Enter") return;
+  const first = document.querySelector("#petSuggest .pet-suggest-item");
+  if(first){
+    selectPet(parseInt(first.dataset.idx));
+    document.getElementById("petSuggest").classList.remove("open");
+    document.getElementById("petSearch").value = "";
+  }
+});
 document.addEventListener("click", e=>{
   if(!e.target.closest("#searchCard")) document.getElementById("petSuggest").classList.remove("open");
 });
