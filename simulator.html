@@ -480,17 +480,17 @@ body {
   </div>
 
 
-  <div class="sim-display" id="sim-display" style="display:none;">
+  <div class="sim-display" id="sim-display">
     <div class="sim-status-bar">
       <div class="sim-status-left">
         <div class="sim-status-label">CURRENT PET</div>
         <div class="sim-status-value" id="sim-pet-name">-</div>
-        <div class="sim-status-sub" id="sim-pet-meta">-</div>
+        <div class="sim-status-sub" id="sim-pet-meta">펫을 선택해주세요</div>
       </div>
       <div class="sim-status-right">
         <div class="sim-status-label">RESETS USED</div>
         <div class="sim-status-counter" id="sim-reset-counter">0/5</div>
-        <div class="sim-status-sub" id="sim-life-status">초기화 가능</div>
+        <div class="sim-status-sub" id="sim-life-status">-</div>
       </div>
     </div>
 
@@ -499,16 +499,16 @@ body {
       <div class="device-screen">
         <div class="tamago-area">
           <div class="tamago-bubble" id="tamago-bubble">
-            <span id="tamago-bubble-text">안녕! 잘 부탁해 🐾</span>
+            <span id="tamago-bubble-text">먼저 펫을 골라줘! 👀</span>
           </div>
           <div class="tamago-pet" id="tamago-pet">
-            <img id="tamago-img" alt="pet" />
-            <span class="tamago-fallback" id="tamago-fallback" style="display:none;">🐾</span>
+            <img id="tamago-img" alt="pet" style="display:none;" />
+            <span class="tamago-fallback" id="tamago-fallback">🐾</span>
           </div>
         </div>
 
         <div class="sim-rolling" id="sim-rolling">
-          <span style="color:#6b7d70;font-size:10px;font-weight:700;">시작을 기다리는 중...</span>
+          <span style="color:#4c6a55;font-size:10.5px;font-weight:800;">펫을 선택해주세요</span>
         </div>
       </div>
 
@@ -856,10 +856,20 @@ function selectPet(name) {
 
   if (wasSimming) {
     simState = null; simRunning = false;
-    $('sim-display').style.display = 'none';
     $('result-area').innerHTML = '';
     $('btn-go').style.display = 'block';
+    $('sim-actions').style.display = 'none';
+    $('sim-restart-row').style.display = 'none';
     toast(`✨ ${name}으로 변경! 시작 버튼을 눌러주세요`);
+  }
+
+  if (!simState || simState.finished) {
+    setTamagoImage(name);
+    $('sim-pet-name').textContent = name;
+    $('sim-pet-meta').textContent = '준비 완료! DECIDE로 시작해봐';
+    $('sim-life-status').textContent = '-';
+    setPetBubble(`${name}, 잡으러 가볼까? ▶`, 'normal');
+    $('sim-rolling').innerHTML = `<span style="color:#4c6a55;font-size:10.5px;font-weight:800;">아래에서 시작 버튼을 눌러줘</span>`;
   }
 }
 
