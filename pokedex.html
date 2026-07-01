@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>쟈쟈서버 페트도감</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#faf9ff; --bg2:#f3f0ff; --white:#ffffff;
+  --s1:#f8f7ff; --s2:#f0eeff;
+  --border:#e8e3ff; --border2:#d4cbff;
+  --a1:#9b87f5; --a2:#f587b8; --a3:#87d4f5; --a4:#f5c887; --a5:#87f5c0;
+  --t1:#3d3560; --t2:#7b72a8; --t3:#b0a8d4; --t4:#d4cff0;
+  --ok:#6dd5a0; --err:#f57878;
+  --shadow:0 4px 24px rgba(155,135,245,0.12);
+  --shadow2:0 8px 32px rgba(155,135,245,0.18);
+}
+[data-theme="dark"] {
+  --bg:#0f0f1a; --bg2:#1a1a2e; --white:#252540;
+  --s1:#2a2a45; --s2:#353555;
+  --border:#404060; --border2:#505080;
+  --t1:#e8e8f0; --t2:#b0b0c8; --t3:#8080a0; --t4:#606080;
+  --shadow:0 4px 24px rgba(0,0,0,0.4);
+  --shadow2:0 8px 32px rgba(0,0,0,0.5);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--t1);min-height:100vh;
+  background-image:radial-gradient(circle at 15% 20%, rgba(155,135,245,0.08) 0%, transparent 50%),
+    radial-gradient(circle at 85% 80%, rgba(245,135,184,0.07) 0%, transparent 50%);}
+
+.dark-toggle{position:fixed;top:14px;right:14px;width:40px;height:40px;border-radius:50%;
+  border:2px solid var(--border2);background:var(--white);cursor:pointer;font-size:1.2rem;
+  display:flex;align-items:center;justify-content:center;transition:all .3s;z-index:1000;box-shadow:var(--shadow);}
+.dark-toggle:hover{transform:scale(1.1) rotate(-8deg);border-color:var(--a1);}
+[data-theme="dark"] .toggle-moon{display:inline;} [data-theme="dark"] .toggle-sun{display:none !important;}
+[data-theme="light"] .toggle-moon{display:none !important;} [data-theme="light"] .toggle-sun{display:inline;}
+
+.nav-pill{position:fixed;top:14px;left:14px;z-index:1000;display:flex;gap:6px;}
+.nav-pill a{text-decoration:none;background:var(--white);border:1.5px solid var(--border2);
+  border-radius:20px;padding:8px 15px;font-size:12.5px;font-weight:800;color:var(--t2);box-shadow:var(--shadow);}
+.nav-pill a.on{background:linear-gradient(135deg,var(--a1),var(--a2));color:#fff;border-color:transparent;}
+
+.main-inner{max-width:1100px;margin:0 auto;padding:70px 20px 80px;}
+
+.page-head{text-align:center;padding:6px 0 26px;}
+.wind-badge{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#f0eeff,#ffeef6);
+  border:1.5px solid var(--border2);border-radius:20px;padding:6px 14px;margin-bottom:12px;box-shadow:0 4px 12px rgba(155,135,245,.12);}
+.wind-badge-dot{width:7px;height:7px;background:var(--a2);border-radius:50%;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(2)}}
+.wind-badge span{font-size:11px;font-weight:800;color:var(--t2);font-family:'Nunito',sans-serif;letter-spacing:.5px;}
+.page-title{font-family:'Nunito',sans-serif;font-size:38px;font-weight:900;letter-spacing:-1px;
+  background:linear-gradient(135deg,var(--a1) 0%,var(--a2) 60%,var(--a4) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  line-height:1.15;margin-bottom:6px;filter:drop-shadow(0 2px 4px rgba(155,135,245,.15));}
+.page-sub{font-size:12px;color:var(--t3);font-family:'Nunito',sans-serif;font-weight:700;letter-spacing:1px;}
+#loadStatus{font-size:11.5px;color:var(--t3);margin-top:10px;}
+
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center;margin-bottom:14px;}
+.search-input{padding:10px 16px;border:1.5px solid var(--border);border-radius:20px;font-family:inherit;
+  font-size:13px;background:var(--white);color:var(--t1);outline:none;width:220px;}
+.search-input:focus{border-color:var(--a1);}
+select{background:var(--white);border:1.5px solid var(--border);color:var(--t1);padding:9px 12px;
+  border-radius:20px;font-size:12.5px;outline:none;font-family:inherit;}
+.seg{display:flex;background:var(--white);border:1.5px solid var(--border);border-radius:20px;overflow:hidden;}
+.seg button{background:transparent;border:none;color:var(--t3);padding:9px 13px;font-size:12px;
+  cursor:pointer;font-family:inherit;font-weight:700;}
+.seg button.active{background:linear-gradient(135deg,var(--a1),var(--a2));color:#fff;}
+
+.chiprow{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-bottom:24px;}
+.chip{background:var(--white);border:1.5px solid var(--border);color:var(--t3);padding:6px 13px;
+  border-radius:20px;font-size:11.5px;cursor:pointer;font-weight:700;}
+.chip.is-on{background:linear-gradient(135deg,var(--a1),var(--a2));border-color:transparent;color:#fff;}
+
+.stats-row{display:flex;gap:20px;justify-content:center;margin-bottom:20px;flex-wrap:wrap;}
+.stat-chip{font-size:11.5px;color:var(--t3);font-family:'Nunito',sans-serif;font-weight:700;}
+.stat-chip b{color:var(--a1);font-size:15px;font-weight:900;margin-right:3px;}
+
+#grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:12px;}
+.pet-info-card{background:var(--white);border:3px solid #fff;outline:2px solid var(--border);
+  border-radius:22px;padding:14px;cursor:pointer;transition:box-shadow .15s,transform .15s;
+  box-shadow:0 6px 20px rgba(155,135,245,0.10),inset 0 -3px 0 rgba(155,135,245,0.05);}
+.pet-info-card:hover{box-shadow:0 8px 26px rgba(155,135,245,.22);transform:translateY(-3px);}
+.pic-img-wrap{width:100%;aspect-ratio:1;border-radius:16px;overflow:hidden;background:var(--s1);
+  display:flex;align-items:center;justify-content:center;margin-bottom:9px;border:1.5px solid var(--border);}
+.pic-img-wrap img{width:78%;height:78%;object-fit:contain;image-rendering:pixelated;}
+.pic-fallback{font-size:26px;color:var(--t4);}
+.pic-name{font-size:13.5px;font-weight:800;color:var(--t1);margin-bottom:2px;}
+.pic-how{font-size:10px;color:var(--t3);line-height:1.3;height:2.4em;overflow:hidden;margin-bottom:7px;}
+.pic-attr-row{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:7px;}
+.pic-attr-chip{font-size:9.5px;font-weight:800;padding:2px 7px;border-radius:8px;color:#fff;}
+.pic-mini{display:flex;justify-content:space-between;font-size:10px;color:var(--t3);font-family:'Nunito',sans-serif;}
+.pic-mini b{color:var(--a1);}
+.pic-badge-row{display:flex;gap:4px;margin-top:7px;}
+.pic-badge{font-size:9px;padding:2px 7px;border-radius:20px;font-weight:800;}
+.pb-mount{background:#e3fbef;color:#3aa876;} .pb-nomount{background:var(--s1);color:var(--t4);}
+
+#empty{text-align:center;padding:60px 20px;color:var(--t3);display:none;}
+#empty .glyph{font-size:34px;margin-bottom:10px;opacity:.4;}
+#loadmore{display:block;margin:24px auto 0;background:var(--white);border:1.5px solid var(--a1);
+  color:var(--a1);padding:11px 28px;border-radius:20px;font-size:13px;font-weight:800;cursor:pointer;
+  font-family:'Nunito',sans-serif;}
+#loadmore:hover{background:linear-gradient(135deg,var(--a1),var(--a2));color:#fff;border-color:transparent;}
+
+/* ===== 모달 (계산기와 공유하는 구조) ===== */
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+#pet-modal{position:fixed;inset:0;background:rgba(61,53,96,0.45);backdrop-filter:blur(4px);
+  display:none;align-items:center;justify-content:center;z-index:2000;padding:20px;}
+#pet-modal.open{display:flex;}
+.modal-card{background:var(--white);border-radius:24px;box-shadow:0 20px 60px rgba(155,135,245,0.25);
+  width:100%;max-width:480px;max-height:90vh;overflow-y:auto;animation:slideUp .25s ease;position:relative;}
+.modal-card::-webkit-scrollbar{width:4px;} .modal-card::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px;}
+.modal-close{position:absolute;top:14px;right:14px;width:32px;height:32px;border-radius:50%;
+  background:var(--s2);border:none;cursor:pointer;font-size:14px;color:var(--t2);transition:all .15s;
+  display:flex;align-items:center;justify-content:center;z-index:2;}
+.modal-close:hover{background:var(--err);color:#fff;}
+.modal-hero{background:linear-gradient(135deg,var(--s1),var(--s2));border-radius:24px 24px 0 0;
+  padding:28px 24px 20px;display:flex;align-items:center;gap:20px;border-bottom:1.5px solid var(--border);}
+.modal-img-box{width:90px;height:90px;flex-shrink:0;background:var(--white);border:2px solid var(--border2);
+  border-radius:18px;display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 16px rgba(155,135,245,0.15);overflow:hidden;}
+.modal-img-box img{width:80px;height:80px;object-fit:contain;image-rendering:pixelated;}
+.modal-hero-info{flex:1;min-width:0;}
+.modal-name{font-size:22px;font-weight:900;font-family:'Nunito',sans-serif;color:var(--t1);margin-bottom:6px;}
+.modal-badges{display:flex;gap:5px;flex-wrap:wrap;}
+.modal-badge{font-size:10px;font-weight:800;padding:3px 9px;border-radius:20px;background:var(--white);
+  border:1.5px solid var(--border2);color:var(--t2);}
+.modal-body{padding:20px 24px 24px;}
+.modal-section{margin-bottom:16px;}
+.modal-section-title{font-size:9px;letter-spacing:2px;color:var(--t3);text-transform:uppercase;
+  font-family:'Nunito',sans-serif;font-weight:800;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.modal-section-title::before{content:'';display:block;width:3px;height:12px;
+  background:linear-gradient(135deg,var(--a1),var(--a2));border-radius:2px;}
+.modal-obtain{font-size:13px;color:var(--t2);line-height:1.6;background:var(--s1);
+  border:1.5px solid var(--border);border-radius:10px;padding:10px 14px;}
+.modal-attr-row{display:flex;gap:6px;flex-wrap:wrap;}
+.modal-attr-chip{display:flex;align-items:center;gap:4px;padding:5px 10px;border-radius:8px;
+  font-size:12px;font-weight:700;color:#fff;}
+.modal-attr-chip .chip-num{font-family:'Nunito',sans-serif;font-weight:900;font-size:14px;}
+.modal-stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.modal-stat-box{background:var(--s1);border:1.5px solid var(--border);border-radius:12px;
+  padding:10px 14px;display:flex;flex-direction:column;gap:2px;}
+.modal-stat-label{font-size:9px;letter-spacing:1px;color:var(--t3);font-family:'Nunito',sans-serif;
+  font-weight:700;text-transform:uppercase;}
+.modal-stat-val{font-size:18px;font-weight:900;font-family:'Nunito',sans-serif;color:var(--t1);}
+.modal-stat-sg{font-size:11px;color:var(--t3);font-family:'Nunito',sans-serif;}
+.stat-atk .modal-stat-val{color:var(--a2);} .stat-def .modal-stat-val{color:var(--a1);}
+.stat-agi .modal-stat-val{color:#5acba8;} .stat-hp .modal-stat-val{color:#d4943a;}
+.modal-total{margin-top:8px;padding:10px 14px;background:linear-gradient(135deg,var(--s2),#ffeef6);
+  border-radius:10px;border:1.5px solid var(--border2);display:flex;align-items:center;justify-content:space-between;}
+.modal-total .l{font-size:10px;font-weight:800;color:var(--t2);}
+.modal-total .v{font-size:18px;font-weight:900;font-family:'Nunito',sans-serif;color:var(--a1);}
+.modal-calc-link{display:block;text-align:center;margin-top:14px;background:linear-gradient(135deg,var(--a1),var(--a2));
+  color:#fff;padding:12px;border-radius:12px;font-weight:800;font-size:14px;text-decoration:none;}
+.modal-calc-link:hover{filter:brightness(1.07);}
+
+footer{text-align:center;padding:30px;color:var(--t3);font-size:11px;font-family:'Nunito',sans-serif;}
+
+@media(max-width:640px){
+  .page-title{font-size:28px;}
+  #grid{grid-template-columns:repeat(auto-fill,minmax(130px,1fr));}
+  .nav-pill{position:static;justify-content:center;margin-bottom:10px;}
+  .main-inner{padding-top:16px;}
+}
+</style>
+</head>
+<body>
+
+<div class="nav-pill">
+  <a href="index.html">🎲 계산기</a>
+  <a href="pokedex.html" class="on">🐾 도감</a>
+</div>
+<button class="dark-toggle" onclick="toggleDark()"><span class="toggle-moon">🌙</span><span class="toggle-sun">☀️</span></button>
+
+<div class="main-inner">
+  <div class="page-head">
+    <div class="wind-badge"><span class="wind-badge-dot"></span><span>SA JYAJYA SERVER</span></div>
+    <div class="page-title">쟈쟈서버 페트도감</div>
+    <div class="page-sub">sa000001.com 실시간 연동 · 초기치 &amp; 성장률 자동계산</div>
+    <div id="loadStatus"></div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-chip"><b id="statTotal">-</b>전체 페트</div>
+    <div class="stat-chip"><b id="statShown">-</b>표시중</div>
+    <div class="stat-chip"><b id="statMount">-</b>탑승가능</div>
+  </div>
+
+  <div class="controls">
+    <input type="text" id="search" class="search-input" placeholder="펫 이름 / 획득처 검색..." />
+    <div class="seg" id="attrSeg">
+      <button data-v="all" class="active">전체</button>
+      <button data-v="earth">토</button>
+      <button data-v="water">수</button>
+      <button data-v="fire">화</button>
+      <button data-v="wind">풍</button>
+    </div>
+    <select id="sortSel">
+      <option value="default">기본정렬</option>
+      <option value="atk">공성장 높은순</option>
+      <option value="def">방성장 높은순</option>
+      <option value="dex">순성장 높은순</option>
+      <option value="hp">피성장 높은순</option>
+      <option value="name">이름순</option>
+    </select>
+  </div>
+
+  <div class="chiprow" id="howFilter">
+    <span class="chip is-on" data-v="ALL">전체</span>
+    <span class="chip" data-v="필드페트">필드</span>
+    <span class="chip" data-v="코인페트">코인페트</span>
+    <span class="chip" data-v="퀘스트페트">퀘스트</span>
+    <span class="chip" data-v="레이드페트">레이드</span>
+    <span class="chip" data-v="복권페트">복권</span>
+    <span class="chip" data-v="돈펫">돈펫</span>
+    <span class="chip" data-v="탑승가능">탑승가능</span>
+    <span class="chip" data-v="히든페트">히든</span>
+    <span class="chip" data-v="구펫">구펫</span>
+    <span class="chip" data-v="신펫">신펫</span>
+    <span class="chip" data-v="골드볼라">골드볼라</span>
+    <span class="chip" data-v="기타">기타</span>
+  </div>
+
+  <div id="grid"></div>
+  <div id="empty"><div class="glyph">◇</div>검색 결과가 없습니다.</div>
+  <button id="loadmore">더 보기</button>
+</div>
+
+<footer>SA 쟈쟈서버 비공식 팬 도구 · made by 루믹스</footer>
+
+<div id="pet-modal">
+  <div class="modal-card">
+    <button class="modal-close" id="modalClose">✕</button>
+    <div class="modal-hero">
+      <div class="modal-img-box" id="modalImgBox"></div>
+      <div class="modal-hero-info">
+        <div class="modal-name" id="modalName"></div>
+        <div class="modal-badges" id="modalBadges"></div>
+      </div>
+    </div>
+    <div class="modal-body">
+      <div class="modal-section">
+        <div class="modal-section-title">속성</div>
+        <div class="modal-attr-row" id="modalAttrs"></div>
+      </div>
+      <div class="modal-section">
+        <div class="modal-section-title">획득 방법</div>
+        <div class="modal-obtain" id="modalObtain"></div>
+      </div>
+      <div class="modal-section">
+        <div class="modal-section-title">성장률 <span style="font-size:10px;color:var(--t3);font-weight:400;">S급 기준</span></div>
+        <div class="modal-stat-grid">
+          <div class="modal-stat-box stat-atk"><span class="modal-stat-label">ATK 공격</span><span class="modal-stat-val" id="mgAtk">—</span></div>
+          <div class="modal-stat-box stat-def"><span class="modal-stat-label">DEF 방어</span><span class="modal-stat-val" id="mgDef">—</span></div>
+          <div class="modal-stat-box stat-agi"><span class="modal-stat-label">AGI 순발</span><span class="modal-stat-val" id="mgAgi">—</span></div>
+          <div class="modal-stat-box stat-hp"><span class="modal-stat-label">HP 내구</span><span class="modal-stat-val" id="mgHp">—</span></div>
+        </div>
+        <div class="modal-total"><span class="l">S급 총성장률</span><span class="v" id="mgTotal">—</span></div>
+      </div>
+      <div class="modal-section">
+        <div class="modal-section-title">초기치 <span style="font-size:10px;color:var(--t3);font-weight:400;">S급 기준 Lv.1</span></div>
+        <div class="modal-stat-grid">
+          <div class="modal-stat-box stat-atk"><span class="modal-stat-label">ATK 공격</span><span class="modal-stat-val" id="miAtk">—</span></div>
+          <div class="modal-stat-box stat-def"><span class="modal-stat-label">DEF 방어</span><span class="modal-stat-val" id="miDef">—</span></div>
+          <div class="modal-stat-box stat-agi"><span class="modal-stat-label">AGI 순발</span><span class="modal-stat-val" id="miAgi">—</span></div>
+          <div class="modal-stat-box stat-hp"><span class="modal-stat-label">HP 내구</span><span class="modal-stat-val" id="miHp">—</span></div>
+        </div>
+      </div>
+      <a class="modal-calc-link" id="modalCalcLink" href="#">🎲 이 펫으로 환각 계산기 열기</a>
+    </div>
+  </div>
+</div>
+
+<script>
+const API_URL = "https://sa000001.com/sa2/info/api/pet_data.php";
+const SEED = [{"name": "﻿우리", "how": "마리너스 마을 앞마당", "mount": "가능", "id": 1, "initPct": 10, "lvup": 4.5, "h0": 20, "a0": 14, "d0": 19, "s0": 25, "earth": 80, "water": 20, "fire": 0, "wind": 0, "rarity": "0", "imageCode": "100250"}, {"name": "두리", "how": "성인식의 동굴 전역", "mount": "가능", "id": 2, "initPct": 20, "lvup": 4.5, "h0": 22, "a0": 28, "d0": 11, "s0": 26, "earth": 0, "water": 40, "fire": 60, "wind": 0, "rarity": "0", "imageCode": "100251"}, {"name": "얼룩우리", "how": "사이너스 (66，592)", "mount": "가능", "id": 3, "initPct": 15, "lvup": 4.5, "h0": 22, "a0": 19, "d0": 21, "s0": 25, "earth": 100, "water": 0, "fire": 0, "wind": 0, "rarity": "0", "imageCode": "100252"}, {"name": "불그리", "how": "B코스 보상페트", "mount": "불가", "id": 4, "initPct": 10, "lvup": 4.5, "h0": 24, "a0": 31, "d0": 12, "s0": 31, "earth": 0, "water": 0, "fire": 70, "wind": 30, "rarity": "0", "imageCode": "100253"}, {"name": "실버우리", "how": "복권 1등 페트(카루타나 마을)", "mount": "가능", "id": 5, "initPct": 20, "lvup": 4.5, "h0": 26, "a0": 29, "d0": 23, "s0": 27, "earth": 50, "water": 0, "fire": 0, "wind": 50, "rarity": "2", "imageCode": "100388"}, {"name": "환생얼룩우리", "how": "1환 보상 페트", "mount": "불가", "id": 6, "initPct": 25, "lvup": 4.5, "h0": 29, "a0": 27, "d0": 31, "s0": 20, "earth": 50, "water": 0, "fire": 0, "wind": 50, "rarity": "2", "imageCode": "100252"}, {"name": "부비", "how": "사이너스 (601，358)", "mount": "가능", "id": 11, "initPct": 15, "lvup": 4.5, "h0": 45, "a0": 30, "d0": 20, "s0": 12, "earth": 80, "water": 20, "fire": 0, "wind": 0, "rarity": "0", "imageCode": "100254"}, {"name": "골드부비", "how": "퀴즈도장 (카루타나)", "mount": "가능", "id": 12, "initPct": 25, "lvup": 4.5, "h0": 42, "a0": 35, "d0": 16, "s0": 14, "earth": 0, "water": 0, "fire": 30, "wind": 70, "rarity": "1", "imageCode": "100255"}, {"name": "부이", "how": "사이너스 (633，344)", "mount": "가능", "id": 13, "initPct": 22, "lvup": 4.5, "h0": 48, "a0": 31, "d0": 18, "s0": 12, "earth": 60, "water": 40, "fire": 0, "wind": 0, "rarity": "0", "imageCode": "100256"}, {"name": "부이비", "how": "쟈루 (389，188)", "mount": "가능", "id": 14, "initPct": 16, "lvup": 4.5, "h0": 44, "a0": 36, "d0": 16, "s0": 12, "earth": 0, "water": 40, "fire": 60, "wind": 0, "rarity": "0", "imageCode": "100257"}, {"name": "얼룩부이비", "how": "퀴즈도장 (마리너스)", "mount": "불가", "id": 15, "initPct": 23, "lvup": 4.5, "h0": 42, "a0": 32, "d0": 22, "s0": 12, "earth": 100, "water": 0, "fire": 0, "wind": 0, "rarity": "1", "imageCode": "100258"}, {"name": "꼬미", "how": "라토토의 복도 (140，123)", "mount": "불가", "id": 21, "initPct": 22, "lvup": 4.5, "h0": 22, "a0": 25, "d0": 12, "s0": 30, "earth": 0, "water": 0, "fire": 60, "wind": 40, "rarity": "0", "imageCode": "100259"}, {"name": "꼬비", "how": "라토토의 복도 (152，46)", "mount": "불가", "id": 22, "initPct": 20, "lvup": 4.5, "h0": 21, "a0": 23, "d0": 15, "s0": 30, "earth": 50, "water": 0, "fire": 0, "wind": 50, "rarity": "0", "imageCode": "100260"}, {"name": "꼬비오", "how": "라토토의 동굴 3층  (78，41)｜C코스 보상페트", "mount": "불가", "id": 23, "initPct": 18, "lvup": 4.5, "h0": 22, "a0": 26, "d0": 13, "s0": 32, "earth": 0, "water": 0, "fire": 0, "wind": 100, "rarity": "0", "imageCode": "100261"}, {"name": "꼬꼬비", "how": "라토토의 동굴 3층 (15，18)", "mount": "불가", "id": 24, "initPct": 16, "lvup": 4.5, "h0": 22, "a0": 27, "d0": 12, "s0": 32, "earth": 0, "water": 0, "fire": 30, "wind": 70, "rarity": "0", "imageCode": "100262"}, {"name": "푸푸", "how": "쟈루 (564，347)", "mount": "가능", "id": 31, "initPct": 16, "lvup": 4.5, "h0": 20, "a0": 24, "d0": 11, "s0": 37, "earth": 30, "water": 0, "fire": 0, "wind": 70, "rarity": "0", "imageCode": "100263"}, {"name": "우푸", "how": "쟈루 (564，379)", "mount": "가능", "id": 32, "initPct": 16, "lvup": 4.5, "h0": 18, "a0": 24, "d0": 9, "s0": 36, "earth": 0, "water": 0, "fire": 60, "wind": 40, "rarity": "0", "imageCode": "100264"}, {"name": "투투", "how": "쟈루 (295，358)", "mount": "가능", "id": 33, "initPct": 17, "lvup": 4.5, "h0": 25, "a0": 24, "d0": 9, "s0": 34, "earth": 30, "water": 70, "fire": 0, "wind": 0, "rarity": "0", "imageCode": "100265"}, {"name": "오투투", "how": "성인식의 동굴 전역", "mount": "가능", "id": 34, "initPct": 20, "lvup": 4.5, "h0": 20, "a0": 23, "d0": 13, "s0": 33, "earth": 60, "water": 0, "fire": 0, "wind": 40, "rarity": "0", "imageCode": "100266"}, {"name": "베론", "how": "쿠링으로의 길 1층 (12，21)", "mount": "가능", "id": 41, "initPct": 24, "lvup": 4.5, "h0": 36, "a0": 20, "d0": 36, "s0": 15, "earth": 0, "water": 100, "fire": 0, "wind": 0, "rarity": "0", "imageCode": "100267"}, {"name": "베로로크", "how": "쿠링으로의 길 2층 (27，26)", "mount": "가능", "id": 42, "initPct": 19, "lvup": 4.5, "h0": 33, "a0": 20, "d0": 39, "s0": 14, "earth": 70, "water": 30, "fire": 0, "wind": 0, "rarity": "0", "imageCode": "100268"}, {"name": "베로보크", "how": "아름산의 동굴 지하 7층 (42，23)", "mount": "가능", "id": 43, "initPct": 23, "lvup": 4.5, "h0": 35, "a0": 19, "d0": 37, "s0": 15, "earth": 30, "water": 70, "fire": 0, "wind": 0, "rarity": "0", "imageCode": "100269"}, {"name": "베로포리", "how": "속임수의 동굴 (22，21)", "mount": "가능", "id": 44, "initPct": 20, "lvup": 4.5, "h0": 32, "a0": 24, "d0": 35, "s0": 15, "earth": 0, "water": 30, "fire": 70, "wind": 0, "rarity": "0", "imageCode": "100270"}, {"name": "노북이", "how": "사이너스 (558，428)", "mount": "가능", "id": 51, "initPct": 14, "lvup": 4.5, "h0": 23, "a0": 21, "d0": 37, "s0": 11, "earth": 30, "water": 0, "fire": 0, "wind": 70, "rarity": "0", "imageCode": "100271"}, {"name": "북이", "how": "사이너스 (521，388)", "mount": "가능", "id": 52, "initPct": 14, "lvup": 4.5, "h0": 23, "a0": 21, "d0": 40, "s0": 9, "earth": 60, "water": 0, "fire": 0, "wind": 40, "rarity": "0", "imageCode": "100272"}, {"name": "깡북이", "how": "쿠오산 소동굴 3층 (20，32)", "mount": "가능", "id": 53, "initPct": 12, "lvup": 4.5, "h0": 22, "a0": 25, "d0": 36, "s0": 10, "earth": 0, "water": 0, "fire": 80, "wind": 20, "rarity": "0", "imageCode": "100273"}, {"name": "돌북이", "how": "쿠오산 소동굴 4층 (23，38)", "mount": "가능", "id": 54, "initPct": 20, "lvup": 4.5, "h0": 24, "a0": 20, "d0": 45, "s0": 9, "earth": 90, "water": 0, "fire": 0, "wind": 10, "rarity": "0", "imageCode": "100274"}, {"name": "아고아", "how": "진홍의 동굴 지하 6층 (12，14)", "mount": "가능", "id": 61, "initPct": 20, "lvup": 4.5, "h0": 24, "a0": 33, "d0": 18, "s0": 24, "earth": 0, "water": 30, "fire": 70, "wind": 0, "rarity": "0", "imageCode": "100275"}, {"name": "네고스", "how": "쟈루 (275，495)", "mount": "가능", "id": 62, "initPct": 18, "lvup": 4.5, "h0": 29, "a0": 32, "d0": 22, "s0": 24, "earth": 40, "water": 60, "fire": 0, "wind": 0, "rarity": "0", "imageCode": "100276"}, {"name": "타로곤", "how": "사이너스 (186，153)", "mount": "가능", "id": 63, "initPct": 17, "lvup": 4.5, "h0": 27, "a0": 32, "d0": 22, "s0": 25, "earth": 70, "water": 0, "fire": 0, "wind": 30, "rarity": "0", "imageCode": "100277"}, {"name": "다고스", "how": "사이너스 (348，174)", "mount": "가능", "id": 64, "initPct": 19, "lvup": 4.5, "h0": 32, "a0": 31, "d0": 20, "s0": 24, "earth": 0, "water": 80, "fire": 20, "wind": 0, "rarity": "0", "imageCode": "100278"}, {"name": "보크곤", "how": "몽환의 동굴 (46，54)", "mount": "불가", "id": 65, "initPct": 19, "lvup": 4.5, "h0": 27, "a0": 34, "d0": 18, "s0": 26, "earth": 0, "water": 0, "fire": 20, "wind": 80, "rarity": "0", "imageCode": "100393"}, {"name": "라고고", "how": "가우린 (461，524)", "mount": "가능", "id": 71, "initPct": 23, "lvup": 4.5, "h0": 22, "a0": 29, "d0": 15, "s0": 28, "earth": 0, "water": 0, "fire": 100, "wind": 0, "rarity": "0", "imageCode": "100279"}, {"name": "후바바", "how": "사이너스 (526，144)", "mount": "가능", "id": 72, "initPct": 24, "lvup": 4.5, "h0": 22, "a0": 28, "d0": 14, "s0": 29, "earth": 0, "water": 0, "fire": 60, "wind": 40, "rarity": "0", "imageCode": "100280"}, {"name": "토루루", "how": "가우린 (374，461)｜D코스 보상페트", "mount": "가능", "id": 73, "initPct": 19, "lvup": 4.5, "h0": 25, "a0": 30, "d0": 18, "s0": 30, "earth": 60, "water": 0, "fire": 0, "wind": 40, "rarity": "0", "imageCode": "100281"}, {"name": "루니", "how": "사이너스 (452，157)", "mount": "가능", "id": 74, "initPct": 22, "lvup": 4.5, "h0": 24, "a0": 27, "d0": 20, "s0": 28, "earth": 100, "water": 0, "fire": 0, "wind": 0, "rarity": "0", "imageCode": "100282"}, {"name": "카타르카스", "how": "동쿠링 광산 1층 (30，45)", "mount": "가능", "id": 81, "initPct": 22, "lvup": 4.5, "h0": 25, "a0": 23, "d0": 40, "s0": 6, "earth": 100, "water": 0, "fire": 0, "wind": 0, "rarity": "0", "imageCode": "100283"}, {"name": "쿠카스", "how": "동쿠링 광산 2층 (5，7)", "mount": "가능", "id": 82, "initPct": 22, "lvup": 4.5, "h0": 28, "a0": 22, "d0": 39, "s0": 5, "earth": 80, "water": 20, "fire": 0, "wind": 0, "rarity": "0", "imageCode": "100284"}, {"name": "코로카스", "how": "도둑의 동굴 지하 4층 (15，4)", "mount": "가능", "id": 83, "initPct": 17, "lvup": 4.5, "h0": 29, "a0": 30, "d0": 38, "s0": 7, "earth": 0, "water": 40, "fire": 60, "wind": 0, "rarity": "0", "imageCode": "100285"}, {"name": "로기안", "how": "유리의 동굴 13층 (35，8)", "mount": "가능", "id": 84, "initPct": 23, "lvup": 4.5, "h0": 28, "a0": 25, "d0": 43, "s0": 8, "earth": 80, "water": 0, "fire": 0, "wind": 20, "rarity": "0", "imageCode": "100286"}, {"name": "램가스", "how": "샴기르 촌장의 선물", "mount": "가능", "id": 85, "initPct": 20, "lvup": 4.5, "h0": 25, "a0": 28, "d0": 45, "s0": 10, "earth": 50, "water": 0, "fire": 0, "wind": 50, "rarity": "1", "imageCode": "100389"}, {"name": "아이카스", "how": "칠흑의 동굴 지하 9층 (40，43)", "mount": "가능", "id": 86, "initPct": 22, "lvup": 4.5, "h0": 33, "a0": 24, "d0": 43, "s0": 6, "earth": 50, "water": 50, "fire": 0, "wind": 0, "rarity": "0", "imageCode": "100390"}, {"name": "쿠타스", "how": "칠흑의 동굴 지하 11층 (56，38)", "mount": "가능", "id": 87, "initPct": 22, "lvup": 4.5, "h0": 34, "a0": 28, "d0": 39, "s0": 6, "earth": 0, "water": 60, "fire": 40, "wind": 0, "rarity": "0", "imageCode": "100391"}, {"name": "카르기안", "how": "칠흑의 동굴 지하 5층 (18，7)", "mount": "가능", "id": 88, "initPct": 20, "lvup": 4.5, "h0": 20, "a0": 20, "d0": 36, "s0": 12, "earth": 20, "water": 0, "fire": 0, "wind": 80, "rarity": "0", "imageCode": "100392"}];
+let PETS = SEED.slice().filter(p => String(p.how||"").replace(/\s+/g,"").trim() !== "미출시");
+
+const IMG_BASE = "https://sa000001.com/sa2/info/img/";
+
+function num(v){ const n = Number(v); return isFinite(n) ? n : 0; }
+function cut2(n){ n=Number(n); if(!isFinite(n)) return "-"; return (Math.floor(n*100)/100).toFixed(2).replace(/\.?0+$/, ""); }
+function dropDecimalInt(v){ v=Number(v); return isFinite(v)?Math.floor(v):0; }
+function rankInfoB(sum){ if(sum>=100)return 475; if(sum>=95)return 495; if(sum>=90)return 515; if(sum>=85)return 535; if(sum>=80)return 555; return 575; }
+function disp(h,a,d,s){ return { h:h*4+a+d+s, a:h*0.1+a+d*0.1+s*0.05, d:h*0.1+a*0.1+d+s*0.05, s:s }; }
+function calcStats(r){
+  const baseSum = num(r.h0)+num(r.a0)+num(r.d0)+num(r.s0);
+  const B = rankInfoB(baseSum);
+  const ph=num(r.h0)+num(r.lvup), pa=num(r.a0)+num(r.lvup), pd=num(r.d0)+num(r.lvup), ps=num(r.s0)+num(r.lvup);
+  const init = disp(num(r.initPct)*ph/100, num(r.initPct)*pa/100, num(r.initPct)*pd/100, num(r.initPct)*ps/100);
+  const growth = disp(ph*B/10000, pa*B/10000, pd*B/10000, ps*B/10000);
+  return { init, growth, totalGrowth: growth.a+growth.d+growth.s };
+}
+function howType(s){
+  s=String(s||"");
+  if(/골드볼라/.test(s)) return "골드볼라";
+  if(/복권/.test(s)) return "복권페트";
+  if(/히든 획득|히든/.test(s)) return "히든페트";
+  if(/불꽃|공간|오형제|미선|황씨|퀘스트|수집|보상|이벤트|선물|퀴즈도장|타니토스|석상/.test(s)) return "퀘스트페트";
+  if(/레이드|주간|일일|페트상자|페트병|전리품|조합/.test(s)) return "레이드페트";
+  if(/비밀|포획|통로|난파|전지역|사이너스|하이하모|쟈루|가우린|가이아|원주민|포루|포우렌|에레보스|동굴|광산|층|전역|마을|해저|길|쿠오|쿠르|라토토|아스마르|칠흑|유리|성인식|폐허|숲의|속임수|몽환|고야산|채석장|마리너스|카루타나/.test(s)) return "필드페트";
+  if(/코인페트/.test(s)) return "코인페트";
+  return "기타";
+}
+function isMoneyPet(r){ const v=String(r.rarity||"").trim(); return v==="1"||v==="2"; }
+function mountText(v){ v=String(v===null||v===undefined?"":v).trim(); if(v==="")return "불가"; if(v==="0"||/불가/.test(v))return "불가"; if(v==="1"||v==="가능"||/탑승가능/.test(v))return "가능"; return v; }
+function petIdNumber(r){ const raw=String(r.id||r.imageCode||"").trim(); const m=raw.match(/\d+/); return m?parseInt(m[0],10):0; }
+function isOldPet(r){ const n=petIdNumber(r); return n>=1 && n<=334; }
+function rarityText(v){ v=String(v||"").trim(); if(v==="0")return "일반등급"; if(v==="1")return "2등급(돈펫)"; if(v==="2")return "1등급(돈펫)"; return v||"-"; }
+
+const attrMeta = { earth:{label:"토",color:"#d4943a"}, water:{label:"수",color:"#5ab0e0"}, fire:{label:"화",color:"#f57878"}, wind:{label:"풍",color:"#5acba8"} };
+function normalizedName(p){ return String(p.name||"").replace(/^\uFEFF/, ""); }
+function imgTag(code, cls){
+  return `<img class="${cls||''}" src="${IMG_BASE}${code}.png" loading="lazy"
+    onerror="this.onerror=function(){this.onerror=null;this.src='${IMG_BASE}placeholder.gif';};this.src='${IMG_BASE}${code}.gif';" />`;
+}
+function attrChipsHTML(p, small){
+  return ["earth","water","fire","wind"].filter(k=>p[k]>0).map(k=>
+    `<span class="${small?'pic-attr-chip':'modal-attr-chip'}" style="background:${attrMeta[k].color}">${small?'':'<span class=\"chip-num\">'+p[k]+'%</span>'}${attrMeta[k].label}${small?' '+p[k]+'%':''}</span>`
+  ).join("");
+}
+
+let state = { q:"", attr:"all", how:"ALL", sort:"default", view:"grid", shown:60 };
+
+function matchesFilter(p){
+  const name = normalizedName(p);
+  if(state.q && !(name.includes(state.q) || (p.how||"").includes(state.q))) return false;
+  if(state.attr !== "all" && !(p[state.attr] > 0)) return false;
+  if(state.how === "돈펫" && !isMoneyPet(p)) return false;
+  else if(state.how === "구펫" && !isOldPet(p)) return false;
+  else if(state.how === "신펫" && isOldPet(p)) return false;
+  else if(state.how === "탑승가능" && mountText(p.mount) !== "가능") return false;
+  else if(state.how !== "ALL" && state.how !== "돈펫" && state.how !== "구펫" && state.how !== "신펫" && state.how !== "탑승가능" && howType(p.how) !== state.how) return false;
+  return true;
+}
+function sortList(list){
+  const s = state.sort;
+  if(s === "default") return list;
+  if(s === "name") return [...list].sort((a,b)=>normalizedName(a).localeCompare(normalizedName(b),'ko'));
+  const key = s==="atk"?"a":s==="def"?"d":s==="dex"?"s":"h";
+  return [...list].sort((a,b)=> calcStats(b).growth[key] - calcStats(a).growth[key]);
+}
+function getFiltered(){ return sortList(PETS.filter(matchesFilter)); }
+
+function cardHTML(p, idx){
+  const name = normalizedName(p);
+  const st = calcStats(p);
+  return `
+  <div class="pet-info-card" data-idx="${idx}">
+    <div class="pic-img-wrap">${imgTag(p.imageCode)}</div>
+    <div class="pic-name">${name}</div>
+    <div class="pic-how">${p.how||""}</div>
+    <div class="pic-attr-row">${attrChipsHTML(p, true)}</div>
+    <div class="pic-mini"><span>총성장 <b>${cut2(st.totalGrowth)}</b></span><span>${rarityText(p.rarity).replace("등급","").replace("(돈펫)","")}</span></div>
+    <div class="pic-badge-row">
+      <span class="pic-badge ${mountText(p.mount)==='가능'?'pb-mount':'pb-nomount'}">${mountText(p.mount)==='가능'?'탑승가능':'탑승불가'}</span>
+    </div>
+  </div>`;
+}
+
+let currentList = [];
+function render(){
+  currentList = getFiltered();
+  document.getElementById("statTotal").textContent = PETS.length;
+  document.getElementById("statShown").textContent = currentList.length;
+  document.getElementById("statMount").textContent = PETS.filter(p=>mountText(p.mount)==="가능").length;
+  const slice = currentList.slice(0, state.shown);
+  const empty = document.getElementById("empty");
+  const loadmore = document.getElementById("loadmore");
+  if(currentList.length===0){ empty.style.display="block"; loadmore.style.display="none"; }
+  else { empty.style.display="none"; loadmore.style.display = currentList.length>state.shown ? "block":"none"; }
+  document.getElementById("grid").innerHTML = slice.map(p=>cardHTML(p, PETS.indexOf(p))).join("");
+}
+
+function openModal(idx){
+  const p = PETS[idx];
+  const st = calcStats(p);
+  const name = normalizedName(p);
+  document.getElementById("modalName").textContent = name;
+  document.getElementById("modalImgBox").innerHTML = imgTag(p.imageCode);
+  document.getElementById("modalBadges").innerHTML =
+    `<span class="modal-badge">${rarityText(p.rarity)}</span><span class="modal-badge">${mountText(p.mount)==='가능'?'탑승가능':'탑승불가'}</span><span class="modal-badge">${isOldPet(p)?'구펫':'신펫'}</span>`;
+  document.getElementById("modalAttrs").innerHTML = attrChipsHTML(p, false) || '<span style="color:var(--t3);font-size:12px;">속성 없음</span>';
+  document.getElementById("modalObtain").textContent = p.how || "정보 없음";
+  document.getElementById("mgAtk").textContent = cut2(st.growth.a);
+  document.getElementById("mgDef").textContent = cut2(st.growth.d);
+  document.getElementById("mgAgi").textContent = cut2(st.growth.s);
+  document.getElementById("mgHp").textContent = cut2(st.growth.h);
+  document.getElementById("mgTotal").textContent = cut2(st.totalGrowth);
+  document.getElementById("miAtk").textContent = cut2(st.init.a);
+  document.getElementById("miDef").textContent = cut2(st.init.d);
+  document.getElementById("miAgi").textContent = cut2(st.init.s);
+  document.getElementById("miHp").textContent = cut2(st.init.h);
+  document.getElementById("modalCalcLink").href = "index.html?pet=" + encodeURIComponent(name);
+  document.getElementById("pet-modal").classList.add("open");
+}
+
+document.getElementById("search").addEventListener("input", e=>{ state.q=e.target.value.trim(); state.shown=60; render(); });
+document.getElementById("sortSel").addEventListener("change", e=>{ state.sort=e.target.value; state.shown=60; render(); });
+document.getElementById("attrSeg").addEventListener("click", e=>{
+  const btn=e.target.closest("button"); if(!btn) return;
+  [...btn.parentElement.children].forEach(b=>b.classList.remove("active"));
+  btn.classList.add("active"); state.attr=btn.dataset.v; state.shown=60; render();
+});
+document.getElementById("howFilter").addEventListener("click", e=>{
+  const chip=e.target.closest(".chip"); if(!chip) return;
+  [...chip.parentElement.children].forEach(c=>c.classList.remove("is-on"));
+  chip.classList.add("is-on"); state.how=chip.dataset.v; state.shown=60; render();
+});
+document.getElementById("loadmore").addEventListener("click", ()=>{ state.shown+=60; render(); });
+document.getElementById("grid").addEventListener("click", e=>{
+  const card=e.target.closest(".pet-info-card"); if(!card) return;
+  openModal(parseInt(card.dataset.idx));
+});
+document.getElementById("modalClose").addEventListener("click", ()=> document.getElementById("pet-modal").classList.remove("open"));
+document.getElementById("pet-modal").addEventListener("click", e=>{ if(e.target.id==="pet-modal") document.getElementById("pet-modal").classList.remove("open"); });
+
+function toggleDark(){
+  const h=document.documentElement;
+  const n=h.getAttribute('data-theme')==='dark'?'light':'dark';
+  h.setAttribute('data-theme', n);
+  try{ localStorage.setItem('sa2-theme', n); }catch(e){}
+}
+try{ const saved=localStorage.getItem('sa2-theme'); if(saved) document.documentElement.setAttribute('data-theme', saved); }catch(e){}
+
+function setStatus(msg){ document.getElementById("loadStatus").textContent = msg; }
+function applyData(rows){ PETS = rows.filter(p => String(p.how||"").replace(/\s+/g,"").trim() !== "미출시"); state.shown=60; render(); }
+async function fetchJson(url){
+  const res = await fetch(url + (url.includes("?") ? "&" : "?") + "ts=" + Date.now(), {cache:"no-store"});
+  if(!res.ok) throw new Error("http " + res.status);
+  const data = await res.json();
+  const rows = data.rows || data;
+  if(!Array.isArray(rows) || rows.length === 0) throw new Error("empty rows");
+  return rows;
+}
+async function loadLive(){
+  setStatus("데이터 불러오는 중...");
+  try{
+    const rows = await fetchJson("./pet_data.json");
+    applyData(rows);
+    setStatus(`데이터 로딩 완료 · 총 ${PETS.length}종 (레포 동기화본)`);
+    return;
+  }catch(e){}
+  try{
+    const rows = await fetchJson(API_URL);
+    applyData(rows);
+    setStatus(`데이터 로딩 완료 · 총 ${PETS.length}종 (실시간 직접연동)`);
+    return;
+  }catch(e){}
+  applyData(PETS);
+  setStatus(`내장 샘플 ${PETS.length}종으로 표시 중`);
+}
+render();
+loadLive();
+</script>
+</body>
+</html>
