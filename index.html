@@ -519,7 +519,7 @@ function imgTag(code, cls){
   return `<img class="${cls||''}" src="${IMG_BASE}${code}.png" loading="lazy"
     onerror="this.onerror=function(){this.onerror=null;this.src='${IMG_BASE}placeholder.gif';};this.src='${IMG_BASE}${code}.gif';" />`;
 }
-const attrMeta = { earth:{label:"지",color:"var(--a4)"}, water:{label:"수",color:"var(--a3)"}, fire:{label:"화",color:"var(--err)"}, wind:{label:"풍",color:"var(--a5)"} };
+const attrMeta = { earth:{label:"지",color:"var(--a5)"}, water:{label:"수",color:"var(--a3)"}, fire:{label:"화",color:"var(--err)"}, wind:{label:"풍",color:"var(--a4)"} };
 function attrPoint(v){ return Math.round(num(v)/10); }
 function rarityText(v){ v=String(v||"").trim(); if(v==="0")return "일반등급"; if(v==="1")return "2등급(돈펫)"; if(v==="2")return "1등급(돈펫)"; return v||"-"; }
 
