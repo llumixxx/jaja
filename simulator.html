@@ -651,6 +651,11 @@ function normalizedName(p){ return String(p.name||"").replace(/^\uFEFF/, ""); }
 function rarityText(v){ v=String(v||"").trim(); if(v==="0")return "일반등급"; if(v==="1")return "2등급(돈펫)"; if(v==="2")return "1등급(돈펫)"; return v||"-"; }
 
 /* 환각 실제매칭 공식 (lvup 미포함 - 실서버 검증됨) */
+/* 배분치(10포인트)는 "10번 반복하며 매번 4개 스탯 중 하나를 25%로 +1"하는 다항분포 방식.
+   (10,0,0,0)처럼 한쪽으로 몰리는 조합과 (3,3,2,2)처럼 고르게 퍼지는 조합은 등장확률이 다름.
+   각 조합의 실제 가중치 = 10! / (a! b! c! d!)  (다항계수) */
+const FACT10 = [1,1,2,6,24,120,720,5040,40320,362880,3628800]; // 0!~10!
+function multinomialWeight(a,b,c,d){ return FACT10[10] / (FACT10[a]*FACT10[b]*FACT10[c]*FACT10[d]); }
 function calcInitWithRollBase(r, rh, ra, rd, rs, hb, ab, db, sb){
   const ph = num(r.h0)+num(rh)+num(hb);
   const pa = num(r.a0)+num(ra)+num(ab);
@@ -663,7 +668,7 @@ function calcIdealDisplay(pet){
   const st = calcStats(pet);
   return { atk: Math.floor(st.init.a), def: Math.floor(st.init.d), agi: Math.floor(st.init.s), hp: Math.floor(st.init.h) };
 }
-/* 펫의 모든 가능 조합(178,750가지)을 브루트포스로 그룹화 → 스탯풀 */
+/* 펫의 모든 가능 조합을 브루트포스로 그룹화 → 스탯풀 (배분치는 다항분포 가중치 반영) */
 function buildPetStatPool(pet){
   const map = {};
   for (let rh = -2; rh <= 2; rh++)
@@ -678,8 +683,9 @@ function buildPetStatPool(pet){
     const ca = dropDecimalInt(init.a), cd = dropDecimalInt(init.d), cs = dropDecimalInt(init.s), ch = dropDecimalInt(init.h);
     const key = ca+','+cd+','+cs+','+ch;
     if (!map[key]) map[key] = { atk: ca, def: cd, agi: cs, hp: ch, total: 0, hall: 0 };
-    map[key].total++;
-    if (rh===2 && ra===2 && rd===2 && rs===2) map[key].hall++;
+    const w = multinomialWeight(ab,db,sb,hb);
+    map[key].total += w;
+    if (rh===2 && ra===2 && rd===2 && rs===2) map[key].hall += w;
   }
   const arr = []; let totalCombos = 0;
   for (const k in map) { const v = map[k]; v.prob = v.hall / v.total; totalCombos += v.total; arr.push(v); }
