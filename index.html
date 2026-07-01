@@ -641,7 +641,13 @@ document.querySelectorAll(".stepper button").forEach(btn=>{
 
 /* ===== 환각 계산기 (실제 서버 계산 방식) ===== */
 const HWANGAK_BASE_POOL = 10;
-const HWANGAK_TOTAL_COMBOS = 178750;
+/* 배분치(10포인트)는 "10번 반복하며 매번 4개 스탯 중 하나를 25%로 +1"하는 다항분포 방식.
+   즉 (10,0,0,0)처럼 한쪽으로 몰리는 조합과 (3,3,2,2)처럼 고르게 퍼지는 조합은 등장확률이 다름.
+   각 조합의 실제 가중치 = 10! / (a! b! c! d!)  (다항계수) */
+const FACT10 = [1,1,2,6,24,120,720,5040,40320,362880,3628800]; // 0!~10!
+function multinomialWeight(a,b,c,d){ return FACT10[10] / (FACT10[a]*FACT10[b]*FACT10[c]*FACT10[d]); }
+const HWANGAK_TOTAL_COMBOS = 178750; // 원시 조합 개수(5^4 성장베이스 × C(13,3) 배분치 조합, 가중치 미반영)
+const HWANGAK_TOTAL_SPACE = 625 * Math.pow(4,10); // 5^4 × 4^10 = 실제 확률공간(가중치 반영, 확률 계산용)
 function calcInitWithRollBase(r, rh, ra, rd, rs, hb, ab, db, sb){
   const ph = num(r.h0)+num(rh)+num(hb);
   const pa = num(r.a0)+num(ra)+num(ab);
@@ -662,7 +668,7 @@ function getAllHwangakMatches(r, t){
     const init = calcInitWithRollBase(r, rh, ra, rd, rs, hb, ab, db, sb);
     const ch=dropDecimalInt(init.h), ca=dropDecimalInt(init.a), cd=dropDecimalInt(init.d), cs=dropDecimalInt(init.s);
     if(ch!==t.h || ca!==t.a || cd!==t.d || cs!==t.s) continue;
-    matches.push({ grade: rh+ra+rd+rs });
+    matches.push({ grade: rh+ra+rd+rs, weight: multinomialWeight(ab,db,sb,hb) });
   }
   return matches;
 }
@@ -704,7 +710,6 @@ document.getElementById("calc-btn").addEventListener("click", ()=>{
     const p = selectedPet;
     const matches = getAllHwangakMatches(p, {h:dHp,a:dAtk,d:dDef,s:dAgi});
     const totalCases = matches.length;
-    const totalPossible = HWANGAK_TOTAL_COMBOS;
 
     if(totalCases === 0){
       rc.innerHTML = '<div class="result-err">일치하는 경우가 없습니다.<br>다른 스탯 값으로 시도해 주세요 🌊</div>';
@@ -712,28 +717,32 @@ document.getElementById("calc-btn").addEventListener("click", ()=>{
       return;
     }
 
-    const gradeDist = {};
-    let hallCases = 0;
-    matches.forEach(m=>{ gradeDist[m.grade] = (gradeDist[m.grade]||0)+1; if(m.grade===8) hallCases++; });
+    const gradeDist = {}; // 등급 -> 가중치 합 (다항분포 반영)
+    let totalWeight = 0, hallWeight = 0, hallCases = 0;
+    matches.forEach(m=>{
+      gradeDist[m.grade] = (gradeDist[m.grade]||0) + m.weight;
+      totalWeight += m.weight;
+      if(m.grade===8){ hallWeight += m.weight; hallCases++; }
+    });
 
-    const prob = Math.min((hallCases/totalCases)*100, 99.99).toFixed(4);
-    const appear = formatPct((totalCases/totalPossible)*100);
-    const canMax = hallCases > 0;
+    const prob = Math.min((hallWeight/totalWeight)*100, 99.99).toFixed(4);
+    const appear = formatPct((totalWeight/HWANGAK_TOTAL_SPACE)*100);
+    const canMax = hallWeight > 0;
     const expect = canMax ? (1/(prob/100)).toFixed(2) : null;
     const topGrade = Object.keys(gradeDist).map(Number).sort((a,b)=>b-a)[0];
     const isGold = topGrade === 8 && canMax;
-    const maxGradeCnt = Math.max(...Object.values(gradeDist));
+    const maxGradeWeight = Math.max(...Object.values(gradeDist));
 
     const gradeRows = Object.keys(gradeDist).map(Number).sort((a,b)=>b-a).filter(g=>gradeDist[g]>0).map(g=>{
-      const cnt = gradeDist[g];
-      const pct = (cnt/totalCases*100).toFixed(1);
-      const barW = (cnt/maxGradeCnt*100).toFixed(1);
+      const w = gradeDist[g];
+      const pct = (w/totalWeight*100).toFixed(1);
+      const barW = (w/maxGradeWeight*100).toFixed(1);
       const isHall = g === 8;
       const barClass = isHall ? 'grade-bar-8' : g > 0 ? 'grade-bar-pos' : g === 0 ? 'grade-bar-zero' : 'grade-bar-neg';
       return `<div class="grade-row">
         <span class="${isHall?'grade-lbl-hall':'grade-lbl'}">${gradeLabel(g)}</span>
         <div class="grade-bar-wrap"><div class="grade-bar ${barClass}" style="width:${barW}%"></div></div>
-        <div class="grade-meta"><span class="grade-cnt">${cnt}건</span><span class="grade-pct">${pct}%</span></div>
+        <div class="grade-meta"><span class="grade-cnt">${pct}%</span></div>
       </div>`;
     }).join("");
 
@@ -763,11 +772,12 @@ document.getElementById("calc-btn").addEventListener("click", ()=>{
         <div class="result-right">
           <div class="grade-dist">
             <div class="grade-dist-title">등급 분포</div>
-            <div class="grade-dist-total">총 ${totalCases}건 / ${totalPossible.toLocaleString()}건</div>
+            <div class="grade-dist-total">총 ${totalCases}건 / ${HWANGAK_TOTAL_COMBOS.toLocaleString()}건</div>
             ${gradeRows}
           </div>
         </div>
-        <div class="result-note">표기: 성장베이스(-2~+2, 4스탯 합산 = 등급) × 배분치(4스탯에 총 10포인트 무작위 배분, Lv.1 초기치에만 영향). 8등급(전스탯 +2)이 곧 환각입니다.</div>
+        <div class="result-note">표기: 성장베이스(-2~+2, 4스탯 합산 = 등급) × 배분치(10회 반복으로 매번 4스탯 중 하나에 25%씩 +1, Lv.1 초기치에만 영향 · 다항분포 가중치 반영). 8등급(전스탯 +2)이 곧 환각입니다.</div>
+        <div class="result-note" style="margin-top:8px;color:var(--t4);">※ 확률은 다항계수(10!/a!b!c!d!) 가중치를 반영해 계산됩니다 — (10,0,0,0)처럼 한쪽으로 몰린 조합보다 (3,3,2,2)처럼 고르게 퍼진 조합이 실제로 더 자주 나옵니다.</div>
       </div>
     `;
     rc.style.display = "block";
