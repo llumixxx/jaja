@@ -1,0 +1,1438 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>쟈쟈서버 환각 시뮬레이터</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f2f7fd; --bg2:#e8f2fc; --white:#ffffff;
+  --s1:#f0f7fd; --s2:#e3f0fb;
+  --border:#dbe9f7; --border2:#bcd8f2;
+  --a1:#2f7fd6; --a2:#22b6c9; --a3:#5aa8ea; --a4:#f5a623; --a5:#6fd0a0;
+  --t1:#12253f; --t2:#4c6a8c; --t3:#8ea6c2; --t4:#c7dcf0;
+  --ok:#3d9e6e; --err:#e05a5a;
+  --gold:#f5a623; --gold2:#fdd835;
+  --shadow:0 4px 24px rgba(47,127,214,0.12);
+  --shadow2:0 8px 32px rgba(47,127,214,0.18);
+}
+[data-theme="dark"] {
+  --bg:#0a1420; --bg2:#0f1e30; --white:#132335;
+  --s1:#16283c; --s2:#1c3149;
+  --border:#233c56; --border2:#2c4a68;
+  --t1:#e6f0fb; --t2:#a9c2dc; --t3:#7391b0; --t4:#4a637d;
+  --shadow:0 4px 24px rgba(0,0,0,0.4);
+  --shadow2:0 8px 32px rgba(0,0,0,0.5);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Noto Sans KR', sans-serif;
+  background: var(--bg);
+  color: var(--t1);
+  min-height: 100vh;
+  background-image:
+    radial-gradient(circle 600px at 10% 10%, rgba(47,127,214,0.08) 0%, transparent 100%),
+    radial-gradient(circle 700px at 90% 30%, rgba(34,182,201,0.07) 0%, transparent 100%),
+    radial-gradient(circle 500px at 50% 90%, rgba(111,208,192,0.08) 0%, transparent 100%);
+}
+
+/* ===== 사이드바 ===== */
+.sidebar{width:300px;height:100vh;background:var(--white);border-right:1.5px solid var(--border);
+  display:flex;flex-direction:column;position:fixed;left:-300px;top:0;z-index:200;
+  transition:left .32s cubic-bezier(.4,0,.2,1);box-shadow:4px 0 24px rgba(47,127,214,0.08);}
+.sidebar.open{left:0;}
+.sb-head{padding:20px 16px 14px;border-bottom:1.5px solid var(--border);}
+.sb-logo{display:flex;align-items:center;gap:8px;font-family:'Nunito',sans-serif;font-weight:900;
+  font-size:16px;color:var(--a1);margin-bottom:4px;}
+.sb-logo-dot{width:8px;height:8px;background:var(--a2);border-radius:50%;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(2)}}
+.sb-sub{font-size:10.5px;color:var(--t3);font-family:'Nunito',sans-serif;font-weight:700;letter-spacing:.5px;}
+.sb-nav{display:flex;gap:6px;padding:12px 16px;border-bottom:1.5px solid var(--border);}
+.sb-nav a{flex:1;text-decoration:none;text-align:center;padding:9px 6px;border-radius:12px;
+  font-size:12.5px;font-weight:800;color:var(--t2);background:var(--s1);border:1.5px solid var(--border);}
+.sb-nav a.on{background:linear-gradient(135deg,var(--a1),var(--a2));color:#fff;border-color:transparent;}
+.sb-body{padding:14px 16px 16px;flex:1;overflow-y:auto;min-height:0;font-size:12.5px;color:var(--t2);line-height:1.7;}
+.sb-body::-webkit-scrollbar{width:4px;} .sb-body::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px;}
+.sb-info-box{background:var(--s1);border:1.5px solid var(--border);border-radius:14px;padding:14px;}
+.sb-info-box b{color:var(--t1);}
+.sb-footer{padding:12px 16px;border-top:1.5px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+.sb-footer-txt{font-size:10.5px;color:var(--t3);}
+.toggle-btn{position:fixed;top:16px;left:16px;z-index:300;width:42px;height:42px;background:var(--white);
+  border:1.5px solid var(--border);border-radius:12px;color:var(--a1);font-size:19px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;transition:all .18s;box-shadow:var(--shadow);}
+.toggle-btn:hover{border-color:var(--a1);box-shadow:var(--shadow2);transform:scale(1.05);}
+.toggle-btn.sb-open{left:314px;}
+@media(max-width:820px){ .toggle-btn.sb-open{left:auto;right:16px;} .main.shifted{margin-left:0;} }
+.dark-toggle{width:36px;height:36px;border-radius:50%;border:2px solid var(--border2);background:var(--white);
+  cursor:pointer;font-size:1.05rem;display:flex;align-items:center;justify-content:center;transition:all .3s;}
+.dark-toggle:hover{transform:scale(1.1) rotate(-8deg);border-color:var(--a1);}
+[data-theme="dark"] .toggle-moon{display:inline;} [data-theme="dark"] .toggle-sun{display:none !important;}
+[data-theme="light"] .toggle-moon{display:none !important;} [data-theme="light"] .toggle-sun{display:inline;}
+.main{flex:1;min-height:100vh;transition:margin-left .32s cubic-bezier(.4,0,.2,1);}
+.main.shifted{margin-left:300px;}
+.main-inner{max-width:720px;margin:0 auto;padding:70px 20px 80px;}
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+
+/* ── header ── */
+.page-head { text-align: center; padding: 6px 0 26px; }
+.wind-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: linear-gradient(135deg,var(--s2),#e0f7fa);
+  border: 1.5px solid var(--border2);
+  border-radius: 20px;
+  padding: 6px 14px; font-size: 11px; font-weight: 800;
+  font-family: 'Nunito', sans-serif;
+  color: var(--t2); letter-spacing: 1px; margin-bottom: 12px;
+  box-shadow: 0 4px 12px rgba(47,127,214,.12);
+}
+.wind-badge-dot { width: 7px; height: 7px; background: var(--a2); border-radius: 50%; animation: pulse 2s infinite; }
+.page-title {
+  font-family: 'Nunito', sans-serif;
+  font-size: 38px; font-weight: 900; letter-spacing: -1px;
+  background: linear-gradient(135deg, var(--a1) 0%, var(--a2) 60%, var(--a5) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  line-height: 1.15; margin-bottom: 6px;
+}
+.page-sub { font-size: 12px; color: var(--t3); font-family: 'Nunito', sans-serif; font-weight: 700; letter-spacing: 1px; }
+
+/* ── card ── */
+.card {
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: 24px; padding: 22px; margin-bottom: 16px;
+  box-shadow: var(--shadow);
+}
+.card-title {
+  font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--t3); margin-bottom: 14px;
+  font-family: 'Nunito', sans-serif; font-weight: 800;
+  display: flex; align-items: center; gap: 7px;
+}
+.card-title::before {
+  content: ''; display: block; width: 10px; height: 10px;
+  border-radius: 50%; background: linear-gradient(135deg, var(--a1), var(--a2));
+}
+
+.setup-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 14px; }
+@media(max-width:640px){ .setup-grid { grid-template-columns: 1fr; } }
+
+.field { margin-bottom: 12px; position: relative; }
+.field-label { font-size: 12px; font-weight: 700; color: var(--t2); margin-bottom: 5px; display: block; }
+.field-input {
+  width: 100%; padding: 11px 14px;
+  background: var(--s1); border: 1.5px solid var(--border);
+  border-radius: 12px; color: var(--t1); font-size: 15px;
+  font-family: 'Noto Sans KR', sans-serif;
+  transition: border-color .18s, box-shadow .18s, background .18s;
+}
+.field-input:focus { outline: none; border-color: var(--a1); background: var(--white); box-shadow: 0 0 0 4px rgba(47,127,214,.1); }
+
+.sugg-wrap { position: relative; }
+.suggestions {
+  position: absolute; top: 100%; left: 0; right: 0; z-index: 50;
+  background: var(--white); border: 1.5px solid var(--a1);
+  border-top: none; border-radius: 0 0 14px 14px;
+  max-height: 180px; overflow-y: auto;
+  box-shadow: 0 12px 32px rgba(47,127,214,.15);
+}
+.sugg-item { padding: 10px 14px; cursor: pointer; font-size: 14px; border-bottom: 1px solid var(--border); color: var(--t1); }
+.sugg-item:last-child { border-bottom: none; }
+.sugg-item:hover { background: var(--s1); color: var(--a1); }
+
+/* 4개 스탯 표시 셀 */
+.stat-rolls { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 8px 0 4px; }
+.stat-roll-cell {
+  background: rgba(255,255,255,.55);
+  border: 2px solid rgba(255,255,255,.7);
+  outline: 1.5px solid rgba(18,37,63,.12);
+  border-radius: 14px; padding: 10px 4px;
+  text-align: center; position: relative;
+  transition: all .25s;
+}
+.srl-label { font-size: 9.5px; font-weight: 900; color: #4c6a55; letter-spacing: 1.5px; font-family: 'Nunito', sans-serif; margin-bottom: 5px; text-transform: uppercase; }
+.srl-val { font-size: 24px; font-weight: 900; font-family: 'Nunito', sans-serif; color: #223526; transition: color .15s; }
+.srl-diff { font-size: 10.5px; font-weight: 800; font-family: 'Nunito', sans-serif; margin-top: 3px; min-height: 13px; }
+.srl-diff.plus { color: #c87800; } .srl-diff.plus-strong { color: #e07700; }
+.srl-diff.minus { color: #b03a3a; opacity:.85; } .srl-diff.zero { color: #6b7d70; }
+.stat-rolls.all-max .stat-roll-cell { background: rgba(255,236,140,.7); outline-color: var(--gold); animation: gradePop .35s cubic-bezier(.34,1.56,.64,1); }
+.stat-rolls.all-max .srl-val { color: #a85c00; }
+.stat-roll-cell.flash { animation: cellFlash .25s ease; }
+@keyframes cellFlash { 0%{transform:scale(1)} 50%{transform:scale(1.1);outline-color:var(--a1);} 100%{transform:scale(1)} }
+
+.orb-grid { display: grid; grid-template-columns: 1fr; gap: 10px; margin-bottom: 12px; }
+.orb-input { padding: 9px 12px; font-size: 14px; }
+
+.opt-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 6px; }
+.opt-check {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 700; color: var(--t2);
+  padding: 8px 12px; background: var(--s1); border: 1.5px solid var(--border);
+  border-radius: 10px; cursor: pointer; user-select: none; transition: all .15s;
+}
+.opt-check:hover { border-color: var(--a1); color: var(--a1); }
+.opt-check input { cursor: pointer; accent-color: var(--a1); }
+.opt-check.active { border-color: var(--a1); background: var(--s2); color: var(--a1); }
+
+.act-row { display: grid; grid-template-columns: 1fr; gap: 8px; margin-top: 12px; }
+.btn-go {
+  padding: 16px;
+  background: linear-gradient(135deg, var(--a1) 0%, var(--a2) 100%);
+  color: #fff; border: none; border-radius: 16px;
+  font-size: 16px; font-weight: 800;
+  font-family: 'Nunito', sans-serif;
+  cursor: pointer; transition: all .2s; letter-spacing: .5px;
+  box-shadow: 0 4px 20px rgba(47,127,214,.3);
+}
+.btn-go:hover:not(:disabled) { transform: translateY(-3px) scale(1.02); box-shadow: 0 10px 32px rgba(47,127,214,.5); }
+.btn-go:active:not(:disabled) { transform: scale(.97); }
+.btn-go:disabled { opacity: .5; cursor: not-allowed; }
+
+/* ── 다마고치 디바이스 프레임 (실제 이미지 기반, 픽셀 분석으로 좌표 산출) ── */
+.device-frame {
+  position: relative;
+  width: 100%; max-width: 460px;
+  aspect-ratio: 1 / 1;
+  margin: 10px auto 6px;
+  background-image: url('jyajyagotchi.png');
+  background-size: contain; background-repeat: no-repeat; background-position: center;
+}
+/* 화면(LCD) 영역 - 이미지 속 사각형 위치에 맞춰 % 좌표로 정확히 배치 */
+.device-screen {
+  position: absolute;
+  left: 22%; top: 19.8%; width: 55%; height: 48.2%;
+  overflow: hidden;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 3%; padding: 4%;
+}
+/* SELECT / DECIDE / CANCEL - 이미지에 이미 그려진 버튼 위에 투명 클릭영역만 배치 */
+.device-hitzone {
+  position: absolute; top: 81.3%;
+  width: 10%; aspect-ratio: 1/1;
+  border-radius: 50%; background: transparent; border: none;
+  cursor: pointer; transform: translate(-50%, -50%);
+  transition: background .15s;
+}
+.device-hitzone:hover { background: rgba(255,255,255,.18); }
+.device-hitzone:active { background: rgba(255,255,255,.32); }
+.device-hitzone.hz-select { left: 29.3%; }
+.device-hitzone.hz-decide { left: 49.8%; }
+.device-hitzone.hz-cancel { left: 70.3%; }
+
+/* 다마고치 펫 + 말풍선 (화면 안, 세로 배치로 좁은 화면에 최적화) */
+.tamago-area { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; position: relative; width: 100%; }
+.tamago-pet {
+  width: 54px; height: 54px;
+  background: rgba(255,255,255,.45);
+  border: 2px solid rgba(255,255,255,.75);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 3px 8px rgba(0,0,0,.12);
+  overflow: hidden; position: relative;
+  animation: tamagoIdle 3s ease-in-out infinite; flex-shrink: 0;
+}
+@keyframes tamagoIdle { 0%,100%{transform:translateY(0) rotate(-1deg)} 50%{transform:translateY(-3px) rotate(1deg)} }
+.tamago-pet img { width: 44px; height: 44px; object-fit: contain; image-rendering: pixelated; filter: drop-shadow(0 1px 2px rgba(0,0,0,.2)); }
+.tamago-fallback { font-size: 26px; }
+.tamago-pet.bouncing { animation: tamagoBounce .6s cubic-bezier(.34,1.56,.64,1); }
+@keyframes tamagoBounce { 0%,100%{transform:scale(1) rotate(0)} 30%{transform:scale(1.15) rotate(-6deg)} 60%{transform:scale(0.92) rotate(4deg)} }
+.tamago-pet.shake { animation: tamagoShake .5s ease; }
+@keyframes tamagoShake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px) rotate(-3deg)} 40%{transform:translateX(6px) rotate(3deg)} 60%{transform:translateX(-4px) rotate(-2deg)} 80%{transform:translateX(4px) rotate(2deg)} }
+.tamago-pet.win { border-color: var(--gold); box-shadow: 0 0 18px rgba(245,166,35,.6); animation: tamagoWin 1s ease-in-out infinite; }
+@keyframes tamagoWin { 0%,100%{transform:translateY(0) rotate(-3deg)} 50%{transform:translateY(-5px) rotate(3deg)} }
+
+.tamago-bubble {
+  background: rgba(255,255,255,.85);
+  border: 1.5px solid #223526;
+  border-radius: 12px; padding: 3px 8px;
+  font-size: 9.5px; font-weight: 800; color: #223526;
+  font-family: 'Noto Sans KR', sans-serif;
+  position: relative; max-width: 96%; min-height: 0;
+  text-align: center; line-height: 1.25;
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden;
+  align-items: center; justify-content: center;
+  animation: bubblePop .35s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes bubblePop { 0%{transform:scale(.6);opacity:0} 60%{transform:scale(1.06);opacity:1} 100%{transform:scale(1);opacity:1} }
+.tamago-bubble.win { border-color: var(--gold); background: rgba(255,252,232,.9); color: #a85c00; }
+.tamago-bubble.fail { border-color: #c0454f; background: rgba(255,240,240,.9); color: #a03a3a; }
+.tamago-bubble.try { border-color: var(--gold); background: rgba(255,249,227,.9); }
+
+/* 등급/확률 표시 (화면 안, 다마고치 LCD 톤) */
+.sim-rolling { display: flex; align-items: center; justify-content: center; font-family: 'Nunito', sans-serif; font-size: 12px; font-weight: 900; min-height: 0; width: 100%; }
+.sim-grade-pop { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; background: rgba(255,255,255,.4); border: 1.5px solid rgba(34,53,38,.3); border-radius: 99px; animation: gradePop .35s cubic-bezier(.34,1.56,.64,1); max-width: 100%; }
+@keyframes gradePop { 0%{transform:scale(.5);opacity:0} 60%{transform:scale(1.12);opacity:1} 100%{transform:scale(1);opacity:1} }
+.sim-grade-num { font-size: 12.5px; font-weight: 900; letter-spacing: -0.3px; white-space: nowrap; }
+.sim-grade-text { font-size: 8.5px; font-weight: 700; color: #4c6a55; white-space: nowrap; }
+.g-pos1 { color: #6a8bb0; } .g-pos2 { color: #2f7fd6; } .g-pos3 { color: #b0508a; text-shadow:0 0 8px rgba(176,80,138,.3);} .g-zero { color: #6b7d70; } .g-neg { color: #8a998f; }
+.g-hall { background: linear-gradient(135deg,#e08a1c,#c8a800,#b0508a); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; filter: drop-shadow(0 0 10px rgba(224,138,28,.4)); animation: hallGlow 1.5s ease infinite alternate; }
+@keyframes hallGlow { from{filter:drop-shadow(0 0 6px rgba(224,138,28,.3))} to{filter:drop-shadow(0 0 14px rgba(200,168,0,.6))} }
+.device-frame.hall-mode { animation: hallShake .5s ease; }
+@keyframes hallShake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)} 40%{transform:translateX(6px)} 60%{transform:translateX(-3px)} 80%{transform:translateX(3px)} }
+
+/* 상태바 */
+.sim-status-bar { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; flex-wrap: wrap; gap: 10px; }
+.sim-status-label { font-size: 10px; font-weight: 900; color: var(--t3); letter-spacing: 2px; font-family: 'Nunito', sans-serif; margin-bottom: 4px; }
+.sim-status-value { font-size: 20px; font-weight: 900; color: var(--t1); letter-spacing: -0.5px; }
+.sim-status-counter { font-size: 24px; font-weight: 900; font-family: 'Nunito', sans-serif; color: var(--a1); }
+.sim-status-sub { font-size: 11px; color: var(--t2); font-weight: 700; margin-top: 4px; }
+.sim-status-right { text-align: right; }
+
+.sim-display { display: flex; flex-direction: column; color: var(--t1); }
+
+.sim-cost-small { text-align: center; font-size: 12px; color: var(--t2); margin-top: 6px; font-family: 'Nunito', sans-serif; font-weight: 700; padding: 8px 16px; background: var(--s1); border-radius: 99px; display: inline-block; border: 1.5px solid var(--border); }
+
+/* 액션 버튼 (도전/초기화/새펫) */
+.sim-actions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 18px; }
+.btn-mini { padding: 12px; font-size: 13px; }
+
+/* 로그 */
+.sim-log { margin-top: 14px; max-height: 100px; overflow-y: auto; background: var(--s2); border: 1.5px solid var(--border); border-radius: 12px; padding: 8px 12px; font-family: 'Nunito', sans-serif; font-size: 11px; color: var(--t2); display: none; }
+.sim-log.show { display: block; }
+.sim-log-line { padding: 1px 0; }
+.sim-log-line.hall { color: #c87800; font-weight: 900; }
+
+/* 결과 카드 */
+.result-card { background: var(--white); border: 1.5px solid var(--border); border-radius: 20px; padding: 24px; box-shadow: var(--shadow); animation: fadeUp .3s ease; margin-top: 14px; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+.result-strip { height: 4px; border-radius: 99px; background: linear-gradient(90deg, var(--gold), var(--gold2), var(--a2)); margin-bottom: 18px; }
+.result-grand { text-align: center; margin-bottom: 18px; }
+.result-grand-tries { font-size: 52px; font-weight: 900; font-family: 'Nunito', sans-serif; background: linear-gradient(135deg, var(--gold), var(--gold2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1; }
+.result-grand-tries-unit { font-size: 20px; color: var(--t2); font-weight: 800; margin-left: 4px; -webkit-text-fill-color: var(--t2); }
+.result-grand-label { font-size: 13px; color: var(--t2); font-weight: 700; margin-top: 8px; }
+.result-grand-cost { display: inline-block; margin-top: 10px; padding: 6px 16px; background: linear-gradient(135deg, #fff5cc, #ffe988); border: 1.5px solid var(--gold); border-radius: 99px; font-size: 14px; font-weight: 900; color: #a85c00; font-family: 'Nunito', sans-serif; }
+[data-theme="dark"] .result-grand-cost { background: linear-gradient(135deg, #3a3020, #4a3825); color: var(--gold); }
+.theory-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 16px; }
+@media(max-width:500px){ .theory-grid { grid-template-columns: 1fr; } }
+.theory-cell { padding: 12px 10px; background: var(--s1); border: 1.5px solid var(--border); border-radius: 12px; text-align: center; }
+.theory-cell.highlight { border-color: var(--a1); background: var(--s2); }
+.theory-label { font-size: 10px; font-weight: 800; color: var(--t3); letter-spacing: 1px; font-family: 'Nunito', sans-serif; text-transform: uppercase; margin-bottom: 4px; }
+.theory-val { font-size: 20px; font-weight: 900; font-family: 'Nunito', sans-serif; color: var(--a1); }
+.theory-sub { font-size: 10px; color: var(--t3); font-family: 'Nunito', sans-serif; font-weight: 700; margin-top: 2px; }
+.luck-msg { margin-top: 14px; padding: 12px 16px; border-radius: 12px; background: var(--s1); border: 1.5px solid var(--border); display: flex; align-items: center; gap: 12px; text-align: left; }
+.luck-emoji { font-size: 26px; flex-shrink: 0; }
+.luck-text { font-size: 13px; font-weight: 700; color: var(--t1); line-height: 1.5; }
+.luck-msg.lucky { background: linear-gradient(135deg, #fff5cc, #ffe988); border-color: var(--gold); }
+[data-theme="dark"] .luck-msg.lucky { background: linear-gradient(135deg, #3a3020, #1c3149); }
+.luck-msg.unlucky { background: linear-gradient(135deg, #eef6ff, #e3f0fb); border-color: var(--a1); }
+[data-theme="dark"] .luck-msg.unlucky { background: linear-gradient(135deg, #16283c, #1c3149); }
+
+/* 도전 히스토리 그래프 */
+.history-graph { margin-top: 14px; padding: 14px; background: var(--s1); border: 1.5px solid var(--border); border-radius: 14px; }
+.history-graph-title { font-size: 11px; font-weight: 900; color: var(--t3); letter-spacing: 1px; margin-bottom: 8px; font-family: 'Nunito', sans-serif; }
+.history-graph-legend { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; font-size: 10px; color: var(--t2); font-weight: 700; justify-content: center; }
+.history-graph-legend .lg-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 4px; vertical-align: middle; }
+
+/* 누적 통계 */
+.stats-card { background: var(--white); border: 1.5px solid var(--border); border-radius: 20px; padding: 18px 20px; margin-top: 14px; box-shadow: var(--shadow); }
+.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+@media(max-width:600px){ .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+.stat-cell { text-align: center; padding: 8px; background: var(--s1); border-radius: 10px; }
+.stat-cell-num { font-size: 20px; font-weight: 900; font-family: 'Nunito', sans-serif; color: var(--a1); }
+.stat-cell-lbl { font-size: 10px; font-weight: 700; color: var(--t3); margin-top: 2px; letter-spacing: .5px; }
+.stats-actions { display: flex; justify-content: flex-end; margin-top: 10px; }
+.btn-reset { background: transparent; border: 1.5px solid var(--border2); color: var(--t3); padding: 5px 12px; border-radius: 99px; font-size: 11px; font-weight: 700; cursor: pointer; font-family: 'Noto Sans KR', sans-serif; transition: all .15s; }
+.btn-reset:hover { border-color: var(--err); color: var(--err); }
+
+/* 펫 정보 미리보기 */
+.pet-preview { display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: var(--s1); border: 1.5px solid var(--border); border-radius: 12px; margin-top: 8px; }
+.pet-preview-img { width: 44px; height: 44px; flex-shrink: 0; background: var(--white); border-radius: 8px; border: 1.5px solid var(--border); display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.pet-preview-img img { width: 36px; height: 36px; object-fit: contain; image-rendering: pixelated; }
+.pet-preview-info { flex: 1; min-width: 0; }
+.pet-preview-name { font-size: 14px; font-weight: 800; color: var(--t1); }
+.pet-preview-grade { font-size: 11px; color: var(--t3); font-weight: 600; margin-top: 2px; }
+
+/* 분포 미리보기 */
+.dist-preview { margin-top: 10px; background: var(--s1); border: 1.5px solid var(--border); border-radius: 10px; padding: 10px 12px; font-size: 11px; color: var(--t3); line-height: 1.6; }
+.dist-preview-title { font-size: 10px; font-weight: 800; color: var(--t3); letter-spacing: 1px; font-family: 'Nunito', sans-serif; margin-bottom: 4px; }
+.dist-bar-row { display: grid; grid-template-columns: 70px 1fr 60px; gap: 6px; align-items: center; padding: 2px 0; font-size: 11px; }
+.dist-bar-label { color: var(--t2); font-weight: 700; }
+.dist-bar-track { background: var(--white); border-radius: 4px; height: 6px; overflow: hidden; border: 1px solid var(--border); }
+.dist-bar-fill { background: linear-gradient(90deg, var(--a1), var(--a2)); height: 100%; }
+.dist-bar-pct { text-align: right; color: var(--t2); font-weight: 700; font-family: 'Nunito', sans-serif; font-size: 10px; }
+.dist-bar-row.highlight .dist-bar-fill { background: linear-gradient(90deg, var(--gold), var(--gold2)); }
+.dist-bar-row.highlight .dist-bar-pct { color: #a85c00; font-weight: 900; }
+.dist-bar-row.highlight .dist-bar-label { color: var(--t1); font-weight: 800; }
+
+/* 자동 진행 */
+.auto-n-check { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 99px; border: 1.5px solid var(--border); background: var(--white); font-size: 12px; font-weight: 700; color: var(--t2); cursor: pointer; transition: all .15s; }
+.auto-n-check input { display: none; }
+.auto-n-check.active { border-color: var(--a1); background: var(--s2); color: var(--a1); }
+
+@media(max-width:520px){ .page-title{font-size:28px;} }
+</style>
+</head>
+<body>
+
+<button class="toggle-btn" id="toggleBtn">☰</button>
+
+<div class="sidebar" id="sidebar">
+  <div class="sb-head">
+    <div class="sb-logo"><span class="sb-logo-dot"></span>SA 쟈쟈</div>
+    <div class="sb-sub">JYAJYA SERVER TOOLS</div>
+  </div>
+  <div class="sb-nav" id="sbNav"></div>
+  <div class="sb-body">
+    <div class="sb-info-box">
+      🎰 <b>환각 시뮬레이터</b><br><br>
+      펫을 잡고, 초기화 구슬을 굴려가며 <b>8등급(환각)</b>이 뜰 때까지 실제로 시뮬레이션해봐요.<br><br>
+      펫마다 초기화는 <b>최대 5번</b>까지 가능하고, 다 쓰면 새 펫을 사서 다시 도전해야 해요.
+    </div>
+  </div>
+  <div class="sb-footer">
+    <span class="sb-footer-txt" id="loadStatusSb">로딩중...</span>
+    <button class="dark-toggle" onclick="toggleDark()"><span class="toggle-moon">🌙</span><span class="toggle-sun">☀️</span></button>
+  </div>
+</div>
+
+<div class="main" id="main">
+<div class="main-inner">
+
+  <div class="page-head">
+    <div class="wind-badge"><span class="wind-badge-dot"></span><span>SA JYAJYA · SIMULATOR</span></div>
+    <h1 class="page-title">🎰 환각 시뮬레이터</h1>
+    <div class="page-sub">실제로 굴려보자, 8등급 뜰 때까지!</div>
+  </div>
+
+  <!-- 셋업 카드 -->
+  <div class="card">
+    <div class="card-title">시뮬 셋업</div>
+
+    <div class="setup-grid">
+      <div>
+        <div class="field">
+          <label class="field-label">펫 선택</label>
+          <div class="sugg-wrap">
+            <input type="text" class="field-input" id="pet-input" placeholder="펫 이름 검색 (예: 우리)" autocomplete="off" />
+            <div class="suggestions" id="suggestions" style="display:none;"></div>
+          </div>
+          <div class="pet-preview" id="pet-preview" style="display:none;">
+            <div class="pet-preview-img" id="pet-preview-img"></div>
+            <div class="pet-preview-info">
+              <div class="pet-preview-name" id="pet-preview-name">-</div>
+              <div class="pet-preview-grade" id="pet-preview-grade">-</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="field-label">
+            <span>펫 가격 (vip)</span>
+            <span id="vip-auto" style="font-weight:600;color:var(--ok);font-size:11px;display:none;">✨ 자동입력됨</span>
+          </label>
+          <input type="number" class="field-input" id="pet-price" placeholder="예: 5500" min="0" />
+        </div>
+
+        <div class="orb-grid">
+          <div>
+            <label class="field-label">초기화 구슬 (vip)</label>
+            <input type="number" class="field-input orb-input" id="orb-reset" value="1000" min="0" />
+          </div>
+        </div>
+
+        <div class="opt-row" style="margin-top:12px;">
+          <label class="opt-check active" id="sound-check-label">
+            <input type="checkbox" id="sound-check" checked />
+            <span>🔊 효과음</span>
+          </label>
+          <label class="opt-check" id="log-check-label">
+            <input type="checkbox" id="log-check" />
+            <span>📋 로그 보기</span>
+          </label>
+        </div>
+      </div>
+
+      <div>
+        <div style="font-size:12px;font-weight:700;color:var(--t2);margin-bottom:8px;">이 펫의 환각 가능성</div>
+        <div id="prob-info-empty" style="padding:24px 12px;text-align:center;background:var(--s1);border:1.5px dashed var(--border);border-radius:12px;color:var(--t3);font-size:13px;">
+          ← 펫을 선택하면 환각 확률 분포가 표시돼요
+        </div>
+        <div id="prob-info" style="display:none;">
+          <div id="catch-dist-preview" class="dist-preview" style="padding:14px;background:var(--s1);border:1.5px solid var(--border);border-radius:12px;">
+            <div class="dist-preview-title" style="margin-bottom:10px;font-size:11px;">📊 초구로 나올 수 있는 환각 확률 분포</div>
+            <div id="dist-bars"></div>
+            <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:11px;color:var(--t3);line-height:1.5;">
+              <strong style="color:var(--t2);">팁:</strong> 환각 확률이 0보다 큰 펫이 나오면 도전해볼 만해요.<br>
+              펫당 초기화 최대 5번
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="act-row">
+      <button class="btn-go" id="btn-go" disabled>🎣 펫 잡기 시작!</button>
+    </div>
+
+    <div id="auto-n-row" style="margin-top:10px;padding:12px 14px;background:var(--s2);border:1.5px dashed var(--border2);border-radius:14px;">
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
+        <span style="font-size:12px;font-weight:800;color:var(--t2);">🚀 자동 진행:</span>
+        <button id="btn-auto-n" class="btn-go" disabled style="padding:8px 16px;font-size:12px;background:linear-gradient(135deg,var(--a1),var(--a2));" onclick="runAutoRun()">▶ 환각까지 자동으로!</button>
+        <button id="btn-auto-stop" class="btn-go" style="display:none;padding:8px 14px;font-size:12px;background:var(--white);color:var(--err);border:1.5px solid var(--err);box-shadow:none;" onclick="autoNAbort = true;">⏸ 정지</button>
+        <button id="btn-auto-skip" class="btn-go" style="display:none;padding:8px 14px;font-size:12px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#5a4015;" onclick="skipToResult()">⏩ 결과 바로보기</button>
+        <span id="auto-help-text" style="font-size:11px;color:var(--t3);font-weight:700;">알아서 초기화/도전/펫구매 반복</span>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+        <span style="font-size:11px;font-weight:800;color:var(--t3);letter-spacing:0.5px;">구슬 사용:</span>
+        <label class="auto-n-check active" id="auto-orb-reset-label">
+          <input type="checkbox" id="auto-orb-reset" checked />
+          <span>📊 초기화 구슬</span>
+        </label>
+        <span style="font-size:10px;color:var(--t3);font-weight:600;">ⓘ 일반 포획펫은 꺼주세요</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 시뮬 디스플레이 -->
+  <div class="sim-display" id="sim-display" style="display:none;">
+    <div class="sim-status-bar">
+      <div class="sim-status-left">
+        <div class="sim-status-label">CURRENT PET</div>
+        <div class="sim-status-value" id="sim-pet-name">-</div>
+        <div class="sim-status-sub" id="sim-pet-meta">-</div>
+      </div>
+      <div class="sim-status-right">
+        <div class="sim-status-label">RESETS USED</div>
+        <div class="sim-status-counter" id="sim-reset-counter">0/5</div>
+        <div class="sim-status-sub" id="sim-life-status">초기화 가능</div>
+      </div>
+    </div>
+
+    <!-- 다마고치 디바이스 -->
+    <div class="device-frame" id="device-frame">
+      <div class="device-screen">
+        <div class="tamago-area">
+          <div class="tamago-bubble" id="tamago-bubble">
+            <span id="tamago-bubble-text">안녕! 잘 부탁해 🐾</span>
+          </div>
+          <div class="tamago-pet" id="tamago-pet">
+            <img id="tamago-img" alt="pet" />
+            <span class="tamago-fallback" id="tamago-fallback" style="display:none;">🐾</span>
+          </div>
+        </div>
+
+        <div class="sim-rolling" id="sim-rolling">
+          <span style="color:#6b7d70;font-size:10px;font-weight:700;">시작을 기다리는 중...</span>
+        </div>
+      </div>
+
+      <button class="device-hitzone hz-select" onclick="deviceSelect()" aria-label="SELECT" title="SELECT · 다른 펫 고르기"></button>
+      <button class="device-hitzone hz-decide" onclick="deviceDecide()" aria-label="DECIDE" title="DECIDE · 다음 행동"></button>
+      <button class="device-hitzone hz-cancel" onclick="deviceCancel()" aria-label="CANCEL" title="CANCEL · 처음부터"></button>
+    </div>
+
+    <div class="stat-rolls" id="stat-rolls">
+      <div class="stat-roll-cell"><div class="srl-label">공격</div><div class="srl-val" id="srl-atk">−</div><div class="srl-diff" id="srl-diff-atk"></div></div>
+      <div class="stat-roll-cell"><div class="srl-label">방어</div><div class="srl-val" id="srl-def">−</div><div class="srl-diff" id="srl-diff-def"></div></div>
+      <div class="stat-roll-cell"><div class="srl-label">민첩</div><div class="srl-val" id="srl-agi">−</div><div class="srl-diff" id="srl-diff-agi"></div></div>
+      <div class="stat-roll-cell"><div class="srl-label">체력</div><div class="srl-val" id="srl-hp">−</div><div class="srl-diff" id="srl-diff-hp"></div></div>
+    </div>
+
+    <div style="text-align:center;margin-top:-6px;margin-bottom:8px;">
+      <button id="btn-skip-anim" style="display:none;background:var(--white);color:var(--a1);border:2px solid var(--a1);padding:6px 20px;border-radius:99px;font-size:12px;font-weight:900;cursor:pointer;font-family:'Noto Sans KR',sans-serif;box-shadow:0 2px 8px rgba(47,127,214,.2);" onclick="skipAnimFlag = true;">⏭ 스킵</button>
+    </div>
+
+    <div style="text-align:center;">
+      <div class="sim-cost-small" id="sim-cost-small"></div>
+    </div>
+
+    <div id="sim-actions" style="display:none;">
+      <div class="sim-actions-grid">
+        <button class="btn-go btn-mini" id="btn-action-hall" style="background:linear-gradient(135deg,var(--gold),var(--gold2));color:#5a4015;" onclick="tryHallChallenge()">🎰 환각 도전!</button>
+        <button class="btn-go btn-mini" id="btn-action-reset" style="background:var(--white);color:var(--a1);border:1.5px solid var(--a1);box-shadow:none;" onclick="rerollStats()">📊 초기화 구슬 사용</button>
+      </div>
+      <div class="sim-actions-grid" style="margin-top:10px;">
+        <button class="btn-go btn-mini" id="btn-action-reset5" style="background:linear-gradient(135deg,var(--a1),var(--a3));" onclick="rerollStats5()">⚡ 초기화 연속</button>
+        <button class="btn-go btn-mini" id="btn-action-newpet-buy" style="background:linear-gradient(135deg,var(--a2),var(--a5));" onclick="buyNewPet()">🛒 새 펫 사기</button>
+      </div>
+    </div>
+
+    <div id="sim-restart-row" style="display:none;margin-top:14px;padding-top:14px;border-top:1.5px dashed var(--border);text-align:center;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
+      <button id="btn-restart" style="background:var(--white);color:var(--t3);border:1.5px solid var(--border2);padding:7px 16px;border-radius:99px;font-size:11px;font-weight:800;cursor:pointer;font-family:'Noto Sans KR',sans-serif;" onclick="restartSimulation()">⚙️ 처음부터 다시시작</button>
+      <button id="btn-giveup" style="background:var(--white);color:var(--t3);border:1.5px solid var(--border2);padding:7px 16px;border-radius:99px;font-size:11px;font-weight:800;cursor:pointer;font-family:'Noto Sans KR',sans-serif;" onclick="giveUp()">🏳️ 여기서 그만</button>
+    </div>
+
+    <div class="sim-log" id="sim-log"></div>
+  </div>
+
+  <div id="result-area"></div>
+
+  <div class="stats-card" id="stats-card" style="display:none;">
+    <div class="card-title">📊 내 누적 통계</div>
+    <div class="stats-grid">
+      <div class="stat-cell"><div class="stat-cell-num" id="st-runs">0</div><div class="stat-cell-lbl">실행 횟수</div></div>
+      <div class="stat-cell"><div class="stat-cell-num" id="st-total-tries">0</div><div class="stat-cell-lbl">총 시도</div></div>
+      <div class="stat-cell"><div class="stat-cell-num" id="st-avg">0</div><div class="stat-cell-lbl">평균 시도</div></div>
+      <div class="stat-cell"><div class="stat-cell-num" id="st-best">-</div><div class="stat-cell-lbl">최고 기록</div></div>
+    </div>
+    <div class="stats-actions"><button class="btn-reset" onclick="resetStats()">통계 초기화</button></div>
+  </div>
+
+</div>
+</div>
+
+<script src="nav.js"></script>
+<script>
+/* ═══════════════════════════════════════════════════════════
+   사이드바 (push 방식)
+   ═══════════════════════════════════════════════════════════ */
+const sidebar = document.getElementById("sidebar");
+const toggleBtn = document.getElementById("toggleBtn");
+const mainEl = document.getElementById("main");
+function setSidebar(open){
+  sidebar.classList.toggle("open", open);
+  toggleBtn.classList.toggle("sb-open", open);
+  mainEl.classList.toggle("shifted", open);
+  toggleBtn.textContent = open ? "✕" : "☰";
+  try{ localStorage.setItem('sa2-sb', open ? '1' : '0'); }catch(e){}
+}
+toggleBtn.addEventListener("click", ()=> setSidebar(!sidebar.classList.contains("open")));
+try{
+  const sbSaved = localStorage.getItem('sa2-sb');
+  setSidebar(sbSaved === null ? window.innerWidth > 820 : sbSaved === '1');
+}catch(e){ setSidebar(window.innerWidth > 820); }
+
+function toggleDark(){
+  const h=document.documentElement;
+  const n=h.getAttribute('data-theme')==='dark'?'light':'dark';
+  h.setAttribute('data-theme', n);
+  try{ localStorage.setItem('sa2-theme', n); }catch(e){}
+}
+try{ const saved=localStorage.getItem('sa2-theme'); if(saved) document.documentElement.setAttribute('data-theme', saved); }catch(e){}
+
+/* ═══════════════════════════════════════════════════════════
+   SA 계산 로직 (index.html / pokedex.html과 동일한 검증된 공식)
+   ═══════════════════════════════════════════════════════════ */
+const SEED = [{"name": "\ufeff우리", "how": "마리너스 마을 앞마당", "mount": "가능", "id": 1, "initPct": 10, "lvup": 4.5, "h0": 20, "a0": 14, "d0": 19, "s0": 25, "earth": 80, "water": 20, "fire": 0, "wind": 0, "rarity": "0", "imageCode": "100250"}, {"name": "두리", "how": "성인식의 동굴 전역", "mount": "가능", "id": 2, "initPct": 20, "lvup": 4.5, "h0": 22, "a0": 28, "d0": 11, "s0": 26, "earth": 0, "water": 40, "fire": 60, "wind": 0, "rarity": "0", "imageCode": "100251"}, {"name": "얼룩우리", "how": "사이너스 (66，592)", "mount": "가능", "id": 3, "initPct": 15, "lvup": 4.5, "h0": 22, "a0": 19, "d0": 21, "s0": 25, "earth": 100, "water": 0, "fire": 0, "wind": 0, "rarity": "0", "imageCode": "100252"}, {"name": "불그리", "how": "B코스 보상페트", "mount": "불가", "id": 4, "initPct": 10, "lvup": 4.5, "h0": 24, "a0": 31, "d0": 12, "s0": 31, "earth": 0, "water": 0, "fire": 70, "wind": 30, "rarity": "0", "imageCode": "100253"}, {"name": "실버우리", "how": "복권 1등 페트(카루타나 마을)", "mount": "가능", "id": 5, "initPct": 20, "lvup": 4.5, "h0": 26, "a0": 29, "d0": 23, "s0": 27, "earth": 50, "water": 0, "fire": 0, "wind": 50, "rarity": "2", "imageCode": "100388"}, {"name": "환생얼룩우리", "how": "1환 보상 페트", "mount": "불가", "id": 6, "initPct": 25, "lvup": 4.5, "h0": 29, "a0": 27, "d0": 31, "s0": 20, "earth": 50, "water": 0, "fire": 0, "wind": 50, "rarity": "2", "imageCode": "100252"}, {"name": "부비", "how": "사이너스 (601，358)", "mount": "가능", "id": 11, "initPct": 15, "lvup": 4.5, "h0": 45, "a0": 30, "d0": 20, "s0": 12, "earth": 80, "water": 20, "fire": 0, "wind": 0, "rarity": "0", "imageCode": "100254"}, {"name": "골드부비", "how": "퀴즈도장 (카루타나)", "mount": "가능", "id": 12, "initPct": 25, "lvup": 4.5, "h0": 42, "a0": 35, "d0": 16, "s0": 14, "earth": 0, "water": 0, "fire": 30, "wind": 70, "rarity": "1", "imageCode": "100255"}, {"name": "부이", "how": "사이너스 (633，344)", "mount": "가능", "id": 13, "initPct": 22, "lvup": 4.5, "h0": 48, "a0": 31, "d0": 18, "s0": 12, "earth": 60, "water": 40, "fire": 0, "wind": 0, "rarity": "0", "imageCode": "100256"}, {"name": "부이비", "how": "쟈루 (389，188)", "mount": "가능", "id": 14, "initPct": 16, "lvup": 4.5, "h0": 44, "a0": 36, "d0": 16, "s0": 12, "earth": 0, "water": 40, "fire": 60, "wind": 0, "rarity": "0", "imageCode": "100257"}, {"name": "얼룩부이비", "how": "퀴즈도장 (마리너스)", "mount": "불가", "id": 15, "initPct": 23, "lvup": 4.5, "h0": 42, "a0": 32, "d0": 22, "s0": 12, "earth": 100, "water": 0, "fire": 0, "wind": 0, "rarity": "1", "imageCode": "100258"}, {"name": "꼬미", "how": "라토토의 복도 (140，123)", "mount": "불가", "id": 21, "initPct": 22, "lvup": 4.5, "h0": 22, "a0": 25, "d0": 12, "s0": 30, "earth": 0, "water": 0, "fire": 60, "wind": 40, "rarity": "0", "imageCode": "100259"}, {"name": "꼬비", "how": "라토토의 복도 (152，46)", "mount": "불가", "id": 22, "initPct": 20, "lvup": 4.5, "h0": 21, "a0": 23, "d0": 15, "s0": 30, "earth": 50, "water": 0, "fire": 0, "wind": 50, "rarity": "0", "imageCode": "100260"}, {"name": "꼬비오", "how": "라토토의 동굴 3층  (78，41)｜C코스 보상페트", "mount": "불가", "id": 23, "initPct": 18, "lvup": 4.5, "h0": 22, "a0": 26, "d0": 13, "s0": 32, "earth": 0, "water": 0, "fire": 0, "wind": 100, "rarity": "0", "imageCode": "100261"}, {"name": "꼬꼬비", "how": "라토토의 동굴 3층 (15，18)", "mount": "불가", "id": 24, "initPct": 16, "lvup": 4.5, "h0": 22, "a0": 27, "d0": 12, "s0": 32, "earth": 0, "water": 0, "fire": 30, "wind": 70, "rarity": "0", "imageCode": "100262"}, {"name": "푸푸", "how": "쟈루 (564，347)", "mount": "가능", "id": 31, "initPct": 16, "lvup": 4.5, "h0": 20, "a0": 24, "d0": 11, "s0": 37, "earth": 30, "water": 0, "fire": 0, "wind": 70, "rarity": "0", "imageCode": "100263"}, {"name": "우푸", "how": "쟈루 (564，379)", "mount": "가능", "id": 32, "initPct": 16, "lvup": 4.5, "h0": 18, "a0": 24, "d0": 9, "s0": 36, "earth": 0, "water": 0, "fire": 60, "wind": 40, "rarity": "0", "imageCode": "100264"}, {"name": "투투", "how": "쟈루 (295，358)", "mount": "가능", "id": 33, "initPct": 17, "lvup": 4.5, "h0": 25, "a0": 24, "d0": 9, "s0": 34, "earth": 30, "water": 70, "fire": 0, "wind": 0, "rarity": "0", "imageCode": "100265"}, {"name": "오투투", "how": "성인식의 동굴 전역", "mount": "가능", "id": 34, "initPct": 20, "lvup": 4.5, "h0": 20, "a0": 23, "d0": 13, "s0": 33, "earth": 60, "water": 0, "fire": 0, "wind": 40, "rarity": "0", "imageCode": "100266"}, {"name": "베론", "how": "쿠링으로의 길 1층 (12，21)", "mount": "가능", "id": 41, "initPct": 24, "lvup": 4.5, "h0": 36, "a0": 20, "d0": 36, "s0": 15, "earth": 0, "water": 100, "fire": 0, "wind": 0, "rarity": "0", "imageCode": "100267"}, {"name": "베로로크", "how": "쿠링으로의 길 2층 (27，26)", "mount": "가능", "id": 42, "initPct": 19, "lvup": 4.5, "h0": 33, "a0": 20, "d0": 39, "s0": 14, "earth": 70, "water": 30, "fire": 0, "wind": 0, "rarity": "0", "imageCode": "100268"}, {"name": "베로보크", "how": "아름산의 동굴 지하 7층 (42，23)", "mount": "가능", "id": 43, "initPct": 23, "lvup": 4.5, "h0": 35, "a0": 19, "d0": 37, "s0": 15, "earth": 30, "water": 70, "fire": 0, "wind": 0, "rarity": "0", "imageCode": "100269"}, {"name": "베로포리", "how": "속임수의 동굴 (22，21)", "mount": "가능", "id": 44, "initPct": 20, "lvup": 4.5, "h0": 32, "a0": 24, "d0": 35, "s0": 15, "earth": 0, "water": 30, "fire": 70, "wind": 0, "rarity": "0", "imageCode": "100270"}, {"name": "노북이", "how": "사이너스 (558，428)", "mount": "가능", "id": 51, "initPct": 14, "lvup": 4.5, "h0": 23, "a0": 21, "d0": 37, "s0": 11, "earth": 30, "water": 0, "fire": 0, "wind": 70, "rarity": "0", "imageCode": "100271"}, {"name": "북이", "how": "사이너스 (521，388)", "mount": "가능", "id": 52, "initPct": 14, "lvup": 4.5, "h0": 23, "a0": 21, "d0": 40, "s0": 9, "earth": 60, "water": 0, "fire": 0, "wind": 40, "rarity": "0", "imageCode": "100272"}, {"name": "깡북이", "how": "쿠오산 소동굴 3층 (20，32)", "mount": "가능", "id": 53, "initPct": 12, "lvup": 4.5, "h0": 22, "a0": 25, "d0": 36, "s0": 10, "earth": 0, "water": 0, "fire": 80, "wind": 20, "rarity": "0", "imageCode": "100273"}, {"name": "돌북이", "how": "쿠오산 소동굴 4층 (23，38)", "mount": "가능", "id": 54, "initPct": 20, "lvup": 4.5, "h0": 24, "a0": 20, "d0": 45, "s0": 9, "earth": 90, "water": 0, "fire": 0, "wind": 10, "rarity": "0", "imageCode": "100274"}, {"name": "아고아", "how": "진홍의 동굴 지하 6층 (12，14)", "mount": "가능", "id": 61, "initPct": 20, "lvup": 4.5, "h0": 24, "a0": 33, "d0": 18, "s0": 24, "earth": 0, "water": 30, "fire": 70, "wind": 0, "rarity": "0", "imageCode": "100275"}, {"name": "네고스", "how": "쟈루 (275，495)", "mount": "가능", "id": 62, "initPct": 18, "lvup": 4.5, "h0": 29, "a0": 32, "d0": 22, "s0": 24, "earth": 40, "water": 60, "fire": 0, "wind": 0, "rarity": "0", "imageCode": "100276"}, {"name": "타로곤", "how": "사이너스 (186，153)", "mount": "가능", "id": 63, "initPct": 17, "lvup": 4.5, "h0": 27, "a0": 32, "d0": 22, "s0": 25, "earth": 70, "water": 0, "fire": 0, "wind": 30, "rarity": "0", "imageCode": "100277"}, {"name": "다고스", "how": "사이너스 (348，174)", "mount": "가능", "id": 64, "initPct": 19, "lvup": 4.5, "h0": 32, "a0": 31, "d0": 20, "s0": 24, "earth": 0, "water": 80, "fire": 20, "wind": 0, "rarity": "0", "imageCode": "100278"}, {"name": "보크곤", "how": "몽환의 동굴 (46，54)", "mount": "불가", "id": 65, "initPct": 19, "lvup": 4.5, "h0": 27, "a0": 34, "d0": 18, "s0": 26, "earth": 0, "water": 0, "fire": 20, "wind": 80, "rarity": "0", "imageCode": "100393"}, {"name": "라고고", "how": "가우린 (461，524)", "mount": "가능", "id": 71, "initPct": 23, "lvup": 4.5, "h0": 22, "a0": 29, "d0": 15, "s0": 28, "earth": 0, "water": 0, "fire": 100, "wind": 0, "rarity": "0", "imageCode": "100279"}, {"name": "후바바", "how": "사이너스 (526，144)", "mount": "가능", "id": 72, "initPct": 24, "lvup": 4.5, "h0": 22, "a0": 28, "d0": 14, "s0": 29, "earth": 0, "water": 0, "fire": 60, "wind": 40, "rarity": "0", "imageCode": "100280"}, {"name": "토루루", "how": "가우린 (374，461)｜D코스 보상페트", "mount": "가능", "id": 73, "initPct": 19, "lvup": 4.5, "h0": 25, "a0": 30, "d0": 18, "s0": 30, "earth": 60, "water": 0, "fire": 0, "wind": 40, "rarity": "0", "imageCode": "100281"}, {"name": "루니", "how": "사이너스 (452，157)", "mount": "가능", "id": 74, "initPct": 22, "lvup": 4.5, "h0": 24, "a0": 27, "d0": 20, "s0": 28, "earth": 100, "water": 0, "fire": 0, "wind": 0, "rarity": "0", "imageCode": "100282"}, {"name": "카타르카스", "how": "동쿠링 광산 1층 (30，45)", "mount": "가능", "id": 81, "initPct": 22, "lvup": 4.5, "h0": 25, "a0": 23, "d0": 40, "s0": 6, "earth": 100, "water": 0, "fire": 0, "wind": 0, "rarity": "0", "imageCode": "100283"}, {"name": "쿠카스", "how": "동쿠링 광산 2층 (5，7)", "mount": "가능", "id": 82, "initPct": 22, "lvup": 4.5, "h0": 28, "a0": 22, "d0": 39, "s0": 5, "earth": 80, "water": 20, "fire": 0, "wind": 0, "rarity": "0", "imageCode": "100284"}, {"name": "코로카스", "how": "도둑의 동굴 지하 4층 (15，4)", "mount": "가능", "id": 83, "initPct": 17, "lvup": 4.5, "h0": 29, "a0": 30, "d0": 38, "s0": 7, "earth": 0, "water": 40, "fire": 60, "wind": 0, "rarity": "0", "imageCode": "100285"}, {"name": "로기안", "how": "유리의 동굴 13층 (35，8)", "mount": "가능", "id": 84, "initPct": 23, "lvup": 4.5, "h0": 28, "a0": 25, "d0": 43, "s0": 8, "earth": 80, "water": 0, "fire": 0, "wind": 20, "rarity": "0", "imageCode": "100286"}, {"name": "램가스", "how": "샴기르 촌장의 선물", "mount": "가능", "id": 85, "initPct": 20, "lvup": 4.5, "h0": 25, "a0": 28, "d0": 45, "s0": 10, "earth": 50, "water": 0, "fire": 0, "wind": 50, "rarity": "1", "imageCode": "100389"}, {"name": "아이카스", "how": "칠흑의 동굴 지하 9층 (40，43)", "mount": "가능", "id": 86, "initPct": 22, "lvup": 4.5, "h0": 33, "a0": 24, "d0": 43, "s0": 6, "earth": 50, "water": 50, "fire": 0, "wind": 0, "rarity": "0", "imageCode": "100390"}, {"name": "쿠타스", "how": "칠흑의 동굴 지하 11층 (56，38)", "mount": "가능", "id": 87, "initPct": 22, "lvup": 4.5, "h0": 34, "a0": 28, "d0": 39, "s0": 6, "earth": 0, "water": 60, "fire": 40, "wind": 0, "rarity": "0", "imageCode": "100391"}, {"name": "카르기안", "how": "칠흑의 동굴 지하 5층 (18，7)", "mount": "가능", "id": 88, "initPct": 20, "lvup": 4.5, "h0": 20, "a0": 20, "d0": 36, "s0": 12, "earth": 20, "water": 0, "fire": 0, "wind": 80, "rarity": "0", "imageCode": "100392"}];
+let PETS = SEED.slice().filter(p => String(p.how||"").replace(/\s+/g,"").trim() !== "미출시");
+const IMG_BASE = "https://sa000001.com/sa2/info/img/";
+const API_URL = "https://sa000001.com/sa2/info/api/pet_data.php";
+
+function num(v){ const n = Number(v); return isFinite(n) ? n : 0; }
+function cut2(n){ n=Number(n); if(!isFinite(n)) return "-"; return (Math.floor(n*100)/100).toFixed(2).replace(/\.?0+$/, ""); }
+function dropDecimalInt(v){ v=Number(v); return isFinite(v)?Math.floor(v):0; }
+function rankInfoB(sum){ if(sum>=100)return 475; if(sum>=95)return 495; if(sum>=90)return 515; if(sum>=85)return 535; if(sum>=80)return 555; return 575; }
+function disp(h,a,d,s){ return { h:h*4+a+d+s, a:h*0.1+a+d*0.1+s*0.05, d:h*0.1+a*0.1+d+s*0.05, s:s }; }
+function calcStats(r){
+  const baseSum = num(r.h0)+num(r.a0)+num(r.d0)+num(r.s0);
+  const B = rankInfoB(baseSum);
+  const ph=num(r.h0)+num(r.lvup), pa=num(r.a0)+num(r.lvup), pd=num(r.d0)+num(r.lvup), ps=num(r.s0)+num(r.lvup);
+  const init = disp(num(r.initPct)*ph/100, num(r.initPct)*pa/100, num(r.initPct)*pd/100, num(r.initPct)*ps/100);
+  const growth = disp(ph*B/10000, pa*B/10000, pd*B/10000, ps*B/10000);
+  return { init, growth, totalGrowth: growth.a+growth.d+growth.s };
+}
+function normalizedName(p){ return String(p.name||"").replace(/^\uFEFF/, ""); }
+function rarityText(v){ v=String(v||"").trim(); if(v==="0")return "일반등급"; if(v==="1")return "2등급(돈펫)"; if(v==="2")return "1등급(돈펫)"; return v||"-"; }
+
+/* 환각 실제매칭 공식 (lvup 미포함 - 실서버 검증됨) */
+function calcInitWithRollBase(r, rh, ra, rd, rs, hb, ab, db, sb){
+  const ph = num(r.h0)+num(rh)+num(hb);
+  const pa = num(r.a0)+num(ra)+num(ab);
+  const pd = num(r.d0)+num(rd)+num(db);
+  const ps = num(r.s0)+num(rs)+num(sb);
+  return disp(num(r.initPct)*ph/100, num(r.initPct)*pa/100, num(r.initPct)*pd/100, num(r.initPct)*ps/100);
+}
+/* S급(품종 고정) 이상적 초기치 - lvup 포함, 차이 표시용 */
+function calcIdealDisplay(pet){
+  const st = calcStats(pet);
+  return { atk: Math.floor(st.init.a), def: Math.floor(st.init.d), agi: Math.floor(st.init.s), hp: Math.floor(st.init.h) };
+}
+/* 펫의 모든 가능 조합(178,750가지)을 브루트포스로 그룹화 → 스탯풀 */
+function buildPetStatPool(pet){
+  const map = {};
+  for (let rh = -2; rh <= 2; rh++)
+  for (let ra = -2; ra <= 2; ra++)
+  for (let rd = -2; rd <= 2; rd++)
+  for (let rs = -2; rs <= 2; rs++)
+  for (let ab = 0; ab <= 10; ab++)
+  for (let db = 0; db <= 10 - ab; db++)
+  for (let sb = 0; sb <= 10 - ab - db; sb++) {
+    const hb = 10 - ab - db - sb;
+    const init = calcInitWithRollBase(pet, rh, ra, rd, rs, hb, ab, db, sb);
+    const ca = dropDecimalInt(init.a), cd = dropDecimalInt(init.d), cs = dropDecimalInt(init.s), ch = dropDecimalInt(init.h);
+    const key = ca+','+cd+','+cs+','+ch;
+    if (!map[key]) map[key] = { atk: ca, def: cd, agi: cs, hp: ch, total: 0, hall: 0 };
+    map[key].total++;
+    if (rh===2 && ra===2 && rd===2 && rs===2) map[key].hall++;
+  }
+  const arr = []; let totalCombos = 0;
+  for (const k in map) { const v = map[k]; v.prob = v.hall / v.total; totalCombos += v.total; arr.push(v); }
+  return { pool: arr, totalCombos };
+}
+
+/* ═══════════════════════════════════════════════════════════
+   다마고치 펫 멘트 시스템
+   ═══════════════════════════════════════════════════════════ */
+const PET_MSGS = {
+  greet: ['안녕! 잘 부탁해 🐾', '오늘은 내 운명을 정해줘!', '준비됐어?', '한 번 해보자!'],
+  zero: ['아 이번엔 망했네... 😞', '에휴, 다시 굴려줘', '꽝이야 ㅠㅠ', '난 크게 될 놈이 아닌가봐 ㅠㅠ', '으악 또 0%야...', '나 그냥 평범한 펫인가봐'],
+  weak: ['아쉬워... 살짝 있긴 한데', '이게 최선이야...?', '음... 미묘하네', '0.001%라도 있긴 있어!'],
+  okay: ['오! 좀 괜찮은데?', '도전해볼만 한데? 🤔', '음~ 나쁘지 않아!', '한 번 도전해봐!'],
+  good: ['오오! 꽤 좋은데?!', '도전해봐!!!', '나 좀 쓸만한 펫인가?', '이번엔 가즈아!'],
+  great: ['대박! 도전 ㄱㄱ! 🔥', '나 환각 띄울 자신 있어!', '믿어봐!', '거의 확정이야!!!'],
+  hot: ['나 확신해! 100% 가능 ✨', 'GOAT 펫이야!!!', '걍 도전이지 ㄴㄴ'],
+  try: ['두근두근... 가즈아!', '제발 떠라!!! 🙏', '간다아아아!'],
+  win: ['환각 성공!!! 나 8등급이야 ✨', '내가 해냈어!!! 🎉', '봐라 나의 진짜 모습을!', '드디어... 진짜 됐어 😭'],
+  fail: ['아쉽네 ㅠㅜ', '왜 안 떠... 분명 확률 있었는데', '한 번 더... 한 번 더 줘봐', '나 진짜 안 되는 건가...', '에휴 다시 굴려야겠다', '맘에 안 들어! 다시!'],
+  newpet: ['안녕! 새로 왔어! 🐾', '이번엔 내가 해낼게!', '나는 다르다구!', '잘 부탁해~'],
+};
+function randomPetMsg(kind) { const arr = PET_MSGS[kind] || PET_MSGS.greet; return arr[Math.floor(Math.random() * arr.length)]; }
+function petBubbleForProb(prob) {
+  const pct = prob * 100;
+  if (pct === 0) return randomPetMsg('zero');
+  if (pct < 1) return randomPetMsg('weak');
+  if (pct < 5) return randomPetMsg('okay');
+  if (pct < 50) return randomPetMsg('good');
+  if (pct < 99) return randomPetMsg('great');
+  return randomPetMsg('hot');
+}
+function setPetBubble(msg, kind) {
+  const bubble = $('tamago-bubble'); const text = $('tamago-bubble-text'); const pet = $('tamago-pet');
+  if (!bubble || !text) return;
+  text.textContent = msg;
+  bubble.classList.remove('win', 'fail', 'try');
+  if (kind === 'win') bubble.classList.add('win');
+  else if (kind === 'fail') bubble.classList.add('fail');
+  else if (kind === 'try') bubble.classList.add('try');
+  pet.classList.remove('bouncing', 'shake', 'win');
+  void pet.offsetWidth;
+  if (kind === 'win') pet.classList.add('win');
+  else if (kind === 'fail') pet.classList.add('shake');
+  else pet.classList.add('bouncing');
+  bubble.style.animation = 'none'; void bubble.offsetWidth; bubble.style.animation = '';
+}
+function setTamagoImage(name) {
+  const img = $('tamago-img'); const fb = $('tamago-fallback');
+  if (!img || !fb) return;
+  const p = petData[name];
+  if (p && p.imageCode) {
+    img.src = IMG_BASE + p.imageCode + '.png';
+    img.onerror = function(){ img.onerror=null; img.src = IMG_BASE + p.imageCode + '.gif'; };
+    img.style.display = 'block'; fb.style.display = 'none';
+  } else { img.style.display = 'none'; fb.style.display = 'inline'; }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   사운드 엔진 (Web Audio API 합성)
+   ═══════════════════════════════════════════════════════════ */
+let audioCtx = null; let soundOn = true;
+function ensureAudio() {
+  if (!soundOn) return null;
+  if (!audioCtx) { try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return null; } }
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+function tone(freq, dur, type = 'sine', vol = 0.15, fStart, fEnd) {
+  const ctx = ensureAudio(); if (!ctx) return;
+  const t = ctx.currentTime;
+  const osc = ctx.createOscillator(); const g = ctx.createGain();
+  osc.type = type;
+  if (fStart && fEnd) { osc.frequency.setValueAtTime(fStart, t); osc.frequency.exponentialRampToValueAtTime(fEnd, t + dur / 1000); }
+  else { osc.frequency.setValueAtTime(freq, t); }
+  g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t + 0.005); g.gain.exponentialRampToValueAtTime(0.001, t + dur / 1000);
+  osc.connect(g).connect(ctx.destination); osc.start(t); osc.stop(t + dur / 1000 + 0.05);
+}
+function sfxReroll() { tone(880, 80, 'square', 0.08); setTimeout(() => tone(1320, 80, 'sine', 0.06), 30); }
+function sfxStatDecide() { tone(0, 250, 'triangle', 0.10, 660, 1320); }
+function sfxHallStart() {
+  const ctx = ensureAudio(); if (!ctx) return;
+  const t = ctx.currentTime;
+  const o = ctx.createOscillator(); const g = ctx.createGain();
+  o.type = 'sawtooth'; o.frequency.setValueAtTime(60, t); o.frequency.linearRampToValueAtTime(220, t + 0.8);
+  g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.12, t + 0.2); g.gain.linearRampToValueAtTime(0, t + 0.85);
+  const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 800;
+  o.connect(lp).connect(g).connect(ctx.destination); o.start(t); o.stop(t + 0.9);
+}
+function sfxHallSuccess() {
+  const ctx = ensureAudio(); if (!ctx) return;
+  const t0 = ctx.currentTime;
+  const bs = ctx.sampleRate * 0.25;
+  const buf = ctx.createBuffer(1, bs, ctx.sampleRate); const data = buf.getChannelData(0);
+  for (let i = 0; i < bs; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / bs);
+  const n = ctx.createBufferSource(); n.buffer = buf;
+  const ng = ctx.createGain(); ng.gain.value = 0.2;
+  const hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 1200;
+  n.connect(hp).connect(ng).connect(ctx.destination); n.start(t0);
+  [ { f: 523, t: 0.05, d: 0.25 }, { f: 659, t: 0.18, d: 0.25 }, { f: 784, t: 0.30, d: 0.30 }, { f: 1047, t: 0.45, d: 1.00 } ].forEach(nn => {
+    [nn.f, nn.f * 2].forEach((freq, i) => {
+      const o = ctx.createOscillator(); const g = ctx.createGain();
+      o.type = i === 0 ? 'sawtooth' : 'sine'; o.frequency.value = freq;
+      const t = t0 + nn.t; const vol = i === 0 ? 0.12 : 0.06;
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t + 0.04); g.gain.exponentialRampToValueAtTime(0.001, t + nn.d);
+      o.connect(g).connect(ctx.destination); o.start(t); o.stop(t + nn.d + 0.1);
+    });
+  });
+}
+function sfxHallFail() { tone(0, 500, 'triangle', 0.12, 440, 110); }
+function sfxNewPet() { tone(660, 100, 'triangle', 0.10); setTimeout(() => tone(880, 150, 'triangle', 0.10), 80); }
+function sfxCatch() {
+  const ctx = ensureAudio(); if (!ctx) return;
+  const t = ctx.currentTime;
+  [0, 0.08, 0.16].forEach((dt, i) => {
+    const o = ctx.createOscillator(); const g = ctx.createGain();
+    o.type = 'triangle'; o.frequency.value = 440 * Math.pow(1.5, i);
+    g.gain.setValueAtTime(0, t + dt); g.gain.linearRampToValueAtTime(0.12, t + dt + 0.02); g.gain.exponentialRampToValueAtTime(0.001, t + dt + 0.18);
+    o.connect(g).connect(ctx.destination); o.start(t + dt); o.stop(t + dt + 0.25);
+  });
+}
+function sfxClick() { tone(880, 40, 'square', 0.05); }
+
+/* ═══════════════════════════════════════════════════════════
+   펫 데이터
+   ═══════════════════════════════════════════════════════════ */
+let petData = {};
+function rebuildPetData(){ petData = {}; PETS.forEach(p => { petData[normalizedName(p)] = p; }); }
+rebuildPetData();
+
+const $ = id => document.getElementById(id);
+let selectedPetName = '';
+let currentPetStatPool = null;
+let currentPetTotalCombos = 0;
+let currentIdealStats = null;
+
+function updateStatCells(stats) {
+  if (!stats) return;
+  const ids = [ {val:'srl-atk',diff:'srl-diff-atk',key:'atk'}, {val:'srl-def',diff:'srl-diff-def',key:'def'}, {val:'srl-agi',diff:'srl-diff-agi',key:'agi'}, {val:'srl-hp',diff:'srl-diff-hp',key:'hp'} ];
+  ids.forEach(({ val, diff, key }) => {
+    const v = stats[key]; $(val).textContent = v;
+    const diffEl = $(diff); if (!diffEl) return;
+    if (!currentIdealStats) { diffEl.textContent = ''; return; }
+    const d = v - currentIdealStats[key];
+    const sign = d > 0 ? '+' : '';
+    diffEl.textContent = d === 0 ? '±0' : `${sign}${d}`;
+    diffEl.classList.remove('plus', 'plus-strong', 'minus', 'zero');
+    if (d === 0) diffEl.classList.add('zero');
+    else if (d > 0) diffEl.classList.add(d >= 3 ? 'plus-strong' : 'plus');
+    else diffEl.classList.add('minus');
+  });
+}
+
+function setupPetSearch() {
+  const input = $('pet-input'); const sugg = $('suggestions');
+  input.addEventListener('input', () => {
+    const q = input.value.trim().toLowerCase();
+    if (!q) { sugg.style.display = 'none'; return; }
+    const matches = Object.keys(petData).filter(n => n.toLowerCase().includes(q)).sort((a, b) => a.localeCompare(b, 'ko-KR')).slice(0, 12);
+    if (matches.length === 0) { sugg.style.display = 'none'; return; }
+    sugg.innerHTML = matches.map(n => {
+      const p = petData[n];
+      const imgHTML = `<img src="${IMG_BASE}${p.imageCode}.png" alt="${n}" style="width:32px;height:32px;border-radius:8px;object-fit:cover;flex-shrink:0;" onerror="this.onerror=null;this.src='${IMG_BASE}${p.imageCode}.gif';">`;
+      const meta = `<div style="font-size:10px;color:var(--t3);">${rarityText(p.rarity)}</div>`;
+      return `<div class="sugg-item" data-name="${n}" style="display:flex;align-items:center;gap:10px;">${imgHTML}<div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:700;color:var(--t1);">${n}</div>${meta}</div></div>`;
+    }).join('');
+    sugg.style.display = 'block';
+  });
+  sugg.addEventListener('click', e => { const item = e.target.closest('.sugg-item'); if (!item) return; selectPet(item.dataset.name); });
+  document.addEventListener('click', e => { if (!sugg.contains(e.target) && e.target !== input) sugg.style.display = 'none'; });
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      const q = input.value.trim();
+      if (petData[q]) { selectPet(q); return; }
+      const first = sugg.querySelector('.sugg-item'); if (first) selectPet(first.dataset.name);
+    }
+  });
+}
+
+function selectPet(name) {
+  if (!petData[name]) return;
+  const wasSimming = simState && !simState.finished;
+  if (simRunning) { simAbort = true; skipAnimFlag = true; }
+
+  selectedPetName = name;
+  $('pet-input').value = name;
+  $('suggestions').style.display = 'none';
+
+  const pet = petData[name];
+  const preview = $('pet-preview');
+  $('pet-preview-name').textContent = name;
+  $('pet-preview-grade').textContent = `${rarityText(pet.rarity)} · ${pet.how || '획득처 정보 없음'}`;
+  $('pet-preview-img').innerHTML = `<img src="${IMG_BASE}${pet.imageCode}.png" alt="${name}" onerror="this.onerror=null;this.src='${IMG_BASE}${pet.imageCode}.gif';">`;
+  preview.style.display = 'flex';
+
+  const built = buildPetStatPool(pet);
+  currentPetStatPool = built.pool;
+  currentPetTotalCombos = built.totalCombos;
+  currentIdealStats = calcIdealDisplay(pet);
+
+  autoFillPetPrice(pet);
+  refreshProbInfo();
+  updateGoButton();
+
+  if (wasSimming) {
+    simState = null; simRunning = false;
+    $('sim-display').style.display = 'none';
+    $('result-area').innerHTML = '';
+    $('btn-go').style.display = 'block';
+    toast(`✨ ${name}으로 변경! 시작 버튼을 눌러주세요`);
+  }
+}
+
+function autoFillPetPrice(pet) {
+  const obtain = pet.how || '';
+  const m = obtain.match(/V[\s]*[PI]P?[\s]*(\d{3,6})/i) || obtain.match(/(\d{3,6})\s*VP/i);
+  if (!m) { $('vip-auto').style.display = 'none'; return; }
+  $('pet-price').value = parseInt(m[1]);
+  $('vip-auto').style.display = 'inline';
+}
+
+function refreshProbInfo() {
+  if (!selectedPetName || !currentPetStatPool) { $('prob-info-empty').style.display = 'block'; $('prob-info').style.display = 'none'; return; }
+  $('prob-info-empty').style.display = 'none'; $('prob-info').style.display = 'block';
+  renderDistPreview();
+}
+function renderDistPreview() {
+  const buckets = [
+    { label: '0%', min: 0, max: 0, combos: 0 }, { label: '0~0.1%', min: 0, max: 0.001, combos: 0 },
+    { label: '0.1~1%', min: 0.001, max: 0.01, combos: 0 }, { label: '1~5%', min: 0.01, max: 0.05, combos: 0 },
+    { label: '5~10%', min: 0.05, max: 0.10, combos: 0 }, { label: '10~50%', min: 0.10, max: 0.50, combos: 0 },
+    { label: '50~99%', min: 0.50, max: 0.99, combos: 0 }, { label: '99% 이상', min: 0.99, max: 1.001, combos: 0 },
+  ];
+  currentPetStatPool.forEach(s => {
+    if (s.prob === 0) buckets[0].combos += s.total;
+    else { for (let i = 1; i < buckets.length; i++) { if (s.prob >= buckets[i].min - 1e-9 && s.prob < buckets[i].max - 1e-9) { buckets[i].combos += s.total; break; } } }
+  });
+  const total = currentPetTotalCombos;
+  const visible = buckets.filter(b => b.combos > 0);
+  const maxCombos = Math.max(...visible.map(b => b.combos), 1);
+  $('dist-bars').innerHTML = visible.map(b => {
+    const pct = (b.combos / total) * 100;
+    return `<div class="dist-bar-row ${b.min > 0 ? 'highlight' : ''}">
+      <div class="dist-bar-label">${b.label}</div>
+      <div class="dist-bar-track"><div class="dist-bar-fill" style="width:${(b.combos / maxCombos * 100).toFixed(1)}%;"></div></div>
+      <div class="dist-bar-pct">${pct < 0.01 ? pct.toExponential(1) : pct.toFixed(2)}%</div>
+    </div>`;
+  }).join('');
+}
+function formatPct(p) {
+  if (p < 0.0001) return p.toExponential(2) + '%';
+  if (p < 0.01) return p.toFixed(4) + '%';
+  if (p < 1) return p.toFixed(3) + '%';
+  if (p < 10) return p.toFixed(2) + '%';
+  return Math.min(p, 99.99).toFixed(2) + '%';
+}
+function updateGoButton() {
+  if (!selectedPetName) { $('btn-go').disabled = true; $('btn-auto-n').disabled = true; return; }
+  $('btn-go').disabled = false; $('btn-auto-n').disabled = false;
+}
+$('pet-price').addEventListener('input', () => { $('vip-auto').style.display = 'none'; });
+
+['log-check', 'sound-check', 'auto-orb-reset'].forEach(id => {
+  const cb = $(id); const lb = $(id + '-label');
+  if (!cb) return;
+  cb.addEventListener('change', () => {
+    lb.classList.toggle('active', cb.checked);
+    if (id === 'log-check') $('sim-log').classList.toggle('show', cb.checked);
+    if (id === 'sound-check') {
+      soundOn = cb.checked;
+      try { localStorage.setItem('sa_sim_sound', cb.checked ? '1' : '0'); } catch (e) {}
+      if (soundOn) { ensureAudio(); sfxClick(); }
+    }
+  });
+});
+try {
+  const s = localStorage.getItem('sa_sim_sound');
+  if (s === '0') { soundOn = false; const cb = $('sound-check'); const lb = $('sound-check-label'); if (cb) cb.checked = false; if (lb) lb.classList.remove('active'); }
+} catch (e) {}
+
+/* ═══════════════════════════════════════════════════════════
+   시뮬레이션 상태 (생명의 구슬 없음, 펫당 초기화 최대 5회)
+   ═══════════════════════════════════════════════════════════ */
+const MAX_RESETS = 5;
+let simState = null; let simRunning = false; let simAbort = false;
+let skipAnimFlag = false; let autoNAbort = false; let autoRunMode = false;
+
+async function runSimulation() {
+  if (!selectedPetName) return;
+  if (simRunning) return;
+  ensureAudio(); sfxCatch();
+
+  simState = { petsBought: 1, resetOrbsUsed: 0, currentPetResets: 0, hallAttempts: 0, currentStats: null, finished: false, hallFailedThisStats: false, history: [] };
+
+  $('result-area').innerHTML = '';
+  $('sim-display').style.display = 'flex';
+  $('device-frame').classList.remove('hall-mode');
+  $('stat-rolls').classList.remove('all-max');
+  $('sim-log').innerHTML = '';
+  $('btn-go').style.display = 'none';
+  $('sim-actions').style.display = 'none';
+
+  $('sim-pet-name').textContent = selectedPetName;
+  $('sim-pet-meta').textContent = `펫 1마리째 · 초기화 0/${MAX_RESETS}`;
+  setTamagoImage(selectedPetName);
+  setPetBubble(randomPetMsg('greet'), 'normal');
+
+  await rollNewPetStats();
+}
+
+async function rollNewPetStats() {
+  $('sim-actions').style.display = 'none';
+  if (!autoRunMode) $('btn-skip-anim').style.display = 'inline-block';
+  const pool = currentPetStatPool; const totalW = currentPetTotalCombos;
+  const cells = ['srl-atk', 'srl-def', 'srl-agi', 'srl-hp'];
+  skipAnimFlag = false;
+  for (let i = 0; i < 5; i++) {
+    if (simAbort || skipAnimFlag) break;
+    const tempPick = weightedPick(pool, totalW);
+    updateStatCells(tempPick);
+    cells.forEach(id => { const cell = $(id).parentElement; cell.classList.remove('flash'); void cell.offsetWidth; cell.classList.add('flash'); });
+    if (i % 2 === 0) sfxReroll();
+    await sleep(40 + i * 8);
+  }
+  const picked = weightedPick(pool, totalW);
+  simState.currentStats = picked;
+  if (!skipAnimFlag) sfxStatDecide();
+  updateStatCells(picked);
+  cells.forEach(id => { const cell = $(id).parentElement; cell.classList.remove('flash'); void cell.offsetWidth; cell.classList.add('flash'); });
+
+  if (simState.currentPetResets === 0) {
+    simState.history.push({ type: 'catch', petIdx: simState.petsBought, resetCount: 0, prob: picked.prob, stats: { ...picked } });
+  }
+  updateMainDisplay();
+  showActionButtons();
+  $('btn-skip-anim').style.display = 'none';
+}
+
+function updateMainDisplay() {
+  const s = simState; const stats = s.currentStats;
+  const pct = stats.prob * 100; const probTxt = formatPct(pct);
+  let colorClass = 'g-neg';
+  if (pct >= 50) colorClass = 'g-hall'; else if (pct >= 10) colorClass = 'g-pos3'; else if (pct >= 1) colorClass = 'g-pos2'; else if (pct >= 0.1) colorClass = 'g-pos1'; else if (pct > 0) colorClass = 'g-zero';
+  $('sim-rolling').innerHTML = `<div class="sim-grade-pop"><span class="sim-grade-num ${colorClass}">환각 ${probTxt}</span><span class="sim-grade-text">${pct === 0 ? '꽝' : (pct < 1 ? '약함' : (pct < 5 ? '쓸만함' : (pct < 50 ? '좋음!' : '대박!')))}</span></div>`;
+
+  $('sim-pet-meta').textContent = `펫 ${s.petsBought}마리째 · 초기화 ${s.currentPetResets}/${MAX_RESETS}`;
+  $('sim-reset-counter').textContent = `${s.currentPetResets}/${MAX_RESETS}`;
+  if (s.currentPetResets >= MAX_RESETS) { $('sim-life-status').textContent = '⛔ 이 펫 한계 도달'; $('sim-life-status').style.color = '#e05a5a'; }
+  else { $('sim-life-status').textContent = '✓ 초기화 가능'; $('sim-life-status').style.color = '#3d9e6e'; }
+
+  const totalCost = calcRunningCost();
+  $('sim-cost-small').innerHTML = totalCost > 0
+    ? `💰 누적 비용: <strong style="color:#a85c00;font-family:'Nunito',sans-serif;">${totalCost.toLocaleString()}</strong> vip · 환각 도전 ${s.hallAttempts}회`
+    : `환각 도전 ${s.hallAttempts}회`;
+}
+
+function showActionButtons() {
+  const s = simState;
+  $('sim-actions').style.display = 'block';
+  $('sim-restart-row').style.display = 'flex';
+
+  const hallBtn = $('btn-action-hall'); const resetBtn = $('btn-action-reset'); const reset5Btn = $('btn-action-reset5'); const newPetBuyBtn = $('btn-action-newpet-buy');
+
+  const canHall = s.currentStats && s.currentStats.prob > 0 && !s.hallFailedThisStats;
+  hallBtn.disabled = !canHall; hallBtn.style.opacity = canHall ? '1' : '0.45'; hallBtn.style.cursor = canHall ? 'pointer' : 'not-allowed';
+  hallBtn.textContent = s.hallFailedThisStats ? '❌ 이미 실패 (초기화 필요)' : (!canHall ? '🎰 환각 도전 (확률 0%)' : '🎰 환각 도전!');
+
+  const r = s.currentPetResets;
+  if (r < MAX_RESETS) {
+    resetBtn.disabled = false; resetBtn.textContent = `📊 초기화 구슬 사용 (${r + 1}/${MAX_RESETS})`; resetBtn.style.opacity = '1'; resetBtn.style.cursor = 'pointer';
+    reset5Btn.disabled = false; const remaining = MAX_RESETS - r; reset5Btn.textContent = `⚡ 초기화 ${remaining}번 연속`; reset5Btn.style.opacity = '1'; reset5Btn.style.cursor = 'pointer';
+  } else {
+    resetBtn.disabled = true; resetBtn.textContent = `⛔ 이 펫 한계 (${MAX_RESETS}/${MAX_RESETS})`; resetBtn.style.opacity = '0.45'; resetBtn.style.cursor = 'not-allowed';
+    reset5Btn.disabled = true; reset5Btn.textContent = '⛔ 이 펫 한계'; reset5Btn.style.opacity = '0.45'; reset5Btn.style.cursor = 'not-allowed';
+  }
+
+  newPetBuyBtn.disabled = false;
+  if (r >= MAX_RESETS) { newPetBuyBtn.style.background = 'linear-gradient(135deg,#e07070,#f5a0a0)'; newPetBuyBtn.textContent = '🛒 새 펫 사기! (이 펫은 한계)'; }
+  else { newPetBuyBtn.style.background = 'linear-gradient(135deg,var(--a2),var(--a5))'; newPetBuyBtn.textContent = '🛒 새 펫 사기'; }
+}
+
+function restartSimulation() {
+  if (!simState) return;
+  if (!confirm('지금까지의 모든 진행을 버리고 처음부터 다시 시작할까요?')) return;
+  sfxClick(); toast('⚙️ 처음부터 다시 시작!'); runSimulation();
+}
+
+async function rerollStats() {
+  if (!simState) return; const s = simState; sfxClick();
+  if (s.currentPetResets >= MAX_RESETS) { toast('⛔ 이 펫은 초기화 한계입니다. 새 펫을 사세요!'); return; }
+  s.currentPetResets++; s.resetOrbsUsed++; s.hallFailedThisStats = false;
+  logSim(`📊 초기화 ${s.currentPetResets}/${MAX_RESETS} → 추첨 중...`);
+  $('sim-actions').style.display = 'none';
+  await rollNewPetStats();
+  logSim(`스탯: 공${s.currentStats.atk}/방${s.currentStats.def}/민${s.currentStats.agi}/체${s.currentStats.hp} · 환각 ${formatPct(s.currentStats.prob * 100)}`);
+  s.history.push({ type: 'reroll', petIdx: s.petsBought, resetCount: s.currentPetResets, prob: s.currentStats.prob, stats: { ...s.currentStats } });
+  setPetBubble(petBubbleForProb(s.currentStats.prob), 'normal');
+}
+
+async function rerollStats5() {
+  if (!simState) return; const s = simState;
+  if (s.currentPetResets >= MAX_RESETS) { toast('⛔ 이 펫은 초기화 한계입니다. 새 펫을 사세요!'); return; }
+  $('sim-actions').style.display = 'none';
+  if (!autoRunMode) $('btn-skip-anim').style.display = 'inline-block';
+  skipAnimFlag = false;
+  for (let i = 0; i < MAX_RESETS; i++) {
+    if (simAbort || skipAnimFlag) break;
+    if (s.currentPetResets >= MAX_RESETS) break;
+    s.currentPetResets++; s.resetOrbsUsed++; s.hallFailedThisStats = false;
+    logSim(`📊 [⚡연속] 초기화 ${s.currentPetResets}/${MAX_RESETS} → 추첨 중...`);
+    await rollNewPetStatsQuick();
+    logSim(`스탯: 공${s.currentStats.atk}/방${s.currentStats.def}/민${s.currentStats.agi}/체${s.currentStats.hp} · 환각 ${formatPct(s.currentStats.prob * 100)}`);
+    s.history.push({ type: 'reroll', petIdx: s.petsBought, resetCount: s.currentPetResets, prob: s.currentStats.prob, stats: { ...s.currentStats } });
+    if (s.currentStats.prob > 0) {
+      logSim(`⏸ 환각 가능 확률 발견! 자동 정지`); toast(`✨ ${formatPct(s.currentStats.prob * 100)} 확률 발견! 자동 정지`);
+      sfxStatDecide(); setPetBubble(petBubbleForProb(s.currentStats.prob), 'normal'); break;
+    }
+    if (!skipAnimFlag) await sleep(120);
+  }
+  $('btn-skip-anim').style.display = 'none';
+  updateMainDisplay(); showActionButtons();
+}
+
+async function rollNewPetStatsQuick() {
+  const pool = currentPetStatPool; const totalW = currentPetTotalCombos;
+  const cells = ['srl-atk', 'srl-def', 'srl-agi', 'srl-hp'];
+  for (let i = 0; i < 3; i++) {
+    if (simAbort) break;
+    const tempPick = weightedPick(pool, totalW);
+    updateStatCells(tempPick);
+    cells.forEach(id => { const cell = $(id).parentElement; cell.classList.remove('flash'); void cell.offsetWidth; cell.classList.add('flash'); });
+    if (i === 0) sfxReroll();
+    await sleep(50);
+  }
+  const picked = weightedPick(pool, totalW);
+  simState.currentStats = picked;
+  updateStatCells(picked);
+  cells.forEach(id => { const cell = $(id).parentElement; cell.classList.remove('flash'); void cell.offsetWidth; cell.classList.add('flash'); });
+  updateMainDisplay();
+  await sleep(80);
+}
+
+async function tryHallChallenge() {
+  if (!simState || !simState.currentStats) return;
+  const s = simState; const prob = s.currentStats.prob;
+  if (prob <= 0) return; if (s.hallFailedThisStats) return;
+
+  s.hallAttempts++;
+  $('sim-actions').style.display = 'none';
+  if (!autoRunMode) $('btn-skip-anim').style.display = 'inline-block';
+  sfxHallStart(); skipAnimFlag = false;
+  setPetBubble('두근두근... 가즈아!', 'try');
+
+  $('device-frame').classList.add('hall-mode');
+  const rolling = $('sim-rolling');
+  for (let i = 0; i < 3; i++) {
+    if (simAbort || skipAnimFlag) break;
+    rolling.innerHTML = `<div class="sim-grade-pop"><span class="sim-grade-num g-hall">두근...</span></div>`;
+    await sleep(120);
+    if (skipAnimFlag) break;
+    rolling.innerHTML = `<div class="sim-grade-pop"><span class="sim-grade-num g-pos3">두근두근!</span></div>`;
+    await sleep(120);
+  }
+
+  const success = Math.random() < prob;
+  s.history.push({ type: 'hall', petIdx: s.petsBought, resetCount: s.currentPetResets, prob: prob, stats: { ...s.currentStats }, success: success });
+
+  if (success) {
+    s.finished = true;
+    $('stat-rolls').classList.add('all-max');
+    rolling.innerHTML = `<div class="sim-grade-pop"><span class="sim-grade-num g-hall" style="font-size:26px;">✨ 8등급 환각! ✨</span></div>`;
+    logSim(`✨ 환각 성공! (${formatPct(prob * 100)} 확률)`); sfxHallSuccess(); setPetBubble(randomPetMsg('win'), 'win');
+    for (let i = 0; i < 12; i++) { if (skipAnimFlag) break; await sleep(100); }
+    $('btn-skip-anim').style.display = 'none';
+    showSuccessResult();
+  } else {
+    s.hallFailedThisStats = true;
+    $('device-frame').classList.remove('hall-mode');
+    logSim(`❌ 환각 실패 (${formatPct(prob * 100)} → 실패) · 초기화 구슬 사용 필요`); sfxHallFail(); setPetBubble(randomPetMsg('fail'), 'fail');
+    rolling.innerHTML = `<div class="sim-grade-pop"><span class="sim-grade-num g-neg">😢 환각 실패!</span><span class="sim-grade-text">초기화 구슬 사용</span></div>`;
+    for (let i = 0; i < 8; i++) { if (skipAnimFlag) break; await sleep(80); }
+    $('btn-skip-anim').style.display = 'none';
+    updateMainDisplay(); showActionButtons();
+  }
+}
+
+async function buyNewPet() {
+  if (!simState) return;
+  simState.petsBought++; simState.currentPetResets = 0; simState.hallFailedThisStats = false;
+  $('device-frame').classList.remove('hall-mode');
+  $('stat-rolls').classList.remove('all-max');
+  sfxNewPet(); setPetBubble(randomPetMsg('newpet'), 'normal');
+  toast(`🛒 새 펫 구매! · 펫 ${simState.petsBought}마리째`);
+  logSim(`🛒 새 펫 구매! 펫 ${simState.petsBought}마리째 (초기화 0/${MAX_RESETS})`);
+  await rollNewPetStats();
+}
+
+function giveUp() { showGiveUpResult(); $('btn-go').style.display = 'block'; $('sim-actions').style.display = 'none'; }
+
+function calcRunningCost() {
+  if (!simState) return 0;
+  const petPrice = parseInt($('pet-price').value) || 0;
+  const orbReset = parseInt($('orb-reset').value) || 0;
+  return simState.petsBought * petPrice + simState.resetOrbsUsed * orbReset;
+}
+function weightedPick(pool, totalWeight) {
+  let r = Math.random() * totalWeight;
+  for (const s of pool) { r -= s.total; if (r <= 0) return s; }
+  return pool[pool.length - 1];
+}
+function logSim(text) {
+  const logEl = $('sim-log'); if (!logEl) return;
+  if (!$('log-check').checked) return;
+  const line = document.createElement('div'); line.className = 'sim-log-line';
+  if (text.includes('✨')) line.classList.add('hall');
+  line.textContent = text; logEl.insertBefore(line, logEl.firstChild);
+  while (logEl.children.length > 100) logEl.removeChild(logEl.lastChild);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   자동 진행 모드
+   ═══════════════════════════════════════════════════════════ */
+async function runAutoRun() {
+  if (!selectedPetName || !currentPetStatPool) return;
+  if (simRunning && !autoRunMode) return;
+  const useReset = $('auto-orb-reset').checked;
+  autoNAbort = false; autoRunMode = true;
+  $('btn-auto-n').style.display = 'none'; $('btn-auto-stop').style.display = 'inline-block'; $('btn-auto-skip').style.display = 'inline-block';
+  $('auto-help-text').textContent = '환각까지 자동 진행 중...';
+  if (!simState || simState.finished) await runSimulation();
+
+  while (!autoNAbort && simState && !simState.finished) {
+    const s = simState; const stats = s.currentStats;
+    if (!stats) { await sleep(50); continue; }
+    if (stats.prob > 0 && !s.hallFailedThisStats) { skipAnimFlag = true; await tryHallChallenge(); continue; }
+    if (s.currentPetResets >= (useReset ? MAX_RESETS : 0)) { skipAnimFlag = true; await buyNewPet(); continue; }
+    if (!useReset) { skipAnimFlag = true; await buyNewPet(); } else { skipAnimFlag = true; await rerollStats(); }
+  }
+  autoRunMode = false;
+  $('btn-auto-n').style.display = 'inline-block'; $('btn-auto-stop').style.display = 'none'; $('btn-auto-skip').style.display = 'none';
+  $('auto-help-text').textContent = '알아서 초기화/도전/펫구매 반복';
+}
+
+function skipToResult() {
+  if (!simState) return;
+  const useReset = $('auto-orb-reset').checked;
+  autoNAbort = true; skipAnimFlag = true;
+  const finished = simulateRestOfRun(simState, useReset);
+  simState.petsBought = finished.petsBought; simState.resetOrbsUsed = finished.resetOrbsUsed;
+  simState.hallAttempts = finished.hallAttempts; simState.currentStats = finished.finalStats; simState.finished = true;
+  autoRunMode = false;
+  $('btn-auto-n').style.display = 'inline-block'; $('btn-auto-stop').style.display = 'none'; $('btn-auto-skip').style.display = 'none';
+  $('auto-help-text').textContent = '알아서 초기화/도전/펫구매 반복';
+  sfxHallSuccess(); toast('⏩ 결과 바로 표시');
+  $('stat-rolls').classList.add('all-max');
+  updateStatCells(finished.finalStats);
+  $('device-frame').classList.add('hall-mode');
+  setPetBubble(randomPetMsg('win'), 'win');
+  updateMainDisplay(); showSuccessResult();
+}
+
+function simulateRestOfRun(s, useReset) {
+  const maxResets = useReset ? MAX_RESETS : 0;
+  let petsBought = s.petsBought, resetsUsed = s.resetOrbsUsed, currentPetResets = s.currentPetResets, hallAttempts = s.hallAttempts, hallFailedThisStats = s.hallFailedThisStats;
+  let curStats = s.currentStats || weightedPick(currentPetStatPool, currentPetTotalCombos);
+  const MAX_PETS = 50000;
+  while (petsBought <= MAX_PETS) {
+    if (curStats && curStats.prob > 0 && !hallFailedThisStats) {
+      hallAttempts++;
+      if (Math.random() < curStats.prob) return { petsBought, resetOrbsUsed: resetsUsed, hallAttempts, finalStats: curStats };
+      hallFailedThisStats = true;
+    }
+    if (currentPetResets >= maxResets) { petsBought++; currentPetResets = 0; hallFailedThisStats = false; curStats = weightedPick(currentPetStatPool, currentPetTotalCombos); }
+    else { currentPetResets++; resetsUsed++; hallFailedThisStats = false; curStats = weightedPick(currentPetStatPool, currentPetTotalCombos); }
+  }
+  return { petsBought, resetOrbsUsed: resetsUsed, hallAttempts, finalStats: curStats };
+}
+
+/* ═══════════════════════════════════════════════════════════
+   다마고치 디바이스 버튼 (SELECT / DECIDE / CANCEL)
+   ═══════════════════════════════════════════════════════════ */
+function deviceSelect() {
+  sfxClick();
+  document.getElementById('pet-input').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  document.getElementById('pet-input').focus();
+  toast('🔍 다른 펫을 선택해보세요');
+}
+function deviceDecide() {
+  sfxClick();
+  if (!simState) { if (!$('btn-go').disabled) runSimulation(); else toast('먼저 펫을 선택해주세요'); return; }
+  const s = simState;
+  if (s.currentStats && s.currentStats.prob > 0 && !s.hallFailedThisStats) { tryHallChallenge(); return; }
+  if (s.currentPetResets < MAX_RESETS) { rerollStats(); return; }
+  buyNewPet();
+}
+function deviceCancel() {
+  sfxClick();
+  if (simState) restartSimulation();
+  else toast('취소할 진행이 없어요');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   유틸: 이론값 / 운빨 멘트
+   ═══════════════════════════════════════════════════════════ */
+function calcTheory(p) {
+  if (p <= 0) return null;
+  const avg = 1 / p; const median = Math.log(0.5) / Math.log(1 - p); const p99 = Math.log(0.01) / Math.log(1 - p);
+  return { avg, median: Math.ceil(median), p99: Math.ceil(p99) };
+}
+function getLuckMsg(actual, theory) {
+  if (!theory) return null;
+  const ratio = actual / theory.avg;
+  if (ratio <= 0.1) return { kind: 'lucky', emoji: '👑', text: `평균의 ${(ratio*100).toFixed(0)}%! 미친 운빨이에요. 로또 사세요!` };
+  if (ratio <= 0.3) return { kind: 'lucky', emoji: '🍀', text: `평균보다 훨씬 빨랐어요! 운이 좋네요 ✨` };
+  if (ratio <= 0.7) return { kind: 'lucky', emoji: '🌟', text: `평균보다 빨랐어요! 잘했어요!` };
+  if (ratio <= 1.3) return { kind: 'normal', emoji: '🙂', text: `평균 정도의 운빨이에요. 무난하네요.` };
+  if (ratio <= 2.5) return { kind: 'unlucky', emoji: '😅', text: `평균보다 좀 늦었어요... 다음엔 더 잘 풀리길!` };
+  if (ratio <= 5) return { kind: 'unlucky', emoji: '😭', text: `평균의 ${ratio.toFixed(1)}배... 오늘은 운이 별로네요.` };
+  return { kind: 'unlucky', emoji: '💀', text: `${actual}회... 평균의 ${ratio.toFixed(1)}배! 이건 좀 가혹하네요...` };
+}
+
+function buildHistoryGraph(history) {
+  if (!history || history.length < 2) return '';
+  const W = 600, H = 180;
+  const pad = { top: 14, right: 14, bottom: 24, left: 36 };
+  const innerW = W - pad.left - pad.right, innerH = H - pad.top - pad.bottom;
+  const pts = history.map((h, i) => ({ x: i, y: Math.max(0.001, h.prob * 100), raw: h.prob * 100, type: h.type, success: h.success, petIdx: h.petIdx }));
+  const n = pts.length;
+  const yMin = Math.log10(0.001), yMax = Math.log10(100);
+  function yScale(v) { if (v <= 0.001) return innerH; return innerH - ((Math.log10(v) - yMin) / (yMax - yMin)) * innerH; }
+  function xScale(i) { return (i / Math.max(n - 1, 1)) * innerW; }
+  let path = '';
+  pts.forEach((p, i) => { const x = xScale(i), y = yScale(p.raw); path += (i === 0 ? `M${x.toFixed(1)},${y.toFixed(1)}` : ` L${x.toFixed(1)},${y.toFixed(1)}`); });
+  let petLines = ''; let lastPet = pts[0].petIdx;
+  pts.forEach((p, i) => { if (p.petIdx !== lastPet) { const x = xScale(i); petLines += `<line x1="${x.toFixed(1)}" y1="0" x2="${x.toFixed(1)}" y2="${innerH}" stroke="#bcd8f2" stroke-width="1" stroke-dasharray="2,3"/><text x="${(x+3).toFixed(1)}" y="10" font-size="9" fill="#2f7fd6" font-weight="800">펫${p.petIdx}</text>`; lastPet = p.petIdx; } });
+  let grid = '';
+  [100, 10, 1, 0.1, 0.01].forEach(v => { const y = yScale(v); grid += `<line x1="0" y1="${y.toFixed(1)}" x2="${innerW}" y2="${y.toFixed(1)}" stroke="#dbe9f7" stroke-width="1"/><text x="-6" y="${(y+3).toFixed(1)}" font-size="9" fill="#8ea6c2" text-anchor="end" font-weight="700">${v}%</text>`; });
+  let dots = '';
+  pts.forEach((p, i) => {
+    const x = xScale(i), y = yScale(p.raw);
+    if (p.type === 'hall') {
+      if (p.success) { dots += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="8" fill="#fdd835" stroke="#fff" stroke-width="2"/><text x="${x.toFixed(1)}" y="${(y+4).toFixed(1)}" font-size="11" text-anchor="middle">✨</text>`; }
+      else { dots += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="5" fill="#e05a5a" stroke="#fff" stroke-width="2"/>`; }
+    } else {
+      const color = p.raw > 0 ? '#2f7fd6' : '#bcd8f2';
+      dots += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${p.raw > 0 ? 3 : 2}" fill="${color}"/>`;
+    }
+  });
+  return `<div class="history-graph"><div class="history-graph-title">📈 도전 히스토리</div>
+    <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" style="width:100%;height:auto;display:block;">
+      <g transform="translate(${pad.left}, ${pad.top})">${grid}${petLines}<path d="${path}" stroke="url(#histGrad)" stroke-width="2" fill="none"/>${dots}</g>
+      <defs><linearGradient id="histGrad" x1="0" x2="1" y1="0" y2="0"><stop offset="0%" stop-color="#2f7fd6"/><stop offset="100%" stop-color="#22b6c9"/></linearGradient></defs>
+    </svg>
+    <div class="history-graph-legend"><span><span class="lg-dot" style="background:#2f7fd6;"></span>초기화 (가능)</span><span><span class="lg-dot" style="background:#bcd8f2;"></span>초기화 (꽝)</span><span><span class="lg-dot" style="background:#e05a5a;"></span>환각 실패</span><span><span class="lg-dot" style="background:#fdd835;"></span>환각 성공</span></div>
+  </div>`;
+}
+
+function showSuccessResult() {
+  const s = simState; const totalCost = calcRunningCost(); const finalProb = s.currentStats.prob;
+  const theory = calcTheory(finalProb); const luck = getLuckMsg(s.hallAttempts, theory);
+  const theoryHTML = theory ? `<div class="theory-grid">
+      <div class="theory-cell ${s.hallAttempts < theory.avg ? 'highlight' : ''}"><div class="theory-label">이 확률 평균</div><div class="theory-val">${theory.avg.toFixed(1)}</div><div class="theory-sub">이 펫에서 환각까지</div></div>
+      <div class="theory-cell ${s.hallAttempts < theory.median ? 'highlight' : ''}"><div class="theory-label">50% 확률</div><div class="theory-val">${theory.median}</div><div class="theory-sub">번이면 절반은 성공</div></div>
+      <div class="theory-cell ${s.hallAttempts < theory.p99 ? 'highlight' : ''}"><div class="theory-label">99% 확률</div><div class="theory-val">${theory.p99}</div><div class="theory-sub">번이면 거의 확정</div></div>
+    </div>` : '';
+  const luckHTML = luck ? `<div class="luck-msg ${luck.kind === 'lucky' ? 'lucky' : (luck.kind === 'unlucky' ? 'unlucky' : '')}"><span class="luck-emoji">${luck.emoji}</span><span class="luck-text">${luck.text}</span></div>` : '';
+  const petPrice = parseInt($('pet-price').value) || 0; const orbReset = parseInt($('orb-reset').value) || 0;
+  const breakdownHTML = totalCost > 0 ? `<div style="margin-top:14px;padding:12px 14px;background:var(--s1);border:1.5px solid var(--border);border-radius:12px;">
+      <div style="font-size:11px;font-weight:800;color:var(--t3);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">💰 비용 상세</div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--t2);padding:3px 0;"><span>펫 ${s.petsBought}마리</span><span style="font-family:'Nunito',sans-serif;font-weight:700;">${(s.petsBought * petPrice).toLocaleString()} vip</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--t2);padding:3px 0;"><span>초기화 구슬 ${s.resetOrbsUsed}개</span><span style="font-family:'Nunito',sans-serif;font-weight:700;">${(s.resetOrbsUsed * orbReset).toLocaleString()} vip</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:14px;font-weight:900;color:var(--t1);padding-top:8px;margin-top:8px;border-top:1.5px solid var(--border);font-family:'Nunito',sans-serif;"><span>최종 총합</span><span style="color:#a85c00;font-size:16px;">${totalCost.toLocaleString()} vip</span></div>
+    </div>` : '';
+  const historyHTML = buildHistoryGraph(s.history);
+
+  $('result-area').innerHTML = `<div class="result-card"><div class="result-strip"></div>
+    <div class="result-grand">
+      <div><span class="result-grand-tries">${s.hallAttempts}</span><span class="result-grand-tries-unit">번 환각 도전</span></div>
+      <div class="result-grand-label">만에 8등급 환각 성공! ✨</div>
+      <div style="margin-top:8px;font-size:12px;color:var(--t3);">펫 ${s.petsBought}마리 · 초기화 ${s.resetOrbsUsed}회</div>
+      <div style="margin-top:10px;font-size:13px;color:var(--t2);font-weight:700;">최종 펫의 환각 확률: <strong style="color:var(--a1);">${formatPct(finalProb * 100)}</strong></div>
+      <div style="margin-top:4px;font-size:12px;color:var(--t3);font-weight:600;">공${s.currentStats.atk} · 방${s.currentStats.def} · 민${s.currentStats.agi} · 체${s.currentStats.hp}</div>
+      ${totalCost > 0 ? `<div class="result-grand-cost">💰 ${totalCost.toLocaleString()} vip 사용</div>` : ''}
+    </div>
+    ${theoryHTML}${luckHTML}${historyHTML}${breakdownHTML}
+    <div style="text-align:center;margin-top:14px;"><button class="btn-go" style="padding:12px 28px;font-size:14px;" onclick="runSimulation()">🔁 다시 돌리기</button></div>
+  </div>`;
+  $('btn-go').style.display = 'block'; $('sim-actions').style.display = 'none';
+  saveStats(s.hallAttempts); renderStats();
+  $('result-area').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function showGiveUpResult() {
+  const s = simState; const totalCost = calcRunningCost();
+  $('result-area').innerHTML = `<div class="result-card"><div style="text-align:center;">
+      <div style="font-size:20px;font-weight:900;color:var(--t2);margin-bottom:8px;">🏳️ 포기</div>
+      <div style="font-size:13px;color:var(--t2);line-height:1.7;">펫 ${s.petsBought}마리 · 초기화 ${s.resetOrbsUsed}회<br>환각 도전 ${s.hallAttempts}회<br>${totalCost > 0 ? `사용한 vip: <strong style="color:#a85c00;">${totalCost.toLocaleString()}</strong>` : ''}</div>
+      <div style="margin-top:14px;"><button class="btn-go" style="padding:12px 28px;font-size:14px;" onclick="runSimulation()">🔁 다시 돌리기</button></div>
+    </div></div>`;
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+$('btn-go').addEventListener('click', runSimulation);
+
+/* ═══════════════════════════════════════════════════════════
+   누적 통계 (localStorage)
+   ═══════════════════════════════════════════════════════════ */
+const STATS_KEY = 'sa_sim_stats_v1';
+function loadStats() { try { const raw = localStorage.getItem(STATS_KEY); if (!raw) return { runs: 0, totalTries: 0, best: null }; return JSON.parse(raw); } catch (e) { return { runs: 0, totalTries: 0, best: null }; } }
+function saveStatsRaw(s) { try { localStorage.setItem(STATS_KEY, JSON.stringify(s)); } catch (e) {} }
+function saveStats(tries) { const s = loadStats(); s.runs++; s.totalTries += tries; if (s.best === null || tries < s.best) s.best = tries; saveStatsRaw(s); }
+function resetStats() { if (!confirm('누적 통계를 초기화할까요?')) return; saveStatsRaw({ runs: 0, totalTries: 0, best: null }); renderStats(); }
+function renderStats() {
+  const s = loadStats();
+  if (s.runs === 0) { $('stats-card').style.display = 'none'; return; }
+  $('stats-card').style.display = 'block';
+  $('st-runs').textContent = s.runs.toLocaleString();
+  $('st-total-tries').textContent = s.totalTries.toLocaleString();
+  $('st-avg').textContent = (s.totalTries / s.runs).toFixed(1);
+  $('st-best').textContent = s.best === null ? '-' : s.best.toLocaleString() + '회';
+}
+
+/* ═══════════════════════════════════════════════════════════
+   토스트 알림
+   ═══════════════════════════════════════════════════════════ */
+let _toastTimer = null;
+function toast(msg) {
+  let el = document.getElementById('_toast_el');
+  if (!el) {
+    el = document.createElement('div'); el.id = '_toast_el';
+    el.style.cssText = `position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(20px);
+      background:linear-gradient(135deg,#12253f,#2f7fd6);color:#fff;padding:12px 22px;border-radius:99px;
+      font-size:13px;font-weight:800;font-family:'Noto Sans KR',sans-serif;
+      box-shadow:0 8px 28px rgba(0,0,0,.25);z-index:99999;opacity:0;pointer-events:none;
+      transition:opacity .2s,transform .2s;`;
+    document.body.appendChild(el);
+  }
+  el.textContent = msg;
+  requestAnimationFrame(() => { el.style.opacity = '1'; el.style.transform = 'translateX(-50%) translateY(0)'; });
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => { el.style.opacity = '0'; el.style.transform = 'translateX(-50%) translateY(20px)'; }, 2200);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   데이터 로딩 (index.html / pokedex.html과 동일한 실시간 연동 패턴)
+   ═══════════════════════════════════════════════════════════ */
+function setStatus(msg){ const el = $('loadStatusSb'); if(el) el.textContent = msg; }
+function applyData(rows){
+  PETS = rows.filter(p => String(p.how||"").replace(/\s+/g,"").trim() !== "미출시");
+  rebuildPetData();
+  const url = new URL(window.location.href);
+  const wantName = url.searchParams.get("pet");
+  if(wantName){
+    const hit = PETS.find(p => normalizedName(p) === wantName) || PETS.find(p => normalizedName(p).includes(wantName));
+    if(hit) selectPet(normalizedName(hit));
+  }
+}
+async function fetchJson(url){
+  const res = await fetch(url + (url.includes("?") ? "&" : "?") + "ts=" + Date.now(), {cache:"no-store"});
+  if(!res.ok) throw new Error("http " + res.status);
+  const data = await res.json();
+  const rows = data.rows || data;
+  if(!Array.isArray(rows) || rows.length === 0) throw new Error("empty rows");
+  return rows;
+}
+async function loadLive(){
+  setStatus("데이터 불러오는 중...");
+  try{ const rows = await fetchJson("./pet_data.json"); applyData(rows); setStatus(`${PETS.length}종 · 레포 동기화본`); return; }catch(e){}
+  try{ const rows = await fetchJson(API_URL); applyData(rows); setStatus(`${PETS.length}종 · 실시간 직접연동`); return; }catch(e){}
+  applyData(PETS); setStatus(`${PETS.length}종 · 내장 샘플`);
+}
+
+(async () => {
+  await loadLive();
+  setupPetSearch();
+  renderStats();
+})();
+</script>
+</body>
+</html>
