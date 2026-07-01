@@ -58,6 +58,9 @@ body {
 .sb-nav a.on{background:linear-gradient(135deg,var(--a1),var(--a2));color:#fff;border-color:transparent;}
 .sb-body{padding:14px 16px 16px;flex:1;overflow-y:auto;min-height:0;font-size:12.5px;color:var(--t2);line-height:1.7;}
 .sb-body::-webkit-scrollbar{width:4px;} .sb-body::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px;}
+.f-section{font-size:10px;letter-spacing:1.5px;color:var(--t3);text-transform:uppercase;margin:16px 0 7px;
+  font-family:'Nunito',sans-serif;font-weight:800;}
+.f-section:first-child{margin-top:0;}
 .sb-info-box{background:var(--s1);border:1.5px solid var(--border);border-radius:14px;padding:14px;}
 .sb-info-box b{color:var(--t1);}
 .sb-footer{padding:12px 16px;border-top:1.5px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
@@ -196,7 +199,7 @@ body {
 /* ── 다마고치 디바이스 프레임 (실제 이미지 기반, 픽셀 분석으로 좌표 산출) ── */
 .device-frame {
   position: relative;
-  width: 100%; max-width: 460px;
+  width: 100%; max-width: 580px;
   aspect-ratio: 1 / 1;
   margin: 10px auto 6px;
   background-image: url('jyajyagotchi.png');
@@ -225,32 +228,32 @@ body {
 .device-hitzone.hz-cancel { left: 70.3%; }
 
 /* 다마고치 펫 + 말풍선 (화면 안, 세로 배치로 좁은 화면에 최적화) */
-.tamago-area { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; position: relative; width: 100%; }
+.tamago-area { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; position: relative; width: 100%; }
 .tamago-pet {
-  width: 54px; height: 54px;
+  width: 92px; height: 92px;
   background: rgba(255,255,255,.45);
-  border: 2px solid rgba(255,255,255,.75);
+  border: 3px solid rgba(255,255,255,.75);
   border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 3px 8px rgba(0,0,0,.12);
+  box-shadow: 0 4px 12px rgba(0,0,0,.14);
   overflow: hidden; position: relative;
   animation: tamagoIdle 3s ease-in-out infinite; flex-shrink: 0;
 }
 @keyframes tamagoIdle { 0%,100%{transform:translateY(0) rotate(-1deg)} 50%{transform:translateY(-3px) rotate(1deg)} }
-.tamago-pet img { width: 44px; height: 44px; object-fit: contain; image-rendering: pixelated; filter: drop-shadow(0 1px 2px rgba(0,0,0,.2)); }
-.tamago-fallback { font-size: 26px; }
+.tamago-pet img { width: 74px; height: 74px; object-fit: contain; image-rendering: pixelated; filter: drop-shadow(0 1px 3px rgba(0,0,0,.2)); }
+.tamago-fallback { font-size: 44px; }
 .tamago-pet.bouncing { animation: tamagoBounce .6s cubic-bezier(.34,1.56,.64,1); }
 @keyframes tamagoBounce { 0%,100%{transform:scale(1) rotate(0)} 30%{transform:scale(1.15) rotate(-6deg)} 60%{transform:scale(0.92) rotate(4deg)} }
 .tamago-pet.shake { animation: tamagoShake .5s ease; }
 @keyframes tamagoShake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px) rotate(-3deg)} 40%{transform:translateX(6px) rotate(3deg)} 60%{transform:translateX(-4px) rotate(-2deg)} 80%{transform:translateX(4px) rotate(2deg)} }
-.tamago-pet.win { border-color: var(--gold); box-shadow: 0 0 18px rgba(245,166,35,.6); animation: tamagoWin 1s ease-in-out infinite; }
+.tamago-pet.win { border-color: var(--gold); box-shadow: 0 0 22px rgba(245,166,35,.6); animation: tamagoWin 1s ease-in-out infinite; }
 @keyframes tamagoWin { 0%,100%{transform:translateY(0) rotate(-3deg)} 50%{transform:translateY(-5px) rotate(3deg)} }
 
 .tamago-bubble {
   background: rgba(255,255,255,.85);
   border: 1.5px solid #223526;
-  border-radius: 12px; padding: 3px 8px;
-  font-size: 9.5px; font-weight: 800; color: #223526;
+  border-radius: 12px; padding: 4px 10px;
+  font-size: 11.5px; font-weight: 800; color: #223526;
   font-family: 'Noto Sans KR', sans-serif;
   position: relative; max-width: 96%; min-height: 0;
   text-align: center; line-height: 1.25;
@@ -265,10 +268,10 @@ body {
 
 /* 등급/확률 표시 (화면 안, 다마고치 LCD 톤) */
 .sim-rolling { display: flex; align-items: center; justify-content: center; font-family: 'Nunito', sans-serif; font-size: 12px; font-weight: 900; min-height: 0; width: 100%; }
-.sim-grade-pop { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; background: rgba(255,255,255,.4); border: 1.5px solid rgba(34,53,38,.3); border-radius: 99px; animation: gradePop .35s cubic-bezier(.34,1.56,.64,1); max-width: 100%; }
+.sim-grade-pop { display: inline-flex; align-items: center; gap: 6px; padding: 5px 13px; background: rgba(255,255,255,.4); border: 1.5px solid rgba(34,53,38,.3); border-radius: 99px; animation: gradePop .35s cubic-bezier(.34,1.56,.64,1); max-width: 100%; }
 @keyframes gradePop { 0%{transform:scale(.5);opacity:0} 60%{transform:scale(1.12);opacity:1} 100%{transform:scale(1);opacity:1} }
-.sim-grade-num { font-size: 12.5px; font-weight: 900; letter-spacing: -0.3px; white-space: nowrap; }
-.sim-grade-text { font-size: 8.5px; font-weight: 700; color: #4c6a55; white-space: nowrap; }
+.sim-grade-num { font-size: 15px; font-weight: 900; letter-spacing: -0.3px; white-space: nowrap; }
+.sim-grade-text { font-size: 10px; font-weight: 700; color: #4c6a55; white-space: nowrap; }
 .g-pos1 { color: #6a8bb0; } .g-pos2 { color: #2f7fd6; } .g-pos3 { color: #b0508a; text-shadow:0 0 8px rgba(176,80,138,.3);} .g-zero { color: #6b7d70; } .g-neg { color: #8a998f; }
 .g-hall { background: linear-gradient(135deg,#e08a1c,#c8a800,#b0508a); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; filter: drop-shadow(0 0 10px rgba(224,138,28,.4)); animation: hallGlow 1.5s ease infinite alternate; }
 @keyframes hallGlow { from{filter:drop-shadow(0 0 6px rgba(224,138,28,.3))} to{filter:drop-shadow(0 0 14px rgba(200,168,0,.6))} }
@@ -387,10 +390,78 @@ body {
   </div>
   <div class="sb-nav" id="sbNav"></div>
   <div class="sb-body">
-    <div class="sb-info-box">
-      🎰 <b>환각 시뮬레이터</b><br><br>
-      펫을 잡고, 초기화 구슬을 굴려가며 <b>8등급(환각)</b>이 뜰 때까지 실제로 시뮬레이션해봐요.<br><br>
-      펫마다 초기화는 <b>최대 5번</b>까지 가능하고, 다 쓰면 새 펫을 사서 다시 도전해야 해요.
+    <div class="f-section">펫 선택</div>
+    <div class="sugg-wrap">
+      <input type="text" class="field-input" id="pet-input" placeholder="펫 이름 검색 (예: 우리)" autocomplete="off" />
+      <div class="suggestions" id="suggestions" style="display:none;"></div>
+    </div>
+    <div class="pet-preview" id="pet-preview" style="display:none;">
+      <div class="pet-preview-img" id="pet-preview-img"></div>
+      <div class="pet-preview-info">
+        <div class="pet-preview-name" id="pet-preview-name">-</div>
+        <div class="pet-preview-grade" id="pet-preview-grade">-</div>
+      </div>
+    </div>
+
+    <div class="f-section">
+      <span>펫 가격 (vip)</span>
+      <span id="vip-auto" style="font-weight:600;color:var(--ok);font-size:10px;display:none;text-transform:none;letter-spacing:0;">✨ 자동입력됨</span>
+    </div>
+    <input type="number" class="field-input" id="pet-price" placeholder="예: 5500" min="0" />
+
+    <div class="f-section">초기화 구슬 (vip)</div>
+    <input type="number" class="field-input orb-input" id="orb-reset" value="1000" min="0" />
+
+    <div class="opt-row" style="margin-top:12px;">
+      <label class="opt-check active" id="sound-check-label">
+        <input type="checkbox" id="sound-check" checked />
+        <span>🔊 효과음</span>
+      </label>
+      <label class="opt-check" id="log-check-label">
+        <input type="checkbox" id="log-check" />
+        <span>📋 로그 보기</span>
+      </label>
+    </div>
+
+    <div class="f-section">이 펫의 환각 가능성</div>
+    <div id="prob-info-empty" style="padding:20px 10px;text-align:center;background:var(--s1);border:1.5px dashed var(--border);border-radius:12px;color:var(--t3);font-size:12px;">
+      ↑ 펫을 선택하면 환각 확률 분포가 표시돼요
+    </div>
+    <div id="prob-info" style="display:none;">
+      <div id="catch-dist-preview" class="dist-preview" style="padding:12px;background:var(--s1);border:1.5px solid var(--border);border-radius:12px;">
+        <div class="dist-preview-title" style="margin-bottom:9px;font-size:10.5px;">📊 초구 환각 확률 분포</div>
+        <div id="dist-bars"></div>
+        <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:10.5px;color:var(--t3);line-height:1.5;">
+          <strong style="color:var(--t2);">팁:</strong> 환각 확률이 0보다 큰 펫이 나오면 도전해볼 만해요. 펫당 초기화 최대 5번
+        </div>
+      </div>
+    </div>
+
+    <div class="act-row" style="margin-top:16px;">
+      <button class="btn-go" id="btn-go" disabled>🎣 펫 잡기 시작!</button>
+    </div>
+
+    <div id="auto-n-row" style="margin-top:10px;padding:12px 14px;background:var(--s2);border:1.5px dashed var(--border2);border-radius:14px;">
+      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
+        <span style="font-size:11.5px;font-weight:800;color:var(--t2);">🚀 자동 진행</span>
+        <span id="auto-help-text" style="font-size:10.5px;color:var(--t3);font-weight:700;">알아서 초기화/도전/펫구매 반복</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <button id="btn-auto-n" class="btn-go" disabled style="padding:9px 10px;font-size:12px;background:linear-gradient(135deg,var(--a1),var(--a2));" onclick="runAutoRun()">▶ 환각까지 자동으로!</button>
+        <button id="btn-auto-stop" class="btn-go" style="display:none;padding:8px 10px;font-size:12px;background:var(--white);color:var(--err);border:1.5px solid var(--err);box-shadow:none;" onclick="autoNAbort = true;">⏸ 정지</button>
+        <button id="btn-auto-skip" class="btn-go" style="display:none;padding:8px 10px;font-size:12px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#5a4015;" onclick="skipToResult()">⏩ 결과 바로보기</button>
+      </div>
+      <div class="toggle-row" style="margin-top:10px;">
+        <div class="toggle-row-label">
+          <span class="toggle-row-title">📊 초기화 구슬 자동 사용</span>
+          <span class="toggle-row-desc" id="auto-orb-reset-desc">켜짐 — 5번까지 초기화, 다 쓰면 새 펫 구매</span>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="auto-orb-reset" checked />
+          <span class="toggle-track"><span class="toggle-thumb"></span></span>
+          <span class="toggle-state-text" id="auto-orb-reset-state">ON</span>
+        </label>
+      </div>
     </div>
   </div>
   <div class="sb-footer">
@@ -408,99 +479,7 @@ body {
     <div class="page-sub">실제로 굴려보자, 8등급 뜰 때까지!</div>
   </div>
 
-  <!-- 셋업 카드 -->
-  <div class="card">
-    <div class="card-title">시뮬 셋업</div>
 
-    <div class="setup-grid">
-      <div>
-        <div class="field">
-          <label class="field-label">펫 선택</label>
-          <div class="sugg-wrap">
-            <input type="text" class="field-input" id="pet-input" placeholder="펫 이름 검색 (예: 우리)" autocomplete="off" />
-            <div class="suggestions" id="suggestions" style="display:none;"></div>
-          </div>
-          <div class="pet-preview" id="pet-preview" style="display:none;">
-            <div class="pet-preview-img" id="pet-preview-img"></div>
-            <div class="pet-preview-info">
-              <div class="pet-preview-name" id="pet-preview-name">-</div>
-              <div class="pet-preview-grade" id="pet-preview-grade">-</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="field">
-          <label class="field-label">
-            <span>펫 가격 (vip)</span>
-            <span id="vip-auto" style="font-weight:600;color:var(--ok);font-size:11px;display:none;">✨ 자동입력됨</span>
-          </label>
-          <input type="number" class="field-input" id="pet-price" placeholder="예: 5500" min="0" />
-        </div>
-
-        <div class="orb-grid">
-          <div>
-            <label class="field-label">초기화 구슬 (vip)</label>
-            <input type="number" class="field-input orb-input" id="orb-reset" value="1000" min="0" />
-          </div>
-        </div>
-
-        <div class="opt-row" style="margin-top:12px;">
-          <label class="opt-check active" id="sound-check-label">
-            <input type="checkbox" id="sound-check" checked />
-            <span>🔊 효과음</span>
-          </label>
-          <label class="opt-check" id="log-check-label">
-            <input type="checkbox" id="log-check" />
-            <span>📋 로그 보기</span>
-          </label>
-        </div>
-      </div>
-
-      <div>
-        <div style="font-size:12px;font-weight:700;color:var(--t2);margin-bottom:8px;">이 펫의 환각 가능성</div>
-        <div id="prob-info-empty" style="padding:24px 12px;text-align:center;background:var(--s1);border:1.5px dashed var(--border);border-radius:12px;color:var(--t3);font-size:13px;">
-          ← 펫을 선택하면 환각 확률 분포가 표시돼요
-        </div>
-        <div id="prob-info" style="display:none;">
-          <div id="catch-dist-preview" class="dist-preview" style="padding:14px;background:var(--s1);border:1.5px solid var(--border);border-radius:12px;">
-            <div class="dist-preview-title" style="margin-bottom:10px;font-size:11px;">📊 초구로 나올 수 있는 환각 확률 분포</div>
-            <div id="dist-bars"></div>
-            <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:11px;color:var(--t3);line-height:1.5;">
-              <strong style="color:var(--t2);">팁:</strong> 환각 확률이 0보다 큰 펫이 나오면 도전해볼 만해요.<br>
-              펫당 초기화 최대 5번
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="act-row">
-      <button class="btn-go" id="btn-go" disabled>🎣 펫 잡기 시작!</button>
-    </div>
-
-    <div id="auto-n-row" style="margin-top:10px;padding:12px 14px;background:var(--s2);border:1.5px dashed var(--border2);border-radius:14px;">
-      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
-        <span style="font-size:12px;font-weight:800;color:var(--t2);">🚀 자동 진행:</span>
-        <button id="btn-auto-n" class="btn-go" disabled style="padding:8px 16px;font-size:12px;background:linear-gradient(135deg,var(--a1),var(--a2));" onclick="runAutoRun()">▶ 환각까지 자동으로!</button>
-        <button id="btn-auto-stop" class="btn-go" style="display:none;padding:8px 14px;font-size:12px;background:var(--white);color:var(--err);border:1.5px solid var(--err);box-shadow:none;" onclick="autoNAbort = true;">⏸ 정지</button>
-        <button id="btn-auto-skip" class="btn-go" style="display:none;padding:8px 14px;font-size:12px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#5a4015;" onclick="skipToResult()">⏩ 결과 바로보기</button>
-        <span id="auto-help-text" style="font-size:11px;color:var(--t3);font-weight:700;">알아서 초기화/도전/펫구매 반복</span>
-      </div>
-      <div class="toggle-row">
-        <div class="toggle-row-label">
-          <span class="toggle-row-title">📊 초기화 구슬 자동 사용</span>
-          <span class="toggle-row-desc" id="auto-orb-reset-desc">켜짐 — 5번까지 초기화하며 도전, 다 쓰면 새 펫 구매</span>
-        </div>
-        <label class="toggle-switch">
-          <input type="checkbox" id="auto-orb-reset" checked />
-          <span class="toggle-track"><span class="toggle-thumb"></span></span>
-          <span class="toggle-state-text" id="auto-orb-reset-state">ON</span>
-        </label>
-      </div>
-    </div>
-  </div>
-
-  <!-- 시뮬 디스플레이 -->
   <div class="sim-display" id="sim-display" style="display:none;">
     <div class="sim-status-bar">
       <div class="sim-status-left">
