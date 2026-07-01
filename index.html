@@ -42,26 +42,49 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--t1);
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(2)}}
 .sb-sub{font-size:10.5px;color:var(--t3);font-family:'Nunito',sans-serif;font-weight:700;letter-spacing:.5px;}
 .sb-nav{display:flex;gap:6px;padding:12px 16px;border-bottom:1.5px solid var(--border);}
-.sb-nav a{flex:1;text-decoration:none;text-align:center;padding:9px 6px;border-radius:12px;
-  font-size:12.5px;font-weight:800;color:var(--t2);background:var(--s1);border:1.5px solid var(--border);}
+.sb-nav a{flex:1;text-decoration:none;text-align:center;padding:10px 6px;border-radius:14px;
+  font-size:12.5px;font-weight:800;color:var(--t2);background:var(--s1);border:1.5px solid var(--border);
+  transition:transform .25s cubic-bezier(.34,1.56,.64,1),box-shadow .2s ease;}
+.sb-nav a:hover{transform:translateY(-2px) scale(1.03);box-shadow:0 4px 12px rgba(47,127,214,.18);}
+.sb-nav a:active{transform:scale(.95);}
 .sb-nav a.on{background:linear-gradient(135deg,var(--a1),var(--a2));color:#fff;border-color:transparent;}
-.sb-search{padding:12px 16px 8px;}
-.sb-search input{width:100%;padding:10px 14px;background:var(--s1);border:1.5px solid var(--border);
-  border-radius:20px;font-family:inherit;font-size:13px;color:var(--t1);outline:none;}
-.sb-search input:focus{border-color:var(--a1);}
-.pet-section{padding:6px 12px 16px;flex:1;overflow-y:auto;min-height:0;}
-.pet-section::-webkit-scrollbar{width:4px;}
-.pet-section::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px;}
-.pet-sec-title{font-size:10px;letter-spacing:2px;color:var(--t3);text-transform:uppercase;
-  margin:8px 4px;font-family:'Nunito',sans-serif;font-weight:800;}
-.pet-item{display:flex;align-items:center;gap:9px;padding:8px 10px;margin-bottom:5px;
-  background:var(--white);border:1.5px solid var(--border);border-radius:12px;cursor:pointer;transition:all .15s;}
-.pet-item:hover{border-color:var(--a1);box-shadow:0 3px 12px rgba(47,127,214,.12);transform:translateY(-1px);}
-.pet-item.active{border-color:var(--a1);background:var(--s2);box-shadow:0 3px 14px rgba(47,127,214,.15);}
-.pet-item img{width:28px;height:28px;object-fit:contain;image-rendering:pixelated;border-radius:6px;background:var(--s1);flex-shrink:0;}
-.pet-item-name{font-size:12.5px;font-weight:700;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--t1);}
+
+.sb-filler{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:24px 20px;text-align:center;gap:6px;}
+.sb-mascot{font-size:56px;margin-bottom:6px;animation:mascot-bob 2.6s ease-in-out infinite;
+  filter:drop-shadow(0 6px 10px rgba(47,127,214,.18));}
+@keyframes mascot-bob{0%,100%{transform:translateY(0) rotate(-4deg);}50%{transform:translateY(-8px) rotate(4deg);}}
+.sb-filler-title{font-size:13.5px;font-weight:800;color:var(--t2);line-height:1.5;}
+.sb-filler-sub{font-size:11px;color:var(--t3);margin-top:2px;}
+.sb-tip{margin-top:18px;display:flex;align-items:center;gap:7px;background:var(--s1);
+  border:1.5px solid var(--border);border-radius:16px;padding:10px 14px;text-align:left;}
+.sb-tip-emoji{font-size:16px;flex-shrink:0;animation:tip-pulse 1.8s ease-in-out infinite;}
+@keyframes tip-pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.15);}}
+.sb-tip-text{font-size:11px;color:var(--t3);line-height:1.4;}
+
 .sb-footer{padding:12px 16px;border-top:1.5px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
 .sb-footer-txt{font-size:10.5px;color:var(--t3);}
+
+.search-input{width:100%;padding:13px 18px;background:var(--s1);border:1.5px solid var(--border);
+  border-radius:20px;font-family:inherit;font-size:14px;color:var(--t1);outline:none;
+  transition:border-color .2s ease,box-shadow .2s ease,transform .2s ease;}
+.search-input:focus{border-color:var(--a1);box-shadow:0 0 0 4px rgba(47,127,214,.1);transform:scale(1.01);}
+
+
+.pet-suggest{position:absolute;top:calc(100% + 6px);left:0;right:0;background:var(--white);
+  border:1.5px solid var(--border2);border-radius:18px;box-shadow:0 10px 30px rgba(47,127,214,.18);
+  max-height:280px;overflow-y:auto;z-index:50;display:none;padding:6px;
+  animation:suggest-pop .18s cubic-bezier(.34,1.56,.64,1);}
+@keyframes suggest-pop{from{opacity:0;transform:translateY(-6px) scale(.98);}to{opacity:1;transform:translateY(0) scale(1);}}
+.pet-suggest.open{display:block;}
+.pet-suggest::-webkit-scrollbar{width:4px;} .pet-suggest::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px;}
+.pet-suggest-empty{padding:14px;text-align:center;color:var(--t3);font-size:12.5px;}
+.pet-suggest-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:12px;
+  cursor:pointer;transition:transform .15s ease,background .15s ease;}
+.pet-suggest-item:hover{background:var(--s1);transform:translateX(3px);}
+.pet-suggest-item img{width:30px;height:30px;object-fit:contain;image-rendering:pixelated;
+  border-radius:8px;background:var(--s1);flex-shrink:0;}
+.pet-item-name{font-size:13px;font-weight:700;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--t1);}
 
 .toggle-btn{position:fixed;top:16px;left:16px;z-index:300;width:42px;height:42px;background:var(--white);
   border:1.5px solid var(--border);border-radius:12px;color:var(--a1);font-size:19px;cursor:pointer;
@@ -91,27 +114,34 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--t1);
 .page-sub{font-size:12px;color:var(--t3);font-family:'Nunito',sans-serif;font-weight:700;letter-spacing:1px;}
 #loadStatus{font-size:11.5px;color:var(--t3);margin-top:10px;}
 
-.card{background:var(--white);border:1.5px solid var(--border);border-radius:24px;padding:20px;
-  box-shadow:0 8px 24px rgba(47,127,214,0.08);margin-bottom:16px;}
+.card{background:var(--white);border:1.5px solid var(--border);border-radius:28px;padding:20px;
+  box-shadow:0 8px 24px rgba(47,127,214,0.08);margin-bottom:16px;
+  transition:box-shadow .25s ease,transform .25s cubic-bezier(.34,1.56,.64,1);}
+.card:hover{box-shadow:0 12px 30px rgba(47,127,214,0.14);}
 
 .empty-state{text-align:center;padding:36px 10px;color:var(--t3);font-size:12.5px;}
-.empty-state .g{font-size:32px;margin-bottom:8px;opacity:.5;}
+.empty-state .g{font-size:32px;margin-bottom:8px;opacity:.5;display:inline-block;animation:g-bob 2.4s ease-in-out infinite;}
+@keyframes g-bob{0%,100%{transform:translateY(0) rotate(0deg);}50%{transform:translateY(-5px) rotate(-6deg);}}
 
 .sel-pet-hero{display:flex;gap:12px;align-items:center;margin-bottom:14px;}
-.sel-pet-img{width:64px;height:64px;border-radius:16px;background:var(--s1);border:2px solid var(--border2);
-  display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;}
+.sel-pet-img{width:64px;height:64px;border-radius:18px;background:var(--s1);border:2px solid var(--border2);
+  display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;
+  transition:transform .3s cubic-bezier(.34,1.56,.64,1);}
+.sel-pet-img:hover{transform:scale(1.08) rotate(-4deg);}
 .sel-pet-img img{width:56px;height:56px;object-fit:contain;image-rendering:pixelated;}
 .sel-pet-name{font-size:18px;font-weight:900;font-family:'Nunito',sans-serif;color:var(--t1);}
 .sel-pet-how{font-size:11px;color:var(--t3);margin-top:2px;}
 
 .mini-pair-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-.mini-pair-box{background:var(--s1);border:1.5px solid var(--border);border-radius:12px;padding:9px 12px;}
+.mini-pair-box{background:var(--s1);border:1.5px solid var(--border);border-radius:14px;padding:9px 12px;
+  transition:transform .2s ease;}
+.mini-pair-box:hover{transform:translateY(-2px);}
 .mini-pair-box .t{font-size:9.5px;color:var(--t3);font-weight:800;letter-spacing:1px;margin-bottom:5px;font-family:'Nunito',sans-serif;}
 .mini-pair-line{display:flex;justify-content:space-between;font-size:12px;padding:1.5px 0;}
 .mini-pair-line span:first-child{color:var(--t3);}
 .mini-pair-line b{color:var(--a1);font-family:'Nunito',sans-serif;}
 .total-pill{margin-top:8px;text-align:center;background:linear-gradient(135deg,var(--s2),#e0f7fa);
-  border:1.5px solid var(--border2);border-radius:10px;padding:9px;}
+  border:1.5px solid var(--border2);border-radius:14px;padding:9px;}
 .total-pill .v{font-size:20px;font-weight:900;font-family:'Nunito',sans-serif;color:var(--a1);}
 .total-pill .l{font-size:9.5px;color:var(--t2);font-weight:800;}
 
@@ -121,24 +151,31 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--t1);
   background:linear-gradient(135deg,var(--a1),var(--a2));border-radius:2px;}
 
 .stat-input-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;}
-.stat-input-box{background:var(--s1);border:1.5px solid var(--border);border-radius:16px;padding:12px 14px;}
+.stat-input-box{background:var(--s1);border:1.5px solid var(--border);border-radius:18px;padding:12px 14px;
+  transition:transform .2s ease,border-color .2s ease;}
+.stat-input-box:hover{transform:translateY(-2px);border-color:var(--border2);}
 .stat-input-box .lbl{font-size:11px;color:var(--t3);font-weight:800;margin-bottom:8px;font-family:'Nunito',sans-serif;}
 .stepper{display:flex;align-items:center;gap:8px;}
-.stepper button{width:32px;height:32px;border-radius:10px;border:1.5px solid var(--border2);
-  background:var(--white);color:var(--a1);font-size:16px;font-weight:900;cursor:pointer;flex-shrink:0;}
-.stepper button:hover{background:var(--a1);color:#fff;}
+.stepper button{width:32px;height:32px;border-radius:12px;border:1.5px solid var(--border2);
+  background:var(--white);color:var(--a1);font-size:16px;font-weight:900;cursor:pointer;flex-shrink:0;
+  transition:transform .18s cubic-bezier(.34,1.56,.64,1),background .18s ease,color .18s ease;}
+.stepper button:hover{background:var(--a1);color:#fff;transform:scale(1.15);}
+.stepper button:active{transform:scale(.85);}
 .stepper input{width:100%;text-align:center;border:none;background:transparent;font-size:19px;
   font-weight:900;font-family:'Nunito',sans-serif;color:var(--t1);outline:none;}
 .stat-atk .lbl{color:var(--a2);} .stat-def .lbl{color:var(--a1);} .stat-agi .lbl{color:var(--a5);} .stat-hp .lbl{color:var(--a4);}
 
 .calc-btn{width:100%;background:linear-gradient(135deg,var(--a1),var(--a2));color:#fff;border:none;
-  padding:14px;border-radius:16px;font-weight:900;font-size:15px;cursor:pointer;font-family:'Nunito',sans-serif;
-  letter-spacing:.5px;box-shadow:0 6px 18px rgba(47,127,214,.3);}
-.calc-btn:hover{filter:brightness(1.06);transform:translateY(-1px);}
-.calc-btn:active{transform:scale(.98);}
+  padding:14px;border-radius:18px;font-weight:900;font-size:15px;cursor:pointer;font-family:'Nunito',sans-serif;
+  letter-spacing:.5px;box-shadow:0 6px 18px rgba(47,127,214,.3);
+  transition:transform .22s cubic-bezier(.34,1.56,.64,1),box-shadow .22s ease,filter .2s ease;}
+.calc-btn:hover{filter:brightness(1.06);transform:translateY(-2px) scale(1.015);box-shadow:0 10px 24px rgba(47,127,214,.4);}
+.calc-btn:active{transform:scale(.94);}
 .fill-btn{width:100%;background:var(--white);border:1.5px solid var(--border2);color:var(--t2);
-  padding:11px;border-radius:16px;font-weight:800;font-size:12.5px;cursor:pointer;margin-bottom:10px;}
-.fill-btn:hover{border-color:var(--a1);color:var(--a1);}
+  padding:11px;border-radius:18px;font-weight:800;font-size:12.5px;cursor:pointer;margin-bottom:10px;
+  transition:transform .2s cubic-bezier(.34,1.56,.64,1),border-color .2s ease,color .2s ease;}
+.fill-btn:hover{border-color:var(--a1);color:var(--a1);transform:translateY(-2px);}
+.fill-btn:active{transform:scale(.96);}
 
 /* ===== 결과 카드 ===== */
 .result-strip{height:4px;border-radius:99px;background:linear-gradient(90deg,var(--a1),var(--a2),var(--a4));margin-bottom:20px;}
@@ -213,12 +250,14 @@ footer{text-align:center;padding:30px;color:var(--t3);font-size:11px;font-family
     <a href="index.html" class="on">🎲 계산기</a>
     <a href="pokedex.html">🐾 도감</a>
   </div>
-  <div class="sb-search">
-    <input type="text" id="petSearch" placeholder="펫 이름 검색..." autocomplete="off" />
-  </div>
-  <div class="pet-section" id="petSection">
-    <div class="pet-sec-title">전체 펫 목록</div>
-    <div id="petList"></div>
+  <div class="sb-filler">
+    <div class="sb-mascot">🦴</div>
+    <div class="sb-filler-title">더 많은 메뉴가<br>곧 찾아올 예정이에요!</div>
+    <div class="sb-filler-sub">랭킹 · 펫 추천 · 그 이상도 준비중 ✨</div>
+    <div class="sb-tip">
+      <span class="sb-tip-emoji">💡</span>
+      <span class="sb-tip-text">펫 이름 검색은 오른쪽 위에서 할 수 있어!</span>
+    </div>
   </div>
   <div class="sb-footer">
     <span class="sb-footer-txt" id="loadStatusSb">로딩중...</span>
@@ -234,10 +273,18 @@ footer{text-align:center;padding:30px;color:var(--t3);font-size:11px;font-family
       <div class="page-sub">Lv.1 초기치로 환각(8등급) 확률을 계산해보세요</div>
     </div>
 
+    <div class="card" id="searchCard">
+      <div class="section-title">펫 검색</div>
+      <div class="search-wrap">
+        <input type="text" id="petSearch" class="search-input" placeholder="🔍 펫 이름을 검색해봐..." autocomplete="off" />
+        <div id="petSuggest" class="pet-suggest"></div>
+      </div>
+    </div>
+
     <div class="card" id="selectedCard">
       <div class="section-title">펫 선택</div>
       <div id="selectedBox">
-        <div class="empty-state"><div class="g">🐾</div>왼쪽 ☰ 메뉴에서 펫을 검색해서 선택해줘</div>
+        <div class="empty-state"><div class="g">🐾</div>위에서 펫을 검색해서 선택해줘</div>
       </div>
     </div>
 
@@ -250,7 +297,7 @@ footer{text-align:center;padding:30px;color:var(--t3);font-size:11px;font-family
 
     <div class="card" id="resultCard" style="display:none;"></div>
   </div>
-  <footer>SA 쟈쟈서버 비공식 팬 도구 · made by 루믹스</footer>
+  <footer>쟈쟈서버 편의기능 made by 야채부락리 애호박</footer>
 </div>
 
 <script>
@@ -304,28 +351,37 @@ try{
   setSidebar(sbSaved === null ? window.innerWidth > 820 : sbSaved === '1');
 }catch(e){ setSidebar(window.innerWidth > 820); }
 
-/* ===== 펫 목록 ===== */
-function renderPetList(filterQ){
-  const box = document.getElementById("petList");
-  const q = (filterQ||"").trim();
-  const list = q ? PETS.filter(p => normalizedName(p).includes(q)) : PETS;
-  if(!list.length){ box.innerHTML = '<div style="padding:10px;color:var(--t3);font-size:12px;">검색 결과 없음</div>'; return; }
-  box.innerHTML = list.map(p => {
+/* ===== 펫 검색 (드롭다운 서제스트) ===== */
+function renderSuggest(q){
+  const box = document.getElementById("petSuggest");
+  q = (q||"").trim();
+  if(!q){ box.classList.remove("open"); box.innerHTML=""; return; }
+  const hits = PETS.filter(p => normalizedName(p).includes(q)).slice(0, 10);
+  if(!hits.length){
+    box.innerHTML = '<div class="pet-suggest-empty">검색 결과 없음 😢</div>';
+    box.classList.add("open");
+    return;
+  }
+  box.innerHTML = hits.map(p => {
     const idx = PETS.indexOf(p);
-    const isActive = selectedPet && normalizedName(selectedPet) === normalizedName(p);
-    return `<div class="pet-item ${isActive?'active':''}" data-idx="${idx}">${imgTag(p.imageCode)}<span class="pet-item-name">${normalizedName(p)}</span></div>`;
+    return `<div class="pet-suggest-item" data-idx="${idx}">${imgTag(p.imageCode)}<span class="pet-item-name">${normalizedName(p)}</span></div>`;
   }).join("");
+  box.classList.add("open");
 }
-document.getElementById("petSearch").addEventListener("input", e=>{ renderPetList(e.target.value); });
-document.getElementById("petList").addEventListener("click", e=>{
-  const item = e.target.closest(".pet-item"); if(!item) return;
+document.getElementById("petSearch").addEventListener("input", e=>{ renderSuggest(e.target.value); });
+document.getElementById("petSearch").addEventListener("focus", e=>{ if(e.target.value.trim()) renderSuggest(e.target.value); });
+document.addEventListener("click", e=>{
+  if(!e.target.closest("#searchCard")) document.getElementById("petSuggest").classList.remove("open");
+});
+document.getElementById("petSuggest").addEventListener("click", e=>{
+  const item = e.target.closest(".pet-suggest-item"); if(!item) return;
   selectPet(parseInt(item.dataset.idx));
-  if(window.innerWidth <= 820) setSidebar(false);
+  document.getElementById("petSuggest").classList.remove("open");
+  document.getElementById("petSearch").value = "";
 });
 
 function selectPet(idx){
   selectedPet = PETS[idx];
-  renderPetList(document.getElementById("petSearch").value);
   renderSelectedBox();
   renderStatInputs();
   document.getElementById("resultCard").style.display = "none";
@@ -548,7 +604,6 @@ function setStatus(msg){
 }
 function applyData(rows){
   PETS = rows.filter(p => String(p.how||"").replace(/\s+/g,"").trim() !== "미출시");
-  renderPetList("");
   const url = new URL(window.location.href);
   const wantName = url.searchParams.get("pet");
   if(wantName){
@@ -581,7 +636,6 @@ async function loadLive(){
   applyData(PETS);
   setStatus(`${PETS.length}종 · 내장 샘플`);
 }
-renderPetList("");
 loadLive();
 </script>
 </body>
