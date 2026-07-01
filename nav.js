@@ -6,6 +6,7 @@
 const SA_NAV_ITEMS = [
   { href: "index.html",   icon: "🎲", label: "계산기" },
   { href: "pokedex.html", icon: "🐾", label: "도감" },
+  { href: "simulator.html", icon: "🎰", label: "시뮬레이터" },
   // 새 메뉴를 추가하려면 아래처럼 한 줄만 더 넣으면 됩니다:
   // { href: "새파일명.html", icon: "✨", label: "메뉴이름" },
 ];
