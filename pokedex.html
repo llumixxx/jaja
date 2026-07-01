@@ -41,9 +41,12 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--t1);
 .sb-logo-dot{width:8px;height:8px;background:var(--a2);border-radius:50%;animation:pulse 2s infinite;}
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(2)}}
 .sb-sub{font-size:10.5px;color:var(--t3);font-family:'Nunito',sans-serif;font-weight:700;letter-spacing:.5px;}
-.sb-nav{display:flex;gap:6px;padding:12px 16px;border-bottom:1.5px solid var(--border);}
-.sb-nav a{flex:1;text-decoration:none;text-align:center;padding:9px 6px;border-radius:12px;
-  font-size:12.5px;font-weight:800;color:var(--t2);background:var(--s1);border:1.5px solid var(--border);}
+.sb-nav{display:flex;flex-direction:column;gap:5px;padding:12px 16px;border-bottom:1.5px solid var(--border);}
+.sb-nav a{display:flex;align-items:center;gap:9px;text-decoration:none;padding:10px 12px;border-radius:13px;
+  font-size:13px;font-weight:800;color:var(--t2);background:var(--s1);border:1.5px solid var(--border);
+  transition:transform .2s cubic-bezier(.34,1.56,.64,1),box-shadow .2s ease;}
+.sb-nav a:hover{transform:translateX(3px);box-shadow:0 4px 12px rgba(47,127,214,.18);}
+.sb-nav a:active{transform:scale(.97);}
 .sb-nav a.on{background:linear-gradient(135deg,var(--a1),var(--a2));color:#fff;border-color:transparent;}
 
 .sb-body{padding:14px 16px 16px;flex:1;overflow-y:auto;min-height:0;}
