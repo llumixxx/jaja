@@ -90,6 +90,10 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--t1);
   display:flex;align-items:center;justify-content:center;transition:all .18s;box-shadow:var(--shadow);}
 .toggle-btn:hover{border-color:var(--a1);box-shadow:var(--shadow2);transform:scale(1.05);}
 .toggle-btn.sb-open{left:314px;}
+@media(max-width:820px){ .toggle-btn.sb-open{left:auto;right:16px;} }
+.sb-backdrop{position:fixed;inset:0;background:rgba(12,25,42,0.35);backdrop-filter:blur(2px);
+  z-index:190;opacity:0;pointer-events:none;transition:opacity .25s ease;}
+.sb-backdrop.open{opacity:1;pointer-events:auto;}
 .dark-toggle{width:36px;height:36px;border-radius:50%;border:2px solid var(--border2);background:var(--white);
   cursor:pointer;font-size:1.05rem;display:flex;align-items:center;justify-content:center;transition:all .3s;}
 .dark-toggle:hover{transform:scale(1.1) rotate(-8deg);border-color:var(--a1);}
@@ -97,8 +101,6 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--t1);
 [data-theme="light"] .toggle-moon{display:none !important;} [data-theme="light"] .toggle-sun{display:inline;}
 
 .main{flex:1;min-height:100vh;}
-.main.shifted{margin-left:300px;}
-@media(max-width:820px){ .main.shifted{margin-left:0;} .toggle-btn.sb-open{left:auto;right:16px;} }
 
 .main-inner{max-width:1200px;margin:0 auto;padding:70px 24px 80px;}
 .page-head{text-align:center;padding:6px 0 26px;}
@@ -208,6 +210,7 @@ footer{text-align:center;padding:30px;color:var(--t3);font-size:11px;font-family
 <body>
 
 <button class="toggle-btn" id="toggleBtn">☰</button>
+<div class="sb-backdrop" id="sbBackdrop"></div>
 
 <div class="sidebar" id="sidebar">
   <div class="sb-head">
@@ -493,19 +496,17 @@ let state = { q:"", attr:"all", how:"ALL", sort:"default", shown:60, attrVal:{ea
 
 const sidebar = document.getElementById("sidebar");
 const toggleBtn = document.getElementById("toggleBtn");
-const mainEl = document.getElementById("main");
+const sbBackdrop = document.getElementById("sbBackdrop");
 function setSidebar(open){
   sidebar.classList.toggle("open", open);
   toggleBtn.classList.toggle("sb-open", open);
-  mainEl.classList.toggle("shifted", open);
+  sbBackdrop.classList.toggle("open", open);
   toggleBtn.textContent = open ? "✕" : "☰";
   try{ localStorage.setItem('sa2-sb', open ? '1' : '0'); }catch(e){}
 }
 toggleBtn.addEventListener("click", ()=> setSidebar(!sidebar.classList.contains("open")));
-try{
-  const sbSaved = localStorage.getItem('sa2-sb');
-  setSidebar(sbSaved === null ? window.innerWidth > 820 : sbSaved === '1');
-}catch(e){ setSidebar(window.innerWidth > 820); }
+sbBackdrop.addEventListener("click", ()=> setSidebar(false));
+setSidebar(false);
 
 function matchesFilter(p){
   const name = normalizedName(p);
