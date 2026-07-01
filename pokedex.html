@@ -166,19 +166,36 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--t1);
 .pic-badge{font-size:9px;padding:2px 7px;border-radius:20px;font-weight:800;}
 .pb-mount{background:#e3fbef;color:#3aa876;} .pb-nomount{background:var(--s1);color:var(--t4);}
 
-/* ── 텍스트형 보기 ── */
-#grid.text-view{display:flex;flex-direction:column;gap:6px;}
-#grid.text-view .pet-info-card{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:14px;}
-#grid.text-view .pet-info-card:hover{transform:translateX(3px);}
-#grid.text-view .pic-img-wrap{display:none;}
-#grid.text-view .pic-name-wrap{min-width:100px;flex-shrink:0;}
-#grid.text-view .pic-name{margin-bottom:0;}
-#grid.text-view .pic-how{height:auto;-webkit-line-clamp:1;display:-webkit-box;-webkit-box-orient:vertical;
-  overflow:hidden;margin-bottom:0;min-width:140px;flex:1;}
-#grid.text-view .pic-attr-row{margin-bottom:0;flex-shrink:0;}
-#grid.text-view .pic-stat-grid{grid-template-columns:repeat(4,auto);gap:4px;margin-bottom:0;flex-shrink:0;}
-#grid.text-view .pic-stat-item{white-space:nowrap;}
-#grid.text-view .pic-badge-row{margin-top:0;flex-shrink:0;}
+/* ── 텍스트형 보기 (표) ── */
+#grid.text-view{display:block;}
+.pet-table-wrap{width:100%;border-collapse:separate;border-spacing:0;background:var(--white);
+  border:1.5px solid var(--border);border-radius:16px;box-shadow:0 4px 16px rgba(47,127,214,0.06);}
+.pet-table-wrap thead tr{background:var(--s1);}
+.pet-table-wrap thead tr:first-child th:first-child{border-top-left-radius:16px;}
+.pet-table-wrap thead tr:first-child th:last-child{border-top-right-radius:16px;}
+.pet-table-wrap tbody tr:last-child td:first-child{border-bottom-left-radius:16px;}
+.pet-table-wrap tbody tr:last-child td:last-child{border-bottom-right-radius:16px;}
+.pet-table-wrap th{padding:12px 14px;text-align:left;font-size:13px;font-weight:800;color:var(--t2);
+  border-bottom:1.5px solid var(--border);white-space:nowrap;position:sticky;top:0;background:var(--s1);z-index:2;}
+.pet-table-wrap td{padding:12px 14px;font-size:15px;border-bottom:1px solid var(--border);vertical-align:middle;}
+.pet-table-wrap tbody tr{cursor:pointer;transition:background .15s;}
+.pet-table-wrap tbody tr:hover{background:var(--s1);}
+.pet-table-wrap tbody tr:last-child td{border-bottom:none;}
+.pt-name{font-size:16px;font-weight:800;color:var(--t1);}
+.pt-how{font-size:12.5px;color:var(--t3);margin-top:2px;}
+.pt-attr-cell{display:flex;gap:4px;flex-wrap:wrap;min-width:110px;}
+.pt-attr-chip{font-size:12px;font-weight:800;padding:3px 9px;border-radius:8px;color:#fff;white-space:nowrap;}
+.pt-stat{font-family:'Nunito',sans-serif;font-weight:900;font-size:15px;text-align:right;white-space:nowrap;}
+.pt-stat-hp{color:var(--a4);} .pt-stat-atk{color:var(--a2);} .pt-stat-def{color:var(--a1);} .pt-stat-agi{color:var(--a5);}
+.pt-total{font-family:'Nunito',sans-serif;font-weight:900;font-size:16px;color:var(--t1);text-align:right;white-space:nowrap;}
+.pt-mount{font-size:11.5px;font-weight:800;padding:4px 10px;border-radius:20px;white-space:nowrap;}
+.pt-mount-y{background:#e3fbef;color:#3aa876;} .pt-mount-n{background:var(--s1);color:var(--t4);}
+/* 헤더-데이터 정렬 통일: 내구/공격/방어/순발/총성장은 오른쪽, 탑승은 가운데 */
+.pet-table-wrap th:nth-child(3), .pet-table-wrap th:nth-child(4),
+.pet-table-wrap th:nth-child(5), .pet-table-wrap th:nth-child(6),
+.pet-table-wrap th:nth-child(7){ text-align:right; }
+.pet-table-wrap th:nth-child(8), .pet-table-wrap td:nth-child(8){ text-align:center; }
+@media(max-width:900px){ .pet-table-wrap{display:block;overflow-x:auto;} }
 
 #empty{text-align:center;padding:60px 20px;color:var(--t3);display:none;}
 #empty .glyph{font-size:34px;margin-bottom:10px;opacity:.4;}
@@ -701,6 +718,30 @@ function cardHTML(p, idx){
   </div>`;
 }
 
+function tableRowHTML(p, idx){
+  const name = normalizedName(p);
+  const st = calcStats(p);
+  return `
+  <tr class="pet-info-card" data-idx="${idx}">
+    <td><div class="pt-name">${name}</div><div class="pt-how">${p.how||""}</div></td>
+    <td><div class="pt-attr-cell">${attrChipsHTML(p, true).replace(/pic-attr-chip/g,"pt-attr-chip")}</div></td>
+    <td class="pt-stat pt-stat-hp">${cut2(st.growth.h)}</td>
+    <td class="pt-stat pt-stat-atk">${cut2(st.growth.a)}</td>
+    <td class="pt-stat pt-stat-def">${cut2(st.growth.d)}</td>
+    <td class="pt-stat pt-stat-agi">${cut2(st.growth.s)}</td>
+    <td class="pt-total">${cut2(st.totalGrowth)}</td>
+    <td><span class="pt-mount ${mountText(p.mount)==='가능'?'pt-mount-y':'pt-mount-n'}">${mountText(p.mount)==='가능'?'탑승가능':'탑승불가'}</span></td>
+  </tr>`;
+}
+function tableHTML(list){
+  return `<table class="pet-table-wrap">
+    <thead><tr>
+      <th>이름 / 획득처</th><th>속성</th><th>❤내구</th><th>⚔공격</th><th>🛡방어</th><th>💨순발</th><th>총성장</th><th>탑승</th>
+    </tr></thead>
+    <tbody>${list.map(p=>tableRowHTML(p, PETS.indexOf(p))).join("")}</tbody>
+  </table>`;
+}
+
 let currentList = [];
 function render(){
   currentList = getFiltered();
@@ -714,7 +755,11 @@ function render(){
   else { empty.style.display="none"; loadmore.style.display = currentList.length>state.shown ? "block":"none"; }
   const grid = document.getElementById("grid");
   grid.classList.toggle("text-view", state.view==="text");
-  grid.innerHTML = slice.map(p=>cardHTML(p, PETS.indexOf(p))).join("");
+  if(state.view==="text"){
+    grid.innerHTML = tableHTML(slice);
+  } else {
+    grid.innerHTML = slice.map(p=>cardHTML(p, PETS.indexOf(p))).join("");
+  }
 }
 
 function openModal(idx){
