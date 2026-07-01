@@ -273,6 +273,12 @@ function calcStats(r){
   const growth = disp(ph*B/10000, pa*B/10000, pd*B/10000, ps*B/10000);
   return { init, growth, totalGrowth: growth.a+growth.d+growth.s };
 }
+/* 실제 존재 가능한 8등급(환각) 초기치 예시 — 롤 전부 +2, 배분치 10포인트를 4스탯에 최대한 고르게 분배(3,3,2,2) */
+function sGradeInit(r){
+  const ph=num(r.h0)+num(r.lvup)+2+3, pa=num(r.a0)+num(r.lvup)+2+3, pd=num(r.d0)+num(r.lvup)+2+2, ps=num(r.s0)+num(r.lvup)+2+2;
+  const init = disp(num(r.initPct)*ph/100, num(r.initPct)*pa/100, num(r.initPct)*pd/100, num(r.initPct)*ps/100);
+  return { h:dropDecimalInt(init.h), a:dropDecimalInt(init.a), d:dropDecimalInt(init.d), s:dropDecimalInt(init.s) };
+}
 function normalizedName(p){ return String(p.name||"").replace(/^\uFEFF/, ""); }
 function imgTag(code, cls){
   return `<img class="${cls||''}" src="${IMG_BASE}${code}.png" loading="lazy"
@@ -393,10 +399,10 @@ function example8GradeInit(r){
   return { h: dropDecimalInt(init.h), a: dropDecimalInt(init.a), d: dropDecimalInt(init.d), s: dropDecimalInt(init.s) };
 }
 function calcInitWithRollBase(r, rh, ra, rd, rs, hb, ab, db, sb){
-  const ph = num(r.h0)+num(r.lvup)+num(rh)+num(hb);
-  const pa = num(r.a0)+num(r.lvup)+num(ra)+num(ab);
-  const pd = num(r.d0)+num(r.lvup)+num(rd)+num(db);
-  const ps = num(r.s0)+num(r.lvup)+num(rs)+num(sb);
+  const ph = num(r.h0)+num(rh)+num(hb);
+  const pa = num(r.a0)+num(ra)+num(ab);
+  const pd = num(r.d0)+num(rd)+num(db);
+  const ps = num(r.s0)+num(rs)+num(sb);
   return disp(num(r.initPct)*ph/100, num(r.initPct)*pa/100, num(r.initPct)*pd/100, num(r.initPct)*ps/100);
 }
 
