@@ -279,12 +279,13 @@ function toChosung(str){
     if(code>=0xAC00 && code<=0xD7A3){
       out += CHO[Math.floor((code-0xAC00)/588)];
     } else if(ch !== ' '){
-      out += ch;
+      out += ch.toLowerCase();
     }
   }
   return out;
 }
-function isChosungQuery(q){ return /^[ㄱ-ㅎ\s]+$/.test(q); }
+/* 검색어에 초성 자음이 하나라도 섞여 있으면 초성모드 (숫자/영문 같이 써도 됨: "1ㄷ", "JOTㅈ" 등) */
+function isChosungQuery(q){ return /[ㄱ-ㅎ]/.test(q); }
 
 function highlightSubstring(text, needle){
   if(!needle) return escapeHtml(text);
@@ -314,13 +315,13 @@ function render(){
   if(!q){
     filtered = QUIZ_DATA.map((item, idx) => ({...item, idx}));
   } else if(chosungMode){
-    const qc = q.replace(/\s+/g, '');
+    const qc = toChosung(q);
     filtered = QUIZ_DATA.map((item, idx) => ({...item, idx}))
       .filter(item => toChosung(item.q).includes(qc) || toChosung(item.a).includes(qc));
   } else {
-    const ql = q.toLowerCase();
+    const ql = q.replace(/\s+/g, '').toLowerCase();
     filtered = QUIZ_DATA.map((item, idx) => ({...item, idx}))
-      .filter(item => item.q.toLowerCase().includes(ql) || item.a.toLowerCase().includes(ql));
+      .filter(item => item.q.replace(/\s+/g, '').toLowerCase().includes(ql) || item.a.replace(/\s+/g, '').toLowerCase().includes(ql));
   }
 
   document.getElementById('result-count').textContent = filtered.length;
