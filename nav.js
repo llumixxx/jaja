@@ -19,18 +19,24 @@ const SA_NAV_ITEMS = [
   const current = (location.pathname.split("/").pop() || "index.html");
   const currentItem = SA_NAV_ITEMS.find(i => i.href === current) || SA_NAV_ITEMS[0];
 
+  const listHTML = SA_NAV_ITEMS.map(item => {
+    const isOn = item.href === current;
+    return `<a href="${item.href}"${isOn ? ' class="on"' : ''}>${item.icon} ${item.label}</a>`;
+  }).join("");
+
+  /* sbNav 엘리먼트에 data-expanded="true"가 있으면 토글 버튼 없이 항상 전체 메뉴를 보여줍니다. */
+  if(nav.dataset.expanded === "true"){
+    nav.innerHTML = `<div class="sb-nav-list open">${listHTML}</div>`;
+    return;
+  }
+
   nav.innerHTML =
     `<button type="button" class="sb-nav-toggle" id="sbNavToggle">` +
       `<span>${currentItem.icon}</span>` +
       `<span class="sb-nav-toggle-label">${currentItem.label}</span>` +
       `<span class="sb-nav-toggle-chevron">▾</span>` +
     `</button>` +
-    `<div class="sb-nav-list" id="sbNavList">` +
-      SA_NAV_ITEMS.map(item => {
-        const isOn = item.href === current;
-        return `<a href="${item.href}"${isOn ? ' class="on"' : ''}>${item.icon} ${item.label}</a>`;
-      }).join("") +
-    `</div>`;
+    `<div class="sb-nav-list" id="sbNavList">${listHTML}</div>`;
 
   const toggleBtn = document.getElementById("sbNavToggle");
   const list = document.getElementById("sbNavList");
