@@ -115,17 +115,18 @@ body {
 .cat-chip:hover{border-color:var(--a1);color:var(--a1);}
 .cat-chip.on{background:linear-gradient(135deg,var(--a1),var(--a2));color:#fff;border-color:transparent;}
 
-/* ── 지도 목록 (깔끔한 리스트형, 항상 보임, 클릭하면 바로 아래 큰 뷰어에 표시) ── */
-.map-list{display:flex;flex-direction:column;gap:6px;margin-bottom:12px;}
-.map-row{display:flex;align-items:center;gap:12px;padding:9px 12px;background:var(--white);
-  border:1.5px solid var(--border);border-radius:13px;cursor:pointer;transition:border-color .15s,background .15s;}
-.map-row:hover{border-color:var(--a1);}
-.map-row.active{border-color:var(--a1);background:var(--s2);}
-.map-row-thumb{width:52px;height:38px;border-radius:8px;overflow:hidden;flex-shrink:0;background:var(--s1);}
+/* ── 지도 목록 (큰 썸네일 카드 그리드, 항상 보임, 클릭하면 바로 아래 큰 뷰어에 표시) ── */
+.map-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:12px;}
+.map-row{background:var(--white);border:1.5px solid var(--border);border-radius:16px;overflow:hidden;
+  cursor:pointer;transition:transform .15s,border-color .15s,box-shadow .15s;}
+.map-row:hover{transform:translateY(-3px);box-shadow:var(--shadow2);border-color:var(--a1);}
+.map-row.active{border-color:var(--a1);box-shadow:0 4px 16px rgba(47,127,214,.25);}
+.map-row-thumb{width:100%;aspect-ratio:202/150;overflow:hidden;background:var(--s1);}
 .map-row-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
-.map-row-title{flex:1;font-size:13.5px;font-weight:700;color:var(--t1);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.map-row-title{font-size:13px;font-weight:800;color:var(--t1);padding:9px 10px 4px;line-height:1.4;}
 .map-row.active .map-row-title{color:var(--a1);}
-.map-row-cat{font-size:10px;font-weight:800;color:var(--a1);background:var(--s2);padding:3px 9px;border-radius:8px;flex-shrink:0;}
+.map-row-cat{display:inline-block;font-size:9.5px;font-weight:900;color:var(--a1);background:var(--s2);
+  padding:2px 8px;border-radius:7px;margin:0 10px 9px;letter-spacing:.3px;}
 
 .empty-state{text-align:center;padding:40px 20px;color:var(--t3);}
 .load-more-btn{margin:4px 0 16px;padding:9px 24px;border-radius:99px;border:1.5px solid var(--border2);
@@ -179,7 +180,7 @@ body {
     <div class="wind-badge"><span class="wind-badge-dot"></span><span>SA JYAJYA · MAP INFO</span></div>
     <h1 class="page-title">🗺️ 지도정보</h1>
     <div class="page-sub">지도를 골라서 크게 확인해보세요</div>
-    <button class="popup-open-btn" onclick="openPip()">📌 PIP로 열기 (게임 위에 항상 띄우기)</button>
+    <button class="popup-open-btn" onclick="openPip().catch(e=>toastMsg('PIP 열기 실패: '+e.message))">📌 PIP로 열기 (게임 위에 항상 띄우기)</button>
   </div>
 
   <div class="map-search-wrap">
@@ -203,7 +204,7 @@ body {
       <span class="big-viewer-title" id="big-title">위 목록에서 지도를 선택해주세요</span>
     </div>
     <div class="big-viewer-body">
-      <img id="big-img" src="" alt="지도 이미지" style="display:none;" onerror="handleImgError(this)">
+      <img id="big-img" alt="지도 이미지" style="display:none;" onerror="handleImgError(this)">
       <div class="big-viewer-empty" id="big-empty"><span class="big-viewer-empty-emoji">🗺️</span>지도를 클릭하면<br>여기에 바로 크게 보여요</div>
     </div>
   </div>
