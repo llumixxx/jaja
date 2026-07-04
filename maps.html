@@ -96,60 +96,40 @@ body {
 .page-sub { font-size: 12px; color: var(--t3); font-family: 'Nunito', sans-serif; font-weight: 700; letter-spacing: 1px; }
 
 /* ── 카테고리 필터 칩 ── */
-.cat-chip-wrap{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;margin-bottom:20px;}
+.cat-chip-wrap{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;margin-bottom:14px;}
 .cat-chip{padding:7px 15px;border-radius:99px;font-size:12.5px;font-weight:800;cursor:pointer;
   background:var(--white);border:1.5px solid var(--border);color:var(--t2);transition:all .15s;}
 .cat-chip:hover{border-color:var(--a1);color:var(--a1);}
 .cat-chip.on{background:linear-gradient(135deg,var(--a1),var(--a2));color:#fff;border-color:transparent;}
 
-/* ── 지도 그리드 ── */
-.map-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;}
-.map-card{background:var(--white);border:1.5px solid var(--border);border-radius:18px;overflow:hidden;
-  cursor:pointer;transition:transform .18s,box-shadow .18s;}
-.map-card:hover{transform:translateY(-3px);box-shadow:var(--shadow2);border-color:var(--a1);}
-.map-thumb-wrap{width:100%;aspect-ratio:202/150;background:var(--s1);overflow:hidden;position:relative;}
-.map-thumb-wrap img{width:100%;height:100%;object-fit:cover;display:block;}
-.map-card-body{padding:10px 12px 12px;}
-.map-card-cat{display:inline-block;font-size:9.5px;font-weight:900;color:var(--a1);background:var(--s2);
-  padding:2px 8px;border-radius:7px;margin-bottom:6px;letter-spacing:.3px;}
-.map-card-title{font-size:13.5px;font-weight:800;color:var(--t1);line-height:1.4;}
-
-.empty-state{text-align:center;padding:50px 20px;color:var(--t3);}
-.empty-state-emoji{font-size:40px;margin-bottom:10px;}
-
-/* ── 팝업(모달) 뷰어: 위에 목록, 아래 큰 이미지 ── */
-#map-modal{position:fixed;inset:0;background:rgba(10,20,32,.72);backdrop-filter:blur(4px);
-  z-index:500;display:none;align-items:center;justify-content:center;padding:20px;}
-#map-modal.open{display:flex;}
-.mv-box{background:var(--white);border-radius:22px;max-width:920px;width:100%;max-height:92vh;
-  display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.4);}
-.mv-header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;
-  border-bottom:1.5px solid var(--border);flex-shrink:0;}
-.mv-header-title{font-size:15px;font-weight:900;color:var(--t1);}
-.mv-close{width:34px;height:34px;border-radius:50%;border:none;background:var(--s1);color:var(--t2);
-  font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0;}
-.mv-close:hover{background:var(--err);color:#fff;}
-/* 위쪽 썸네일 리스트(가로 스크롤) */
-.mv-list{display:flex;gap:8px;padding:12px 14px;overflow-x:auto;flex-shrink:0;border-bottom:1.5px solid var(--border);background:var(--s1);}
-.mv-list::-webkit-scrollbar{height:5px;} .mv-list::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px;}
-.mv-list-item{flex-shrink:0;width:78px;cursor:pointer;border-radius:10px;overflow:hidden;
-  border:2.5px solid transparent;transition:border-color .15s,transform .15s;}
-.mv-list-item:hover{transform:translateY(-2px);}
-.mv-list-item.active{border-color:var(--a1);}
-.mv-list-item img{width:78px;height:58px;object-fit:cover;display:block;background:var(--white);}
-.mv-list-item-label{font-size:8.5px;font-weight:700;color:var(--t2);text-align:center;padding:2px 2px;
+/* ── 썸네일 스트립(항상 보임, 클릭하면 바로 아래 큰 뷰어에 표시) ── */
+.thumb-strip{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:16px;
+  padding:12px;background:var(--white);border:1.5px solid var(--border);border-radius:16px;}
+.thumb-item{width:84px;cursor:pointer;border-radius:10px;overflow:hidden;
+  border:2.5px solid transparent;transition:border-color .15s,transform .15s;background:var(--s1);}
+.thumb-item:hover{transform:translateY(-2px);}
+.thumb-item.active{border-color:var(--a1);box-shadow:0 4px 12px rgba(47,127,214,.25);}
+.thumb-item img{width:84px;height:62px;object-fit:cover;display:block;background:var(--white);}
+.thumb-item-label{font-size:9px;font-weight:700;color:var(--t2);text-align:center;padding:3px 3px;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:var(--white);}
-/* 아래쪽 큰 이미지 뷰어 */
-.mv-viewer{flex:1;overflow:auto;display:flex;align-items:center;justify-content:center;background:#0d1620;padding:10px;min-height:200px;}
-.mv-viewer img{max-width:100%;max-height:76vh;object-fit:contain;border-radius:6px;}
-.mv-footer{display:flex;align-items:center;justify-content:space-between;padding:10px 18px;
-  border-top:1.5px solid var(--border);flex-shrink:0;flex-wrap:wrap;gap:8px;}
-.mv-footer-cat{font-size:11px;font-weight:800;color:var(--a1);background:var(--s2);padding:4px 10px;border-radius:8px;}
-.mv-orig-link{font-size:12px;font-weight:800;color:var(--a1);text-decoration:none;display:inline-flex;align-items:center;gap:4px;}
-.mv-orig-link:hover{text-decoration:underline;}
+.thumb-item.active .thumb-item-label{color:var(--a1);}
+
+.empty-state{text-align:center;padding:40px 20px;color:var(--t3);}
+.empty-state-emoji{font-size:36px;margin-bottom:8px;}
+
+/* ── 큰 뷰어 (같은 화면에 바로 표시, 팝업/모달 없음) ── */
+.big-viewer{background:var(--white);border:1.5px solid var(--border);border-radius:18px;overflow:hidden;box-shadow:var(--shadow);}
+.big-viewer-head{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1.5px solid var(--border);}
+.big-viewer-cat{font-size:10.5px;font-weight:900;color:var(--a1);background:var(--s2);padding:3px 10px;border-radius:8px;flex-shrink:0;}
+.big-viewer-title{font-size:15px;font-weight:900;color:var(--t1);flex:1;}
+.big-viewer-body{background:#0d1620;min-height:260px;display:flex;align-items:center;justify-content:center;padding:12px;}
+.big-viewer-body img{max-width:100%;max-height:70vh;object-fit:contain;border-radius:6px;}
+.big-viewer-empty{color:#5a7290;text-align:center;font-size:13px;font-weight:700;line-height:1.7;}
+.big-viewer-empty-emoji{font-size:36px;display:block;margin-bottom:8px;}
 
 @media(max-width:520px){ .page-title{font-size:26px;} .main-inner{padding:16px 14px 60px;}
-  .mv-box{max-height:96vh;} .mv-viewer img{max-height:56vh;} }
+  .big-viewer-body{min-height:180px;} .big-viewer-body img{max-height:50vh;}
+  .thumb-item{width:70px;} .thumb-item img{width:70px;height:52px;} }
 </style>
 </head>
 <body>
@@ -166,8 +146,8 @@ body {
   <div class="sb-body">
     <div class="sb-info-box">
       🗺️ <b>지도정보</b><br><br>
-      공홈 지도게시판(지도정보) 1페이지 기준 <b id="sb-map-count">-</b>개 지도를 모아왔어요.<br><br>
-      카드를 클릭하면 목록이 위에 뜨는 팝업으로 크게 볼 수 있어요.<br><br>
+      공홈 지도게시판 1페이지 기준 <b id="sb-map-count">-</b>개 지도를 모아왔어요.<br><br>
+      위 카테고리에서 고르고, 썸네일을 클릭하면 바로 아래에 크게 보여요. 창을 게임 옆에 띄워놓고 바로바로 확인할 수 있어요.<br><br>
       <span style="color:var(--t3);">※ 공홈에 지도가 더 올라오면 알려주세요, 추가해드릴게요.</span>
     </div>
   </div>
@@ -188,31 +168,24 @@ body {
 
   <div class="cat-chip-wrap" id="cat-chips"></div>
 
-  <div class="map-grid" id="map-grid"></div>
+  <div class="thumb-strip" id="thumb-strip"></div>
   <div class="empty-state" id="empty-state" style="display:none;">
     <div class="empty-state-emoji">🗺️</div>
     <div>해당 카테고리에 지도가 없어요</div>
   </div>
 
-</div>
-</div>
-
-<!-- 팝업 뷰어: 위에 목록, 아래 큰 이미지 -->
-<div id="map-modal">
-  <div class="mv-box">
-    <div class="mv-header">
-      <div class="mv-header-title" id="mv-title">-</div>
-      <button class="mv-close" onclick="closeMapModal()">✕</button>
+  <div class="big-viewer">
+    <div class="big-viewer-head">
+      <span class="big-viewer-cat" id="big-cat" style="display:none;">-</span>
+      <span class="big-viewer-title" id="big-title">위 목록에서 지도를 선택해주세요</span>
     </div>
-    <div class="mv-list" id="mv-list"></div>
-    <div class="mv-viewer">
-      <img id="mv-img" src="" alt="지도 이미지" onerror="handleImgError(this)">
-    </div>
-    <div class="mv-footer">
-      <span class="mv-footer-cat" id="mv-cat">-</span>
-      <a class="mv-orig-link" id="mv-orig" href="#" target="_blank" rel="noopener noreferrer">🔗 원본 게시글에서 크게 보기</a>
+    <div class="big-viewer-body">
+      <img id="big-img" src="" alt="지도 이미지" style="display:none;" onerror="handleImgError(this)">
+      <div class="big-viewer-empty" id="big-empty"><span class="big-viewer-empty-emoji">🗺️</span>지도를 클릭하면<br>여기에 바로 크게 보여요</div>
     </div>
   </div>
+
+</div>
 </div>
 
 <script src="nav.js"></script>
@@ -274,73 +247,44 @@ const MAPS = [
 function guessFullImage(thumbUrl){
   return thumbUrl.replace('/thumb-', '/').replace(/_\d+x\d+(?=\.\w+$)/, '');
 }
-function boardPostUrl(id){ return `${BOARD_URL}&wr_id=${id}`; }
 
 /* ═══════════════════════════════════════════════════════════
-   그리드 렌더 + 카테고리 필터
+   카테고리 필터 + 썸네일 스트립 + 큰 뷰어 (한 화면, 팝업/이동 없음)
    ═══════════════════════════════════════════════════════════ */
 let currentCat = '전체보기';
+let currentMapId = null;
+
 function renderChips(){
   const cats = ['전체보기', ...Array.from(new Set(MAPS.map(m=>m.cat)))];
   document.getElementById('cat-chips').innerHTML = cats.map(c=>
     `<button class="cat-chip ${c===currentCat?'on':''}" data-cat="${c}">${c}</button>`
   ).join('');
 }
-function renderGrid(){
+function renderStrip(){
   const list = currentCat === '전체보기' ? MAPS : MAPS.filter(m=>m.cat===currentCat);
-  const grid = document.getElementById('map-grid');
+  const strip = document.getElementById('thumb-strip');
   const empty = document.getElementById('empty-state');
-  if(list.length===0){ grid.innerHTML=''; empty.style.display='block'; return; }
-  empty.style.display='none';
-  grid.innerHTML = list.map(m => `
-    <div class="map-card" data-id="${m.id}">
-      <div class="map-thumb-wrap"><img src="${m.thumb}" alt="${m.title}" loading="lazy"></div>
-      <div class="map-card-body">
-        <span class="map-card-cat">${m.cat}</span>
-        <div class="map-card-title">${m.title}</div>
-      </div>
+  if(list.length===0){ strip.innerHTML=''; strip.style.display='none'; empty.style.display='block'; return; }
+  empty.style.display='none'; strip.style.display='flex';
+  strip.innerHTML = list.map(m => `
+    <div class="thumb-item ${m.id===currentMapId?'active':''}" data-id="${m.id}">
+      <img src="${m.thumb}" alt="${m.title}" loading="lazy">
+      <div class="thumb-item-label">${m.title}</div>
     </div>
   `).join('');
 }
-document.getElementById('cat-chips').addEventListener('click', e=>{
-  const btn = e.target.closest('.cat-chip'); if(!btn) return;
-  currentCat = btn.dataset.cat;
-  renderChips(); renderGrid();
-});
-document.getElementById('map-grid').addEventListener('click', e=>{
-  const card = e.target.closest('.map-card'); if(!card) return;
-  openMapModal(parseInt(card.dataset.id));
-});
-
-/* ═══════════════════════════════════════════════════════════
-   팝업 뷰어: 위에 썸네일 목록, 아래 큰 이미지
-   ═══════════════════════════════════════════════════════════ */
-let currentMapId = null;
-function renderMvList(){
-  document.getElementById('mv-list').innerHTML = MAPS.map(m => `
-    <div class="mv-list-item ${m.id===currentMapId?'active':''}" data-id="${m.id}">
-      <img src="${m.thumb}" alt="${m.title}">
-      <div class="mv-list-item-label">${m.title}</div>
-    </div>
-  `).join('');
-}
-function openMapModal(id){
-  currentMapId = id;
-  renderMvList();
-  showMap(id);
-  document.getElementById('map-modal').classList.add('open');
-}
-function closeMapModal(){ document.getElementById('map-modal').classList.remove('open'); }
 function showMap(id){
   const m = MAPS.find(x=>x.id===id); if(!m) return;
   currentMapId = id;
-  document.getElementById('mv-title').textContent = m.title;
-  document.getElementById('mv-cat').textContent = m.cat;
-  document.getElementById('mv-orig').href = boardPostUrl(m.id);
-  const img = document.getElementById('mv-img');
+  document.getElementById('big-title').textContent = m.title;
+  const catEl = document.getElementById('big-cat');
+  catEl.textContent = m.cat; catEl.style.display = 'inline-block';
+  document.getElementById('big-empty').style.display = 'none';
+  const img = document.getElementById('big-img');
+  img.style.display = 'block';
   img.dataset.triedFull = '0';
   img.src = guessFullImage(m.thumb);
-  [...document.querySelectorAll('.mv-list-item')].forEach(el=>{
+  [...document.querySelectorAll('.thumb-item')].forEach(el=>{
     el.classList.toggle('active', parseInt(el.dataset.id)===id);
   });
 }
@@ -352,20 +296,19 @@ function handleImgError(img){
     if(m) img.src = m.thumb;
   }
 }
-document.getElementById('mv-list').addEventListener('click', e=>{
-  const item = e.target.closest('.mv-list-item'); if(!item) return;
+document.getElementById('cat-chips').addEventListener('click', e=>{
+  const btn = e.target.closest('.cat-chip'); if(!btn) return;
+  currentCat = btn.dataset.cat;
+  renderChips(); renderStrip();
+});
+document.getElementById('thumb-strip').addEventListener('click', e=>{
+  const item = e.target.closest('.thumb-item'); if(!item) return;
   showMap(parseInt(item.dataset.id));
-});
-document.getElementById('map-modal').addEventListener('click', e=>{
-  if(e.target.id === 'map-modal') closeMapModal();
-});
-document.addEventListener('keydown', e=>{
-  if(e.key === 'Escape') closeMapModal();
 });
 
 /* 초기 렌더 */
 renderChips();
-renderGrid();
+renderStrip();
 document.getElementById('sb-map-count').textContent = MAPS.length;
 document.getElementById('mapCountFooter').textContent = MAPS.length + '개 지도';
 </script>
