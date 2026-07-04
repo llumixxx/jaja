@@ -94,6 +94,11 @@ body {
   background: linear-gradient(135deg, var(--a1) 0%, var(--a2) 60%, var(--a5) 100%);
   -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1.15; margin-bottom: 6px; }
 .page-sub { font-size: 12px; color: var(--t3); font-family: 'Nunito', sans-serif; font-weight: 700; letter-spacing: 1px; }
+.popup-open-btn { margin-top: 14px; padding: 10px 20px; border-radius: 99px; border: none; cursor: pointer;
+  background: linear-gradient(135deg, var(--a1), var(--a2)); color: #fff; font-size: 12.5px; font-weight: 800;
+  font-family: 'Noto Sans KR', sans-serif; box-shadow: 0 4px 16px rgba(47,127,214,.3); transition: transform .15s; }
+.popup-open-btn:hover { transform: translateY(-2px); }
+.popup-open-btn:active { transform: scale(.97); }
 
 /* ── 카테고리 필터 칩 ── */
 .cat-chip-wrap{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;margin-bottom:14px;}
@@ -164,6 +169,7 @@ body {
     <div class="wind-badge"><span class="wind-badge-dot"></span><span>SA JYAJYA · MAP INFO</span></div>
     <h1 class="page-title">🗺️ 지도정보</h1>
     <div class="page-sub">지도를 골라서 크게 확인해보세요</div>
+    <button class="popup-open-btn" onclick="openAsPopup()">🗗 별도 팝업창으로 열기 (게임 옆에 띄우기)</button>
   </div>
 
   <div class="cat-chip-wrap" id="cat-chips"></div>
@@ -241,6 +247,100 @@ const MAPS = [
   { id:106, cat:"가이아",   title:"물의 해변 (수속성레이드)", thumb:"https://sa000001.com/data/editor/2502/thumb-65ee93eb244be7335a09c37cd9593121_1740695204_2489_202x150.png" },
   { id:105, cat:"가이아",   title:"바람의 동굴 (풍속성레이드)", thumb:"https://sa000001.com/data/editor/2502/thumb-65ee93eb244be7335a09c37cd9593121_1740695230_9994_202x150.png" },
   { id:104, cat:"가이아",   title:"땅의 숲 (지속성 레이드)", thumb:"https://sa000001.com/data/editor/2502/thumb-86aed2272a49228ab38d9bb864900a06_1740707152_8205_202x150.png" },
+  { id:103, cat:"전체",     title:"투기장 (팀 듀얼)", thumb:"https://sa000001.com/data/editor/2502/thumb-65ee93eb244be7335a09c37cd9593121_1740707706_8189_202x150.png" },
+  { id:102, cat:"가이아",   title:"북 가이아 섬", thumb:"https://sa000001.com/data/editor/2503/thumb-401f96f31d85ec3b3e727835291dacf5_1740777917_5114_202x150.png" },
+  { id:101, cat:"가이아",   title:"가이아 미로섬", thumb:"https://sa000001.com/data/editor/2502/thumb-e5f577935d77aff6cfd5e9d34de19691_1740642675_171_202x150.png" },
+  { id:100, cat:"가이아",   title:"땅의 정령 통로", thumb:"https://sa000001.com/data/editor/2502/thumb-6e2ade6e67ba42194e7b606e6ffd1709_1740047128_1832_202x150.png" },
+  { id:97,  cat:"전체",     title:"아쿠아펄 해저 지역 전체지도", thumb:"https://sa000001.com/data/editor/2606/thumb-4268513e4c40cee9e8a8c1f714ef7eec_1782236347_6647_202x150.png" },
+  { id:96,  cat:"전체",     title:"인어의 섬 전체지도", thumb:"https://sa000001.com/data/editor/2606/thumb-4268513e4c40cee9e8a8c1f714ef7eec_1782236383_9803_202x150.png" },
+  { id:95,  cat:"전체",     title:"클로니클 어비스 전체지도", thumb:"https://sa000001.com/data/editor/2606/thumb-4268513e4c40cee9e8a8c1f714ef7eec_1782236395_6378_202x150.png" },
+  { id:88,  cat:"전체",     title:"사이너스 전체지도", thumb:"https://sa000001.com/data/editor/2606/thumb-feb1d4ced69e4b34dfb3373d9967356b_1782236409_2485_202x150.png" },
+  { id:87,  cat:"아쿠아펄", title:"히스토닉 동굴", thumb:"https://sa000001.com/data/editor/2606/thumb-feb1d4ced69e4b34dfb3373d9967356b_1782236420_8339_202x150.png" },
+  { id:86,  cat:"아쿠아펄", title:"환선심해통로", thumb:"https://sa000001.com/data/editor/2606/thumb-feb1d4ced69e4b34dfb3373d9967356b_1782236430_7718_202x150.png" },
+  { id:85,  cat:"아쿠아펄", title:"인어의 숲", thumb:"https://sa000001.com/data/editor/2606/thumb-feb1d4ced69e4b34dfb3373d9967356b_1782236440_6773_202x150.png" },
+  { id:84,  cat:"아쿠아펄", title:"오래된 상처 동굴", thumb:"https://sa000001.com/data/editor/2606/thumb-feb1d4ced69e4b34dfb3373d9967356b_1782236451_5526_202x150.png" },
+  { id:83,  cat:"아쿠아펄", title:"심연의 동굴 지하", thumb:"https://sa000001.com/data/editor/2606/thumb-feb1d4ced69e4b34dfb3373d9967356b_1782236463_8639_202x150.png" },
+  { id:82,  cat:"아쿠아펄", title:"미지의 섬 / 폭풍의 언덕", thumb:"https://sa000001.com/data/editor/2606/thumb-feb1d4ced69e4b34dfb3373d9967356b_1782236504_0265_202x150.png" },
+  { id:81,  cat:"아쿠아펄", title:"미라지 협곡", thumb:"https://sa000001.com/data/editor/2606/thumb-feb1d4ced69e4b34dfb3373d9967356b_1782236521_7967_202x150.png" },
+  { id:80, cat:"아쿠아펄", title:"난파된 해적선", thumb:"https://sa000001.com/data/editor/2606/thumb-feb1d4ced69e4b34dfb3373d9967356b_1782236531_9833_202x150.png" },
+  { id:79, cat:"에레보스", title:"파론 마을", thumb:"https://sa000001.com/data/editor/2606/thumb-feb1d4ced69e4b34dfb3373d9967356b_1782236544_7107_202x150.png" },
+  { id:78, cat:"에레보스", title:"타니토스 신전", thumb:"https://sa000001.com/data/editor/2606/thumb-feb1d4ced69e4b34dfb3373d9967356b_1782236568_6673_202x150.png" },
+  { id:77, cat:"에레보스", title:"용암 동굴", thumb:"https://sa000001.com/data/editor/2606/thumb-feb1d4ced69e4b34dfb3373d9967356b_1782236590_1967_202x150.png" },
+  { id:76, cat:"에레보스", title:"어둠의 동굴", thumb:"https://sa000001.com/data/editor/2606/thumb-feb1d4ced69e4b34dfb3373d9967356b_1782236600_4341_202x150.png" },
+  { id:75, cat:"에레보스", title:"온천랜드", thumb:"https://sa000001.com/data/editor/2606/thumb-feb1d4ced69e4b34dfb3373d9967356b_1782236610_0509_202x150.png" },
+  { id:74, cat:"에레보스", title:"고타나 마을", thumb:"https://sa000001.com/data/editor/2606/thumb-feb1d4ced69e4b34dfb3373d9967356b_1782236619_7241_202x150.png" },
+  { id:73, cat:"하이하모", title:"헤메라 신전", thumb:"https://sa000001.com/data/editor/2606/thumb-feb1d4ced69e4b34dfb3373d9967356b_1782236653_9382_202x150.png" },
+  { id:72, cat:"하이하모", title:"포타 마을", thumb:"https://sa000001.com/data/editor/2606/thumb-feb1d4ced69e4b34dfb3373d9967356b_1782236679_7691_202x150.png" },
+  { id:71, cat:"하이하모", title:"정령의 마을", thumb:"https://sa000001.com/data/editor/2606/thumb-feb1d4ced69e4b34dfb3373d9967356b_1782236691_6675_202x150.png" },
+  { id:70, cat:"하이하모", title:"신전", thumb:"https://sa000001.com/data/editor/2606/thumb-4268513e4c40cee9e8a8c1f714ef7eec_1782236727_7913_202x150.png" },
+  { id:69, cat:"하이하모", title:"빛의 동굴", thumb:"https://sa000001.com/data/editor/2606/thumb-4268513e4c40cee9e8a8c1f714ef7eec_1782236753_2938_202x150.png" },
+  { id:68, cat:"하이하모", title:"눈물의 동굴", thumb:"https://sa000001.com/data/editor/2606/thumb-4268513e4c40cee9e8a8c1f714ef7eec_1782236764_3313_202x150.png" },
+  { id:67, cat:"포우렌", title:"후암산 지하", thumb:"https://sa000001.com/data/editor/2606/thumb-feb1d4ced69e4b34dfb3373d9967356b_1782236784_877_202x150.png" },
+  { id:66, cat:"포우렌", title:"후암산", thumb:"https://sa000001.com/data/editor/2606/thumb-feb1d4ced69e4b34dfb3373d9967356b_1782236806_1299_202x150.png" },
+  { id:65, cat:"포우렌", title:"황금동", thumb:"https://sa000001.com/data/editor/2606/thumb-feb1d4ced69e4b34dfb3373d9967356b_1782236817_5017_202x150.png" },
+  { id:64, cat:"포우렌", title:"폐기물 광산", thumb:"https://sa000001.com/data/editor/2606/thumb-4268513e4c40cee9e8a8c1f714ef7eec_1782236843_763_202x150.png" },
+  { id:63, cat:"포우렌", title:"오르페의 동굴", thumb:"https://sa000001.com/data/editor/2606/thumb-feb1d4ced69e4b34dfb3373d9967356b_1782236873_8627_202x150.png" },
+  { id:62, cat:"포우렌", title:"스라인 지하동굴", thumb:"https://sa000001.com/data/editor/2606/thumb-feb1d4ced69e4b34dfb3373d9967356b_1782236890_6733_202x150.png" },
+  { id:61, cat:"포우렌", title:"스라인 마을", thumb:"https://sa000001.com/data/editor/2606/thumb-feb1d4ced69e4b34dfb3373d9967356b_1782236901_5249_202x150.png" },
+  { id:60, cat:"포우렌", title:"수정동굴 지하", thumb:"https://sa000001.com/data/editor/2606/thumb-feb1d4ced69e4b34dfb3373d9967356b_1782236911_6895_202x150.png" },
+  { id:59, cat:"포우렌", title:"다이몬족 동굴", thumb:"https://sa000001.com/data/editor/2606/thumb-feb1d4ced69e4b34dfb3373d9967356b_1782236922_171_202x150.png" },
+  { id:58, cat:"포우렌", title:"공간의 동굴", thumb:"https://sa000001.com/data/editor/2606/thumb-4268513e4c40cee9e8a8c1f714ef7eec_1782236942_058_202x150.png" },
+  { id:57, cat:"포우렌", title:"강인함의 동굴", thumb:"https://sa000001.com/data/editor/2606/thumb-4268513e4c40cee9e8a8c1f714ef7eec_1782236960_6547_202x150.png" },
+  { id:56, cat:"세르노스", title:"호피도 전체지도", thumb:"https://sa000001.com/data/editor/2606/thumb-4268513e4c40cee9e8a8c1f714ef7eec_1782236970_2199_202x150.png" },
+  { id:55, cat:"세르노스", title:"폐허", thumb:"https://sa000001.com/data/editor/2606/thumb-4268513e4c40cee9e8a8c1f714ef7eec_1782236994_7909_202x150.png" },
+  { id:54, cat:"세르노스", title:"쿠르 마을", thumb:"https://sa000001.com/data/editor/2606/thumb-4268513e4c40cee9e8a8c1f714ef7eec_1782237012_3523_202x150.png" },
+  { id:53, cat:"세르노스", title:"콧구멍 동굴", thumb:"https://sa000001.com/data/editor/2606/thumb-4268513e4c40cee9e8a8c1f714ef7eec_1782237022_8638_202x150.png" },
+  { id:52, cat:"세르노스", title:"잊혀진 영웅의 동굴", thumb:"https://sa000001.com/data/editor/2606/thumb-4268513e4c40cee9e8a8c1f714ef7eec_1782237033_2239_202x150.png" },
+  { id:51, cat:"세르노스", title:"신비의 동굴", thumb:"https://sa000001.com/data/editor/2606/thumb-feb1d4ced69e4b34dfb3373d9967356b_1782237061_168_202x150.png" },
+  { id:50, cat:"세르노스", title:"범굴", thumb:"https://sa000001.com/data/editor/2606/thumb-feb1d4ced69e4b34dfb3373d9967356b_1782237084_5174_202x150.png" },
+  { id:49, cat:"세르노스", title:"몽환동굴 (낮/밤)", thumb:"https://sa000001.com/data/editor/2606/thumb-feb1d4ced69e4b34dfb3373d9967356b_1782237097_8458_202x150.png" },
+  { id:48, cat:"가우린", title:"후르도 마을", thumb:"https://sa000001.com/data/editor/2606/thumb-feb1d4ced69e4b34dfb3373d9967356b_1782237108_1366_202x150.png" },
+  { id:47, cat:"가우린", title:"폐허가 된 탄광", thumb:"https://sa000001.com/data/editor/2606/thumb-feb1d4ced69e4b34dfb3373d9967356b_1782237117_5951_202x150.png" },
+  { id:46, cat:"가우린", title:"칠흑의 지하동굴", thumb:"https://sa000001.com/data/editor/2606/thumb-feb1d4ced69e4b34dfb3373d9967356b_1782237127_7966_202x150.png" },
+  { id:45, cat:"가우린", title:"진홍의 지하동굴 (가/나)", thumb:"https://sa000001.com/data/editor/2606/thumb-4268513e4c40cee9e8a8c1f714ef7eec_1782237147_6168_202x150.png" },
+  { id:44, cat:"가우린", title:"오형제의 동굴", thumb:"https://sa000001.com/data/editor/2606/thumb-4268513e4c40cee9e8a8c1f714ef7eec_1782237166_4438_202x150.png" },
+  { id:43, cat:"가우린", title:"알수없는 지하", thumb:"https://sa000001.com/data/editor/2606/thumb-4268513e4c40cee9e8a8c1f714ef7eec_1782237178_3958_202x150.png" },
+  { id:42, cat:"가우린", title:"아스마르 광산", thumb:"https://sa000001.com/data/editor/2606/thumb-4268513e4c40cee9e8a8c1f714ef7eec_1782237188_1178_202x150.png" },
+  { id:41, cat:"가우린", title:"비룡 동굴 지하", thumb:"https://sa000001.com/data/editor/2606/thumb-4268513e4c40cee9e8a8c1f714ef7eec_1782237196_9872_202x150.png" },
+  { id:40, cat:"가우린", title:"북가우린 지하통로", thumb:"https://sa000001.com/data/editor/2606/thumb-4268513e4c40cee9e8a8c1f714ef7eec_1782237205_7849_202x150.png" },
+  { id:39, cat:"가우린", title:"북가우린 산봉우리", thumb:"https://sa000001.com/data/editor/2606/thumb-4268513e4c40cee9e8a8c1f714ef7eec_1782237215_229_202x150.png" },
+  { id:38, cat:"가우린", title:"방향의 사당", thumb:"https://sa000001.com/data/editor/2606/thumb-4268513e4c40cee9e8a8c1f714ef7eec_1782237224_8222_202x150.png" },
+  { id:37, cat:"가우린", title:"바남의 지하동굴 (가/나)", thumb:"https://sa000001.com/data/editor/2606/thumb-cd0c9602d6dac7a3078b19f6ae0a40d1_1782237243_8503_202x150.png" },
+  { id:36, cat:"가우린", title:"메루나 동굴", thumb:"https://sa000001.com/data/editor/2606/thumb-cd0c9602d6dac7a3078b19f6ae0a40d1_1782237264_9404_202x150.png" },
+  { id:35, cat:"가우린", title:"동가우린 산봉우리", thumb:"https://sa000001.com/data/editor/2606/thumb-7af8735c42d805a8a677d820eeea962f_1782237279_3457_202x150.png" },
+  { id:34, cat:"가우린", title:"다나 마을", thumb:"https://sa000001.com/data/editor/2606/thumb-7af8735c42d805a8a677d820eeea962f_1782237299_1023_202x150.png" },
+  { id:33, cat:"가우린", title:"가토로 동굴", thumb:"https://sa000001.com/data/editor/2606/thumb-7af8735c42d805a8a677d820eeea962f_1782237312_7016_202x150.png" },
+  { id:32, cat:"가우린", title:"가우린 채석장", thumb:"https://sa000001.com/data/editor/2606/thumb-7af8735c42d805a8a677d820eeea962f_1782237325_3554_202x150.png" },
+  { id:31, cat:"쟈루", title:"토토 마을", thumb:"https://sa000001.com/data/editor/2606/thumb-cd0c9602d6dac7a3078b19f6ae0a40d1_1782237342_77_202x150.png" },
+  { id:30, cat:"쟈루", title:"타무타무 마을", thumb:"https://sa000001.com/data/editor/2606/thumb-cd0c9602d6dac7a3078b19f6ae0a40d1_1782237356_129_202x150.png" },
+  { id:29, cat:"쟈루", title:"쿠키 마을", thumb:"https://sa000001.com/data/editor/2606/thumb-cd0c9602d6dac7a3078b19f6ae0a40d1_1782237370_0083_202x150.png" },
+  { id:28, cat:"쟈루", title:"카루타나 마을", thumb:"https://sa000001.com/data/editor/2606/thumb-cd0c9602d6dac7a3078b19f6ae0a40d1_1782237383_9556_202x150.png" },
+  { id:27, cat:"쟈루", title:"쟌족의 동굴", thumb:"https://sa000001.com/data/editor/2606/thumb-cd0c9602d6dac7a3078b19f6ae0a40d1_1782237398_1217_202x150.png" },
+  { id:26, cat:"쟈루", title:"쟈쟈 마을", thumb:"https://sa000001.com/data/editor/2606/thumb-cd0c9602d6dac7a3078b19f6ae0a40d1_1782237411_8827_202x150.png" },
+  { id:25, cat:"쟈루", title:"유리의 동굴", thumb:"https://sa000001.com/data/editor/2606/thumb-cd0c9602d6dac7a3078b19f6ae0a40d1_1782237426_1275_202x150.png" },
+  { id:24, cat:"쟈루", title:"우루리 마을", thumb:"https://sa000001.com/data/editor/2606/thumb-cd0c9602d6dac7a3078b19f6ae0a40d1_1782237440_2543_202x150.png" },
+  { id:23, cat:"쟈루", title:"용의 소굴", thumb:"https://sa000001.com/data/editor/2606/thumb-cd0c9602d6dac7a3078b19f6ae0a40d1_1782237453_4672_202x150.png" },
+  { id:22, cat:"쟈루", title:"아름산의 지하동굴", thumb:"https://sa000001.com/data/editor/2606/thumb-cd0c9602d6dac7a3078b19f6ae0a40d1_1782237465_5561_202x150.png" },
+  { id:21, cat:"쟈루", title:"숲의 동굴", thumb:"https://sa000001.com/data/editor/2606/thumb-cd0c9602d6dac7a3078b19f6ae0a40d1_1782237478_1694_202x150.png" },
+  { id:20, cat:"쟈루", title:"벽청 지하동굴 (가/나)", thumb:"https://sa000001.com/data/editor/2606/thumb-cd0c9602d6dac7a3078b19f6ae0a40d1_1782237827_5333_202x150.png" },
+  { id:19, cat:"쟈루", title:"라토토의 복도 / 라토토의 동굴", thumb:"https://sa000001.com/data/editor/2606/thumb-cd0c9602d6dac7a3078b19f6ae0a40d1_1782237865_7366_202x150.png" },
+  { id:18, cat:"쟈루", title:"라토토 대동굴", thumb:"https://sa000001.com/data/editor/2606/thumb-ce6ee534fb5232c72cfdaf4cf14503b0_1782237930_9615_202x150.png" },
+  { id:17, cat:"쟈루", title:"고야산 동굴", thumb:"https://sa000001.com/data/editor/2606/thumb-ce6ee534fb5232c72cfdaf4cf14503b0_1782237945_2042_202x150.png" },
+  { id:16, cat:"사이너스", title:"호토르 마을", thumb:"https://sa000001.com/data/editor/2606/thumb-ce6ee534fb5232c72cfdaf4cf14503b0_1782237971_5666_202x150.png" },
+  { id:15, cat:"사이너스", title:"쿠오산 소동굴", thumb:"https://sa000001.com/data/editor/2606/thumb-ce6ee534fb5232c72cfdaf4cf14503b0_1782237983_8827_202x150.png" },
+  { id:14, cat:"사이너스", title:"쿠오 마을", thumb:"https://sa000001.com/data/editor/2606/thumb-ce6ee534fb5232c72cfdaf4cf14503b0_1782237995_6587_202x150.png" },
+  { id:13, cat:"사이너스", title:"쿠링 대광산 (SBC)", thumb:"https://sa000001.com/data/editor/2606/thumb-ce6ee534fb5232c72cfdaf4cf14503b0_1782238008_6758_202x150.png" },
+  { id:12, cat:"사이너스", title:"쿠링 마을 / 쿠링으로의 길", thumb:"https://sa000001.com/data/editor/2606/thumb-ce6ee534fb5232c72cfdaf4cf14503b0_1782238027_8996_202x150.png" },
+  { id:11, cat:"사이너스", title:"카탄 마을", thumb:"https://sa000001.com/data/editor/2606/thumb-ce6ee534fb5232c72cfdaf4cf14503b0_1782238048_8554_202x150.png" },
+  { id:10, cat:"사이너스", title:"천지의 동굴", thumb:"https://sa000001.com/data/editor/2606/thumb-ce6ee534fb5232c72cfdaf4cf14503b0_1782238066_4973_202x150.png" },
+  { id:9, cat:"사이너스", title:"아부의 지하동굴", thumb:"https://sa000001.com/data/editor/2606/thumb-ce6ee534fb5232c72cfdaf4cf14503b0_1782238080_382_202x150.png" },
+  { id:8, cat:"사이너스", title:"속임수의 동굴", thumb:"https://sa000001.com/data/editor/2606/thumb-ce6ee534fb5232c72cfdaf4cf14503b0_1782238091_901_202x150.png" },
+  { id:7, cat:"사이너스", title:"샴기르 마을", thumb:"https://sa000001.com/data/editor/2606/thumb-ce6ee534fb5232c72cfdaf4cf14503b0_1782238104_8368_202x150.png" },
+  { id:6, cat:"사이너스", title:"무이왕의 동굴", thumb:"https://sa000001.com/data/editor/2606/thumb-ce6ee534fb5232c72cfdaf4cf14503b0_1782238120_471_202x150.png" },
+  { id:5, cat:"사이너스", title:"마쥬의 미로", thumb:"https://sa000001.com/data/editor/2606/thumb-ce6ee534fb5232c72cfdaf4cf14503b0_1782238135_8333_202x150.png" },
+  { id:4, cat:"사이너스", title:"마리너스 마을", thumb:"https://sa000001.com/data/editor/2606/thumb-ce6ee534fb5232c72cfdaf4cf14503b0_1782238162_4862_202x150.png" },
+  { id:3, cat:"사이너스", title:"동쿠링 탄광", thumb:"https://sa000001.com/data/editor/2606/thumb-ce6ee534fb5232c72cfdaf4cf14503b0_1782238175_3903_202x150.png" },
+  { id:2, cat:"사이너스", title:"도적의 아지트", thumb:"https://sa000001.com/data/editor/2606/thumb-ce6ee534fb5232c72cfdaf4cf14503b0_1782238185_51_202x150.png" },
 ];
 
 /* 썸네일 경로에서 원본(큰) 이미지 경로를 추정 (thumb- 접두어 + _WxH 접미어 제거) */
@@ -305,6 +405,18 @@ document.getElementById('thumb-strip').addEventListener('click', e=>{
   const item = e.target.closest('.thumb-item'); if(!item) return;
   showMap(parseInt(item.dataset.id));
 });
+
+/* 이 페이지를 게임 옆에 띄울 수 있는 작은 별도 창으로 열기 */
+function openAsPopup(){
+  const w = 440, h = 800;
+  const left = Math.max(0, window.screen.availWidth - w - 40);
+  const top = 60;
+  window.open(
+    location.pathname + location.search,
+    'sa_map_popup',
+    `width=${w},height=${h},left=${left},top=${top},resizable=yes,scrollbars=yes,toolbar=no,menubar=no,location=no,status=no`
+  );
+}
 
 /* 초기 렌더 */
 renderChips();
