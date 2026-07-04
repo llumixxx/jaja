@@ -543,7 +543,7 @@ async function openPip(){
     toastMsg('이 브라우저는 PIP를 지원하지 않아요. 크롬/엣지 최신 버전에서 써보세요!');
     return;
   }
-  const pipWindow = await window.documentPictureInPicture.requestWindow({ width: 360, height: 620 });
+  const pipWindow = await window.documentPictureInPicture.requestWindow({ width: 340, height: 480 });
   const doc = pipWindow.document;
 
   document.querySelectorAll('link[rel="stylesheet"], link[rel="preconnect"]').forEach(link=>{
@@ -554,66 +554,64 @@ async function openPip(){
   style.textContent = `
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { height: 100%; font-family: 'Noto Sans KR', sans-serif; background: #f2f7fd; color:#12253f; }
-    #pip-app { height: 100vh; display: flex; flex-direction: column; }
-    .pip-header { display:flex; align-items:center; gap:8px; padding:10px 12px; border-bottom:1.5px solid #dbe9f7; background:#fff; flex-shrink:0; }
-    .pip-back-btn { background:#f0f7fd; border:1.5px solid #dbe9f7; border-radius:10px; padding:7px 11px; font-size:13px; font-weight:800; cursor:pointer; color:#4c6a8c; font-family:inherit; flex-shrink:0; }
-    .pip-back-btn:hover { border-color:#2f7fd6; color:#2f7fd6; }
-    .pip-current-title { font-size:13px; font-weight:800; color:#12253f; flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .pip-search-wrap { padding:9px 12px 0; background:#fff; flex-shrink:0; }
-    .pip-search-input { width:100%; padding:9px 12px; background:#f0f7fd; border:1.5px solid #dbe9f7; border-radius:10px; font-size:13px; color:#12253f; font-family:inherit; outline:none; }
+    #pip-app { height: 100vh; display: flex; flex-direction: column; transition: opacity .15s; }
+    .pip-search-wrap { padding:6px 8px; background:#fff; flex-shrink:0; border-bottom:1.5px solid #dbe9f7; }
+    .pip-search-input { width:100%; padding:6px 10px; background:#f0f7fd; border:1.5px solid #dbe9f7; border-radius:9px; font-size:12px; color:#12253f; font-family:inherit; outline:none; }
     .pip-search-input:focus { border-color:#2f7fd6; }
-    /* 상단 고정 대분류 칩 바 (가로 스크롤, 클릭 즉시 필터) */
-    .pip-cat-bar { display:flex; gap:6px; overflow-x:auto; padding:9px 12px; border-bottom:1.5px solid #dbe9f7; background:#fff; flex-shrink:0; }
+    /* 대분류 바 (상시 노출, 가로스크롤) */
+    .pip-cat-bar { display:flex; gap:5px; overflow-x:auto; padding:6px 8px; border-bottom:1px solid #dbe9f7; background:#fff; flex-shrink:0; }
     .pip-cat-bar::-webkit-scrollbar{ height:0; }
-    .pip-cat-chip { flex-shrink:0; padding:6px 12px; border-radius:99px; font-size:11.5px; font-weight:800;
+    .pip-cat-chip { flex-shrink:0; padding:5px 10px; border-radius:99px; font-size:11px; font-weight:800;
       background:#f0f7fd; border:1.5px solid #dbe9f7; color:#4c6a8c; cursor:pointer; white-space:nowrap; font-family:inherit; }
     .pip-cat-chip.on { background:linear-gradient(135deg,#2f7fd6,#22b6c9); color:#fff; border-color:transparent; }
-    .pip-body { flex:1; overflow-y:auto; position:relative; }
-    .pip-body::-webkit-scrollbar{ width:4px; } .pip-body::-webkit-scrollbar-thumb{ background:#bcd8f2; border-radius:4px; }
-    .pip-list-view { padding:6px; }
-    .pip-list-item { padding:11px 12px; font-size:13.5px; font-weight:700; color:#12253f; cursor:pointer; border-radius:9px; transition:background .12s; display:flex; align-items:center; justify-content:space-between; gap:8px; }
-    .pip-list-item:hover, .pip-list-item:active { background:#e3f0fb; color:#2f7fd6; }
-    .pip-list-item-cat { font-size:10.5px; color:#8ea6c2; font-weight:700; flex-shrink:0; }
-    .pip-image-view { display:none; flex-direction:column; height:100%; background:#0d1620; }
-    .pip-image-toolbar { display:flex; align-items:center; gap:5px; padding:6px 10px; background:rgba(0,0,0,.45); flex-shrink:0; }
-    .pip-img-tool-btn { width:26px; height:26px; border-radius:7px; border:none; background:rgba(255,255,255,.15);
-      color:#fff; font-size:11px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+    /* 하위(개별 지도) 바 - 대분류 선택시 항상 노출, 가로스크롤 */
+    .pip-sub-bar { display:flex; gap:5px; overflow-x:auto; padding:6px 8px; border-bottom:1.5px solid #dbe9f7; background:#eaf3fc; flex-shrink:0; }
+    .pip-sub-bar::-webkit-scrollbar{ height:0; }
+    .pip-sub-chip { flex-shrink:0; padding:5px 10px; border-radius:8px; font-size:11px; font-weight:700;
+      background:#fff; border:1.5px solid #dbe9f7; color:#12253f; cursor:pointer; white-space:nowrap; font-family:inherit; max-width:140px; overflow:hidden; text-overflow:ellipsis; }
+    .pip-sub-chip.on { background:#22b6c9; color:#fff; border-color:transparent; }
+    .pip-sub-empty { font-size:11px; color:#8ea6c2; padding:2px 6px; }
+    /* 이미지 뷰어 - 남은 공간 전부 사용 */
+    .pip-image-view { flex:1; display:flex; flex-direction:column; min-height:0; background:#0d1620; }
+    .pip-image-toolbar { display:flex; align-items:center; gap:4px; padding:5px 8px; background:rgba(0,0,0,.45); flex-shrink:0; }
+    .pip-img-tool-btn { width:24px; height:24px; border-radius:6px; border:none; background:rgba(255,255,255,.15);
+      color:#fff; font-size:10.5px; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
     .pip-img-tool-btn:hover { background:rgba(255,255,255,.3); }
     .pip-img-tool-btn.on { background:#2f7fd6; }
-    .pip-img-zoom-level { font-size:10.5px; font-weight:800; color:#cfe0f5; min-width:34px; text-align:center; }
+    .pip-img-zoom-level { font-size:10px; font-weight:800; color:#cfe0f5; min-width:30px; text-align:center; }
     .pip-opacity-wrap { display:flex; align-items:center; gap:3px; margin-left:2px; }
-    .pip-opacity-wrap input[type=range] { width:44px; accent-color:#2f7fd6; cursor:pointer; }
-    .pip-image-scroll { flex:1; overflow:auto; display:flex; align-items:center; justify-content:center; }
+    .pip-opacity-wrap input[type=range] { width:40px; accent-color:#2f7fd6; cursor:pointer; }
+    .pip-image-scroll { flex:1; min-height:0; overflow:auto; display:flex; align-items:center; justify-content:center; }
     .pip-image-scroll img { max-width:100%; max-height:100%; object-fit:contain; transition:transform .15s; transform-origin:center center; }
-    .pip-image-scroll.responsive-off img { max-height:none; max-width:none; height:260px; width:auto; }
-    .pip-empty { color:#7391b0; text-align:center; font-size:13px; padding:30px 20px; }
+    .pip-image-title { position:absolute; left:8px; top:8px; font-size:10.5px; font-weight:800; color:#fff;
+      background:rgba(0,0,0,.5); padding:3px 8px; border-radius:7px; pointer-events:none; max-width:70%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .pip-image-scroll-wrap { position:relative; flex:1; min-height:0; display:flex; }
+    .pip-empty { color:#7391b0; text-align:center; font-size:12px; padding:20px; margin:auto; }
   `;
   doc.head.appendChild(style);
 
   doc.body.innerHTML = `
     <div id="pip-app">
-      <div class="pip-header">
-        <button class="pip-back-btn" id="pip-back-btn" style="display:none;">◀</button>
-        <span class="pip-current-title" id="pip-current-title">전체보기</span>
-      </div>
       <div class="pip-search-wrap">
-        <input type="text" class="pip-search-input" id="pip-search" placeholder="지도 검색... (초성 가능, 예: ㄱㅇㄹ)" autocomplete="off">
+        <input type="text" class="pip-search-input" id="pip-search" placeholder="지도 검색... (초성 가능)" autocomplete="off">
       </div>
       <div class="pip-cat-bar" id="pip-cat-bar"></div>
-      <div class="pip-body">
-        <div id="pip-list-view"></div>
-        <div class="pip-image-view" id="pip-image-view">
-          <div class="pip-image-toolbar">
-            <button class="pip-img-tool-btn on" id="pip-responsive-btn" title="반응형 보기">📐</button>
-            <button class="pip-img-tool-btn" id="pip-zoom-out" title="축소">➖</button>
-            <span class="pip-img-zoom-level" id="pip-zoom-level">100%</span>
-            <button class="pip-img-tool-btn" id="pip-zoom-in" title="확대">➕</button>
-            <button class="pip-img-tool-btn" id="pip-zoom-reset" title="원래대로">↺</button>
-            <span class="pip-opacity-wrap" title="투명도">🌗<input type="range" id="pip-opacity" min="20" max="100" value="100"></span>
-          </div>
+      <div class="pip-sub-bar" id="pip-sub-bar"></div>
+      <div class="pip-image-view" id="pip-image-view">
+        <div class="pip-image-toolbar">
+          <button class="pip-img-tool-btn on" id="pip-responsive-btn" title="반응형(창크기 맞춤)">📐</button>
+          <button class="pip-img-tool-btn" id="pip-zoom-out" title="축소">➖</button>
+          <span class="pip-img-zoom-level" id="pip-zoom-level">100%</span>
+          <button class="pip-img-tool-btn" id="pip-zoom-in" title="확대">➕</button>
+          <button class="pip-img-tool-btn" id="pip-zoom-reset" title="원래대로">↺</button>
+          <span class="pip-opacity-wrap" title="창 전체 투명도">🌗<input type="range" id="pip-opacity" min="20" max="100" value="100"></span>
+        </div>
+        <div class="pip-image-scroll-wrap">
           <div class="pip-image-scroll" id="pip-image-scroll">
             <img id="pip-img" alt="지도 이미지">
+            <div class="pip-empty" id="pip-empty" style="display:none;">🔍 결과가 없어요</div>
           </div>
+          <div class="pip-image-title" id="pip-image-title" style="display:none;"></div>
         </div>
       </div>
     </div>
@@ -621,14 +619,33 @@ async function openPip(){
 
   let pipZoom = 1;
   let pipResponsive = true;
+  let pipCurrentCat = '전체보기';
+  let pipCurrentId = null;
+  const pipCats = ['전체보기', ...sortCats(Array.from(new Set(MAPS.filter(m=>m.cat!=='공지').map(m=>m.cat))))];
+
   function pipApplyZoom(){
     doc.getElementById('pip-img').style.transform = `scale(${pipZoom})`;
     doc.getElementById('pip-zoom-level').textContent = Math.round(pipZoom*100) + '%';
   }
+  /* 반응형: 창 자체를 이미지 비율에 맞춰 리사이즈 */
+  function pipFitWindowToImage(){
+    if(!pipResponsive) return;
+    const img = doc.getElementById('pip-img');
+    const nw = img.naturalWidth, nh = img.naturalHeight;
+    if(!nw || !nh) return;
+    const chromeHeight = doc.querySelector('.pip-search-wrap').offsetHeight
+      + doc.querySelector('.pip-cat-bar').offsetHeight
+      + doc.querySelector('.pip-sub-bar').offsetHeight
+      + doc.querySelector('.pip-image-toolbar').offsetHeight;
+    const targetWidth = Math.max(260, Math.min(560, pipWindow.innerWidth || 340));
+    const targetImgHeight = Math.round(targetWidth * (nh/nw));
+    const targetHeight = Math.min(Math.round(pipWindow.screen.availHeight * 0.9), chromeHeight + targetImgHeight + 4);
+    try{ pipWindow.resizeTo(targetWidth, targetHeight); }catch(e){}
+  }
   doc.getElementById('pip-responsive-btn').addEventListener('click', function(){
     pipResponsive = !pipResponsive;
     this.classList.toggle('on', pipResponsive);
-    doc.getElementById('pip-image-scroll').classList.toggle('responsive-off', !pipResponsive);
+    if(pipResponsive) pipFitWindowToImage();
   });
   doc.getElementById('pip-zoom-in').addEventListener('click', ()=>{
     pipZoom = Math.min(3, Math.round((pipZoom + 0.25)*100)/100);
@@ -642,74 +659,78 @@ async function openPip(){
     pipZoom = 1;
     pipApplyZoom();
   });
+  /* 투명도: 지도 이미지만이 아니라 창(앱) 전체에 적용 */
   doc.getElementById('pip-opacity').addEventListener('input', e=>{
-    doc.getElementById('pip-img').style.opacity = e.target.value/100;
+    doc.getElementById('pip-app').style.opacity = e.target.value/100;
   });
-
-  const pipCats = ['전체보기', ...sortCats(Array.from(new Set(MAPS.filter(m=>m.cat!=='공지').map(m=>m.cat))))];
-  let pipCurrentCat = '전체보기';
 
   function pipRenderCatBar(){
     doc.getElementById('pip-cat-bar').innerHTML = pipCats.map(cat=>
       `<button class="pip-cat-chip ${cat===pipCurrentCat?'on':''}" data-cat="${cat}">${cat}</button>`
     ).join('');
   }
-  function pipRenderList(){
-    const q = doc.getElementById('pip-search').value.trim();
-    let items, label;
-    if(q){
-      items = searchMaps(q);
-      label = `검색: ${q} (${items.length})`;
-    } else {
-      items = pipCurrentCat==='전체보기' ? MAPS : MAPS.filter(m=>m.cat===pipCurrentCat);
-      label = `${pipCurrentCat} (${items.length})`;
-    }
-    doc.getElementById('pip-current-title').textContent = label;
-    doc.getElementById('pip-list-view').innerHTML = items.length
-      ? items.map(m=>`<div class="pip-list-item" data-id="${m.id}"><span>${m.title}</span>${q?`<span class="pip-list-item-cat">${m.cat}</span>`:''}</div>`).join('')
-      : `<div class="pip-empty">🔍 결과가 없어요</div>`;
+  /* 대분류 하위의 개별 지도 목록을 항상 노출되는 바로 표시 */
+  function pipRenderSubBar(items){
+    const bar = doc.getElementById('pip-sub-bar');
+    if(!items.length){ bar.innerHTML = `<span class="pip-sub-empty">지도가 없어요</span>`; return; }
+    bar.innerHTML = items.map(m=>
+      `<button class="pip-sub-chip ${m.id===pipCurrentId?'on':''}" data-id="${m.id}" title="${m.title}">${m.title}</button>`
+    ).join('');
   }
-  function pipShowList(){
-    doc.getElementById('pip-list-view').style.display = 'block';
-    doc.getElementById('pip-image-view').style.display = 'none';
-    doc.getElementById('pip-back-btn').style.display = 'none';
-    pipRenderList();
+  function pipGetCurrentItems(){
+    const q = doc.getElementById('pip-search').value.trim();
+    if(q) return searchMaps(q);
+    return pipCurrentCat==='전체보기' ? MAPS : MAPS.filter(m=>m.cat===pipCurrentCat);
   }
   function pipShowMap(id){
     const m = MAPS.find(x=>x.id===id); if(!m) return;
-    doc.getElementById('pip-list-view').style.display = 'none';
-    doc.getElementById('pip-image-view').style.display = 'flex';
-    doc.getElementById('pip-back-btn').style.display = 'inline-block';
-    doc.getElementById('pip-current-title').textContent = m.title;
+    pipCurrentId = id;
     pipZoom = 1;
     pipApplyZoom();
     doc.getElementById('pip-opacity').value = 100;
+    doc.getElementById('pip-app').style.opacity = 1;
+    doc.getElementById('pip-empty').style.display = 'none';
+    const titleEl = doc.getElementById('pip-image-title');
+    titleEl.textContent = m.title; titleEl.style.display = 'block';
     const img = doc.getElementById('pip-img');
+    img.style.display = 'block';
     img.style.opacity = 1;
     img.dataset.triedFull = '0';
     img.onerror = () => { if(img.dataset.triedFull === '0'){ img.dataset.triedFull = '1'; img.src = m.thumb; } };
+    img.onload = () => pipFitWindowToImage();
     img.src = guessFullImage(m.thumb);
+    [...doc.querySelectorAll('.pip-sub-chip')].forEach(el=>{
+      el.classList.toggle('on', parseInt(el.dataset.id)===id);
+    });
+  }
+  function pipRefresh(){
+    const items = pipGetCurrentItems();
+    pipRenderSubBar(items);
+    if(items.length){
+      const stillThere = items.find(m=>m.id===pipCurrentId);
+      pipShowMap(stillThere ? pipCurrentId : items[0].id);
+    } else {
+      doc.getElementById('pip-img').style.display = 'none';
+      doc.getElementById('pip-image-title').style.display = 'none';
+      doc.getElementById('pip-empty').style.display = 'block';
+    }
   }
 
-  doc.getElementById('pip-back-btn').addEventListener('click', pipShowList);
   doc.getElementById('pip-cat-bar').addEventListener('click', e=>{
     const chip = e.target.closest('.pip-cat-chip'); if(!chip) return;
     pipCurrentCat = chip.dataset.cat;
     doc.getElementById('pip-search').value = '';
     pipRenderCatBar();
-    pipRenderList();
-    const items = pipCurrentCat==='전체보기' ? MAPS : MAPS.filter(m=>m.cat===pipCurrentCat);
-    if(items.length) pipShowMap(items[0].id);
-    else pipShowList();
+    pipRefresh();
   });
-  doc.getElementById('pip-list-view').addEventListener('click', e=>{
-    const item = e.target.closest('.pip-list-item'); if(!item) return;
-    pipShowMap(parseInt(item.dataset.id));
+  doc.getElementById('pip-sub-bar').addEventListener('click', e=>{
+    const chip = e.target.closest('.pip-sub-chip'); if(!chip) return;
+    pipShowMap(parseInt(chip.dataset.id));
   });
-  doc.getElementById('pip-search').addEventListener('input', pipRenderList);
+  doc.getElementById('pip-search').addEventListener('input', pipRefresh);
 
   pipRenderCatBar();
-  pipRenderList();
+  pipRefresh();
 }
 
 function toastMsg(msg){
