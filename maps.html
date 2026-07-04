@@ -145,12 +145,9 @@ body {
 .bv-tool-btn:hover{border-color:var(--a1);color:var(--a1);}
 .bv-tool-btn.on{background:linear-gradient(135deg,var(--a1),var(--a2));color:#fff;border-color:transparent;}
 .bv-zoom-level{font-size:11px;font-weight:800;color:var(--t3);min-width:36px;text-align:center;font-family:'Nunito',sans-serif;}
-.bv-opacity-wrap{display:flex;align-items:center;gap:4px;font-size:12px;margin-left:4px;}
-.bv-opacity-wrap input[type=range]{width:60px;accent-color:var(--a1);cursor:pointer;}
-.big-viewer-body{background:#0d1620;min-height:260px;max-height:70vh;overflow:auto;display:flex;align-items:center;justify-content:center;padding:12px;}
-.big-viewer-body img{max-width:100%;max-height:66vh;object-fit:contain;border-radius:6px;transition:transform .15s;transform-origin:center center;}
-.big-viewer-body.responsive-off{min-height:340px;max-height:340px;}
-.big-viewer-body.responsive-off img{max-height:none;height:316px;width:auto;max-width:none;}
+.big-viewer-body{background:#0d1620;min-height:260px;max-height:70vh;overflow:hidden;display:flex;align-items:center;justify-content:center;padding:12px;position:relative;cursor:grab;}
+.big-viewer-body.dragging{cursor:grabbing;}
+.big-viewer-body img{max-width:100%;max-height:66vh;object-fit:contain;border-radius:6px;user-select:none;-webkit-user-drag:none;}
 .big-viewer-empty{color:#5a7290;text-align:center;font-size:13px;font-weight:700;line-height:1.7;}
 .big-viewer-empty-emoji{font-size:36px;display:block;margin-bottom:8px;}
 
@@ -213,12 +210,10 @@ body {
       <span class="big-viewer-cat" id="big-cat" style="display:none;">-</span>
       <span class="big-viewer-title" id="big-title">위 목록에서 지도를 선택해주세요</span>
       <div class="bv-tools">
-        <button class="bv-tool-btn on" id="bv-responsive-btn" title="반응형 보기 ON/OFF">📐</button>
-        <button class="bv-tool-btn" id="bv-zoom-out" title="축소">➖</button>
+        <button class="bv-tool-btn" id="bv-zoom-out" title="축소 (휠도 가능)">➖</button>
         <span class="bv-zoom-level" id="bv-zoom-level">100%</span>
-        <button class="bv-tool-btn" id="bv-zoom-in" title="확대">➕</button>
+        <button class="bv-tool-btn" id="bv-zoom-in" title="확대 (휠도 가능)">➕</button>
         <button class="bv-tool-btn" id="bv-zoom-reset" title="원래대로">↺</button>
-        <span class="bv-opacity-wrap" title="투명도">🌗<input type="range" id="bv-opacity" min="20" max="100" value="100"></span>
       </div>
     </div>
     <div class="big-viewer-body" id="big-viewer-body">
@@ -437,19 +432,17 @@ function renderList(){
   }
 }
 let bvZoom = 1;
-let bvResponsive = true;
+let bvPanX = 0, bvPanY = 0;
 function showMap(id){
   const m = MAPS.find(x=>x.id===id); if(!m) return;
   currentMapId = id;
-  bvZoom = 1;
-  document.getElementById('bv-opacity').value = 100;
+  bvZoom = 1; bvPanX = 0; bvPanY = 0;
   document.getElementById('big-title').textContent = m.title;
   const catEl = document.getElementById('big-cat');
   catEl.textContent = m.cat; catEl.style.display = 'inline-block';
   document.getElementById('big-empty').style.display = 'none';
   const img = document.getElementById('big-img');
   img.style.display = 'block';
-  img.style.opacity = 1;
   img.dataset.triedFull = '0';
   img.src = guessFullImage(m.thumb);
   bvApplyZoom();
@@ -465,31 +458,42 @@ function handleImgError(img){
     if(m) img.src = m.thumb;
   }
 }
-/* ── 지도 뷰어: 반응형 토글 / 확대·축소 / 투명도 ── */
+/* ── 지도 뷰어: 확대·축소(휠 지원) + 드래그로 이동 ── */
 function bvApplyZoom(){
-  document.getElementById('big-img').style.transform = `scale(${bvZoom})`;
+  document.getElementById('big-img').style.transform = `translate(${bvPanX}px, ${bvPanY}px) scale(${bvZoom})`;
   document.getElementById('bv-zoom-level').textContent = Math.round(bvZoom*100) + '%';
 }
-document.getElementById('bv-responsive-btn').addEventListener('click', function(){
-  bvResponsive = !bvResponsive;
-  this.classList.toggle('on', bvResponsive);
-  document.getElementById('big-viewer-body').classList.toggle('responsive-off', !bvResponsive);
-});
-document.getElementById('bv-zoom-in').addEventListener('click', ()=>{
-  bvZoom = Math.min(3, Math.round((bvZoom + 0.25)*100)/100);
+function bvSetZoom(z){
+  bvZoom = Math.max(0.5, Math.min(4, Math.round(z*100)/100));
+  if(bvZoom===1){ bvPanX=0; bvPanY=0; }
   bvApplyZoom();
-});
-document.getElementById('bv-zoom-out').addEventListener('click', ()=>{
-  bvZoom = Math.max(0.5, Math.round((bvZoom - 0.25)*100)/100);
-  bvApplyZoom();
-});
+}
+document.getElementById('bv-zoom-in').addEventListener('click', ()=> bvSetZoom(bvZoom+0.25));
+document.getElementById('bv-zoom-out').addEventListener('click', ()=> bvSetZoom(bvZoom-0.25));
 document.getElementById('bv-zoom-reset').addEventListener('click', ()=>{
-  bvZoom = 1;
-  bvApplyZoom();
+  bvZoom = 1; bvPanX = 0; bvPanY = 0; bvApplyZoom();
 });
-document.getElementById('bv-opacity').addEventListener('input', e=>{
-  document.getElementById('big-img').style.opacity = e.target.value/100;
-});
+{
+  const body = document.getElementById('big-viewer-body');
+  body.addEventListener('wheel', e=>{
+    if(!currentMapId) return;
+    e.preventDefault();
+    bvSetZoom(bvZoom + (e.deltaY < 0 ? 0.15 : -0.15));
+  }, { passive:false });
+  let dragging = false, startX=0, startY=0, startPanX=0, startPanY=0;
+  body.addEventListener('mousedown', e=>{
+    if(!currentMapId || bvZoom<=1) return;
+    dragging = true; startX=e.clientX; startY=e.clientY; startPanX=bvPanX; startPanY=bvPanY;
+    body.classList.add('dragging');
+  });
+  window.addEventListener('mousemove', e=>{
+    if(!dragging) return;
+    bvPanX = startPanX + (e.clientX-startX);
+    bvPanY = startPanY + (e.clientY-startY);
+    bvApplyZoom();
+  });
+  window.addEventListener('mouseup', ()=>{ dragging=false; body.classList.remove('dragging'); });
+}
 document.getElementById('map-search').addEventListener('input', ()=>{
   shownCount = 30;
   renderList();
@@ -543,7 +547,7 @@ async function openPip(){
     toastMsg('이 브라우저는 PIP를 지원하지 않아요. 크롬/엣지 최신 버전에서 써보세요!');
     return;
   }
-  const pipWindow = await window.documentPictureInPicture.requestWindow({ width: 340, height: 480 });
+  const pipWindow = await window.documentPictureInPicture.requestWindow({ width: 340, height: 520 });
   const doc = pipWindow.document;
 
   document.querySelectorAll('link[rel="stylesheet"], link[rel="preconnect"]').forEach(link=>{
@@ -554,39 +558,38 @@ async function openPip(){
   style.textContent = `
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { height: 100%; font-family: 'Noto Sans KR', sans-serif; background: #f2f7fd; color:#12253f; }
-    #pip-app { height: 100vh; display: flex; flex-direction: column; transition: opacity .15s; }
+    #pip-app { height: 100vh; display: flex; flex-direction: column; }
     .pip-search-wrap { padding:6px 8px; background:#fff; flex-shrink:0; border-bottom:1.5px solid #dbe9f7; }
     .pip-search-input { width:100%; padding:6px 10px; background:#f0f7fd; border:1.5px solid #dbe9f7; border-radius:9px; font-size:12px; color:#12253f; font-family:inherit; outline:none; }
     .pip-search-input:focus { border-color:#2f7fd6; }
-    /* 대분류 바 (상시 노출, 가로스크롤) */
-    .pip-cat-bar { display:flex; gap:5px; overflow-x:auto; padding:6px 8px; border-bottom:1px solid #dbe9f7; background:#fff; flex-shrink:0; }
+    .pip-cat-bar { display:flex; gap:5px; overflow-x:auto; padding:6px 8px; border-bottom:1.5px solid #dbe9f7; background:#fff; flex-shrink:0; }
     .pip-cat-bar::-webkit-scrollbar{ height:0; }
     .pip-cat-chip { flex-shrink:0; padding:5px 10px; border-radius:99px; font-size:11px; font-weight:800;
       background:#f0f7fd; border:1.5px solid #dbe9f7; color:#4c6a8c; cursor:pointer; white-space:nowrap; font-family:inherit; }
     .pip-cat-chip.on { background:linear-gradient(135deg,#2f7fd6,#22b6c9); color:#fff; border-color:transparent; }
-    /* 하위(개별 지도) 바 - 대분류 선택시 항상 노출, 가로스크롤 */
-    .pip-sub-bar { display:flex; gap:5px; overflow-x:auto; padding:6px 8px; border-bottom:1.5px solid #dbe9f7; background:#eaf3fc; flex-shrink:0; }
-    .pip-sub-bar::-webkit-scrollbar{ height:0; }
-    .pip-sub-chip { flex-shrink:0; padding:5px 10px; border-radius:8px; font-size:11px; font-weight:700;
-      background:#fff; border:1.5px solid #dbe9f7; color:#12253f; cursor:pointer; white-space:nowrap; font-family:inherit; max-width:140px; overflow:hidden; text-overflow:ellipsis; }
-    .pip-sub-chip.on { background:#22b6c9; color:#fff; border-color:transparent; }
-    .pip-sub-empty { font-size:11px; color:#8ea6c2; padding:2px 6px; }
-    /* 이미지 뷰어 - 남은 공간 전부 사용 */
-    .pip-image-view { flex:1; display:flex; flex-direction:column; min-height:0; background:#0d1620; }
-    .pip-image-toolbar { display:flex; align-items:center; gap:4px; padding:5px 8px; background:rgba(0,0,0,.45); flex-shrink:0; }
+    .pip-body { flex:1; min-height:0; position:relative; }
+    /* 세로 목록 뷰 (전체 제목 안 잘림, 클릭하면 이미지뷰로) */
+    .pip-list-view { position:absolute; inset:0; overflow-y:auto; padding:5px; }
+    .pip-list-view::-webkit-scrollbar{ width:4px; } .pip-list-view::-webkit-scrollbar-thumb{ background:#bcd8f2; border-radius:4px; }
+    .pip-list-item { padding:10px 11px; font-size:13px; font-weight:700; color:#12253f; cursor:pointer;
+      border-radius:9px; transition:background .12s; display:flex; align-items:center; justify-content:space-between; gap:8px; }
+    .pip-list-item:hover, .pip-list-item:active { background:#e3f0fb; color:#2f7fd6; }
+    .pip-list-item-cat { font-size:10px; color:#8ea6c2; font-weight:700; flex-shrink:0; }
+    .pip-empty { color:#7391b0; text-align:center; font-size:12px; padding:30px 20px; }
+    /* 이미지 뷰 */
+    .pip-image-view { position:absolute; inset:0; display:none; flex-direction:column; background:#0d1620; }
+    .pip-image-toolbar { display:flex; align-items:center; gap:4px; padding:5px 8px; background:rgba(0,0,0,.5); flex-shrink:0; }
     .pip-img-tool-btn { width:24px; height:24px; border-radius:6px; border:none; background:rgba(255,255,255,.15);
       color:#fff; font-size:10.5px; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
     .pip-img-tool-btn:hover { background:rgba(255,255,255,.3); }
-    .pip-img-tool-btn.on { background:#2f7fd6; }
+    .pip-img-list-btn { background:rgba(255,255,255,.2); border:none; color:#fff; font-size:11px; font-weight:800;
+      border-radius:7px; padding:5px 9px; cursor:pointer; font-family:inherit; flex-shrink:0; }
+    .pip-img-list-btn:hover { background:rgba(255,255,255,.35); }
     .pip-img-zoom-level { font-size:10px; font-weight:800; color:#cfe0f5; min-width:30px; text-align:center; }
-    .pip-opacity-wrap { display:flex; align-items:center; gap:3px; margin-left:2px; }
-    .pip-opacity-wrap input[type=range] { width:40px; accent-color:#2f7fd6; cursor:pointer; }
-    .pip-image-scroll { flex:1; min-height:0; overflow:auto; display:flex; align-items:center; justify-content:center; }
-    .pip-image-scroll img { max-width:100%; max-height:100%; object-fit:contain; transition:transform .15s; transform-origin:center center; }
-    .pip-image-title { position:absolute; left:8px; top:8px; font-size:10.5px; font-weight:800; color:#fff;
-      background:rgba(0,0,0,.5); padding:3px 8px; border-radius:7px; pointer-events:none; max-width:70%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-    .pip-image-scroll-wrap { position:relative; flex:1; min-height:0; display:flex; }
-    .pip-empty { color:#7391b0; text-align:center; font-size:12px; padding:20px; margin:auto; }
+    .pip-img-title { font-size:11px; font-weight:800; color:#fff; flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .pip-image-scroll { flex:1; min-height:0; overflow:hidden; display:flex; align-items:center; justify-content:center; cursor:grab; }
+    .pip-image-scroll.dragging { cursor:grabbing; }
+    .pip-image-scroll img { max-width:100%; max-height:100%; object-fit:contain; user-select:none; -webkit-user-drag:none; }
   `;
   doc.head.appendChild(style);
 
@@ -596,85 +599,66 @@ async function openPip(){
         <input type="text" class="pip-search-input" id="pip-search" placeholder="지도 검색... (초성 가능)" autocomplete="off">
       </div>
       <div class="pip-cat-bar" id="pip-cat-bar"></div>
-      <div class="pip-sub-bar" id="pip-sub-bar"></div>
-      <div class="pip-image-view" id="pip-image-view">
-        <div class="pip-image-toolbar">
-          <button class="pip-img-tool-btn on" id="pip-responsive-btn" title="반응형(창크기 맞춤)">📐</button>
-          <button class="pip-img-tool-btn" id="pip-zoom-out" title="축소">➖</button>
-          <span class="pip-img-zoom-level" id="pip-zoom-level">100%</span>
-          <button class="pip-img-tool-btn" id="pip-zoom-in" title="확대">➕</button>
-          <button class="pip-img-tool-btn" id="pip-zoom-reset" title="원래대로">↺</button>
-          <span class="pip-opacity-wrap" title="창 전체 투명도">🌗<input type="range" id="pip-opacity" min="20" max="100" value="100"></span>
-        </div>
-        <div class="pip-image-scroll-wrap">
+      <div class="pip-body">
+        <div class="pip-list-view" id="pip-list-view"></div>
+        <div class="pip-image-view" id="pip-image-view">
+          <div class="pip-image-toolbar">
+            <button class="pip-img-list-btn" id="pip-list-btn">☰ 목록</button>
+            <span class="pip-img-title" id="pip-img-title"></span>
+            <button class="pip-img-tool-btn" id="pip-zoom-out" title="축소 (휠도 가능)">➖</button>
+            <span class="pip-img-zoom-level" id="pip-zoom-level">100%</span>
+            <button class="pip-img-tool-btn" id="pip-zoom-in" title="확대 (휠도 가능)">➕</button>
+            <button class="pip-img-tool-btn" id="pip-zoom-reset" title="원래대로">↺</button>
+          </div>
           <div class="pip-image-scroll" id="pip-image-scroll">
             <img id="pip-img" alt="지도 이미지">
-            <div class="pip-empty" id="pip-empty" style="display:none;">🔍 결과가 없어요</div>
           </div>
-          <div class="pip-image-title" id="pip-image-title" style="display:none;"></div>
         </div>
       </div>
     </div>
   `;
 
-  let pipZoom = 1;
-  let pipResponsive = true;
+  let pipZoom = 1, pipPanX = 0, pipPanY = 0;
   let pipCurrentCat = '전체보기';
   let pipCurrentId = null;
   const pipCats = ['전체보기', ...sortCats(Array.from(new Set(MAPS.filter(m=>m.cat!=='공지').map(m=>m.cat))))];
 
   function pipApplyZoom(){
-    doc.getElementById('pip-img').style.transform = `scale(${pipZoom})`;
+    doc.getElementById('pip-img').style.transform = `translate(${pipPanX}px, ${pipPanY}px) scale(${pipZoom})`;
     doc.getElementById('pip-zoom-level').textContent = Math.round(pipZoom*100) + '%';
   }
-  /* 반응형: 창 자체를 이미지 비율에 맞춰 리사이즈 */
-  function pipFitWindowToImage(){
-    if(!pipResponsive) return;
-    const img = doc.getElementById('pip-img');
-    const nw = img.naturalWidth, nh = img.naturalHeight;
-    if(!nw || !nh) return;
-    const chromeHeight = doc.querySelector('.pip-search-wrap').offsetHeight
-      + doc.querySelector('.pip-cat-bar').offsetHeight
-      + doc.querySelector('.pip-sub-bar').offsetHeight
-      + doc.querySelector('.pip-image-toolbar').offsetHeight;
-    const targetWidth = Math.max(260, Math.min(560, pipWindow.innerWidth || 340));
-    const targetImgHeight = Math.round(targetWidth * (nh/nw));
-    const targetHeight = Math.min(Math.round(pipWindow.screen.availHeight * 0.9), chromeHeight + targetImgHeight + 4);
-    try{ pipWindow.resizeTo(targetWidth, targetHeight); }catch(e){}
+  function pipSetZoom(z){
+    pipZoom = Math.max(0.5, Math.min(4, Math.round(z*100)/100));
+    if(pipZoom===1){ pipPanX=0; pipPanY=0; }
+    pipApplyZoom();
   }
-  doc.getElementById('pip-responsive-btn').addEventListener('click', function(){
-    pipResponsive = !pipResponsive;
-    this.classList.toggle('on', pipResponsive);
-    if(pipResponsive) pipFitWindowToImage();
-  });
-  doc.getElementById('pip-zoom-in').addEventListener('click', ()=>{
-    pipZoom = Math.min(3, Math.round((pipZoom + 0.25)*100)/100);
-    pipApplyZoom();
-  });
-  doc.getElementById('pip-zoom-out').addEventListener('click', ()=>{
-    pipZoom = Math.max(0.5, Math.round((pipZoom - 0.25)*100)/100);
-    pipApplyZoom();
-  });
-  doc.getElementById('pip-zoom-reset').addEventListener('click', ()=>{
-    pipZoom = 1;
-    pipApplyZoom();
-  });
-  /* 투명도: 지도 이미지만이 아니라 창(앱) 전체에 적용 */
-  doc.getElementById('pip-opacity').addEventListener('input', e=>{
-    doc.getElementById('pip-app').style.opacity = e.target.value/100;
-  });
+  doc.getElementById('pip-zoom-in').addEventListener('click', ()=> pipSetZoom(pipZoom+0.25));
+  doc.getElementById('pip-zoom-out').addEventListener('click', ()=> pipSetZoom(pipZoom-0.25));
+  doc.getElementById('pip-zoom-reset').addEventListener('click', ()=>{ pipZoom=1; pipPanX=0; pipPanY=0; pipApplyZoom(); });
+  {
+    const scrollEl = doc.getElementById('pip-image-scroll');
+    scrollEl.addEventListener('wheel', e=>{
+      e.preventDefault();
+      pipSetZoom(pipZoom + (e.deltaY < 0 ? 0.15 : -0.15));
+    }, { passive:false });
+    let dragging=false, startX=0, startY=0, startPanX=0, startPanY=0;
+    scrollEl.addEventListener('mousedown', e=>{
+      if(pipZoom<=1) return;
+      dragging=true; startX=e.clientX; startY=e.clientY; startPanX=pipPanX; startPanY=pipPanY;
+      scrollEl.classList.add('dragging');
+    });
+    doc.addEventListener('mousemove', e=>{
+      if(!dragging) return;
+      pipPanX = startPanX + (e.clientX-startX);
+      pipPanY = startPanY + (e.clientY-startY);
+      pipApplyZoom();
+    });
+    doc.addEventListener('mouseup', ()=>{ dragging=false; scrollEl.classList.remove('dragging'); });
+  }
 
   function pipRenderCatBar(){
     doc.getElementById('pip-cat-bar').innerHTML = pipCats.map(cat=>
       `<button class="pip-cat-chip ${cat===pipCurrentCat?'on':''}" data-cat="${cat}">${cat}</button>`
-    ).join('');
-  }
-  /* 대분류 하위의 개별 지도 목록을 항상 노출되는 바로 표시 */
-  function pipRenderSubBar(items){
-    const bar = doc.getElementById('pip-sub-bar');
-    if(!items.length){ bar.innerHTML = `<span class="pip-sub-empty">지도가 없어요</span>`; return; }
-    bar.innerHTML = items.map(m=>
-      `<button class="pip-sub-chip ${m.id===pipCurrentId?'on':''}" data-id="${m.id}" title="${m.title}">${m.title}</button>`
     ).join('');
   }
   function pipGetCurrentItems(){
@@ -682,38 +666,30 @@ async function openPip(){
     if(q) return searchMaps(q);
     return pipCurrentCat==='전체보기' ? MAPS : MAPS.filter(m=>m.cat===pipCurrentCat);
   }
+  function pipRenderList(){
+    const q = doc.getElementById('pip-search').value.trim();
+    const items = pipGetCurrentItems();
+    doc.getElementById('pip-list-view').innerHTML = items.length
+      ? items.map(m=>`<div class="pip-list-item" data-id="${m.id}"><span>${m.title}</span>${q?`<span class="pip-list-item-cat">${m.cat}</span>`:''}</div>`).join('')
+      : `<div class="pip-empty">🔍 결과가 없어요</div>`;
+  }
+  function pipShowList(){
+    doc.getElementById('pip-list-view').style.display = 'block';
+    doc.getElementById('pip-image-view').style.display = 'none';
+    pipRenderList();
+  }
   function pipShowMap(id){
     const m = MAPS.find(x=>x.id===id); if(!m) return;
     pipCurrentId = id;
-    pipZoom = 1;
+    pipZoom = 1; pipPanX = 0; pipPanY = 0;
     pipApplyZoom();
-    doc.getElementById('pip-opacity').value = 100;
-    doc.getElementById('pip-app').style.opacity = 1;
-    doc.getElementById('pip-empty').style.display = 'none';
-    const titleEl = doc.getElementById('pip-image-title');
-    titleEl.textContent = m.title; titleEl.style.display = 'block';
+    doc.getElementById('pip-list-view').style.display = 'none';
+    doc.getElementById('pip-image-view').style.display = 'flex';
+    doc.getElementById('pip-img-title').textContent = m.title;
     const img = doc.getElementById('pip-img');
-    img.style.display = 'block';
-    img.style.opacity = 1;
     img.dataset.triedFull = '0';
     img.onerror = () => { if(img.dataset.triedFull === '0'){ img.dataset.triedFull = '1'; img.src = m.thumb; } };
-    img.onload = () => pipFitWindowToImage();
     img.src = guessFullImage(m.thumb);
-    [...doc.querySelectorAll('.pip-sub-chip')].forEach(el=>{
-      el.classList.toggle('on', parseInt(el.dataset.id)===id);
-    });
-  }
-  function pipRefresh(){
-    const items = pipGetCurrentItems();
-    pipRenderSubBar(items);
-    if(items.length){
-      const stillThere = items.find(m=>m.id===pipCurrentId);
-      pipShowMap(stillThere ? pipCurrentId : items[0].id);
-    } else {
-      doc.getElementById('pip-img').style.display = 'none';
-      doc.getElementById('pip-image-title').style.display = 'none';
-      doc.getElementById('pip-empty').style.display = 'block';
-    }
   }
 
   doc.getElementById('pip-cat-bar').addEventListener('click', e=>{
@@ -721,16 +697,17 @@ async function openPip(){
     pipCurrentCat = chip.dataset.cat;
     doc.getElementById('pip-search').value = '';
     pipRenderCatBar();
-    pipRefresh();
+    pipShowList();
   });
-  doc.getElementById('pip-sub-bar').addEventListener('click', e=>{
-    const chip = e.target.closest('.pip-sub-chip'); if(!chip) return;
-    pipShowMap(parseInt(chip.dataset.id));
+  doc.getElementById('pip-list-view').addEventListener('click', e=>{
+    const item = e.target.closest('.pip-list-item'); if(!item) return;
+    pipShowMap(parseInt(item.dataset.id));
   });
-  doc.getElementById('pip-search').addEventListener('input', pipRefresh);
+  doc.getElementById('pip-list-btn').addEventListener('click', pipShowList);
+  doc.getElementById('pip-search').addEventListener('input', pipShowList);
 
   pipRenderCatBar();
-  pipRefresh();
+  pipShowList();
 }
 
 function toastMsg(msg){
