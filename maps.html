@@ -136,11 +136,21 @@ body {
 
 /* ── 큰 뷰어 (같은 화면에 바로 표시, 팝업/모달 없음) ── */
 .big-viewer{background:var(--white);border:1.5px solid var(--border);border-radius:18px;overflow:hidden;box-shadow:var(--shadow);}
-.big-viewer-head{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1.5px solid var(--border);}
+.big-viewer-head{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1.5px solid var(--border);flex-wrap:wrap;}
 .big-viewer-cat{font-size:10.5px;font-weight:900;color:var(--a1);background:var(--s2);padding:3px 10px;border-radius:8px;flex-shrink:0;}
-.big-viewer-title{font-size:15px;font-weight:900;color:var(--t1);flex:1;}
-.big-viewer-body{background:#0d1620;min-height:260px;display:flex;align-items:center;justify-content:center;padding:12px;}
-.big-viewer-body img{max-width:100%;max-height:70vh;object-fit:contain;border-radius:6px;}
+.big-viewer-title{font-size:15px;font-weight:900;color:var(--t1);flex:1;min-width:80px;}
+.bv-tools{display:flex;align-items:center;gap:5px;flex-shrink:0;}
+.bv-tool-btn{width:28px;height:28px;border-radius:8px;border:1.5px solid var(--border);background:var(--s1);
+  color:var(--t2);font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.bv-tool-btn:hover{border-color:var(--a1);color:var(--a1);}
+.bv-tool-btn.on{background:linear-gradient(135deg,var(--a1),var(--a2));color:#fff;border-color:transparent;}
+.bv-zoom-level{font-size:11px;font-weight:800;color:var(--t3);min-width:36px;text-align:center;font-family:'Nunito',sans-serif;}
+.bv-opacity-wrap{display:flex;align-items:center;gap:4px;font-size:12px;margin-left:4px;}
+.bv-opacity-wrap input[type=range]{width:60px;accent-color:var(--a1);cursor:pointer;}
+.big-viewer-body{background:#0d1620;min-height:260px;max-height:70vh;overflow:auto;display:flex;align-items:center;justify-content:center;padding:12px;}
+.big-viewer-body img{max-width:100%;max-height:66vh;object-fit:contain;border-radius:6px;transition:transform .15s;transform-origin:center center;}
+.big-viewer-body.responsive-off{min-height:340px;max-height:340px;}
+.big-viewer-body.responsive-off img{max-height:none;height:316px;width:auto;max-width:none;}
 .big-viewer-empty{color:#5a7290;text-align:center;font-size:13px;font-weight:700;line-height:1.7;}
 .big-viewer-empty-emoji{font-size:36px;display:block;margin-bottom:8px;}
 
@@ -202,8 +212,16 @@ body {
     <div class="big-viewer-head">
       <span class="big-viewer-cat" id="big-cat" style="display:none;">-</span>
       <span class="big-viewer-title" id="big-title">위 목록에서 지도를 선택해주세요</span>
+      <div class="bv-tools">
+        <button class="bv-tool-btn on" id="bv-responsive-btn" title="반응형 보기 ON/OFF">📐</button>
+        <button class="bv-tool-btn" id="bv-zoom-out" title="축소">➖</button>
+        <span class="bv-zoom-level" id="bv-zoom-level">100%</span>
+        <button class="bv-tool-btn" id="bv-zoom-in" title="확대">➕</button>
+        <button class="bv-tool-btn" id="bv-zoom-reset" title="원래대로">↺</button>
+        <span class="bv-opacity-wrap" title="투명도">🌗<input type="range" id="bv-opacity" min="20" max="100" value="100"></span>
+      </div>
     </div>
-    <div class="big-viewer-body">
+    <div class="big-viewer-body" id="big-viewer-body">
       <img id="big-img" alt="지도 이미지" style="display:none;" onerror="handleImgError(this)">
       <div class="big-viewer-empty" id="big-empty"><span class="big-viewer-empty-emoji">🗺️</span>지도를 클릭하면<br>여기에 바로 크게 보여요</div>
     </div>
@@ -252,27 +270,27 @@ const BOARD_URL = "https://sa000001.com/bbs/board.php?bo_table=s2_map";
 const MAPS = [
   { id:1,   cat:"사이너스", title:"사이너스 전체지도", thumb:"https://sa000001.com/data/editor/2606/thumb-feb1d4ced69e4b34dfb3373d9967356b_1782236319_254_202x150.png" },
   { id:99,  cat:"공지",     title:"상점 (구매 위치 정보)", thumb:"https://sa000001.com/data/editor/2502/thumb-77a34ab8117c1c470e546aa6965d0a59_1740647367_5312_202x150.png" },
-  { id:98,  cat:"전체",     title:"가이아 섬 전체지도", thumb:"https://sa000001.com/data/editor/2502/thumb-a6353f7e848d23c69d24ce879277fec4_1740046840_4651_202x150.png" },
-  { id:94,  cat:"전체",     title:"에레보스 전체지도", thumb:"https://sa000001.com/data/editor/2606/thumb-feb1d4ced69e4b34dfb3373d9967356b_1782236308_8428_202x150.png" },
-  { id:93,  cat:"전체",     title:"하이하모 전체지도", thumb:"https://sa000001.com/data/editor/2606/thumb-feb1d4ced69e4b34dfb3373d9967356b_1782236295_6378_202x150.png" },
-  { id:92,  cat:"전체",     title:"포우렌 전체지도", thumb:"https://sa000001.com/data/editor/2606/thumb-feb1d4ced69e4b34dfb3373d9967356b_1782236279_3602_202x150.png" },
-  { id:90,  cat:"전체",     title:"가우린 전체지도", thumb:"https://sa000001.com/data/editor/2606/thumb-7af8735c42d805a8a677d820eeea962f_1782236215_5567_202x150.png" },
-  { id:91,  cat:"전체",     title:"세르노스 전체지도", thumb:"https://sa000001.com/data/editor/2606/thumb-7af8735c42d805a8a677d820eeea962f_1782236199_5609_202x150.png" },
-  { id:89,  cat:"전체",     title:"쟈루 전체지도", thumb:"https://sa000001.com/data/editor/2606/thumb-cd0c9602d6dac7a3078b19f6ae0a40d1_1782236173_974_202x150.png" },
-  { id:109, cat:"전체",     title:"사냥터", thumb:"https://sa000001.com/data/editor/2606/thumb-d5fab41b3c2cd9c6ad5e5c2d85fecbc8_1782797423_2094_202x150.png" },
+  { id:98,  cat:"전체지도",     title:"가이아 섬 전체지도", thumb:"https://sa000001.com/data/editor/2502/thumb-a6353f7e848d23c69d24ce879277fec4_1740046840_4651_202x150.png" },
+  { id:94,  cat:"전체지도",     title:"에레보스 전체지도", thumb:"https://sa000001.com/data/editor/2606/thumb-feb1d4ced69e4b34dfb3373d9967356b_1782236308_8428_202x150.png" },
+  { id:93,  cat:"전체지도",     title:"하이하모 전체지도", thumb:"https://sa000001.com/data/editor/2606/thumb-feb1d4ced69e4b34dfb3373d9967356b_1782236295_6378_202x150.png" },
+  { id:92,  cat:"전체지도",     title:"포우렌 전체지도", thumb:"https://sa000001.com/data/editor/2606/thumb-feb1d4ced69e4b34dfb3373d9967356b_1782236279_3602_202x150.png" },
+  { id:90,  cat:"전체지도",     title:"가우린 전체지도", thumb:"https://sa000001.com/data/editor/2606/thumb-7af8735c42d805a8a677d820eeea962f_1782236215_5567_202x150.png" },
+  { id:91,  cat:"전체지도",     title:"세르노스 전체지도", thumb:"https://sa000001.com/data/editor/2606/thumb-7af8735c42d805a8a677d820eeea962f_1782236199_5609_202x150.png" },
+  { id:89,  cat:"전체지도",     title:"쟈루 전체지도", thumb:"https://sa000001.com/data/editor/2606/thumb-cd0c9602d6dac7a3078b19f6ae0a40d1_1782236173_974_202x150.png" },
+  { id:109, cat:"전체지도",     title:"사냥터", thumb:"https://sa000001.com/data/editor/2606/thumb-d5fab41b3c2cd9c6ad5e5c2d85fecbc8_1782797423_2094_202x150.png" },
   { id:108, cat:"세르노스", title:"포루섬 전체지도", thumb:"https://sa000001.com/data/editor/2503/thumb-d06c3aac20d35e7c94461f6fe7791092_1742750480_0263_202x150.png" },
   { id:107, cat:"사이너스", title:"원주민섬 전체지도", thumb:"https://sa000001.com/data/editor/2503/thumb-d06c3aac20d35e7c94461f6fe7791092_1742750451_5546_202x150.png" },
   { id:106, cat:"가이아",   title:"물의 해변 (수속성레이드)", thumb:"https://sa000001.com/data/editor/2502/thumb-65ee93eb244be7335a09c37cd9593121_1740695204_2489_202x150.png" },
   { id:105, cat:"가이아",   title:"바람의 동굴 (풍속성레이드)", thumb:"https://sa000001.com/data/editor/2502/thumb-65ee93eb244be7335a09c37cd9593121_1740695230_9994_202x150.png" },
   { id:104, cat:"가이아",   title:"땅의 숲 (지속성 레이드)", thumb:"https://sa000001.com/data/editor/2502/thumb-86aed2272a49228ab38d9bb864900a06_1740707152_8205_202x150.png" },
-  { id:103, cat:"전체",     title:"투기장 (팀 듀얼)", thumb:"https://sa000001.com/data/editor/2502/thumb-65ee93eb244be7335a09c37cd9593121_1740707706_8189_202x150.png" },
+  { id:103, cat:"전체지도",     title:"투기장 (팀 듀얼)", thumb:"https://sa000001.com/data/editor/2502/thumb-65ee93eb244be7335a09c37cd9593121_1740707706_8189_202x150.png" },
   { id:102, cat:"가이아",   title:"북 가이아 섬", thumb:"https://sa000001.com/data/editor/2503/thumb-401f96f31d85ec3b3e727835291dacf5_1740777917_5114_202x150.png" },
   { id:101, cat:"가이아",   title:"가이아 미로섬", thumb:"https://sa000001.com/data/editor/2502/thumb-e5f577935d77aff6cfd5e9d34de19691_1740642675_171_202x150.png" },
   { id:100, cat:"가이아",   title:"땅의 정령 통로", thumb:"https://sa000001.com/data/editor/2502/thumb-6e2ade6e67ba42194e7b606e6ffd1709_1740047128_1832_202x150.png" },
-  { id:97,  cat:"전체",     title:"아쿠아펄 해저 지역 전체지도", thumb:"https://sa000001.com/data/editor/2606/thumb-4268513e4c40cee9e8a8c1f714ef7eec_1782236347_6647_202x150.png" },
-  { id:96,  cat:"전체",     title:"인어의 섬 전체지도", thumb:"https://sa000001.com/data/editor/2606/thumb-4268513e4c40cee9e8a8c1f714ef7eec_1782236383_9803_202x150.png" },
-  { id:95,  cat:"전체",     title:"클로니클 어비스 전체지도", thumb:"https://sa000001.com/data/editor/2606/thumb-4268513e4c40cee9e8a8c1f714ef7eec_1782236395_6378_202x150.png" },
-  { id:88,  cat:"전체",     title:"사이너스 전체지도", thumb:"https://sa000001.com/data/editor/2606/thumb-feb1d4ced69e4b34dfb3373d9967356b_1782236409_2485_202x150.png" },
+  { id:97,  cat:"전체지도",     title:"아쿠아펄 해저 지역 전체지도", thumb:"https://sa000001.com/data/editor/2606/thumb-4268513e4c40cee9e8a8c1f714ef7eec_1782236347_6647_202x150.png" },
+  { id:96,  cat:"전체지도",     title:"인어의 섬 전체지도", thumb:"https://sa000001.com/data/editor/2606/thumb-4268513e4c40cee9e8a8c1f714ef7eec_1782236383_9803_202x150.png" },
+  { id:95,  cat:"전체지도",     title:"클로니클 어비스 전체지도", thumb:"https://sa000001.com/data/editor/2606/thumb-4268513e4c40cee9e8a8c1f714ef7eec_1782236395_6378_202x150.png" },
+  { id:88,  cat:"전체지도",     title:"사이너스 전체지도", thumb:"https://sa000001.com/data/editor/2606/thumb-feb1d4ced69e4b34dfb3373d9967356b_1782236409_2485_202x150.png" },
   { id:87,  cat:"아쿠아펄", title:"히스토닉 동굴", thumb:"https://sa000001.com/data/editor/2606/thumb-feb1d4ced69e4b34dfb3373d9967356b_1782236420_8339_202x150.png" },
   { id:86,  cat:"아쿠아펄", title:"환선심해통로", thumb:"https://sa000001.com/data/editor/2606/thumb-feb1d4ced69e4b34dfb3373d9967356b_1782236430_7718_202x150.png" },
   { id:85,  cat:"아쿠아펄", title:"인어의 숲", thumb:"https://sa000001.com/data/editor/2606/thumb-feb1d4ced69e4b34dfb3373d9967356b_1782236440_6773_202x150.png" },
@@ -366,6 +384,18 @@ function guessFullImage(thumbUrl){
   return thumbUrl.replace('/thumb-', '/').replace(/_\d+x\d+(?=\.\w+$)/, '');
 }
 
+/* 카테고리 표시 순서 (지정된 순서 → 그 외는 뒤에 알파벳/가나다 순) */
+const CAT_ORDER = ['사이너스','쟈루','가우린','세르노스','포우렌','하이하모','에레보스','아쿠아펄','가이아','전체지도'];
+function sortCats(cats){
+  return cats.slice().sort((a,b)=>{
+    const ia = CAT_ORDER.indexOf(a), ib = CAT_ORDER.indexOf(b);
+    if(ia===-1 && ib===-1) return a.localeCompare(b,'ko');
+    if(ia===-1) return 1;
+    if(ib===-1) return -1;
+    return ia-ib;
+  });
+}
+
 /* ═══════════════════════════════════════════════════════════
    카테고리 필터 + 썸네일 스트립 + 큰 뷰어 (한 화면, 팝업/이동 없음)
    ═══════════════════════════════════════════════════════════ */
@@ -374,7 +404,7 @@ let currentMapId = null;
 let shownCount = 30;
 
 function renderChips(){
-  const cats = ['전체보기', ...Array.from(new Set(MAPS.filter(m=>m.cat!=='공지').map(m=>m.cat)))];
+  const cats = ['전체보기', ...sortCats(Array.from(new Set(MAPS.filter(m=>m.cat!=='공지').map(m=>m.cat))))];
   document.getElementById('cat-chips').innerHTML = cats.map(c=>
     `<button class="cat-chip ${c===currentCat?'on':''}" data-cat="${c}">${c}</button>`
   ).join('');
@@ -406,17 +436,23 @@ function renderList(){
     moreBtn.style.display = 'none';
   }
 }
+let bvZoom = 1;
+let bvResponsive = true;
 function showMap(id){
   const m = MAPS.find(x=>x.id===id); if(!m) return;
   currentMapId = id;
+  bvZoom = 1;
+  document.getElementById('bv-opacity').value = 100;
   document.getElementById('big-title').textContent = m.title;
   const catEl = document.getElementById('big-cat');
   catEl.textContent = m.cat; catEl.style.display = 'inline-block';
   document.getElementById('big-empty').style.display = 'none';
   const img = document.getElementById('big-img');
   img.style.display = 'block';
+  img.style.opacity = 1;
   img.dataset.triedFull = '0';
   img.src = guessFullImage(m.thumb);
+  bvApplyZoom();
   [...document.querySelectorAll('.map-row')].forEach(el=>{
     el.classList.toggle('active', parseInt(el.dataset.id)===id);
   });
@@ -429,6 +465,31 @@ function handleImgError(img){
     if(m) img.src = m.thumb;
   }
 }
+/* ── 지도 뷰어: 반응형 토글 / 확대·축소 / 투명도 ── */
+function bvApplyZoom(){
+  document.getElementById('big-img').style.transform = `scale(${bvZoom})`;
+  document.getElementById('bv-zoom-level').textContent = Math.round(bvZoom*100) + '%';
+}
+document.getElementById('bv-responsive-btn').addEventListener('click', function(){
+  bvResponsive = !bvResponsive;
+  this.classList.toggle('on', bvResponsive);
+  document.getElementById('big-viewer-body').classList.toggle('responsive-off', !bvResponsive);
+});
+document.getElementById('bv-zoom-in').addEventListener('click', ()=>{
+  bvZoom = Math.min(3, Math.round((bvZoom + 0.25)*100)/100);
+  bvApplyZoom();
+});
+document.getElementById('bv-zoom-out').addEventListener('click', ()=>{
+  bvZoom = Math.max(0.5, Math.round((bvZoom - 0.25)*100)/100);
+  bvApplyZoom();
+});
+document.getElementById('bv-zoom-reset').addEventListener('click', ()=>{
+  bvZoom = 1;
+  bvApplyZoom();
+});
+document.getElementById('bv-opacity').addEventListener('input', e=>{
+  document.getElementById('big-img').style.opacity = e.target.value/100;
+});
 document.getElementById('map-search').addEventListener('input', ()=>{
   shownCount = 30;
   renderList();
@@ -438,6 +499,8 @@ document.getElementById('cat-chips').addEventListener('click', e=>{
   currentCat = btn.dataset.cat;
   shownCount = 30;
   renderChips(); renderList();
+  const firstItem = currentCat==='전체보기' ? MAPS[0] : MAPS.find(m=>m.cat===currentCat);
+  if(firstItem) showMap(firstItem.id);
 });
 document.getElementById('map-list').addEventListener('click', e=>{
   const item = e.target.closest('.map-row'); if(!item) return;
@@ -511,8 +574,18 @@ async function openPip(){
     .pip-list-item { padding:11px 12px; font-size:13.5px; font-weight:700; color:#12253f; cursor:pointer; border-radius:9px; transition:background .12s; display:flex; align-items:center; justify-content:space-between; gap:8px; }
     .pip-list-item:hover, .pip-list-item:active { background:#e3f0fb; color:#2f7fd6; }
     .pip-list-item-cat { font-size:10.5px; color:#8ea6c2; font-weight:700; flex-shrink:0; }
-    .pip-image-view { display:none; height:100%; align-items:center; justify-content:center; background:#0d1620; }
-    .pip-image-view img { max-width:100%; max-height:100%; object-fit:contain; }
+    .pip-image-view { display:none; flex-direction:column; height:100%; background:#0d1620; }
+    .pip-image-toolbar { display:flex; align-items:center; gap:5px; padding:6px 10px; background:rgba(0,0,0,.45); flex-shrink:0; }
+    .pip-img-tool-btn { width:26px; height:26px; border-radius:7px; border:none; background:rgba(255,255,255,.15);
+      color:#fff; font-size:11px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+    .pip-img-tool-btn:hover { background:rgba(255,255,255,.3); }
+    .pip-img-tool-btn.on { background:#2f7fd6; }
+    .pip-img-zoom-level { font-size:10.5px; font-weight:800; color:#cfe0f5; min-width:34px; text-align:center; }
+    .pip-opacity-wrap { display:flex; align-items:center; gap:3px; margin-left:2px; }
+    .pip-opacity-wrap input[type=range] { width:44px; accent-color:#2f7fd6; cursor:pointer; }
+    .pip-image-scroll { flex:1; overflow:auto; display:flex; align-items:center; justify-content:center; }
+    .pip-image-scroll img { max-width:100%; max-height:100%; object-fit:contain; transition:transform .15s; transform-origin:center center; }
+    .pip-image-scroll.responsive-off img { max-height:none; max-width:none; height:260px; width:auto; }
     .pip-empty { color:#7391b0; text-align:center; font-size:13px; padding:30px 20px; }
   `;
   doc.head.appendChild(style);
@@ -530,13 +603,50 @@ async function openPip(){
       <div class="pip-body">
         <div id="pip-list-view"></div>
         <div class="pip-image-view" id="pip-image-view">
-          <img id="pip-img" alt="지도 이미지">
+          <div class="pip-image-toolbar">
+            <button class="pip-img-tool-btn on" id="pip-responsive-btn" title="반응형 보기">📐</button>
+            <button class="pip-img-tool-btn" id="pip-zoom-out" title="축소">➖</button>
+            <span class="pip-img-zoom-level" id="pip-zoom-level">100%</span>
+            <button class="pip-img-tool-btn" id="pip-zoom-in" title="확대">➕</button>
+            <button class="pip-img-tool-btn" id="pip-zoom-reset" title="원래대로">↺</button>
+            <span class="pip-opacity-wrap" title="투명도">🌗<input type="range" id="pip-opacity" min="20" max="100" value="100"></span>
+          </div>
+          <div class="pip-image-scroll" id="pip-image-scroll">
+            <img id="pip-img" alt="지도 이미지">
+          </div>
         </div>
       </div>
     </div>
   `;
 
-  const pipCats = ['전체보기', ...Array.from(new Set(MAPS.filter(m=>m.cat!=='공지').map(m=>m.cat)))];
+  let pipZoom = 1;
+  let pipResponsive = true;
+  function pipApplyZoom(){
+    doc.getElementById('pip-img').style.transform = `scale(${pipZoom})`;
+    doc.getElementById('pip-zoom-level').textContent = Math.round(pipZoom*100) + '%';
+  }
+  doc.getElementById('pip-responsive-btn').addEventListener('click', function(){
+    pipResponsive = !pipResponsive;
+    this.classList.toggle('on', pipResponsive);
+    doc.getElementById('pip-image-scroll').classList.toggle('responsive-off', !pipResponsive);
+  });
+  doc.getElementById('pip-zoom-in').addEventListener('click', ()=>{
+    pipZoom = Math.min(3, Math.round((pipZoom + 0.25)*100)/100);
+    pipApplyZoom();
+  });
+  doc.getElementById('pip-zoom-out').addEventListener('click', ()=>{
+    pipZoom = Math.max(0.5, Math.round((pipZoom - 0.25)*100)/100);
+    pipApplyZoom();
+  });
+  doc.getElementById('pip-zoom-reset').addEventListener('click', ()=>{
+    pipZoom = 1;
+    pipApplyZoom();
+  });
+  doc.getElementById('pip-opacity').addEventListener('input', e=>{
+    doc.getElementById('pip-img').style.opacity = e.target.value/100;
+  });
+
+  const pipCats = ['전체보기', ...sortCats(Array.from(new Set(MAPS.filter(m=>m.cat!=='공지').map(m=>m.cat))))];
   let pipCurrentCat = '전체보기';
 
   function pipRenderCatBar(){
@@ -571,7 +681,11 @@ async function openPip(){
     doc.getElementById('pip-image-view').style.display = 'flex';
     doc.getElementById('pip-back-btn').style.display = 'inline-block';
     doc.getElementById('pip-current-title').textContent = m.title;
+    pipZoom = 1;
+    pipApplyZoom();
+    doc.getElementById('pip-opacity').value = 100;
     const img = doc.getElementById('pip-img');
+    img.style.opacity = 1;
     img.dataset.triedFull = '0';
     img.onerror = () => { if(img.dataset.triedFull === '0'){ img.dataset.triedFull = '1'; img.src = m.thumb; } };
     img.src = guessFullImage(m.thumb);
@@ -584,6 +698,9 @@ async function openPip(){
     doc.getElementById('pip-search').value = '';
     pipRenderCatBar();
     pipRenderList();
+    const items = pipCurrentCat==='전체보기' ? MAPS : MAPS.filter(m=>m.cat===pipCurrentCat);
+    if(items.length) pipShowMap(items[0].id);
+    else pipShowList();
   });
   doc.getElementById('pip-list-view').addEventListener('click', e=>{
     const item = e.target.closest('.pip-list-item'); if(!item) return;
