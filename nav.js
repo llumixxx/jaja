@@ -17,8 +17,25 @@ const SA_NAV_ITEMS = [
   const nav = document.getElementById("sbNav");
   if(!nav) return;
   const current = (location.pathname.split("/").pop() || "index.html");
-  nav.innerHTML = SA_NAV_ITEMS.map(item => {
-    const isOn = item.href === current;
-    return `<a href="${item.href}"${isOn ? ' class="on"' : ''}>${item.icon} ${item.label}</a>`;
-  }).join("");
+  const currentItem = SA_NAV_ITEMS.find(i => i.href === current) || SA_NAV_ITEMS[0];
+
+  nav.innerHTML =
+    `<button type="button" class="sb-nav-toggle" id="sbNavToggle">` +
+      `<span>${currentItem.icon}</span>` +
+      `<span class="sb-nav-toggle-label">${currentItem.label}</span>` +
+      `<span class="sb-nav-toggle-chevron">▾</span>` +
+    `</button>` +
+    `<div class="sb-nav-list" id="sbNavList">` +
+      SA_NAV_ITEMS.map(item => {
+        const isOn = item.href === current;
+        return `<a href="${item.href}"${isOn ? ' class="on"' : ''}>${item.icon} ${item.label}</a>`;
+      }).join("") +
+    `</div>`;
+
+  const toggleBtn = document.getElementById("sbNavToggle");
+  const list = document.getElementById("sbNavList");
+  toggleBtn.addEventListener("click", () => {
+    list.classList.toggle("open");
+    toggleBtn.classList.toggle("open");
+  });
 })();
