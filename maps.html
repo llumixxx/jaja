@@ -169,7 +169,7 @@ body {
     <div class="wind-badge"><span class="wind-badge-dot"></span><span>SA JYAJYA · MAP INFO</span></div>
     <h1 class="page-title">🗺️ 지도정보</h1>
     <div class="page-sub">지도를 골라서 크게 확인해보세요</div>
-    <button class="popup-open-btn" onclick="openAsPopup()">🗗 별도 팝업창으로 열기 (게임 옆에 띄우기)</button>
+    <button class="popup-open-btn" onclick="openPip()">📌 PIP로 열기 (게임 위에 항상 띄우기)</button>
   </div>
 
   <div class="cat-chip-wrap" id="cat-chips"></div>
@@ -406,16 +406,105 @@ document.getElementById('thumb-strip').addEventListener('click', e=>{
   showMap(parseInt(item.dataset.id));
 });
 
-/* 이 페이지를 게임 옆에 띄울 수 있는 작은 별도 창으로 열기 */
-function openAsPopup(){
-  const w = 440, h = 800;
-  const left = Math.max(0, window.screen.availWidth - w - 40);
-  const top = 60;
-  window.open(
-    location.pathname + location.search,
-    'sa_map_popup',
-    `width=${w},height=${h},left=${left},top=${top},resizable=yes,scrollbars=yes,toolbar=no,menubar=no,location=no,status=no`
-  );
+/* ═══════════════════════════════════════════════════════════
+   PIP(항상 위에 떠있는 미니창)로 열기
+   ═══════════════════════════════════════════════════════════ */
+async function openPip(){
+  if(!('documentPictureInPicture' in window)){
+    toastMsg('이 브라우저는 PIP를 지원하지 않아요. 크롬/엣지 최신 버전에서 써보세요!');
+    return;
+  }
+  const pipWindow = await window.documentPictureInPicture.requestWindow({ width: 360, height: 620 });
+  const doc = pipWindow.document;
+
+  // 폰트 링크 그대로 복사
+  document.querySelectorAll('link[rel="stylesheet"], link[rel="preconnect"]').forEach(link=>{
+    doc.head.appendChild(link.cloneNode(true));
+  });
+
+  const style = doc.createElement('style');
+  style.textContent = `
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; font-family: 'Noto Sans KR', sans-serif; background: ${getComputedStyle(document.documentElement).getPropertyValue('--bg')}; color:#12253f; }
+    #pip-app { height: 100vh; display: flex; flex-direction: column; }
+    .pip-header { display:flex; align-items:center; gap:8px; padding:10px 12px; border-bottom:1.5px solid #dbe9f7; background:#fff; flex-shrink:0; }
+    .pip-list-btn { background:#f0f7fd; border:1.5px solid #dbe9f7; border-radius:10px; padding:7px 12px; font-size:12px; font-weight:800; cursor:pointer; color:#4c6a8c; font-family:inherit; flex-shrink:0; }
+    .pip-list-btn:hover { border-color:#2f7fd6; color:#2f7fd6; }
+    .pip-current-title { font-size:13px; font-weight:800; color:#12253f; flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .pip-body { flex:1; overflow-y:auto; position:relative; }
+    .pip-body::-webkit-scrollbar{ width:4px; } .pip-body::-webkit-scrollbar-thumb{ background:#bcd8f2; border-radius:4px; }
+    .pip-list-view { padding:6px; }
+    .pip-cat-label { font-size:10px; font-weight:900; color:#8ea6c2; letter-spacing:1.5px; padding:12px 10px 5px; text-transform:uppercase; }
+    .pip-list-item { padding:9px 12px; font-size:13.5px; font-weight:700; color:#12253f; cursor:pointer; border-radius:9px; transition:background .12s; }
+    .pip-list-item:hover, .pip-list-item:active { background:#e3f0fb; color:#2f7fd6; }
+    .pip-image-view { display:none; height:100%; align-items:center; justify-content:center; background:#0d1620; }
+    .pip-image-view img { max-width:100%; max-height:100%; object-fit:contain; }
+    .pip-image-empty { color:#7391b0; text-align:center; font-size:13px; padding:20px; }
+  `;
+  doc.head.appendChild(style);
+
+  doc.body.innerHTML = `
+    <div id="pip-app">
+      <div class="pip-header">
+        <button class="pip-list-btn" id="pip-list-btn">📋 목록</button>
+        <span class="pip-current-title" id="pip-current-title">지도 목록 (${MAPS.length}개)</span>
+      </div>
+      <div class="pip-body">
+        <div class="pip-list-view" id="pip-list-view"></div>
+        <div class="pip-image-view" id="pip-image-view">
+          <img id="pip-img" alt="지도 이미지">
+        </div>
+      </div>
+    </div>
+  `;
+
+  const cats = Array.from(new Set(MAPS.map(m=>m.cat)));
+  doc.getElementById('pip-list-view').innerHTML = cats.map(cat => {
+    const items = MAPS.filter(m=>m.cat===cat);
+    return `<div class="pip-cat-label">${cat}</div>` +
+      items.map(m=>`<div class="pip-list-item" data-id="${m.id}">${m.title}</div>`).join('');
+  }).join('');
+
+  function pipShowList(){
+    doc.getElementById('pip-list-view').style.display = 'block';
+    doc.getElementById('pip-image-view').style.display = 'none';
+    doc.getElementById('pip-current-title').textContent = `지도 목록 (${MAPS.length}개)`;
+  }
+  function pipShowMap(id){
+    const m = MAPS.find(x=>x.id===id); if(!m) return;
+    doc.getElementById('pip-list-view').style.display = 'none';
+    doc.getElementById('pip-image-view').style.display = 'flex';
+    doc.getElementById('pip-current-title').textContent = m.title;
+    const img = doc.getElementById('pip-img');
+    img.dataset.triedFull = '0';
+    img.dataset.mapId = id;
+    img.onerror = () => {
+      if(img.dataset.triedFull === '0'){ img.dataset.triedFull = '1'; img.src = m.thumb; }
+    };
+    img.src = guessFullImage(m.thumb);
+  }
+  doc.getElementById('pip-list-btn').addEventListener('click', pipShowList);
+  doc.getElementById('pip-list-view').addEventListener('click', e=>{
+    const item = e.target.closest('.pip-list-item'); if(!item) return;
+    pipShowMap(parseInt(item.dataset.id));
+  });
+}
+
+function toastMsg(msg){
+  let el = document.getElementById('_toast_el');
+  if(!el){
+    el = document.createElement('div'); el.id = '_toast_el';
+    el.style.cssText = `position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(20px);
+      background:linear-gradient(135deg,#12253f,#2f7fd6);color:#fff;padding:12px 22px;border-radius:99px;
+      font-size:13px;font-weight:800;font-family:'Noto Sans KR',sans-serif;text-align:center;max-width:88vw;
+      box-shadow:0 8px 28px rgba(0,0,0,.25);z-index:99999;opacity:0;pointer-events:none;
+      transition:opacity .2s,transform .2s;`;
+    document.body.appendChild(el);
+  }
+  el.textContent = msg;
+  requestAnimationFrame(()=>{ el.style.opacity='1'; el.style.transform='translateX(-50%) translateY(0)'; });
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(()=>{ el.style.opacity='0'; el.style.transform='translateX(-50%) translateY(20px)'; }, 2200);
 }
 
 /* 초기 렌더 */
