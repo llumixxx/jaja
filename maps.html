@@ -100,6 +100,14 @@ body {
 .popup-open-btn:hover { transform: translateY(-2px); }
 .popup-open-btn:active { transform: scale(.97); }
 
+/* ── 검색 ── */
+.map-search-wrap{margin-bottom:14px;}
+.map-search-input{width:100%;padding:12px 16px;background:var(--white);border:1.5px solid var(--border);
+  border-radius:14px;color:var(--t1);font-size:16px;font-family:'Noto Sans KR',sans-serif;
+  transition:border-color .18s,box-shadow .18s;box-shadow:var(--shadow);}
+.map-search-input:focus{outline:none;border-color:var(--a1);box-shadow:0 0 0 4px rgba(47,127,214,.1);}
+.map-search-input::placeholder{color:var(--t4);}
+
 /* ── 카테고리 필터 칩 ── */
 .cat-chip-wrap{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;margin-bottom:14px;}
 .cat-chip{padding:7px 15px;border-radius:99px;font-size:12.5px;font-weight:800;cursor:pointer;
@@ -107,17 +115,17 @@ body {
 .cat-chip:hover{border-color:var(--a1);color:var(--a1);}
 .cat-chip.on{background:linear-gradient(135deg,var(--a1),var(--a2));color:#fff;border-color:transparent;}
 
-/* ── 썸네일 스트립(항상 보임, 클릭하면 바로 아래 큰 뷰어에 표시) ── */
-.thumb-strip{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:16px;
-  padding:12px;background:var(--white);border:1.5px solid var(--border);border-radius:16px;}
-.thumb-item{width:84px;cursor:pointer;border-radius:10px;overflow:hidden;
-  border:2.5px solid transparent;transition:border-color .15s,transform .15s;background:var(--s1);}
-.thumb-item:hover{transform:translateY(-2px);}
-.thumb-item.active{border-color:var(--a1);box-shadow:0 4px 12px rgba(47,127,214,.25);}
-.thumb-item img{width:84px;height:62px;object-fit:cover;display:block;background:var(--white);}
-.thumb-item-label{font-size:9px;font-weight:700;color:var(--t2);text-align:center;padding:3px 3px;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:var(--white);}
-.thumb-item.active .thumb-item-label{color:var(--a1);}
+/* ── 지도 목록 (깔끔한 리스트형, 항상 보임, 클릭하면 바로 아래 큰 뷰어에 표시) ── */
+.map-list{display:flex;flex-direction:column;gap:6px;margin-bottom:12px;}
+.map-row{display:flex;align-items:center;gap:12px;padding:9px 12px;background:var(--white);
+  border:1.5px solid var(--border);border-radius:13px;cursor:pointer;transition:border-color .15s,background .15s;}
+.map-row:hover{border-color:var(--a1);}
+.map-row.active{border-color:var(--a1);background:var(--s2);}
+.map-row-thumb{width:52px;height:38px;border-radius:8px;overflow:hidden;flex-shrink:0;background:var(--s1);}
+.map-row-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+.map-row-title{flex:1;font-size:13.5px;font-weight:700;color:var(--t1);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.map-row.active .map-row-title{color:var(--a1);}
+.map-row-cat{font-size:10px;font-weight:800;color:var(--a1);background:var(--s2);padding:3px 9px;border-radius:8px;flex-shrink:0;}
 
 .empty-state{text-align:center;padding:40px 20px;color:var(--t3);}
 .load-more-btn{margin:4px 0 16px;padding:9px 24px;border-radius:99px;border:1.5px solid var(--border2);
@@ -136,8 +144,7 @@ body {
 .big-viewer-empty-emoji{font-size:36px;display:block;margin-bottom:8px;}
 
 @media(max-width:520px){ .page-title{font-size:26px;} .main-inner{padding:16px 14px 60px;}
-  .big-viewer-body{min-height:180px;} .big-viewer-body img{max-height:50vh;}
-  .thumb-item{width:70px;} .thumb-item img{width:70px;height:52px;} }
+  .big-viewer-body{min-height:180px;} .big-viewer-body img{max-height:50vh;} }
 </style>
 </head>
 <body>
@@ -155,7 +162,7 @@ body {
     <div class="sb-info-box">
       🗺️ <b>지도정보</b><br><br>
       공홈 지도게시판 1페이지 기준 <b id="sb-map-count">-</b>개 지도를 모아왔어요.<br><br>
-      위 카테고리에서 고르고, 썸네일을 클릭하면 바로 아래에 크게 보여요. 창을 게임 옆에 띄워놓고 바로바로 확인할 수 있어요.<br><br>
+      검색창에 초성만 쳐도 찾을 수 있고, 카테고리로 필터링도 가능해요. 클릭하면 바로 아래에 크게 보여요.<br><br>
       <span style="color:var(--t3);">※ 공홈에 지도가 더 올라오면 알려주세요, 추가해드릴게요.</span>
     </div>
   </div>
@@ -175,15 +182,19 @@ body {
     <button class="popup-open-btn" onclick="openPip()">📌 PIP로 열기 (게임 위에 항상 띄우기)</button>
   </div>
 
+  <div class="map-search-wrap">
+    <input type="text" class="map-search-input" id="map-search" placeholder="지도 검색... (초성 가능, 예: ㄱㅇㄹ)" autocomplete="off">
+  </div>
+
   <div class="cat-chip-wrap" id="cat-chips"></div>
 
-  <div class="thumb-strip" id="thumb-strip"></div>
+  <div class="map-list" id="map-list"></div>
   <div style="text-align:center;">
     <button class="load-more-btn" id="load-more-btn" style="display:none;">더보기</button>
   </div>
   <div class="empty-state" id="empty-state" style="display:none;">
     <div class="empty-state-emoji">🗺️</div>
-    <div>해당 카테고리에 지도가 없어요</div>
+    <div>결과가 없어요</div>
   </div>
 
   <div class="big-viewer">
@@ -367,17 +378,23 @@ function renderChips(){
     `<button class="cat-chip ${c===currentCat?'on':''}" data-cat="${c}">${c}</button>`
   ).join('');
 }
-function renderStrip(){
-  const full = currentCat === '전체보기' ? MAPS : MAPS.filter(m=>m.cat===currentCat);
+function renderList(){
+  const q = document.getElementById('map-search').value.trim();
+  const searching = q.length > 0;
+  document.getElementById('cat-chips').style.opacity = searching ? '.4' : '1';
+  document.getElementById('cat-chips').style.pointerEvents = searching ? 'none' : 'auto';
+
+  const full = searching ? searchMaps(q) : (currentCat === '전체보기' ? MAPS : MAPS.filter(m=>m.cat===currentCat));
   const list = full.slice(0, shownCount);
-  const strip = document.getElementById('thumb-strip');
+  const listEl = document.getElementById('map-list');
   const empty = document.getElementById('empty-state');
-  if(full.length===0){ strip.innerHTML=''; strip.style.display='none'; empty.style.display='block'; document.getElementById('load-more-btn').style.display='none'; return; }
-  empty.style.display='none'; strip.style.display='flex';
-  strip.innerHTML = list.map(m => `
-    <div class="thumb-item ${m.id===currentMapId?'active':''}" data-id="${m.id}">
-      <img src="${m.thumb}" alt="${m.title}" loading="lazy">
-      <div class="thumb-item-label">${m.title}</div>
+  if(full.length===0){ listEl.innerHTML=''; empty.style.display='block'; document.getElementById('load-more-btn').style.display='none'; return; }
+  empty.style.display='none';
+  listEl.innerHTML = list.map(m => `
+    <div class="map-row ${m.id===currentMapId?'active':''}" data-id="${m.id}">
+      <div class="map-row-thumb"><img src="${m.thumb}" alt="${m.title}" loading="lazy"></div>
+      <div class="map-row-title">${m.title}</div>
+      <div class="map-row-cat">${m.cat}</div>
     </div>
   `).join('');
   const moreBtn = document.getElementById('load-more-btn');
@@ -399,7 +416,7 @@ function showMap(id){
   img.style.display = 'block';
   img.dataset.triedFull = '0';
   img.src = guessFullImage(m.thumb);
-  [...document.querySelectorAll('.thumb-item')].forEach(el=>{
+  [...document.querySelectorAll('.map-row')].forEach(el=>{
     el.classList.toggle('active', parseInt(el.dataset.id)===id);
   });
 }
@@ -411,19 +428,23 @@ function handleImgError(img){
     if(m) img.src = m.thumb;
   }
 }
+document.getElementById('map-search').addEventListener('input', ()=>{
+  shownCount = 30;
+  renderList();
+});
 document.getElementById('cat-chips').addEventListener('click', e=>{
   const btn = e.target.closest('.cat-chip'); if(!btn) return;
   currentCat = btn.dataset.cat;
   shownCount = 30;
-  renderChips(); renderStrip();
+  renderChips(); renderList();
 });
-document.getElementById('thumb-strip').addEventListener('click', e=>{
-  const item = e.target.closest('.thumb-item'); if(!item) return;
+document.getElementById('map-list').addEventListener('click', e=>{
+  const item = e.target.closest('.map-row'); if(!item) return;
   showMap(parseInt(item.dataset.id));
 });
 document.getElementById('load-more-btn').addEventListener('click', ()=>{
   shownCount += 30;
-  renderStrip();
+  renderList();
 });
 
 /* ═══════════════════════════════════════════════════════════
@@ -474,16 +495,21 @@ async function openPip(){
     .pip-back-btn { background:#f0f7fd; border:1.5px solid #dbe9f7; border-radius:10px; padding:7px 11px; font-size:13px; font-weight:800; cursor:pointer; color:#4c6a8c; font-family:inherit; flex-shrink:0; }
     .pip-back-btn:hover { border-color:#2f7fd6; color:#2f7fd6; }
     .pip-current-title { font-size:13px; font-weight:800; color:#12253f; flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .pip-search-wrap { padding:10px 12px; border-bottom:1.5px solid #dbe9f7; background:#fff; flex-shrink:0; }
+    .pip-search-wrap { padding:9px 12px 0; background:#fff; flex-shrink:0; }
     .pip-search-input { width:100%; padding:9px 12px; background:#f0f7fd; border:1.5px solid #dbe9f7; border-radius:10px; font-size:13px; color:#12253f; font-family:inherit; outline:none; }
     .pip-search-input:focus { border-color:#2f7fd6; }
+    /* 상단 고정 대분류 칩 바 (가로 스크롤, 클릭 즉시 필터) */
+    .pip-cat-bar { display:flex; gap:6px; overflow-x:auto; padding:9px 12px; border-bottom:1.5px solid #dbe9f7; background:#fff; flex-shrink:0; }
+    .pip-cat-bar::-webkit-scrollbar{ height:0; }
+    .pip-cat-chip { flex-shrink:0; padding:6px 12px; border-radius:99px; font-size:11.5px; font-weight:800;
+      background:#f0f7fd; border:1.5px solid #dbe9f7; color:#4c6a8c; cursor:pointer; white-space:nowrap; font-family:inherit; }
+    .pip-cat-chip.on { background:linear-gradient(135deg,#2f7fd6,#22b6c9); color:#fff; border-color:transparent; }
     .pip-body { flex:1; overflow-y:auto; position:relative; }
     .pip-body::-webkit-scrollbar{ width:4px; } .pip-body::-webkit-scrollbar-thumb{ background:#bcd8f2; border-radius:4px; }
     .pip-list-view { padding:6px; }
-    .pip-cat-label { font-size:10px; font-weight:900; color:#8ea6c2; letter-spacing:1.5px; padding:12px 10px 5px; text-transform:uppercase; }
-    .pip-list-item, .pip-cat-item { padding:11px 12px; font-size:13.5px; font-weight:700; color:#12253f; cursor:pointer; border-radius:9px; transition:background .12s; display:flex; align-items:center; justify-content:space-between; }
-    .pip-list-item:hover, .pip-list-item:active, .pip-cat-item:hover, .pip-cat-item:active { background:#e3f0fb; color:#2f7fd6; }
-    .pip-cat-item-count { font-size:11px; color:#8ea6c2; font-weight:700; }
+    .pip-list-item { padding:11px 12px; font-size:13.5px; font-weight:700; color:#12253f; cursor:pointer; border-radius:9px; transition:background .12s; display:flex; align-items:center; justify-content:space-between; gap:8px; }
+    .pip-list-item:hover, .pip-list-item:active { background:#e3f0fb; color:#2f7fd6; }
+    .pip-list-item-cat { font-size:10.5px; color:#8ea6c2; font-weight:700; flex-shrink:0; }
     .pip-image-view { display:none; height:100%; align-items:center; justify-content:center; background:#0d1620; }
     .pip-image-view img { max-width:100%; max-height:100%; object-fit:contain; }
     .pip-empty { color:#7391b0; text-align:center; font-size:13px; padding:30px 20px; }
@@ -494,14 +520,14 @@ async function openPip(){
     <div id="pip-app">
       <div class="pip-header">
         <button class="pip-back-btn" id="pip-back-btn" style="display:none;">◀</button>
-        <span class="pip-current-title" id="pip-current-title">대분류 선택</span>
+        <span class="pip-current-title" id="pip-current-title">전체보기</span>
       </div>
       <div class="pip-search-wrap">
         <input type="text" class="pip-search-input" id="pip-search" placeholder="지도 검색... (초성 가능, 예: ㄱㅇㄹ)" autocomplete="off">
       </div>
+      <div class="pip-cat-bar" id="pip-cat-bar"></div>
       <div class="pip-body">
-        <div id="pip-cat-view"></div>
-        <div id="pip-list-view" style="display:none;"></div>
+        <div id="pip-list-view"></div>
         <div class="pip-image-view" id="pip-image-view">
           <img id="pip-img" alt="지도 이미지">
         </div>
@@ -509,60 +535,37 @@ async function openPip(){
     </div>
   `;
 
-  const pipCats = Array.from(new Set(MAPS.filter(m=>m.cat!=='공지').map(m=>m.cat)));
-  let pipLastCat = null; // 뒤로가기용: 목록에서 이미지로 들어갔을 때 어느 카테고리였는지 기억
+  const pipCats = ['전체보기', ...Array.from(new Set(MAPS.filter(m=>m.cat!=='공지').map(m=>m.cat)))];
+  let pipCurrentCat = '전체보기';
 
-  function pipRenderCatView(){
-    const el = doc.getElementById('pip-cat-view');
-    const rows = ['전체보기', ...pipCats].map(cat=>{
-      const count = cat==='전체보기' ? MAPS.length : MAPS.filter(m=>m.cat===cat).length;
-      return `<div class="pip-cat-item" data-cat="${cat}"><span>${cat==='전체보기'?'🗂':'📁'} ${cat}</span><span class="pip-cat-item-count">${count}</span></div>`;
-    }).join('');
-    el.innerHTML = rows;
+  function pipRenderCatBar(){
+    doc.getElementById('pip-cat-bar').innerHTML = pipCats.map(cat=>
+      `<button class="pip-cat-chip ${cat===pipCurrentCat?'on':''}" data-cat="${cat}">${cat}</button>`
+    ).join('');
   }
-  function pipRenderListForCat(cat){
-    const items = cat==='전체보기' ? MAPS : MAPS.filter(m=>m.cat===cat);
-    doc.getElementById('pip-list-view').innerHTML = items.map(m=>
-      `<div class="pip-list-item" data-id="${m.id}">${m.title}</div>`
-    ).join('') || `<div class="pip-empty">지도가 없어요</div>`;
+  function pipRenderList(){
+    const q = doc.getElementById('pip-search').value.trim();
+    let items, label;
+    if(q){
+      items = searchMaps(q);
+      label = `검색: ${q} (${items.length})`;
+    } else {
+      items = pipCurrentCat==='전체보기' ? MAPS : MAPS.filter(m=>m.cat===pipCurrentCat);
+      label = `${pipCurrentCat} (${items.length})`;
+    }
+    doc.getElementById('pip-current-title').textContent = label;
+    doc.getElementById('pip-list-view').innerHTML = items.length
+      ? items.map(m=>`<div class="pip-list-item" data-id="${m.id}"><span>${m.title}</span>${q?`<span class="pip-list-item-cat">${m.cat}</span>`:''}</div>`).join('')
+      : `<div class="pip-empty">🔍 결과가 없어요</div>`;
   }
-  function pipRenderSearchResults(q){
-    const results = searchMaps(q);
-    doc.getElementById('pip-list-view').innerHTML = results.length
-      ? results.map(m=>`<div class="pip-list-item" data-id="${m.id}"><span>${m.title}</span><span class="pip-cat-item-count">${m.cat}</span></div>`).join('')
-      : `<div class="pip-empty">🔍 검색 결과가 없어요</div>`;
-  }
-
-  function pipShowCategories(){
-    doc.getElementById('pip-search').value = '';
-    doc.getElementById('pip-cat-view').style.display = 'block';
-    doc.getElementById('pip-list-view').style.display = 'none';
+  function pipShowList(){
+    doc.getElementById('pip-list-view').style.display = 'block';
     doc.getElementById('pip-image-view').style.display = 'none';
     doc.getElementById('pip-back-btn').style.display = 'none';
-    doc.getElementById('pip-current-title').textContent = '대분류 선택';
-    pipRenderCatView();
-  }
-  function pipShowListByCat(cat){
-    pipLastCat = cat;
-    pipRenderListForCat(cat);
-    doc.getElementById('pip-cat-view').style.display = 'none';
-    doc.getElementById('pip-list-view').style.display = 'block';
-    doc.getElementById('pip-image-view').style.display = 'none';
-    doc.getElementById('pip-back-btn').style.display = 'inline-block';
-    doc.getElementById('pip-current-title').textContent = cat;
-  }
-  function pipShowSearch(q){
-    pipLastCat = null;
-    pipRenderSearchResults(q);
-    doc.getElementById('pip-cat-view').style.display = 'none';
-    doc.getElementById('pip-list-view').style.display = 'block';
-    doc.getElementById('pip-image-view').style.display = 'none';
-    doc.getElementById('pip-back-btn').style.display = 'inline-block';
-    doc.getElementById('pip-current-title').textContent = `검색: ${q}`;
+    pipRenderList();
   }
   function pipShowMap(id){
     const m = MAPS.find(x=>x.id===id); if(!m) return;
-    doc.getElementById('pip-cat-view').style.display = 'none';
     doc.getElementById('pip-list-view').style.display = 'none';
     doc.getElementById('pip-image-view').style.display = 'flex';
     doc.getElementById('pip-back-btn').style.display = 'inline-block';
@@ -573,32 +576,22 @@ async function openPip(){
     img.src = guessFullImage(m.thumb);
   }
 
-  doc.getElementById('pip-back-btn').addEventListener('click', ()=>{
-    const imgVisible = doc.getElementById('pip-image-view').style.display === 'flex';
-    if(imgVisible){
-      const q = doc.getElementById('pip-search').value.trim();
-      if(q) pipShowSearch(q);
-      else if(pipLastCat) pipShowListByCat(pipLastCat);
-      else pipShowCategories();
-    } else {
-      pipShowCategories();
-    }
-  });
-  doc.getElementById('pip-cat-view').addEventListener('click', e=>{
-    const item = e.target.closest('.pip-cat-item'); if(!item) return;
-    pipShowListByCat(item.dataset.cat);
+  doc.getElementById('pip-back-btn').addEventListener('click', pipShowList);
+  doc.getElementById('pip-cat-bar').addEventListener('click', e=>{
+    const chip = e.target.closest('.pip-cat-chip'); if(!chip) return;
+    pipCurrentCat = chip.dataset.cat;
+    doc.getElementById('pip-search').value = '';
+    pipRenderCatBar();
+    pipRenderList();
   });
   doc.getElementById('pip-list-view').addEventListener('click', e=>{
     const item = e.target.closest('.pip-list-item'); if(!item) return;
     pipShowMap(parseInt(item.dataset.id));
   });
-  doc.getElementById('pip-search').addEventListener('input', e=>{
-    const q = e.target.value;
-    if(q.trim()) pipShowSearch(q);
-    else pipShowCategories();
-  });
+  doc.getElementById('pip-search').addEventListener('input', pipRenderList);
 
-  pipShowCategories();
+  pipRenderCatBar();
+  pipRenderList();
 }
 
 function toastMsg(msg){
@@ -620,7 +613,7 @@ function toastMsg(msg){
 
 /* 초기 렌더 */
 renderChips();
-renderStrip();
+renderList();
 document.getElementById('sb-map-count').textContent = MAPS.length;
 document.getElementById('mapCountFooter').textContent = MAPS.length + '개 지도';
 </script>
