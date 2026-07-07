@@ -94,12 +94,9 @@ body {
   background: linear-gradient(135deg, var(--a1) 0%, var(--a2) 60%, var(--a5) 100%);
   -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1.15; margin-bottom: 6px; }
 .page-sub { font-size: 12px; color: var(--t3); font-family: 'Nunito', sans-serif; font-weight: 700; letter-spacing: 1px; }
-.popup-btn-row { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 14px; }
-.popup-open-btn { padding: 10px 20px; border-radius: 99px; border: none; cursor: pointer;
+.popup-open-btn { margin-top: 14px; padding: 10px 20px; border-radius: 99px; border: none; cursor: pointer;
   background: linear-gradient(135deg, var(--a1), var(--a2)); color: #fff; font-size: 12.5px; font-weight: 800;
-  font-family: 'Noto Sans KR', sans-serif; box-shadow: 0 4px 16px rgba(47,127,214,.3); transition: transform .15s; margin-top:0; }
-.popup-open-btn.secondary { background: var(--white); color: var(--t2); border: 1.5px solid var(--border2); box-shadow: none; }
-.popup-open-btn.secondary:hover { border-color: var(--a1); color: var(--a1); }
+  font-family: 'Noto Sans KR', sans-serif; box-shadow: 0 4px 16px rgba(47,127,214,.3); transition: transform .15s; }
 .popup-open-btn:hover { transform: translateY(-2px); }
 .popup-open-btn:active { transform: scale(.97); }
 
@@ -194,10 +191,7 @@ body {
     <div class="wind-badge"><span class="wind-badge-dot"></span><span>SA JYAJYA · MAP INFO</span></div>
     <h1 class="page-title">🗺️ 지도정보</h1>
     <div class="page-sub">지도를 골라서 크게 확인해보세요</div>
-    <div class="popup-btn-row">
-      <button class="popup-open-btn" onclick="openPip().catch(e=>toastMsg('PIP 열기 실패: '+e.message))">📌 PIP로 열기 (항상 위)</button>
-      <button class="popup-open-btn secondary" onclick="openAsNormalWindow()">🗗 일반 창으로 열기 (항상 위 아님)</button>
-    </div>
+    <button class="popup-open-btn" onclick="openPip().catch(e=>toastMsg('PIP 열기 실패: '+e.message))">📌 PIP로 열기 (게임 위에 항상 띄우기)</button>
   </div>
 
   <div class="map-search-wrap">
@@ -573,28 +567,39 @@ function searchMaps(q){
   return MAPS.filter(m => m.title.replace(/\s+/g,'').toLowerCase().includes(ql));
 }
 
+/* 최근 본 지도 기록 (localStorage, 최대 15개) */
+const RECENT_KEY = 'sa_map_recent';
+function getRecentIds(){
+  try { return JSON.parse(localStorage.getItem(RECENT_KEY) || '[]'); } catch(e){ return []; }
+}
+function pushRecentId(id){
+  let ids = getRecentIds().filter(x=>x!==id);
+  ids.unshift(id);
+  ids = ids.slice(0, 15);
+  try { localStorage.setItem(RECENT_KEY, JSON.stringify(ids)); } catch(e){}
+}
+function getRecentMaps(){
+  return getRecentIds().map(id => MAPS.find(m=>m.id===id)).filter(Boolean);
+}
+
 /* ═══════════════════════════════════════════════════════════
    PIP(항상 위에 떠있는 미니창)로 열기 — 대분류선택 → 목록 → 이미지
    ═══════════════════════════════════════════════════════════ */
-/* 항상 위 고정 없이 그냥 보통 창으로 열기 (게임 조작 방해될 때 이걸 쓰면 됨) */
-function openAsNormalWindow(){
-  const w = 400, h = 720;
-  const left = Math.max(0, window.screen.availWidth - w - 40);
-  const top = 60;
-  window.open(
-    location.pathname + location.search,
-    'sa_map_normal_window',
-    `width=${w},height=${h},left=${left},top=${top},resizable=yes,scrollbars=yes,toolbar=no,menubar=no,location=no,status=no`
-  );
-}
-
 async function openPip(){
   if(!('documentPictureInPicture' in window)){
     toastMsg('이 브라우저는 PIP를 지원하지 않아요. 크롬/엣지 최신 버전에서 써보세요!');
     return;
   }
-  const pipWindow = await window.documentPictureInPicture.requestWindow({ width: 340, height: 520 });
+  let savedW = 340, savedH = 520;
+  try {
+    const saved = JSON.parse(localStorage.getItem('sa_map_pip_size') || 'null');
+    if(saved && saved.w && saved.h){ savedW = saved.w; savedH = saved.h; }
+  } catch(e){}
+  const pipWindow = await window.documentPictureInPicture.requestWindow({ width: savedW, height: savedH });
   const doc = pipWindow.document;
+  pipWindow.addEventListener('resize', ()=>{
+    try{ localStorage.setItem('sa_map_pip_size', JSON.stringify({ w: pipWindow.innerWidth, h: pipWindow.innerHeight })); }catch(e){}
+  });
 
   document.querySelectorAll('link[rel="stylesheet"], link[rel="preconnect"]').forEach(link=>{
     doc.head.appendChild(link.cloneNode(true));
@@ -673,7 +678,7 @@ async function openPip(){
   let pipIsMulti = false;
   let pipCurrentCat = '전체보기';
   let pipCurrentId = null;
-  const pipCats = ['전체보기', ...sortCats(Array.from(new Set(MAPS.filter(m=>m.cat!=='공지').map(m=>m.cat))))];
+  const pipCats = ['🕐 최근', '전체보기', ...sortCats(Array.from(new Set(MAPS.filter(m=>m.cat!=='공지').map(m=>m.cat))))];
 
   function pipApplyZoom(){
     const target = doc.getElementById(pipIsMulti ? 'pip-multi-wrap' : 'pip-img');
@@ -717,14 +722,16 @@ async function openPip(){
   function pipGetCurrentItems(){
     const q = doc.getElementById('pip-search').value.trim();
     if(q) return searchMaps(q);
+    if(pipCurrentCat==='🕐 최근') return getRecentMaps();
     return pipCurrentCat==='전체보기' ? MAPS : MAPS.filter(m=>m.cat===pipCurrentCat);
   }
   function pipRenderList(){
     const q = doc.getElementById('pip-search').value.trim();
     const items = pipGetCurrentItems();
+    const emptyMsg = (!q && pipCurrentCat==='🕐 최근') ? '아직 본 지도가 없어요' : '🔍 결과가 없어요';
     doc.getElementById('pip-list-view').innerHTML = items.length
       ? items.map(m=>`<div class="pip-list-item" data-id="${m.id}"><span>${m.title}</span>${q?`<span class="pip-list-item-cat">${m.cat}</span>`:''}</div>`).join('')
-      : `<div class="pip-empty">🔍 결과가 없어요</div>`;
+      : `<div class="pip-empty">${emptyMsg}</div>`;
   }
   function pipShowList(){
     doc.getElementById('pip-list-view').style.display = 'block';
@@ -734,6 +741,7 @@ async function openPip(){
   function pipShowMap(id){
     const m = MAPS.find(x=>x.id===id); if(!m) return;
     pipCurrentId = id;
+    pushRecentId(id);
     pipZoom = 1; pipPanX = 0; pipPanY = 0;
     doc.getElementById('pip-list-view').style.display = 'none';
     doc.getElementById('pip-image-view').style.display = 'flex';
@@ -775,6 +783,18 @@ async function openPip(){
   });
   doc.getElementById('pip-list-btn').addEventListener('click', pipShowList);
   doc.getElementById('pip-search').addEventListener('input', pipShowList);
+
+  /* ◀ ▶ 화살표 키로 현재 목록(카테고리/검색결과) 안에서 이전/다음 지도로 바로 이동 */
+  doc.addEventListener('keydown', e=>{
+    if(doc.activeElement === doc.getElementById('pip-search')) return; // 검색창 타이핑 중엔 무시
+    if(doc.getElementById('pip-image-view').style.display !== 'flex') return; // 이미지 보는 중에만 동작
+    if(e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+    const items = pipGetCurrentItems();
+    const idx = items.findIndex(m => m.id === pipCurrentId);
+    if(idx === -1) return;
+    const nextIdx = e.key === 'ArrowRight' ? idx+1 : idx-1;
+    if(nextIdx >= 0 && nextIdx < items.length) pipShowMap(items[nextIdx].id);
+  });
 
   pipRenderCatBar();
   pipShowList();
