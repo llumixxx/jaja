@@ -6,6 +6,7 @@
 const SA_NAV_ITEMS = [
   { href: "index.html",   icon: "🎲", label: "계산기" },
   { href: "pokedex.html", icon: "🐾", label: "도감" },
+  { href: "item.html", icon: "🗡️", label: "아이템도감" },
   { href: "simulator.html", icon: "🎰", label: "시뮬레이터" },
   { href: "quiz.html", icon: "🧠", label: "퀴즈마스터" },
   { href: "maps.html", icon: "🗺️", label: "지도정보" },
