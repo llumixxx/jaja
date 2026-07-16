@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>쟈쟈서버 아이템도감</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f2f7fd; --bg2:#e8f2fc; --white:#ffffff;
+  --s1:#f0f7fd; --s2:#e3f0fb;
+  --border:#dbe9f7; --border2:#bcd8f2;
+  --a1:#2f7fd6; --a2:#22b6c9; --a3:#5aa8ea; --a4:#f5a623; --a5:#6fd0a0;
+  --t1:#12253f; --t2:#4c6a8c; --t3:#8ea6c2; --t4:#c7dcf0;
+  --ok:#3d9e6e; --err:#e05a5a; --pos:#2f7fd6; --neg:#e05a5a;
+  --shadow:0 4px 24px rgba(47,127,214,0.12);
+  --shadow2:0 8px 32px rgba(47,127,214,0.18);
+}
+[data-theme="dark"] {
+  --bg:#0a1420; --bg2:#0f1e30; --white:#132335;
+  --s1:#16283c; --s2:#1c3149;
+  --border:#233c56; --border2:#2c4a68;
+  --t1:#e6f0fb; --t2:#a9c2dc; --t3:#7391b0; --t4:#4a637d;
+  --pos:#5aa8ea; --neg:#f08a8a;
+  --shadow:0 4px 24px rgba(0,0,0,0.4);
+  --shadow2:0 8px 32px rgba(0,0,0,0.5);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--t1);min-height:100vh;
+  background-image:radial-gradient(circle at 12% 8%, rgba(47,127,214,0.08) 0%, transparent 50%),
+    radial-gradient(circle at 88% 90%, rgba(34,182,201,0.07) 0%, transparent 50%);}
+
+/* ===== 사이드바 ===== */
+.sidebar{width:300px;height:100vh;background:var(--white);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;position:fixed;left:-300px;top:0;z-index:200;
+  transition:left .32s cubic-bezier(.4,0,.2,1);box-shadow:4px 0 24px rgba(47,127,214,0.08);}
+.sidebar.open{left:0;}
+.sb-head{padding:20px 16px 15px;border-bottom:1px solid var(--border);}
+.sb-logo{display:flex;align-items:center;gap:8px;font-family:'Nunito',sans-serif;font-weight:900;
+  font-size:16px;color:var(--a1);margin-bottom:4px;}
+.sb-logo-dot{width:8px;height:8px;background:var(--a2);border-radius:50%;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(2)}}
+.sb-sub{font-size:10.5px;color:var(--t3);font-family:'Nunito',sans-serif;font-weight:700;letter-spacing:.5px;}
+.sb-nav{padding:11px 14px;border-bottom:1px solid var(--border);}
+.sb-nav-toggle{width:100%;display:flex;align-items:center;gap:10px;padding:11px 13px;border-radius:12px;
+  font-size:13px;font-weight:800;color:var(--t1);background:var(--s1);border:none;
+  cursor:pointer;font-family:inherit;transition:background .18s;}
+.sb-nav-toggle:hover{background:var(--s2);}
+.sb-nav-toggle-label{flex:1;text-align:left;}
+.sb-nav-toggle-chevron{color:var(--t3);font-size:11px;transition:transform .3s cubic-bezier(.4,0,.2,1);}
+.sb-nav-toggle.open .sb-nav-toggle-chevron{transform:rotate(180deg);}
+.sb-nav-list{max-height:0;overflow:hidden;transition:max-height .4s cubic-bezier(.33,1,.68,1);
+  display:flex;flex-direction:column;gap:2px;perspective:700px;}
+.sb-nav-list.open{max-height:520px;margin-top:5px;padding-top:2px;}
+.sb-nav-list a{display:flex;align-items:center;gap:10px;text-decoration:none;padding:10px 13px;border-radius:10px;
+  font-size:12.5px;font-weight:700;color:var(--t2);background:transparent;border:none;
+  opacity:0;transform:rotateX(-82deg);transform-origin:center top;
+  transition:opacity .26s ease,transform .5s cubic-bezier(.34,1.32,.5,1),background .16s ease,color .16s ease;}
+.sb-nav-list.open a{opacity:1;transform:rotateX(0);}
+.sb-nav-list.open a:nth-child(1){transition-delay:.02s;}
+.sb-nav-list.open a:nth-child(2){transition-delay:.07s;}
+.sb-nav-list.open a:nth-child(3){transition-delay:.12s;}
+.sb-nav-list.open a:nth-child(4){transition-delay:.17s;}
+.sb-nav-list.open a:nth-child(5){transition-delay:.22s;}
+.sb-nav-list.open a:nth-child(6){transition-delay:.27s;}
+.sb-nav-list.open a:nth-child(7){transition-delay:.32s;}
+.sb-nav-list.open a:nth-child(8){transition-delay:.37s;}
+.sb-nav-list a:hover{background:var(--s1);color:var(--a1);}
+.sb-nav-list a.on{background:rgba(47,127,214,.12);color:var(--a1);font-weight:800;}
+[data-theme="dark"] .sb-nav-list a.on{background:rgba(90,168,234,.16);}
+@media(prefers-reduced-motion:reduce){
+  .sb-nav-list a{transition:background .16s ease,color .16s ease;transform:none;opacity:1;}
+  .sb-nav-list.open a{transition-delay:0s;}
+}
+
+.sb-body{padding:16px 16px 16px;flex:1;overflow-y:auto;min-height:0;}
+.sb-body::-webkit-scrollbar{width:4px;} .sb-body::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px;}
+.f-group{margin-bottom:18px;}
+.f-group:last-child{margin-bottom:0;}
+.f-section{font-size:10px;letter-spacing:1.2px;color:var(--t3);text-transform:uppercase;margin:0 0 8px 2px;
+  font-family:'Nunito',sans-serif;font-weight:800;}
+.f-input,.f-select{width:100%;padding:10px 13px;background:var(--s1);border:1px solid var(--border);
+  border-radius:11px;font-family:inherit;font-size:16px;color:var(--t1);outline:none;transition:border-color .15s,background .15s;}
+.f-input::placeholder{color:var(--t3);}
+.f-input:focus,.f-select:focus{border-color:var(--a1);background:var(--white);}
+.f-chip-wrap{display:flex;flex-wrap:wrap;gap:6px;}
+.f-chip{background:var(--white);border:1px solid var(--border);color:var(--t2);padding:6px 11px;
+  border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;transition:border-color .15s,color .15s,background .15s;}
+.f-chip:hover{border-color:var(--a3);color:var(--a1);}
+.f-chip.is-on{background:var(--a1);border-color:var(--a1);color:#fff;}
+.f-chip .cnt{font-family:'Nunito',sans-serif;font-weight:800;opacity:.65;margin-left:4px;font-size:10.5px;}
+.f-subwrap{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;padding:11px;background:var(--s1);border-radius:11px;}
+.f-subchip{background:var(--white);border:1px solid var(--border);color:var(--t2);padding:5px 10px;
+  border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:4px;
+  transition:border-color .15s,color .15s,background .15s;}
+.f-subchip:hover{border-color:var(--a3);color:var(--a1);}
+.f-subchip.is-on{background:var(--catcolor,var(--a1));border-color:transparent;color:#fff;}
+.f-subchip .cnt{font-family:'Nunito',sans-serif;font-weight:800;opacity:.65;font-size:10px;}
+.f-seg{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.f-seg3{grid-template-columns:1fr 1fr 1fr;}
+.f-seg button{background:var(--white);border:1px solid var(--border);color:var(--t2);padding:9px 4px;
+  border-radius:11px;font-size:12px;cursor:pointer;font-weight:700;font-family:inherit;transition:border-color .15s,color .15s,background .15s;}
+.f-seg button:hover{border-color:var(--a3);color:var(--a1);}
+.f-seg button.active{background:var(--a1);color:#fff;border-color:var(--a1);}
+
+.sb-footer{padding:12px 16px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+.sb-footer-txt{font-size:10.5px;color:var(--t3);}
+.dark-toggle{width:34px;height:34px;border-radius:10px;border:1px solid var(--border);background:var(--s1);
+  cursor:pointer;font-size:14px;transition:border-color .15s,background .15s;}
+.dark-toggle:hover{border-color:var(--a3);background:var(--white);}
+[data-theme="dark"] .toggle-moon{display:inline;} [data-theme="dark"] .toggle-sun{display:none !important;}
+[data-theme="light"] .toggle-moon{display:none !important;} [data-theme="light"] .toggle-sun{display:inline;}
+
+.toggle-btn{position:fixed;top:16px;left:16px;z-index:300;width:42px;height:42px;background:var(--white);
+  border:1.5px solid var(--border);border-radius:13px;cursor:pointer;font-size:17px;color:var(--t2);
+  box-shadow:var(--shadow);transition:left .32s cubic-bezier(.4,0,.2,1),border-color .15s,transform .15s;}
+.toggle-btn:hover{border-color:var(--a1);box-shadow:var(--shadow2);transform:scale(1.05);}
+.toggle-btn.sb-open{left:314px;}
+@media(max-width:820px){ .toggle-btn.sb-open{left:auto;right:16px;} .main.shifted{margin-left:0;} }
+.sb-backdrop{position:fixed;inset:0;background:rgba(18,37,63,.35);z-index:150;opacity:0;pointer-events:none;transition:opacity .3s;}
+.sb-backdrop.show{opacity:1;pointer-events:auto;}
+
+/* ===== 메인 ===== */
+.main{flex:1;min-height:100vh;transition:margin-left .32s cubic-bezier(.4,0,.2,1);}
+.main.shifted{margin-left:300px;}
+.main-inner{max-width:1240px;margin:0 auto;padding:74px 26px 90px;}
+.page-head{text-align:center;padding:8px 0 30px;}
+.wind-badge{display:inline-flex;align-items:center;gap:7px;background:var(--white);border:1px solid var(--border2);
+  border-radius:20px;padding:6px 15px;font-size:10.5px;font-weight:800;color:var(--a1);
+  font-family:'Nunito',sans-serif;letter-spacing:.6px;margin-bottom:15px;box-shadow:0 2px 12px rgba(47,127,214,.08);}
+.wind-badge-dot{width:6px;height:6px;background:var(--a2);border-radius:50%;animation:pulse 2s infinite;}
+.page-title{font-size:40px;font-weight:900;letter-spacing:-1.4px;line-height:1.05;color:var(--a1);
+  background:linear-gradient(115deg,var(--a1),var(--a2) 55%,var(--a3));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+.page-sub{font-size:13px;color:var(--t3);margin-top:9px;font-weight:600;}
+.stats-row{display:flex;gap:10px;justify-content:center;margin-bottom:26px;flex-wrap:wrap;}
+.stat-chip{display:inline-flex;align-items:baseline;gap:5px;font-size:11.5px;color:var(--t3);
+  font-family:'Nunito',sans-serif;font-weight:700;background:var(--white);border:1px solid var(--border);
+  padding:7px 14px;border-radius:12px;box-shadow:0 1px 4px rgba(47,127,214,.05);}
+.stat-chip b{color:var(--a1);font-size:15px;font-weight:900;}
+
+@keyframes cardIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+#grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(262px,1fr));gap:16px;}
+.item-card{background:var(--white);border:1px solid var(--border);border-radius:18px;padding:18px 19px 16px;
+  cursor:pointer;position:relative;overflow:hidden;box-shadow:0 1px 3px rgba(47,127,214,0.05);
+  display:flex;flex-direction:column;
+  transition:box-shadow .28s cubic-bezier(.22,1,.36,1),transform .28s cubic-bezier(.22,1,.36,1),border-color .25s;
+  animation:cardIn .5s cubic-bezier(.22,1,.36,1) both;animation-delay:calc(min(var(--i,0),16) * 34ms);}
+.item-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--cc);
+  transform:scaleY(.7);transform-origin:center;transition:transform .28s cubic-bezier(.22,1,.36,1);}
+.item-card:hover{transform:translateY(-6px);border-color:var(--border2);box-shadow:0 16px 34px rgba(47,127,214,.16);
+  border-color:color-mix(in srgb,var(--cc) 42%,var(--border));box-shadow:0 16px 34px color-mix(in srgb,var(--cc) 20%,transparent);}
+.item-card:hover::before{transform:scaleY(1);}
+.item-card:active{transform:translateY(-2px);}
+.ic-top{display:flex;gap:13px;align-items:center;margin-bottom:15px;}
+.ic-img{width:54px;height:54px;flex-shrink:0;border-radius:14px;overflow:hidden;
+  background:linear-gradient(145deg,var(--s1),var(--s2));display:flex;align-items:center;justify-content:center;
+  box-shadow:inset 0 0 0 1px var(--border);}
+.ic-img img{width:82%;height:82%;object-fit:contain;image-rendering:pixelated;transition:transform .3s cubic-bezier(.22,1,.36,1);}
+.item-card:hover .ic-img img{transform:scale(1.13);}
+.ic-head{min-width:0;flex:1;}
+.ic-name{font-size:15.5px;font-weight:800;color:var(--t1);line-height:1.28;word-break:break-all;margin-bottom:4px;}
+.ic-type-row{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.ic-type{font-size:11.5px;color:var(--t3);font-weight:700;letter-spacing:.2px;}
+.ic-total{flex-shrink:0;display:inline-flex;align-items:baseline;gap:5px;font-family:'Nunito',sans-serif;}
+.ic-total .l{font-size:10px;color:var(--t3);font-weight:700;}
+.ic-total b{font-size:18px;font-weight:900;letter-spacing:-.5px;}
+.ic-total b.pos{color:var(--a1);} .ic-total b.neg{color:var(--neg);} .ic-total b.zero{color:var(--t3);}
+.ic-stats{display:flex;flex-wrap:wrap;gap:9px 18px;padding:13px 0;
+  border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin-bottom:13px;}
+.ic-stats .st{display:inline-flex;align-items:baseline;gap:6px;font-family:'Nunito',sans-serif;}
+.ic-stats .st i{font-style:normal;font-size:11px;color:var(--t3);font-weight:700;}
+.ic-stats .st b{font-size:15.5px;font-weight:800;letter-spacing:-.3px;}
+.ic-stats .st b.pos{color:var(--t1);} .ic-stats .st b.neg{color:var(--neg);} .ic-stats .st b.zero{color:var(--t4);}
+.ic-desc{font-size:12px;color:var(--t2);background:var(--s1);border-radius:10px;padding:10px 12px;margin-bottom:13px;line-height:1.55;}
+.ic-meta{display:flex;flex-wrap:wrap;gap:6px 12px;margin-bottom:11px;}
+.ic-meta .m{font-size:11px;font-weight:700;display:inline-flex;align-items:center;gap:4px;}
+.ic-meta .m.hit{color:var(--t2);} .ic-meta .m.set{color:var(--a4);} .ic-meta .m.magic{color:var(--a2);}
+.ic-route{font-size:11px;color:var(--t3);line-height:1.5;overflow:hidden;margin-top:auto;padding-top:2px;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
+@media(prefers-reduced-motion:reduce){ .item-card{animation:none;} }
+
+/* ===== 3D 덱(커버플로우) — 풀 상세가 흘러감 ===== */
+.deck{position:relative;height:600px;margin-top:8px;perspective:1900px;
+  display:flex;align-items:center;justify-content:center;overflow:hidden;user-select:none;}
+.deck-stage{position:relative;width:100%;height:100%;transform-style:preserve-3d;touch-action:pan-y;}
+.deck-card{position:absolute;left:50%;top:50%;width:360px;height:540px;margin-left:-180px;margin-top:-270px;
+  transition:transform .55s cubic-bezier(.25,1,.4,1),opacity .45s ease;
+  will-change:transform,opacity;}
+.dcard{width:100%;height:100%;background:var(--white);border:1px solid var(--border);border-radius:22px;
+  overflow:hidden;display:flex;flex-direction:column;box-shadow:0 6px 20px rgba(47,127,214,.1);}
+.deck-card.is-center .dcard{box-shadow:0 24px 55px rgba(47,127,214,.28);border-color:var(--border2);}
+[data-theme="dark"] .deck-card.is-center .dcard{box-shadow:0 24px 60px rgba(0,0,0,.6);}
+.deck-card:not(.is-center) .dcard{filter:saturate(.94);}
+.deck-card:not(.is-center){cursor:pointer;}
+.dcard .modal-hero{border-radius:22px 22px 0 0;padding:22px 22px 18px;flex-shrink:0;}
+.dcard .modal-body{padding:18px 22px 22px;overflow-y:auto;flex:1;}
+.dcard .modal-body::-webkit-scrollbar{width:4px;} .dcard .modal-body::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px;}
+.dcard .modal-name{font-size:19px;}
+.deck-nav{position:absolute;top:50%;transform:translateY(-50%);z-index:200;width:46px;height:46px;border-radius:50%;
+  background:var(--white);border:1px solid var(--border);color:var(--a1);font-size:22px;line-height:1;cursor:pointer;
+  box-shadow:0 6px 20px rgba(47,127,214,.18);display:flex;align-items:center;justify-content:center;
+  transition:transform .18s cubic-bezier(.34,1.56,.64,1),background .18s,color .18s;padding-bottom:2px;}
+.deck-nav:hover{background:var(--a1);color:#fff;transform:translateY(-50%) scale(1.1);}
+.deck-nav:active{transform:translateY(-50%) scale(.94);}
+.deck-nav.prev{left:8px;} .deck-nav.next{right:8px;}
+.deck-count{position:absolute;bottom:32px;left:50%;transform:translateX(-50%);z-index:200;
+  font-family:'Nunito',sans-serif;font-weight:900;font-size:13px;color:var(--t2);
+  background:var(--white);border:1px solid var(--border);border-radius:20px;padding:5px 16px;box-shadow:0 2px 10px rgba(47,127,214,.1);}
+.deck-count b{color:var(--a1);}
+.deck-hint{position:absolute;bottom:4px;left:50%;transform:translateX(-50%);z-index:200;
+  font-size:10.5px;color:var(--t3);white-space:nowrap;}
+@media(max-width:640px){
+  .deck{height:560px;perspective:1300px;}
+  .deck-card{width:290px;height:500px;margin-left:-145px;margin-top:-250px;}
+  .dcard .modal-name{font-size:17px;}
+  .deck-hint{display:none;}
+}
+
+/* 텍스트형 */
+#grid.text-view{display:block;}
+.item-table{width:100%;border-collapse:separate;border-spacing:0;background:var(--white);
+  border:1.5px solid var(--border);border-radius:16px;box-shadow:0 4px 16px rgba(47,127,214,0.06);}
+.item-table thead tr{background:var(--s1);}
+.item-table th{padding:11px 12px;text-align:left;font-size:12.5px;font-weight:800;color:var(--t2);
+  border-bottom:1.5px solid var(--border);white-space:nowrap;background:var(--s1);
+  position:sticky;top:0;z-index:3;}
+.item-table th.grp{text-align:center;font-size:9.5px;letter-spacing:2px;color:var(--t3);
+  text-transform:uppercase;font-family:'Nunito',sans-serif;font-weight:800;padding:8px 12px 5px;border-bottom:1px solid var(--border);}
+.item-table th.sub{padding:5px 12px 9px;font-size:12px;top:var(--h1,33px);z-index:2;}
+.item-table th.grp.sp{background:linear-gradient(rgba(34,182,201,.13),rgba(34,182,201,.13)),var(--s1);color:var(--a2);}
+.item-table th.sub.sp{background:linear-gradient(rgba(34,182,201,.07),rgba(34,182,201,.07)),var(--s1);}
+.item-table td.sp{background:rgba(34,182,201,.055);}
+[data-theme="dark"] .item-table td.sp{background:rgba(34,182,201,.1);}
+.item-table td{padding:11px 12px;font-size:14px;border-bottom:1px solid var(--border);vertical-align:middle;}
+.item-table tbody tr{cursor:pointer;transition:background .15s;}
+.item-table tbody tr:hover{background:var(--s1);}
+.item-table tbody tr:last-child td{border-bottom:none;}
+.it-name{font-size:14.5px;font-weight:800;color:var(--t1);}
+.it-cat{font-size:11px;font-weight:800;padding:2px 8px;border-radius:8px;color:#fff;white-space:nowrap;}
+.it-route{font-size:12px;color:var(--t3);margin-top:2px;max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.it-stat{font-family:'Nunito',sans-serif;font-weight:900;font-size:14px;text-align:right;white-space:nowrap;}
+.it-stat.pos{color:var(--pos);} .it-stat.neg{color:var(--neg);} .it-stat.zero{color:var(--t4);}
+.it-total{font-family:'Nunito',sans-serif;font-weight:900;font-size:15px;text-align:right;white-space:nowrap;}
+.it-total.pos{color:var(--a1);} .it-total.neg{color:var(--neg);} .it-total.zero{color:var(--t4);}
+.item-table th.r,.item-table td.r{text-align:right;}
+@media(max-width:900px){ .item-table{display:block;overflow-x:auto;} }
+
+#empty{text-align:center;padding:60px 20px;color:var(--t3);display:none;}
+#empty .glyph{font-size:34px;margin-bottom:10px;opacity:.4;}
+#loadmore{display:block;margin:24px auto 0;background:var(--white);border:1.5px solid var(--a1);
+  color:var(--a1);padding:11px 28px;border-radius:20px;font-size:13px;font-weight:800;cursor:pointer;
+  font-family:'Nunito',sans-serif;transition:transform .2s cubic-bezier(.34,1.56,.64,1),background .2s ease,color .2s ease;}
+#loadmore:hover{background:linear-gradient(135deg,var(--a1),var(--a2));color:#fff;border-color:transparent;transform:translateY(-2px) scale(1.03);}
+#loadmore:active{transform:scale(.95);}
+
+@keyframes slideUp{from{opacity:0;transform:translateY(24px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+#item-modal{position:fixed;inset:0;background:rgba(18,37,63,0.45);backdrop-filter:blur(4px);
+  display:none;align-items:center;justify-content:center;z-index:2000;padding:20px;}
+#item-modal.open{display:flex;}
+.modal-card{background:var(--white);border-radius:24px;box-shadow:0 20px 60px rgba(47,127,214,0.25);
+  width:100%;max-width:460px;max-height:90vh;overflow-y:auto;animation:slideUp .3s cubic-bezier(.34,1.56,.64,1);position:relative;}
+.modal-card::-webkit-scrollbar{width:4px;} .modal-card::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px;}
+.modal-close{position:absolute;top:14px;right:14px;width:32px;height:32px;border-radius:50%;
+  background:var(--s2);border:none;cursor:pointer;font-size:14px;color:var(--t2);transition:all .15s;
+  display:flex;align-items:center;justify-content:center;z-index:2;}
+.modal-close:hover{background:var(--err);color:#fff;}
+.modal-hero{background:linear-gradient(135deg,var(--s1),var(--s2));border-radius:24px 24px 0 0;
+  padding:26px 24px 20px;display:flex;align-items:center;gap:18px;border-bottom:1.5px solid var(--border);}
+.modal-img-box{width:84px;height:84px;flex-shrink:0;background:var(--white);border:2px solid var(--border2);
+  border-radius:18px;display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 16px rgba(47,127,214,0.15);overflow:hidden;}
+.modal-img-box img{width:78%;height:78%;object-fit:contain;image-rendering:pixelated;}
+.modal-hero-info{flex:1;min-width:0;}
+.modal-name{font-size:21px;font-weight:900;color:var(--t1);margin-bottom:7px;line-height:1.2;word-break:break-all;}
+.modal-badges{display:flex;gap:5px;flex-wrap:wrap;}
+.modal-badge{font-size:10px;font-weight:800;padding:3px 10px;border-radius:20px;color:#fff;}
+.modal-badge.set{color:var(--a4);background:rgba(245,166,35,.14);border:1px solid rgba(245,166,35,.35);}
+.modal-body{padding:20px 24px 24px;}
+.modal-section{margin-bottom:16px;}
+.modal-section:last-child{margin-bottom:0;}
+.modal-section-title{font-size:9px;letter-spacing:2px;color:var(--t3);text-transform:uppercase;
+  font-family:'Nunito',sans-serif;font-weight:800;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.modal-section-title::before{content:'';display:block;width:3px;height:12px;
+  background:linear-gradient(135deg,var(--a1),var(--a2));border-radius:2px;}
+.modal-obtain{font-size:13px;color:var(--t2);line-height:1.6;background:var(--s1);
+  border:1.5px solid var(--border);border-radius:10px;padding:10px 14px;word-break:break-all;}
+.modal-stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;}
+.modal-stat-box{background:var(--s1);border:1.5px solid var(--border);border-radius:12px;
+  padding:9px 13px;display:flex;flex-direction:column;gap:2px;}
+.modal-stat-label{font-size:9px;letter-spacing:1px;color:var(--t3);font-family:'Nunito',sans-serif;
+  font-weight:700;text-transform:uppercase;}
+.modal-stat-val{font-size:17px;font-weight:900;font-family:'Nunito',sans-serif;color:var(--t1);}
+.modal-stat-val.pos{color:var(--pos);} .modal-stat-val.neg{color:var(--neg);}
+.modal-total{margin-top:10px;padding:11px 15px;background:linear-gradient(135deg,var(--s2),var(--s1));
+  border:1.5px solid var(--border2);border-radius:12px;display:flex;align-items:center;justify-content:space-between;}
+.modal-total .l{font-size:11px;font-weight:800;color:var(--t2);}
+.modal-total .v{font-size:20px;font-weight:900;font-family:'Nunito',sans-serif;}
+.modal-total .v.pos{color:var(--a1);} .modal-total .v.neg{color:var(--neg);} .modal-total .v.zero{color:var(--t3);}
+.modal-desc{font-size:13px;color:var(--t2);line-height:1.6;background:var(--s1);border:1.5px solid var(--border);
+  border-radius:10px;padding:10px 14px;}
+.modal-magic{display:flex;gap:10px;flex-wrap:wrap;}
+.modal-magic-box{flex:1;min-width:120px;background:linear-gradient(135deg,var(--s2),var(--s1));
+  border:1.5px solid var(--border2);border-radius:12px;padding:10px 14px;display:flex;flex-direction:column;gap:3px;}
+.modal-magic-box .l{font-size:9px;letter-spacing:1px;color:var(--t3);font-weight:800;font-family:'Nunito',sans-serif;text-transform:uppercase;}
+.modal-magic-box .v{font-size:14px;font-weight:900;color:var(--a2);}
+
+footer{text-align:center;padding:30px;color:var(--t3);font-size:11px;font-family:'Nunito',sans-serif;}
+@media(max-width:640px){
+  .page-title{font-size:30px;letter-spacing:-1px;}
+  #grid{grid-template-columns:1fr;gap:13px;}
+  .main-inner{padding:66px 16px 70px;}
+  .item-card{padding:16px 17px 15px;}
+}
+@media(min-width:641px) and (max-width:900px){
+  #grid{grid-template-columns:repeat(2,1fr);}
+}
+</style>
+</head>
+<body>
+
+<button class="toggle-btn" id="toggleBtn">☰</button>
+<div class="sb-backdrop" id="sbBackdrop"></div>
+
+<div class="sidebar" id="sidebar">
+  <div class="sb-head">
+    <div class="sb-logo"><span class="sb-logo-dot"></span>SA 쟈쟈</div>
+    <div class="sb-sub">JYAJYA SERVER TOOLS</div>
+  </div>
+  <div class="sb-nav" id="sbNav"></div>
+  <div class="sb-body">
+    <div class="f-group">
+      <div class="f-section">검색</div>
+      <input type="text" id="search" class="f-input" placeholder="아이템 이름 / 설명 검색..." />
+    </div>
+
+    <div class="f-group">
+      <div class="f-section">분류</div>
+      <div class="f-chip-wrap" id="catFilter"></div>
+      <div class="f-subwrap" id="subFilter" style="display:none;"></div>
+    </div>
+
+    <div class="f-group">
+      <div class="f-section">정렬</div>
+      <select id="sortSel" class="f-select">
+        <option value="default">기본정렬</option>
+        <option value="total">공방순내 합계 높은순 (내÷3)</option>
+        <option value="atk">공격 높은순</option>
+        <option value="def">방어 높은순</option>
+        <option value="dex">순발 높은순</option>
+        <option value="hp">내구 높은순</option>
+        <option value="crit">크리 높은순</option>
+        <option value="eva">회피 높은순</option>
+        <option value="hit">명중 높은순</option>
+        <option value="name">이름순</option>
+      </select>
+    </div>
+
+    <div class="f-group">
+      <div class="f-section">주술</div>
+      <select id="magicSel" class="f-select"></select>
+    </div>
+
+    <div class="f-group">
+      <div class="f-section">보기 방식</div>
+      <div class="f-seg f-seg3" id="viewSeg">
+        <button data-v="card" class="active">🗂 카드</button>
+        <button data-v="text">📝 목록</button>
+        <button data-v="deck">🎴 덱</button>
+      </div>
+    </div>
+  </div>
+  <div class="sb-footer">
+    <span class="sb-footer-txt" id="loadStatus">로딩중...</span>
+    <button class="dark-toggle" onclick="toggleDark()"><span class="toggle-moon">🌙</span><span class="toggle-sun">☀️</span></button>
+  </div>
+</div>
+
+<div class="main" id="main">
+  <div class="main-inner">
+    <div class="page-head">
+      <div class="wind-badge"><span class="wind-badge-dot"></span><span>SA JYAJYA SERVER</span></div>
+      <div class="page-title">쟈쟈서버 아이템도감</div>
+      <div class="page-sub">무기 · 방어구 · 장신구 옵션 한눈에 보기</div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-chip"><b id="statTotal">-</b>전체 아이템</div>
+      <div class="stat-chip"><b id="statShown">-</b>표시중</div>
+      <div class="stat-chip"><b id="statCat">전체</b>분류</div>
+    </div>
+
+    <div id="grid"></div>
+    <div id="deck" class="deck" style="display:none;">
+      <button class="deck-nav prev" id="deckPrev" aria-label="이전">‹</button>
+      <div class="deck-stage" id="deckStage"></div>
+      <button class="deck-nav next" id="deckNext" aria-label="다음">›</button>
+      <div class="deck-count" id="deckCount"></div>
+      <div class="deck-hint">드래그 · 화살표 · 좌우 카드 클릭으로 넘기기</div>
+    </div>
+    <div id="empty"><div class="glyph">◇</div>검색 결과가 없습니다.</div>
+    <button id="loadmore" style="display:none;">더 보기</button>
+  </div>
+  <footer>쟈쟈서버 편의기능 made by 야채부락리 애호박</footer>
+</div>
+
+<div id="item-modal">
+  <div class="modal-card">
+    <button class="modal-close" id="modalClose">✕</button>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<script src="nav.js"></script>
+<script>
+/* ===== 데이터 소스 ===== */
+var DATA_FILE  = "https://sa000001.com/sa2/info/data/itemset6.txt";
+var MAGIC_FILE = "https://sa000001.com/sa2/info/data/magic.txt";
+var ICON_BASE  = "https://sa000001.com/sa2/info/img/item/";
+var ICON_DEFAULT = "https://sa000001.com/sa2/info/img/item/default.png";
+
+/* SEED: 페이지 로딩 즉시 표시용(빌드 시점 스냅샷). 로딩 후 서버 최신 데이터로 자동 교체 시도. */
+var SEED = [{"o":0,"name":"바람의 창","id":"89500","gfx":"50017","route":"상인의 장터 (패키지 상점) <바람 패키지상자>","desc":"공-30 순+30 크+5","part":3,"cat":"무기","setEff":"","minHit":"0","maxHit":"0","minAtk":"-30","maxAtk":"-30","minDef":"0","maxDef":"0","minDex":"30","maxDex":"30","minHP":"0","maxHP":"0","minCrit":"5","maxCrit":"5","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":1,"name":"바람의 갑옷","id":"89501","gfx":"50018","route":"상인의 장터 (패키지 상점) <바람 패키지상자>","desc":"공-30 방+10 순+30","part":7,"cat":"방어구","setEff":"","minHit":"0","maxHit":"0","minAtk":"-30","maxAtk":"-30","minDef":"10","maxDef":"10","minDex":"30","maxDex":"30","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":2,"name":"바람의 투구","id":"89502","gfx":"50019","route":"상인의 장터 (패키지 상점) <바람 패키지상자>","desc":"공-20 방+10 순+20","part":6,"cat":"방어구","setEff":"","minHit":"0","maxHit":"0","minAtk":"-20","maxAtk":"-20","minDef":"10","maxDef":"10","minDex":"20","maxDex":"20","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":3,"name":"바람 패키지상자","id":"88434","gfx":"51458","route":"상인의 장터 (패키지 상점)","desc":"바람의 창，바람의 갑옷，바람의 투구가 들어있는 패키지상자","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":4,"name":"헤티아의 암흑 창","id":"88430","gfx":"36096","route":"정령의 마을 - 천공의 대장장이(50%)","desc":"미확인","part":3,"cat":"무기","setEff":"","minHit":"0","maxHit":"0","minAtk":"52","maxAtk":"60","minDef":"0","maxDef":"0","minDex":"-12","maxDex":"-9","minHP":"0","maxHP":"0","minCrit":"5","maxCrit":"5","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"은혜의 정령 Lv5","stamina":"25"},{"o":5,"name":"카루의 투구","id":"89130","gfx":"36080","route":"기억하는자 제작 (바커 발톱+땅의 돌)","desc":"미확인","part":6,"cat":"방어구","setEff":"세트효과 방+20","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"20","maxDef":"35","minDex":"-19","maxDex":"-12","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"-"},{"o":6,"name":"카루의 갑옷","id":"89131","gfx":"36081","route":"기억하는자 제작 (바커 발톱+땅의 돌)","desc":"미확인","part":7,"cat":"방어구","setEff":"세트효과 방+20","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"32","maxDef":"40","minDex":"-22","maxDex":"-18","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":7,"name":"요루의 투구","id":"89132","gfx":"36082","route":"기억하는자 제작 (바커 발톱+물의 돌)","desc":"미확인","part":6,"cat":"방어구","setEff":"세트효과 내+60","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"20","maxDef":"35","minDex":"-21","maxDex":"-18","minHP":"6","maxHP":"18","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"-"},{"o":8,"name":"요루의 갑옷","id":"89133","gfx":"36083","route":"기억하는자 제작 (바커 발톱+물의 돌)","desc":"미확인","part":7,"cat":"방어구","setEff":"세트효과 내+60","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"29","maxDef":"33","minDex":"-22","maxDex":"-20","minHP":"9","maxHP":"27","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":9,"name":"이루의 투구","id":"89134","gfx":"36084","route":"기억하는자 제작 (바커 발톱+불의 돌)","desc":"미확인","part":6,"cat":"방어구","setEff":"세트효과 공+20","minHit":"0","maxHit":"0","minAtk":"5","maxAtk":"8","minDef":"25","maxDef":"38","minDex":"-29","maxDex":"-23","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"-"},{"o":10,"name":"이루의 갑옷","id":"89135","gfx":"36085","route":"기억하는자 제작 (바커 발톱+불의 돌)","desc":"미확인","part":7,"cat":"방어구","setEff":"세트효과 공+20","minHit":"0","maxHit":"0","minAtk":"8","maxAtk":"10","minDef":"30","maxDef":"37","minDex":"-28","maxDex":"-25","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":11,"name":"그루의 투구","id":"89136","gfx":"36086","route":"기억하는자 제작 (바커 발톱+바람의 돌)","desc":"미확인","part":6,"cat":"방어구","setEff":"세트효과 순+20","minHit":"0","maxHit":"0","minAtk":"-35","maxAtk":"-30","minDef":"22","maxDef":"36","minDex":"14","maxDex":"17","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"-"},{"o":12,"name":"그루의 갑옷","id":"89137","gfx":"36087","route":"기억하는자 제작 (바커 발톱+바람의 돌)","desc":"미확인","part":7,"cat":"방어구","setEff":"세트효과 순+20","minHit":"0","maxHit":"0","minAtk":"-35","maxAtk":"-30","minDef":"29","maxDef":"34","minDex":"16","maxDex":"18","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":13,"name":"테라시온의 곤봉","id":"89138","gfx":"36088","route":"[일일레이드] 테라시온의 보상","desc":"미확인","part":2,"cat":"무기","setEff":"세트효과 방+20","minHit":"1","maxHit":"1","minAtk":"32","maxAtk":"50","minDef":"3","maxDef":"5","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"3","maxCrit":"3","minEva":"2","maxEva":"2","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":14,"name":"실프리온의 곤봉","id":"89139","gfx":"36089","route":"[일일레이드] 실프리온의 보상","desc":"미확인","part":2,"cat":"무기","setEff":"세트효과 순+20","minHit":"1","maxHit":"1","minAtk":"32","maxAtk":"50","minDef":"0","maxDef":"0","minDex":"3","maxDex":"5","minHP":"0","maxHP":"0","minCrit":"3","maxCrit":"3","minEva":"2","maxEva":"2","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":15,"name":"테라시온의 도끼","id":"89140","gfx":"36090","route":"[일일레이드] 테라시온의 보상","desc":"미확인","part":1,"cat":"무기","setEff":"세트효과 방+20","minHit":"1","maxHit":"1","minAtk":"77","maxAtk":"93","minDef":"-14","maxDef":"-12","minDex":"-28","maxDex":"-26","minHP":"0","maxHP":"0","minCrit":"3","maxCrit":"3","minEva":"0","maxEva":"0","hit":"2","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":16,"name":"이그니온의 도끼","id":"89141","gfx":"36091","route":"[일일레이드] 이그니온의 보상","desc":"미확인","part":1,"cat":"무기","setEff":"세트효과 공+20","minHit":"1","maxHit":"1","minAtk":"87","maxAtk":"103","minDef":"-22","maxDef":"-20","minDex":"-30","maxDex":"-28","minHP":"0","maxHP":"0","minCrit":"3","maxCrit":"3","minEva":"0","maxEva":"0","hit":"2","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":17,"name":"포세이온의 활","id":"89142","gfx":"36092","route":"[일일레이드] 포세이온의 보상","desc":"미확인","part":4,"cat":"무기","setEff":"세트효과 내+60","minHit":"5","maxHit":"6","minAtk":"18","maxAtk":"21","minDef":"-14","maxDef":"-13","minDex":"0","maxDex":"0","minHP":"9","maxHP":"12","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"3","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":18,"name":"이그니온의 활","id":"89143","gfx":"36093","route":"[일일레이드] 이그니온의 보상","desc":"미확인","part":4,"cat":"무기","setEff":"세트효과 공+20","minHit":"5","maxHit":"6","minAtk":"23","maxAtk":"26","minDef":"-16","maxDef":"-14","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"2","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":19,"name":"실프리온의 창","id":"89144","gfx":"36094","route":"[일일레이드] 실프리온의 보상","desc":"미확인","part":3,"cat":"무기","setEff":"세트효과 순+20","minHit":"0","maxHit":"0","minAtk":"50","maxAtk":"62","minDef":"0","maxDef":"0","minDex":"-15","maxDex":"-7","minHP":"0","maxHP":"0","minCrit":"5","maxCrit":"5","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":20,"name":"포세이온의 창","id":"89145","gfx":"36095","route":"[일일레이드] 포세이온의 보상","desc":"미확인","part":3,"cat":"무기","setEff":"세트효과 내+60","minHit":"0","maxHit":"0","minAtk":"50","maxAtk":"62","minDef":"0","maxDef":"0","minDex":"-25","maxDex":"-19","minHP":"30","maxHP":"36","minCrit":"5","maxCrit":"5","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":21,"name":"카루 기술문서","id":"88596","gfx":"56286","route":"[필드레이드] 카루","desc":"진화 (해당 페트가 진화 합니다.) [카루전용]","part":20,"cat":"소모","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":22,"name":"요루 기술문서","id":"88597","gfx":"56286","route":"[필드레이드] 요루","desc":"진화 (해당 페트가 진화 합니다.) [요루전용]","part":20,"cat":"소모","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":23,"name":"이루 기술문서","id":"88598","gfx":"56286","route":"[필드레이드] 이루","desc":"진화 (해당 페트가 진화 합니다.) [이루전용]","part":20,"cat":"소모","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":24,"name":"그루 기술문서","id":"88599","gfx":"56286","route":"[필드레이드] 그루","desc":"진화 (해당 페트가 진화 합니다.) [그루전용]","part":20,"cat":"소모","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":25,"name":"땅의 돌","id":"13538","gfx":"51413","route":"[일일] 땅의 숲 레이드","desc":"장비에 1~3 지속성을 랜덤으로 추가 한다.","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":26,"name":"물의 돌","id":"13539","gfx":"51414","route":"[일일] 물의 해변 레이드","desc":"장비에 1~3 수속성을 랜덤으로 추가 한다.","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":27,"name":"불의 돌","id":"13540","gfx":"51415","route":"[일일] 불의 신전 레이드","desc":"장비에 1~3 화속성을 랜덤으로 추가 한다.","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":28,"name":"바람의 돌","id":"13541","gfx":"51416","route":"[일일] 바람의 동굴 레이드","desc":"장비에 1~3 풍속성을 랜덤으로 추가 한다.","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":29,"name":"망각의 돌","id":"13542","gfx":"51575","route":"상인의 장터 (소모품상점)","desc":"속성이 생성된 장비에 속성을 제거 한다.","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":30,"name":"바커의 발톱","id":"13544","gfx":"51395","route":"[필드] 카루·요루·이루·그루 레이드","desc":"바커를 처지하고 획득한 발톱","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":31,"name":"레벨업 팩","id":"88801","gfx":"51302","route":"상인의 장터 (홍보 상인)","desc":"경구24 펫경구100 아가모토24 우리의반지2 람쥐페트병","part":16,"cat":"페트병","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":32,"name":"신목의 창","id":"70053","gfx":"51475","route":"쟈쟈서버 오픈기념","desc":"미확인","part":3,"cat":"무기","setEff":"세트효과 방+10","minHit":"0","maxHit":"0","minAtk":"50","maxAtk":"56","minDef":"5","maxDef":"7","minDex":"-20","maxDex":"-18","minHP":"0","maxHP":"0","minCrit":"5","maxCrit":"5","minEva":"0","maxEva":"0","hit":"-","minCharm":"3","maxCharm":"5","magicName":"주술없음","stamina":"-"},{"o":33,"name":"신목의 갑옷","id":"70054","gfx":"51473","route":"쟈쟈서버 오픈기념","desc":"미확인","part":7,"cat":"방어구","setEff":"세트효과 방+10","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"35","maxDef":"40","minDex":"-25","maxDex":"-20","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"-"},{"o":34,"name":"신목의 목걸이","id":"70055","gfx":"51474","route":"쟈쟈서버 오픈기념","desc":"미확인","part":10,"cat":"장신구","setEff":"세트효과 방+10","minHit":"0","maxHit":"0","minAtk":"2","maxAtk":"4","minDef":"8","maxDef":"12","minDex":"-5","maxDex":"-1","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"-"},{"o":35,"name":"스톤 수표","id":"88005","gfx":"70717","route":"스톤 수표 교환","desc":"스톤 수표 아이템","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":36,"name":"코인 수표","id":"88006","gfx":"70716","route":"코인 수표 교환","desc":"코인 수표 아이템","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":37,"name":"정령왕의 활","id":"2775","gfx":"20325","route":"옛일을 아는자 이벤트","desc":"공+25? 방-15? (5-6) 윤택의 정령 Lv3","part":4,"cat":"이벤트","setEff":"","minHit":"5","maxHit":"6","minAtk":"18","maxAtk":"29","minDef":"-9","maxDef":"-16","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"2","minCharm":"0","maxCharm":"0","magicName":"윤택의 정령 Lv3","stamina":"16"},{"o":38,"name":"바람의 쇠사슬 [바람]","id":"2735","gfx":"22016","route":"바람의 하프(천지동굴이벤트)","desc":"매력 +3 [바람] 바람을 정복한자의 증거","part":10,"cat":"이벤트","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"3","maxCharm":"3","magicName":"주술없음","stamina":"0"},{"o":39,"name":"불의 깃털장식[불]","id":"2707","gfx":"22011","route":"정령의 의식을 받아라(진홍동굴이벤트)","desc":"공+2 방-7 민+5 매력+3 [화] 불을 정복하는 자의 증거","part":10,"cat":"이벤트","setEff":"","minHit":"0","maxHit":"0","minAtk":"2","maxAtk":"2","minDef":"-7","maxDef":"-7","minDex":"5","maxDex":"5","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"3","maxCharm":"3","magicName":"주술없음","stamina":"0"},{"o":40,"name":"대지의 인연[땅]","id":"2701","gfx":"22026","route":"엄마의 흔적(유리동굴이벤트)","desc":"공 -4 방 +5 매력 +3 [땅]대지를 정복하는 자의 증표","part":10,"cat":"이벤트","setEff":"","minHit":"0","maxHit":"0","minAtk":"-4","maxAtk":"-4","minDef":"5","maxDef":"5","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"3","maxCharm":"3","magicName":"주술없음","stamina":"0"},{"o":41,"name":"물의 반지[물]","id":"2770","gfx":"22124","route":"물의 여신을 도와주세요(벽청동굴이벤트)","desc":"매력+3 물을 정복한자의 증표","part":11,"cat":"이벤트","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"3","maxCharm":"3","magicName":"주술없음","stamina":"0"},{"o":42,"name":"마쥬의 도끼","id":"2688","gfx":"20042","route":"마쥬의 우편배달 이벤트","desc":"공+50 방-20 민-20  윤택의 정령 Lv3","part":1,"cat":"이벤트","setEff":"","minHit":"1","maxHit":"1","minAtk":"50","maxAtk":"50","minDef":"-20","maxDef":"-20","minDex":"-20","maxDex":"-20","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"윤택의 정령 Lv3","stamina":"20"},{"o":43,"name":"마쥬의 창","id":"2689","gfx":"20452","route":"마쥬의 우편배달 이벤트","desc":"공+45 민-10 매력+4   치유의 정령 Lv3","part":3,"cat":"이벤트","setEff":"","minHit":"0","maxHit":"0","minAtk":"45","maxAtk":"45","minDef":"0","maxDef":"0","minDex":"-10","maxDex":"-10","minHP":"0","maxHP":"0","minCrit":"5","maxCrit":"5","minEva":"0","maxEva":"0","hit":"-","minCharm":"4","maxCharm":"4","magicName":"치유의 정령 Lv3","stamina":"10"},{"o":44,"name":"마쥬의 곤봉","id":"2690","gfx":"20116","route":"마쥬의 우편배달 이벤트","desc":"공+35                    은혜의 정령 Lv3","part":2,"cat":"이벤트","setEff":"","minHit":"1","maxHit":"1","minAtk":"35","maxAtk":"35","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"2","maxCrit":"2","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"은혜의 정령 Lv3","stamina":"40"},{"o":45,"name":"카이의 도끼","id":"2438","gfx":"20003","route":"[일일] 카이 할머니의 목걸이를 찾자","desc":"미확인","part":1,"cat":"무기","setEff":"","minHit":"1","maxHit":"1","minAtk":"20","maxAtk":"35","minDef":"-12","maxDef":"-8","minDex":"-12","maxDex":"-8","minHP":"0","maxHP":"0","minCrit":"5","maxCrit":"5","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":46,"name":"툰가의 곤봉","id":"2439","gfx":"20100","route":"[일일] 툰가의 반성문 받기","desc":"미확인","part":2,"cat":"무기","setEff":"","minHit":"1","maxHit":"1","minAtk":"10","maxAtk":"25","minDef":"-8","maxDef":"-6","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"5","maxCrit":"5","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":47,"name":"카이 할머니 선물","id":"13376","gfx":"24304","route":"[일일] 카이 할머니의 목걸이를 찾자","desc":"하루에 한번 획득가능한 카이 할머니의 선물상자","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":48,"name":"채석장 주인의 토벌보상","id":"13382","gfx":"24304","route":"[일일] 가우린 채석장 주인의 의뢰","desc":"하루에 한번 획득가능한 채석장 주인의 토벌보상","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":49,"name":"툰가를 혼내준 보상","id":"13379","gfx":"24304","route":"[일일] 툰가의 반성문 받기","desc":"하루에 한번 획득가능한 툰가를 혼내준 보상","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":50,"name":"환생포인트 클리어권","id":"88082","gfx":"56286","route":"상인의 장터 (클리어권상점)","desc":"환생 포인트 퀘스트 전체 클리어 권 (보상획득불가)","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":51,"name":"유리(4대 퀘스트) 클리어권","id":"88084","gfx":"56286","route":"상인의 장터 (클리어권상점)","desc":"4대 유리 클리어 권 (보상획득불가)","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":52,"name":"벽청(4대 퀘스트) 클리어권","id":"88085","gfx":"56286","route":"상인의 장터 (클리어권상점)","desc":"4대 벽청 클리어 권 (보상획득불가)","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":53,"name":"진홍(4대 퀘스트) 클리어권","id":"88086","gfx":"56286","route":"상인의 장터 (클리어권상점)","desc":"4대 진홍 클리어 권 (보상획득불가)","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":54,"name":"천지(4대 퀘스트) 클리어권","id":"88087","gfx":"56286","route":"상인의 장터 (클리어권상점)","desc":"4대 천지 클리어 권 (보상획득불가)","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":55,"name":"특수옵션 추가","id":"13391","gfx":"50146","route":"샴기르 24시 편의점 (잡화상인)","desc":"특수옵션이 생성 되지 않은 필드페트에 1회 특수옵션을 추가한다.","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":56,"name":"체력의 사파이어 (최상급)","id":"32004","gfx":"50096","route":"상인의 장터 (소모품상인)","desc":"체력 12 포인트를 재분배","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":57,"name":"완력의 루비 (최상급)","id":"32008","gfx":"50100","route":"상인의 장터 (소모품상인)","desc":"완력 12 포인트를 재분배","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":58,"name":"건강의 에메랄드 (최상급)","id":"32012","gfx":"50104","route":"상인의 장터 (소모품상인)","desc":"건강 12 포인트를 재분배","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":59,"name":"스피드의 토파즈 (최상급)","id":"32016","gfx":"50108","route":"상인의 장터 (소모품상인)","desc":"스피드 12 포인트를 재분배","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":60,"name":"페트 기술창 확장권","id":"32211","gfx":"50146","route":"[주간] 카이의 도끼에 대해 물어보자!","desc":"페트의 기술창 1칸 증가      ※ 최대 7칸.","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":61,"name":"특별한 선물","id":"13408","gfx":"24304","route":"[주간] 카이의 도끼에 대해 물어보자!","desc":"1주일에 한번 획득가능한 특별한 선물상자","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":62,"name":"카이인형","id":"13409","gfx":"24317","route":"[주간] 카이의 도끼에 대해 물어보자!","desc":"어디선가 쓰임새가 있을거 같은 인형..","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":63,"name":"[3일] 우리의 반지","id":"88219","gfx":"24703","route":"상인의 장터 (소모품상점)","desc":"더블클릭시 우리의 반지의 기간이 시작된다.","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":64,"name":"우리의 반지","id":"88221","gfx":"24703","route":"상인의 장터 (소모품상점)","desc":"탑승페트의 획득경험치+20% 만큼 상승시킨다.","part":11,"cat":"장신구","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":65,"name":"[7일] 우리의 반지2","id":"88220","gfx":"24703","route":"상인의 장터 (마일리지상점)","desc":"더블클릭시 우리의 반지2의 기간이 시작된다.","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":66,"name":"우리의 반지2","id":"88228","gfx":"24703","route":"상인의 장터 (마일리지상점)","desc":"탑승페트의 획득경험치+40% 만큼 상승시킨다.","part":11,"cat":"장신구","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":67,"name":"얼음 손톱","id":"88125","gfx":"51270","route":"테로노돈 보상병(25%)","desc":"공+20(X5) 은혜의 정령 Lv5","part":0,"cat":"무기","setEff":"","minHit":"5","maxHit":"5","minAtk":"20","maxAtk":"20","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"은혜의 정령 Lv4","stamina":"40"},{"o":68,"name":"대지의 심장","id":"88130","gfx":"51261","route":"흑룡 보상병(3%)","desc":"미확인","part":27,"cat":"토템","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"10","maxDef":"15","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"-"},{"o":69,"name":"풍신의 주머니","id":"88131","gfx":"51108","route":"흑룡 보상병(3%)","desc":"미확인","part":27,"cat":"토템","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"10","maxDex":"15","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"-"},{"o":70,"name":"불사조의 정신","id":"88132","gfx":"51112","route":"흑룡 보상병(3%)","desc":"미확인","part":27,"cat":"토템","setEff":"","minHit":"0","maxHit":"0","minAtk":"10","maxAtk":"15","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"-"},{"o":71,"name":"헤티아의 눈물","id":"88133","gfx":"55089","route":"흑룡 보상병(3%)","desc":"미확인","part":27,"cat":"토템","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"30","maxHP":"45","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"-"},{"o":72,"name":"검은불꽃 장궁","id":"88141","gfx":"51258","route":"언딘 보상병(2%)","desc":"미확인","part":4,"cat":"무기","setEff":"","minHit":"5","maxHit":"6","minAtk":"21","maxAtk":"32","minDef":"0","maxDef":"0","minDex":"-17","maxDex":"-12","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"2","minCharm":"0","maxCharm":"0","magicName":"은혜의 정령 Lv4","stamina":"40"},{"o":73,"name":"달의 도끼","id":"13305","gfx":"56168","route":"눈꽃섬 포우렌으로","desc":"공+42 방-11 민-11 윤택의 정령 Lv.3","part":1,"cat":"무기","setEff":"","minHit":"0","maxHit":"0","minAtk":"42","maxAtk":"42","minDef":"-11","maxDef":"-11","minDex":"-11","maxDex":"-11","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"윤택의 정령 Lv3","stamina":"12"},{"o":74,"name":"공간의 목걸이","id":"13372","gfx":"22040","route":"공간의 틈새를 막으러 공간의 탑으로","desc":"공+3 방-6 민+3 매력+3 땅+2 땅공간을 정복한 자의 증거","part":10,"cat":"장신구","setEff":"","minHit":"0","maxHit":"0","minAtk":"3","maxAtk":"3","minDef":"-6","maxDef":"-6","minDex":"3","maxDex":"3","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":75,"name":"포우렌 진입문서","id":"88229","gfx":"56286","route":"상인의 장터 (클리어권 상점)","desc":"사용시 포우렌 진입을 할수있는 문서","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":76,"name":"얼음 옷","id":"88204","gfx":"51271","route":"테로노돈 보상병(20%)","desc":"미확인","part":7,"cat":"방어구","setEff":"","minHit":"0","maxHit":"0","minAtk":"2","maxAtk":"5","minDef":"20","maxDef":"30","minDex":"2","maxDex":"5","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"윤택의 정령 Lv4","stamina":"20"},{"o":77,"name":"요리 보따리","id":"88238","gfx":"51293","route":"얼음성 보스 보상병","desc":"요리 보따리(호화 생선회1~3 랜덤획득)","part":16,"cat":"요리","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":78,"name":"향상된 재감정 돋보기","id":"88203","gfx":"36023","route":"상인의 장터 (레이드상점)","desc":"삼위일체(眞)을 재감정하는 돋보기","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":79,"name":"클리어권 패키지 상자","id":"88216","gfx":"51458","route":"상인의 장터 (클리어권 상점)","desc":"더블클릭시 4대문서와 4대증표가 나온다.","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":80,"name":"마수 기술문서","id":"88351","gfx":"56286","route":"[주간] 수레이드","desc":"마수의 격노 (3턴동안 아군의 공격력이 일정량 증가) [마수전용]","part":20,"cat":"소모","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":81,"name":"냉기 기술문서","id":"88352","gfx":"56286","route":"[주간] 수레이드","desc":"냉기 공격  (공격력이 줄고 3턴 전후 냉기로 인해 데미지를 입힘)","part":20,"cat":"소모","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":82,"name":"헤메라의 소울 팬던트","id":"88587","gfx":"56369","route":"하이하모 신전에서 영웅의 길로 이벤트","desc":"미확인","part":10,"cat":"이벤트","setEff":"","minHit":"0","maxHit":"0","minAtk":"-5","maxAtk":"-1","minDef":"0","maxDef":"0","minDex":"1","maxDex":"5","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"5","maxEva":"5","hit":"-","minCharm":"10","maxCharm":"10","magicName":"주술없음","stamina":"-"},{"o":83,"name":"타니토스 소울 팬던트","id":"88581","gfx":"56375","route":"타니토스의 신전에서 네메시스의 길로","desc":"미확인","part":10,"cat":"장신구","setEff":"","minHit":"0","maxHit":"0","minAtk":"1","maxAtk":"5","minDef":"0","maxDef":"0","minDex":"-5","maxDex":"-1","minHP":"0","maxHP":"0","minCrit":"5","maxCrit":"5","minEva":"0","maxEva":"0","hit":"-","minCharm":"10","maxCharm":"10","magicName":"주술없음","stamina":"-"},{"o":84,"name":"이상한 조개","id":"2402","gfx":"24130","route":"친구의 우정 퀘스트","desc":"어디선가 흘러 들어온 작은 조개","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":85,"name":"의식의 투구","id":"2405","gfx":"21542","route":"성인식 이벤트","desc":"방+18 민-5 모든 이상상태 방어+3","part":6,"cat":"이벤트","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"18","maxDef":"18","minDex":"-5","maxDex":"-5","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":86,"name":"의식의 갑옷","id":"2406","gfx":"51456","route":"성인식 이벤트","desc":"방 +34 민 -12                윤택의 정령 Lv2","part":7,"cat":"이벤트","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"34","maxDef":"34","minDex":"-12","maxDex":"-12","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"윤택의 정령 Lv2","stamina":"12"},{"o":87,"name":"의식의 곤봉","id":"2407","gfx":"51457","route":"성인식 이벤트","desc":"공 +20 방 +8 모든 이상상태 방어 +5","part":2,"cat":"이벤트","setEff":"","minHit":"1","maxHit":"1","minAtk":"20","maxAtk":"20","minDef":"8","maxDef":"8","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":88,"name":"아가모토의 서 [시간]","id":"28955","gfx":"51671","route":"","desc":"오프라인 경험치 획득 시간을 6시간을 추가합니다.","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":89,"name":"경험치 구슬","id":"28994","gfx":"50005","route":"각종 이벤트 및 상인의 장터 (소모품 상점)","desc":"경험치 100 프로 상승 (6:00:00)","part":16,"cat":"이벤트","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":90,"name":"아이템 창고 이용권","id":"29003","gfx":"51488","route":"출석도장 상점","desc":"아이템 창고 이용 1회 증가합니다.","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":91,"name":"페트 창고 이용권","id":"29004","gfx":"51488","route":"출석도장 상점","desc":"페트 창고 이용 1회 증가합니다.","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":92,"name":"워프 프리패스권","id":"29006","gfx":"24176","route":"","desc":"워프 프리패스권","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":93,"name":"보급 창","id":"29010","gfx":"20402","route":"초기지급","desc":"공+15 [세트 방+15]","part":3,"cat":"무기","setEff":"세트효과 방+15","minHit":"0","maxHit":"0","minAtk":"30","maxAtk":"30","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":94,"name":"보급 갑옷","id":"29011","gfx":"21011","route":"초기지급","desc":"방+20 [세트 방+15]","part":7,"cat":"방어구","setEff":"세트효과 방+15","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"20","maxDef":"20","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"-"},{"o":95,"name":"보급 투구","id":"29012","gfx":"21514","route":"초기지급","desc":"방+15 [세트 방+15]","part":6,"cat":"방어구","setEff":"세트효과 방+15","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"10","maxDef":"10","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"-"},{"o":96,"name":"황금 자루[2번]","id":"29100","gfx":"36009","route":"4개의 보물 이벤트 or 상인의 장터 (소모품상점)","desc":"가방 2단계 확장 아이템 (15칸)","part":16,"cat":"이벤트","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":97,"name":"황금 자루[3번]","id":"29101","gfx":"36010","route":"황금자루 이벤트 or 상인의 장터 (소모품상점)","desc":"가방 3단계 확장 아이템 (15칸)","part":16,"cat":"이벤트","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":98,"name":"황금 자루[4번]","id":"29102","gfx":"36011","route":"상인의 장터 (마일리지 상점)","desc":"가방 4단계 확장 아이템 (15칸)","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":99,"name":"황금 자루[5번]","id":"29103","gfx":"36012","route":"상인의 장터 (마일리지 상점)","desc":"가방 5단계 확장 아이템 (15칸)","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":100,"name":"카이 캐릭터 저장권","id":"31000","gfx":"36607","route":"[주간퀘스트] 카이의 도끼에 대해 물어보자!","desc":"저장가능한 카이 캐릭터 저장권","part":16,"cat":"캐릭터","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":101,"name":"툰가 캐릭터 저장권","id":"31001","gfx":"36607","route":"[주간퀘스트] 다이몬에 가입한 툰가돕기","desc":"저장가능한 툰가 캐릭터 저장권","part":16,"cat":"캐릭터","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":102,"name":"운명의 팔찌","id":"13453","gfx":"22073","route":"오랑이 퀘스트","desc":"공+3 방+3 민-3 매력10                 부활수호","part":9,"cat":"장신구","setEff":"","minHit":"0","maxHit":"0","minAtk":"3","maxAtk":"3","minDef":"3","maxDef":"3","minDex":"-3","maxDex":"-3","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"10","maxCharm":"10","magicName":"부활 수호의 정령 Lv1","stamina":"20"},{"o":103,"name":"용맹의 귀걸이","id":"13454","gfx":"22090","route":"오랑이 퀘스트","desc":"공+6 민-3 회피5 매력10","part":13,"cat":"장신구","setEff":"","minHit":"0","maxHit":"0","minAtk":"6","maxAtk":"6","minDef":"0","maxDef":"0","minDex":"-3","maxDex":"-3","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"5","maxEva":"5","hit":"-","minCharm":"10","maxCharm":"10","magicName":"주술없음","stamina":"-"},{"o":104,"name":"강인함의 반지","id":"13455","gfx":"22118","route":"오랑이 퀘스트","desc":"방+6 공-3 크리5 매력10","part":11,"cat":"장신구","setEff":"","minHit":"0","maxHit":"0","minAtk":"-3","maxAtk":"-3","minDef":"6","maxDef":"6","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"5","maxCrit":"5","minEva":"0","maxEva":"0","hit":"-","minCharm":"10","maxCharm":"10","magicName":"주술없음","stamina":"-"},{"o":105,"name":"순발력의 목걸이","id":"13456","gfx":"22118","route":"오랑이 퀘스트","desc":"민+6 방-3 매력10                  부활거울","part":9,"cat":"장신구","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"-3","maxDef":"-3","minDex":"6","maxDex":"6","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"10","maxCharm":"10","magicName":"부활 거울의 정령 Lv1","stamina":"20"},{"o":106,"name":"출석 도장","id":"88111","gfx":"36017","route":"출석 체크(1일 1회)","desc":"매일 출석을 하면 얻을수 있는 도장 (출석상점에서 이용가능)","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":107,"name":"얼음 투구","id":"88124","gfx":"51272","route":"테로노돈 보상병(25%)","desc":"방+20","part":6,"cat":"방어구","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"20","maxDef":"20","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":108,"name":"얼음 부메랑","id":"88126","gfx":"51269","route":"테로노돈 보상병(20%)","desc":"공+20 민+10 맹독의 정령Lv5","part":17,"cat":"무기","setEff":"","minHit":"0","maxHit":"0","minAtk":"20","maxAtk":"20","minDef":"0","maxDef":"0","minDex":"10","maxDex":"10","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"독안개의 정령 Lv5","stamina":"14"},{"o":109,"name":"머슬 링귀걸이","id":"88127","gfx":"51265","route":"테로노돈 보상병(2%)","desc":"미확인","part":13,"cat":"장신구","setEff":"","minHit":"0","maxHit":"0","minAtk":"3","maxAtk":"5","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"8","maxHP":"12","minCrit":"0","maxCrit":"0","minEva":"4","maxEva":"6","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"-"},{"o":110,"name":"번개의 반지","id":"88128","gfx":"51266","route":"테로노돈 보상병(2%)","desc":"미확인","part":11,"cat":"장신구","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"6","maxDex":"8","minHP":"8","maxHP":"12","minCrit":"6","maxCrit":"8","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"-"},{"o":111,"name":"삼위일체","id":"88129","gfx":"51097","route":"테로노돈 보상병(6%)","desc":"공+3 방+3 민+3 내+9","part":24,"cat":"토템","setEff":"","minHit":"0","maxHit":"0","minAtk":"3","maxAtk":"3","minDef":"3","maxDef":"3","minDex":"3","maxDex":"3","minHP":"9","maxHP":"9","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"-"},{"o":112,"name":"미라쥬","id":"88134","gfx":"51113","route":"흑룡 보상병(5%)","desc":"공+5 거울의 정령[기5]","part":9,"cat":"장신구","setEff":"","minHit":"0","maxHit":"0","minAtk":"5","maxAtk":"5","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"거울의 정령 Lv1","stamina":"5"},{"o":113,"name":"미라쥬","id":"88135","gfx":"51113","route":"흑룡 보상병(5%)","desc":"공+5 거울의 정령[기15]","part":9,"cat":"장신구","setEff":"","minHit":"0","maxHit":"0","minAtk":"5","maxAtk":"5","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"거울의 정령 Lv1","stamina":"15"},{"o":114,"name":"삼위일체(眞)의 심장","id":"88136","gfx":"51268","route":"헤티아 보상병(2%)","desc":"삼위일체(眞)를 만들기 위한 도구","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":115,"name":"흑룡의 발톱","id":"88137","gfx":"51264","route":"언딘 보상병(5%)","desc":"공+41 민+10 크리5 은헤의 정령 Lv3","part":2,"cat":"무기","setEff":"","minHit":"1","maxHit":"1","minAtk":"41","maxAtk":"41","minDef":"0","maxDef":"0","minDex":"10","maxDex":"10","minHP":"0","maxHP":"0","minCrit":"5","maxCrit":"5","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"은혜의 정령 Lv3","stamina":"40"},{"o":116,"name":"냉동 참다랑어","id":"88138","gfx":"51259","route":"언딘 보상병(5%)","desc":"공+51 크리5","part":2,"cat":"무기","setEff":"","minHit":"0","maxHit":"0","minAtk":"51","maxAtk":"51","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"5","maxCrit":"5","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"-"},{"o":117,"name":"열공의 도끼","id":"88139","gfx":"51273","route":"언딘 보상병(5%)","desc":"공+71 방-10 민-10 크리5","part":1,"cat":"무기","setEff":"","minHit":"1","maxHit":"1","minAtk":"71","maxAtk":"71","minDef":"-10","maxDef":"-10","minDex":"-10","maxDex":"-10","minHP":"0","maxHP":"0","minCrit":"5","maxCrit":"5","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":118,"name":"삼위일체(改)의 구슬","id":"88140","gfx":"51267","route":"흑룡 보상병(1%)","desc":"삼위일체(改)를 만들기 위한 도구","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":119,"name":"냉동 황새치","id":"88142","gfx":"51260","route":"헤티아 보상병(5%)","desc":"공+61 민-10 크리 5","part":3,"cat":"무기","setEff":"","minHit":"0","maxHit":"0","minAtk":"61","maxAtk":"61","minDef":"0","maxDef":"0","minDex":"-10","maxDex":"-10","minHP":"0","maxHP":"0","minCrit":"5","maxCrit":"5","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"-"},{"o":120,"name":"미리네아의 거울","id":"88143","gfx":"51114","route":"헤티아 보상병(2%)","desc":"공+7 거울의 정령(2회)","part":15,"cat":"장신구","setEff":"","minHit":"0","maxHit":"0","minAtk":"7","maxAtk":"7","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"거울의 정령 Lv2","stamina":"25"},{"o":121,"name":"초신성의 갑옷","id":"88144","gfx":"51274","route":"언딘 보상병(1%)","desc":"미확인","part":7,"cat":"방어구","setEff":"","minHit":"0","maxHit":"0","minAtk":"7","maxAtk":"10","minDef":"41","maxDef":"49","minDex":"-10","maxDex":"-7","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"윤택의 정령 Lv5","stamina":"24"},{"o":122,"name":"헤티아의 창","id":"88145","gfx":"51263","route":"헤티아 보상병(2%)","desc":"미확인","part":3,"cat":"무기","setEff":"","minHit":"0","maxHit":"0","minAtk":"56","maxAtk":"60","minDef":"16","maxDef":"20","minDex":"-30","maxDex":"-26","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"은혜의 정령 Lv3","stamina":"30"},{"o":123,"name":"헤티아의 머리 장식","id":"88146","gfx":"51275","route":"헤티아 보상병(2%)","desc":"미확인","part":6,"cat":"방어구","setEff":"","minHit":"0","maxHit":"0","minAtk":"3","maxAtk":"5","minDef":"20","maxDef":"24","minDex":"0","maxDex":"0","minHP":"6","maxHP":"12","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"고등정화의 정령 Lv2","stamina":"18"},{"o":124,"name":"헤티아의 빛나는 창","id":"88147","gfx":"51262","route":"정령의 마을 - 천공의 대장장이(50%)","desc":"미확인","part":3,"cat":"무기","setEff":"","minHit":"0","maxHit":"0","minAtk":"57","maxAtk":"65","minDef":"0","maxDef":"0","minDex":"-12","maxDex":"-9","minHP":"6","maxHP":"12","minCrit":"5","maxCrit":"5","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"은혜의 정령 Lv4","stamina":"30"},{"o":125,"name":"삼위일체(改)","id":"88148","gfx":"51098","route":"스라인마을 - 신비한 대장장이 (20%)","desc":"미확인","part":24,"cat":"토템","setEff":"","minHit":"0","maxHit":"0","minAtk":"5","maxAtk":"7","minDef":"5","maxDef":"7","minDex":"5","maxDex":"7","minHP":"15","maxHP":"21","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"-"},{"o":126,"name":"삼위일체(眞)","id":"88149","gfx":"51099","route":"정령의 마을 - 천공의 대장장이(10%)","desc":"미확인","part":24,"cat":"토템","setEff":"","minHit":"0","maxHit":"0","minAtk":"8","maxAtk":"10","minDef":"8","maxDef":"10","minDex":"8","maxDex":"10","minHP":"24","maxHP":"30","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"-"},{"o":127,"name":"성장문서","id":"88184","gfx":"36141","route":"","desc":"캐릭터 페트에 사용시 즉시 25레벨이 된다.","part":20,"cat":"캐릭터","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":128,"name":"소생의 구슬","id":"88198","gfx":"36021","route":"상인의 장터 (소모품 상점)","desc":"120레벨 이상 페트에게 사용하면 랜덤으로 기회의 영혼석을 획득","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":129,"name":"기회의 영혼석","id":"88199","gfx":"36020","route":"홈페이지 게임정보 -> 시스템정보(페트 소생 시스템)","desc":"페트에게 사용하면 100% 확률로 초기화 횟수 1~3회 증가","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":130,"name":"재감정 돋보기","id":"88202","gfx":"36022","route":"상인의 장터 (레이드상점)","desc":"재감정이 가능한 아이템을 재감정하는 돋보기","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":131,"name":"파괴 된 재","id":"88211","gfx":"24158","route":"제작실패 또는 꽝","desc":"제작에 실패하여 나온 파괴 된 재 ( 더블클릭시 소멸한다 )","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":132,"name":"영웅 샴기르의 활","id":"88794","gfx":"36033","route":"상인의 장터 (마일리지상점)","desc":"미확인","part":4,"cat":"무기","setEff":"","minHit":"5","maxHit":"6","minAtk":"21","maxAtk":"34","minDef":"-10","maxDef":"-7","minDex":"-10","maxDex":"-7","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"2","minCharm":"0","maxCharm":"0","magicName":"은혜의 정령 Lv4","stamina":"40"},{"o":133,"name":"영웅 샴기르의 도끼","id":"88233","gfx":"36027","route":"상인의 장터 (마일리지상점)","desc":"미확인","part":1,"cat":"무기","setEff":"","minHit":"1","maxHit":"1","minAtk":"70","maxAtk":"76","minDef":"-12","maxDef":"-10","minDex":"-12","maxDex":"-10","minHP":"6","maxHP":"12","minCrit":"3","maxCrit":"3","minEva":"0","maxEva":"0","hit":"2","minCharm":"0","maxCharm":"0","magicName":"거울의 정령 Lv1","stamina":"10"},{"o":134,"name":"영웅 샴기르의 곤봉","id":"88234","gfx":"36026","route":"상인의 장터 (마일리지상점)","desc":"미확인","part":2,"cat":"무기","setEff":"","minHit":"1","maxHit":"1","minAtk":"44","maxAtk":"56","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"6","maxHP":"12","minCrit":"3","maxCrit":"3","minEva":"2","maxEva":"2","hit":"-","minCharm":"0","maxCharm":"0","magicName":"은혜의 정령 Lv4","stamina":"35"},{"o":135,"name":"영웅 샴기르의 머리장식","id":"88235","gfx":"36025","route":"상인의 장터 (마일리지상점)","desc":"미확인","part":6,"cat":"방어구","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"15","maxDef":"20","minDex":"7","maxDex":"9","minHP":"6","maxHP":"12","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"오로라의 정령","stamina":"35"},{"o":136,"name":"영웅 샴기르의 옷","id":"88236","gfx":"36024","route":"상인의 장터 (마일리지상점)","desc":"미확인","part":7,"cat":"방어구","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"30","maxDef":"40","minDex":"9","maxDex":"12","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"무지개의 정령","stamina":"25"},{"o":137,"name":"향상된 재감정 돋보기","id":"88239","gfx":"36023","route":"상인의 장터 (마일리지상점)","desc":"영웅 샴기르 아이템을 재감정하는 돋보기","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":138,"name":"대지의 토템 (7일)","id":"88269","gfx":"51060","route":"","desc":"더블클릭시 7일을 기간제가 시작된다 [거래불가]","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":139,"name":"바다의 토템 (7일)","id":"88270","gfx":"51062","route":"","desc":"더블클릭시 7일을 기간제가 시작된다 [거래불가]","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":140,"name":"화염의 토템 (7일)","id":"88271","gfx":"51059","route":"","desc":"더블클릭시 7일을 기간제가 시작된다 [거래불가]","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":141,"name":"바람의 토템 (7일)","id":"88272","gfx":"51061","route":"","desc":"더블클릭시 7일을 기간제가 시작된다 [거래불가]","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":142,"name":"하이하모 진입문서","id":"88306","gfx":"56286","route":"상인의 장터 (클리어권 상점)","desc":"사용시 하이하모 진입을 할수있는 문서","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":143,"name":"트위스터 창","id":"88312","gfx":"55929","route":"신전으로 이벤트 보상","desc":"공 +60 민 -12 매 +5 치유의정령 Lv3","part":3,"cat":"이벤트","setEff":"","minHit":"0","maxHit":"0","minAtk":"60","maxAtk":"60","minDef":"0","maxDef":"0","minDex":"-12","maxDex":"-12","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"5","maxCharm":"5","magicName":"치유의 정령 Lv3","stamina":"10"},{"o":144,"name":"루나의 곤봉","id":"88337","gfx":"51717","route":"개인듀얼 아이템꾸러미，개인듀얼 아이템꾸러미2 랜덤획득","desc":"기력 +5~15","part":2,"cat":"무기","setEff":"","minHit":"1","maxHit":"1","minAtk":"30","maxAtk":"30","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"9","maxHP":"9","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"은혜의 정령 Lv3","stamina":"30"},{"o":145,"name":"루나의 머리장식","id":"88338","gfx":"51744","route":"개인듀얼 아이템꾸러미，개인듀얼 아이템꾸러미2 랜덤획득","desc":"기력 +1~10","part":6,"cat":"방어구","setEff":"","minHit":"0","maxHit":"0","minAtk":"-5","maxAtk":"-5","minDef":"12","maxDef":"12","minDex":"15","maxDex":"15","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"오로라의 정령","stamina":"42"},{"o":146,"name":"루나의 옷","id":"88339","gfx":"51741","route":"개인듀얼 아이템꾸러미，개인듀얼 아이템꾸러미2 랜덤획득","desc":"기력 +5~15","part":7,"cat":"방어구","setEff":"","minHit":"0","maxHit":"0","minAtk":"-10","maxAtk":"-10","minDef":"10","maxDef":"10","minDex":"18","maxDex":"18","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"무지개의 정령","stamina":"28"},{"o":147,"name":"얼음 눈꽃","id":"88381","gfx":"51711","route":"흑룡 보상병(68%) / 언딘 보상병(67%)","desc":"헤티아를 처치한 증거로 획득한 얼음 눈꽃","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":148,"name":"황금 코인","id":"88421","gfx":"51450","route":"","desc":"코인 구매 보너스로 획득 가능한 황금 코인상점 전용 코인","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":149,"name":"영험한 힘을 가진 갑옷","id":"88432","gfx":"24345","route":"","desc":"지수화풍의 영험한 힘을 가진 보호 갑옷      방+48 민-12","part":7,"cat":"방어구","setEff":"","minHit":"1","maxHit":"1","minAtk":"0","maxAtk":"0","minDef":"48","maxDef":"48","minDex":"-12","maxDex":"-12","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"은혜의 정령 Lv5","stamina":"30"},{"o":150,"name":"환생의 영혼석","id":"88524","gfx":"36036","route":"","desc":"환생 페트에게 사용하면 100% 확률로 초기화 횟수 1~3회 증가","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":151,"name":"환생 게이지","id":"88525","gfx":"36037","route":"","desc":"게이지 5 충전","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":152,"name":"환생 초기화 구슬","id":"88526","gfx":"36037","route":"","desc":"환생 페트를 초기화 시킨다.","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":153,"name":"환생의 구슬","id":"88527","gfx":"36038","route":"","desc":"120레벨 이상 페트를 환생 시킨다.","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":154,"name":"페트경험치 구슬[50]","id":"88528","gfx":"51322","route":"","desc":"페트 레벨을 50까지 올려주는 구슬","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":155,"name":"특수옵션 리셋물약","id":"88532","gfx":"51170","route":"","desc":"페트의 특수옵션을 리셋한다.","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":156,"name":"환영석 상자","id":"88553","gfx":"24310","route":"","desc":"더블클릭시 환생의 영혼석 5개가 나온다.","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":157,"name":"페트경험치 구슬[100]","id":"88555","gfx":"51322","route":"","desc":"페트 레벨을 100까지 올려주는 구슬","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":158,"name":"페트경험치 구슬[120]","id":"88568","gfx":"51322","route":"","desc":"페트 레벨을 120까지 올려주는 구슬","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":159,"name":"맘모스쿠폰","id":"88571","gfx":"37310","route":"","desc":"랜덤으로 아이템을 획득한다 (랜덤)","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":160,"name":"타니토스의 창","id":"88576","gfx":"56376","route":"타니토스신전 어둠 장인","desc":"미확인","part":3,"cat":"무기","setEff":"","minHit":"0","maxHit":"0","minAtk":"47","maxAtk":"58","minDef":"0","maxDef":"0","minDex":"-12","maxDex":"-10","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"은혜의 정령 Lv4","stamina":"35"},{"o":161,"name":"타니토스의 도끼","id":"88577","gfx":"56374","route":"타니토스신전 어둠 장인","desc":"미확인","part":1,"cat":"무기","setEff":"","minHit":"1","maxHit":"1","minAtk":"57","maxAtk":"68","minDef":"-13","maxDef":"-11","minDex":"-13","maxDex":"-11","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"은혜의 정령 Lv4","stamina":"35"},{"o":162,"name":"타니토스의 곤봉","id":"88578","gfx":"56373","route":"타니토스신전 어둠 장인","desc":"미확인","part":2,"cat":"무기","setEff":"","minHit":"1","maxHit":"1","minAtk":"35","maxAtk":"48","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"은혜의 정령 Lv4","stamina":"35"},{"o":163,"name":"타니토스의 갑옷","id":"88579","gfx":"56372","route":"타니토스신전 어둠 장인","desc":"미확인","part":7,"cat":"방어구","setEff":"","minHit":"0","maxHit":"0","minAtk":"2","maxAtk":"2","minDef":"30","maxDef":"40","minDex":"-11","maxDex":"-9","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"무지개의 정령","stamina":"25"},{"o":164,"name":"타니토스의 투구","id":"88580","gfx":"56377","route":"타니토스신전 어둠 장인","desc":"미확인","part":6,"cat":"방어구","setEff":"","minHit":"0","maxHit":"0","minAtk":"2","maxAtk":"2","minDef":"15","maxDef":"20","minDex":"-11","maxDex":"-9","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"오로라의 정령","stamina":"35"},{"o":165,"name":"헤메라의 창","id":"88582","gfx":"56370","route":"헤메라신전 빛의 장인 제작","desc":"미확인","part":3,"cat":"무기","setEff":"","minHit":"0","maxHit":"0","minAtk":"45","maxAtk":"56","minDef":"0","maxDef":"0","minDex":"-10","maxDex":"-8","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"은혜의 정령 Lv4","stamina":"35"},{"o":166,"name":"헤메라의 도끼","id":"88583","gfx":"56368","route":"헤메라신전 빛의 장인 제작","desc":"미확인","part":1,"cat":"무기","setEff":"","minHit":"1","maxHit":"1","minAtk":"55","maxAtk":"66","minDef":"-12","maxDef":"-10","minDex":"-12","maxDex":"-10","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"은혜의 정령 Lv4","stamina":"35"},{"o":167,"name":"헤메라의 곤봉","id":"88584","gfx":"56367","route":"헤메라신전 빛의 장인 제작","desc":"미확인","part":2,"cat":"무기","setEff":"","minHit":"1","maxHit":"1","minAtk":"33","maxAtk":"46","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"은혜의 정령 Lv4","stamina":"35"},{"o":168,"name":"헤메라의 갑옷","id":"88585","gfx":"56366","route":"헤메라신전 빛의 장인 제작","desc":"미확인","part":7,"cat":"방어구","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"30","maxDef":"40","minDex":"-9","maxDex":"-7","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"무지개의 정령","stamina":"25"},{"o":169,"name":"헤메라의 투구","id":"88586","gfx":"56371","route":"헤메라신전 빛의 장인 제작","desc":"미확인","part":6,"cat":"방어구","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"15","maxDef":"20","minDex":"-9","maxDex":"-7","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"오로라의 정령","stamina":"35"},{"o":170,"name":"환생의 영혼석2","id":"88588","gfx":"36036","route":"","desc":"환생 페트에게 사용하면 100% 확률로 초기화 횟수 2~3회 증가","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":171,"name":"에레보스 진입문서","id":"88641","gfx":"56286","route":"상인의 장터 (클리어권 상점)","desc":"사용시 에레보스 진입을 할수있는 문서","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":172,"name":"경험치문서 [100만]","id":"88736","gfx":"24222","route":"","desc":"레벨 120이상의 대상의 경험치 100만을 상승시킵니다.","part":20,"cat":"소모","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":173,"name":"경험치문서 [500만]","id":"88737","gfx":"24222","route":"","desc":"레벨 120이상의 대상의 경험치 500만을 상승시킵니다.","part":20,"cat":"소모","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":174,"name":"경험치문서 [1000만]","id":"88738","gfx":"24222","route":"","desc":"레벨 120이상의 대상의 경험치 1000만을 상승시킵니다.","part":20,"cat":"소모","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":175,"name":"경험치문서 [3000만]","id":"88739","gfx":"24222","route":"","desc":"레벨 120이상의 대상의 경험치 3000만을 상승시킵니다.","part":20,"cat":"소모","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":176,"name":"경험치문서 [5000만]","id":"88740","gfx":"24222","route":"","desc":"레벨 120이상의 대상의 경험치 5000만을 상승시킵니다.","part":20,"cat":"소모","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":177,"name":"페트경험치 구슬[140]","id":"88757","gfx":"51322","route":"황금코인 상점","desc":"페트 레벨을 140까지 올려주는 구슬","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":178,"name":"늑대쓰개","id":"88825","gfx":"51337","route":"헬 타우루스 보상보따리","desc":"미확인","part":6,"cat":"방어구","setEff":"","minHit":"0","maxHit":"0","minAtk":"1","maxAtk":"9","minDef":"10","maxDef":"20","minDex":"0","maxDex":"0","minHP":"6","maxHP":"12","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"오로라의 정령","stamina":"30"},{"o":179,"name":"지옥견 털옷","id":"88826","gfx":"51344","route":"헬 바이론 보상보따리","desc":"미확인","part":7,"cat":"방어구","setEff":"","minHit":"0","maxHit":"0","minAtk":"1","maxAtk":"12","minDef":"25","maxDef":"40","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"무지개의 정령","stamina":"20"},{"o":180,"name":"삼수정 곤봉","id":"88827","gfx":"51341","route":"헬 바이론 보상보따리","desc":"미확인","part":3,"cat":"무기","setEff":"","minHit":"0","maxHit":"0","minAtk":"32","maxAtk":"58","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"6","maxHP":"12","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"은혜의 정령 Lv3","stamina":"30"},{"o":181,"name":"지옥의 투구","id":"88828","gfx":"51338","route":"헬 타우루스 보상보따리","desc":"미확인","part":6,"cat":"방어구","setEff":"","minHit":"0","maxHit":"0","minAtk":"1","maxAtk":"5","minDef":"18","maxDef":"24","minDex":"0","maxDex":"0","minHP":"6","maxHP":"12","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"고등정화의 정령 Lv1","stamina":"9"},{"o":182,"name":"지옥의 창","id":"88829","gfx":"51342","route":"지옥문 소호자 보상보따리","desc":"미확인","part":3,"cat":"무기","setEff":"","minHit":"0","maxHit":"0","minAtk":"46","maxAtk":"65","minDef":"5","maxDef":"10","minDex":"-34","maxDex":"-28","minHP":"6","maxHP":"12","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"은혜의 정령 Lv2","stamina":"25"},{"o":183,"name":"지옥의 갑옷","id":"88830","gfx":"51343","route":"지옥문 수호자 보상보따리","desc":"미확인","part":7,"cat":"방어구","setEff":"","minHit":"0","maxHit":"0","minAtk":"1","maxAtk":"10","minDef":"35","maxDef":"49","minDex":"-10","maxDex":"-7","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"윤택의 정령 Lv3","stamina":"35"},{"o":184,"name":"용암 부메랑","id":"88831","gfx":"51340","route":"헬 바이론 보상보따리","desc":"공+20","part":17,"cat":"무기","setEff":"","minHit":"0","maxHit":"0","minAtk":"20","maxAtk":"20","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"-"},{"o":185,"name":"지옥문 기념품","id":"88832","gfx":"51339","route":"지옥문 수호자 보상보따리","desc":"지옥문의 기운이 담긴 기념품","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":186,"name":"지옥불 조각","id":"88845","gfx":"55167","route":"지옥문1 보스","desc":"지옥문에서 획득한 지옥불 조각","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":187,"name":"금빛가루","id":"88870","gfx":"36060","route":"샴기르 도구상점","desc":"분해에 성공하여 얻은 금빛가루","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":188,"name":"은빛가루","id":"88871","gfx":"36061","route":"샴기르 도구상점","desc":"분해에 성공하여 얻은 은빛가루","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":189,"name":"동빛가루","id":"88872","gfx":"36062","route":"샴기르 도구상점","desc":"분해에 성공하여 얻은 동빛가루","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":190,"name":"2 환생의 구슬","id":"88915","gfx":"36038","route":"","desc":"1환생 140레벨의 페트를 2환생 시킨다.","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":191,"name":"불가사리","id":"88917","gfx":"36068","route":"","desc":"난파된 해적선에서 발견한 불가사리","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":192,"name":"카우제의 집게","id":"88918","gfx":"36072","route":"","desc":"카우제를 처치하고 획득한 집게","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":193,"name":"심해 갑옷","id":"88919","gfx":"36064","route":"난파된 해적선 3단계 (바이겔)","desc":"미확인","part":7,"cat":"방어구","setEff":"","minHit":"0","maxHit":"0","minAtk":"5","maxAtk":"5","minDef":"30","maxDef":"30","minDex":"-10","maxDex":"-10","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"오로라의 정령","stamina":"28"},{"o":194,"name":"옥토의 옷","id":"88920","gfx":"36071","route":"난파된 해적선 4단계 (옥토)","desc":"미확인","part":7,"cat":"방어구","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"25","maxDef":"35","minDex":"7","maxDex":"10","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"무지개의 정령","stamina":"20"},{"o":195,"name":"메가죠의 도끼","id":"88921","gfx":"36066","route":"난파된 해적선 5단계 (메가죠)","desc":"미확인","part":1,"cat":"무기","setEff":"","minHit":"1","maxHit":"1","minAtk":"30","maxAtk":"80","minDef":"-20","maxDef":"-10","minDex":"-20","maxDex":"-10","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"5","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"-"},{"o":196,"name":"악몽의 뼈조각","id":"88922","gfx":"36065","route":"","desc":"바다의 악몽을 처치하고 획득한 뼈조각","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":197,"name":"악몽의 모자","id":"88923","gfx":"36069","route":"난파된 해적선 6단계(바다의 악몽)","desc":"미확인","part":6,"cat":"방어구","setEff":"","minHit":"0","maxHit":"0","minAtk":"7","maxAtk":"9","minDef":"15","maxDef":"20","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"고등정화의 정령 Lv2","stamina":"5"},{"o":198,"name":"심해의 활","id":"88924","gfx":"36070","route":"상점) 불가사리 150개 / 제작 카우지집게 + 악몽의뼈조각 + 10만S","desc":"미확인","part":4,"cat":"무기","setEff":"","minHit":"5","maxHit":"6","minAtk":"21","maxAtk":"32","minDef":"-17","maxDef":"-12","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"2","minCharm":"0","maxCharm":"0","magicName":"은혜의 정령 Lv4","stamina":"40"},{"o":199,"name":"뉴 발굴용 삽","id":"88927","gfx":"24352","route":"","desc":"틈새동굴 발견물 발견용 삽","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":200,"name":"수중 호흡 소라","id":"88931","gfx":"36003","route":"","desc":"수중 호흡 소라. 이것이 없으면 해저를 돌아 다닐 수 없다.","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":201,"name":"삼위일체(神)","id":"88992","gfx":"51099","route":"","desc":"미확인","part":24,"cat":"토템","setEff":"","minHit":"0","maxHit":"0","minAtk":"7","maxAtk":"14","minDef":"7","maxDef":"14","minDex":"7","maxDex":"14","minHP":"21","maxHP":"42","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"-"},{"o":202,"name":"드래곤 뼈갑옷","id":"88993","gfx":"52143","route":"","desc":"미확인","part":7,"cat":"방어구","setEff":"","minHit":"0","maxHit":"0","minAtk":"7","maxAtk":"10","minDef":"45","maxDef":"54","minDex":"-15","maxDex":"-12","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"은혜의 정령 Lv4","stamina":"30"},{"o":203,"name":"카오닉스의 창","id":"88994","gfx":"52148","route":"","desc":"미확인","part":3,"cat":"무기","setEff":"","minHit":"0","maxHit":"0","minAtk":"56","maxAtk":"60","minDef":"21","maxDef":"25","minDex":"-35","maxDex":"-31","minHP":"0","maxHP":"0","minCrit":"5","maxCrit":"5","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"은혜의 정령 Lv3","stamina":"30"},{"o":204,"name":"불타는 카오닉스의 창","id":"88995","gfx":"51342","route":"","desc":"미확인","part":3,"cat":"무기","setEff":"","minHit":"0","maxHit":"0","minAtk":"62","maxAtk":"70","minDef":"0","maxDef":"0","minDex":"-17","maxDex":"-14","minHP":"6","maxHP":"12","minCrit":"5","maxCrit":"5","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"은혜의 정령 Lv4","stamina":"30"},{"o":205,"name":"카오닉스의 투구","id":"88996","gfx":"52146","route":"","desc":"미확인","part":6,"cat":"방어구","setEff":"","minHit":"0","maxHit":"0","minAtk":"3","maxAtk":"5","minDef":"25","maxDef":"29","minDex":"-5","maxDex":"-5","minHP":"6","maxHP":"12","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"고등정화의 정령 Lv2","stamina":"18"},{"o":206,"name":"드래곤 비늘","id":"88997","gfx":"52144","route":"","desc":"지옥문의 기운이 담긴 기념품","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":207,"name":"카오닉스 불꽃","id":"88998","gfx":"52147","route":"","desc":"지옥문의 기운이 담긴 기념품","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":208,"name":"어둠의 비늘","id":"88999","gfx":"52137","route":"","desc":"민-100","part":25,"cat":"토템","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"-100","maxDex":"-100","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":209,"name":"뿅뿅 목걸이","id":"89000","gfx":"52142","route":"","desc":"미확인","part":10,"cat":"장신구","setEff":"","minHit":"0","maxHit":"0","minAtk":"1","maxAtk":"5","minDef":"-10","maxDef":"-10","minDex":"1","maxDex":"5","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"3","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"-"},{"o":210,"name":"뼈 결정 반지","id":"89001","gfx":"52140","route":"","desc":"미확인","part":11,"cat":"장신구","setEff":"","minHit":"0","maxHit":"0","minAtk":"6","maxAtk":"8","minDef":"8","maxDef":"12","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"6","maxCrit":"8","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"9"},{"o":211,"name":"늑대발톱 도끼","id":"89002","gfx":"52138","route":"","desc":"미확인","part":1,"cat":"무기","setEff":"","minHit":"0","maxHit":"0","minAtk":"60","maxAtk":"70","minDef":"-20","maxDef":"-20","minDex":"-20","maxDex":"-20","minHP":"0","maxHP":"0","minCrit":"5","maxCrit":"5","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"-"},{"o":212,"name":"닉네임변경권","id":"99999","gfx":"55122","route":"상인의 장터 (마일리지 상점)","desc":"닉네임을 변경할수있는 종이","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"},{"o":213,"name":"헌터의 소라3","id":"28974","gfx":"52091","route":"","desc":"필드 Lv1 펫의 출현 확률이 50% 증가 (3:00:00)","part":16,"cat":"기타","setEff":"","minHit":"0","maxHit":"0","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0"}];
+
+/* ===== 카테고리 색상/순서 ===== */
+var CAT_ORDER = ['전체','무기','방어구','장신구','토템','보조','소모','캐릭터','요리','이벤트','초보자','페트병','기타'];
+var CAT_COLOR = {
+  '무기':'#e0684a','방어구':'#2f7fd6','장신구':'#9b6fd6','토템':'#6fd0a0','보조':'#22b6c9',
+  '소모':'#4bb884','캐릭터':'#e070a8','요리':'#f5a623','이벤트':'#f0c419','초보자':'#7fb3e8',
+  '페트병':'#5fc4cf','기타':'#8ea6c2','전체':'#2f7fd6'
+};
+/* 세부종류: 무기/방어구는 part(게임 실제 무기타입) 기준, 장신구는 이름 기준 */
+var SUBCATS = {
+  '무기':['창','도끼','곤봉','활','손톱','부메랑','기타무기'],
+  '방어구':['투구','갑옷','기타방어구'],
+  '장신구':['목걸이','반지','귀걸이','팔찌','거울','기타장신구']
+};
+var SUBICON = {'창':'🔱','도끼':'🪓','곤봉':'🏏','활':'🏹','손톱':'🐾','부메랑':'🪃','기타무기':'⚔',
+  '투구':'⛑','갑옷':'🛡','기타방어구':'🧿','목걸이':'📿','반지':'💍','귀걸이':'✨','팔찌':'⌚','거울':'🪞','기타장신구':'💠'};
+function itemSubtype(it){
+  var p=it.part, n=it.name;
+  if(it.cat==='무기'){
+    if(p===0) return '손톱'; if(p===1) return '도끼'; if(p===2) return '곤봉';
+    if(p===3) return '창'; if(p===4) return '활'; if(p===17) return '부메랑';
+    return '기타무기';
+  }
+  if(it.cat==='방어구'){ if(p===6) return '투구'; if(p===7) return '갑옷'; return '기타방어구'; }
+  if(it.cat==='장신구'){
+    if(n.indexOf('목걸이')>=0||n.indexOf('팬던트')>=0||n.indexOf('펜던트')>=0) return '목걸이';
+    if(n.indexOf('반지')>=0) return '반지';
+    if(n.indexOf('귀걸이')>=0) return '귀걸이';
+    if(n.indexOf('팔찌')>=0) return '팔찌';
+    if(n.indexOf('거울')>=0) return '거울';
+    return '기타장신구';
+  }
+  return '';
+}
+
+var ITEMS = SEED.slice();
+var CAT = '전체';
+var SUBCAT = '전체';
+var MAGIC = '전체';
+var QUERY = '';
+var SORT = 'default';
+var VIEW = 'card';
+var SHOWN = 60;
+var PAGE_STEP = 60;
+
+function byId(id){ return document.getElementById(id); }
+function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function trim(s){ return String(s==null?'':s).replace(/^\s+|\s+$/g,''); }
+function norm(s){ s=String(s==null?'':s).toLowerCase(); s=s.replace(/\s+/g,''); s=s.replace(/[^\w가-힣]/g,''); return s; }
+function isEmptyVal(v){ v=trim(v); return v===''||v==='-'||v==='0'||v==='+0'||v==='-0'; }
+
+function statRange(min,max){
+  var a=trim(min), b=trim(max);
+  var am=a.match(/-?\d+/), bm=b.match(/-?\d+/);
+  a = am?am[0]:'-'; b = bm?bm[0]:'-';
+  var ae=isEmptyVal(a), be=isEmptyVal(b);
+  if(ae&&be) return '-';
+  if(ae&&!be) return b.replace(/^\+/,'');
+  if(be&&!ae) return a.replace(/^\+/,'');
+  a=a.replace(/^\+/,''); b=b.replace(/^\+/,'');
+  if(a===b) return a;
+  return a+'~'+b;
+}
+function statNum(v){ var m=String(v).match(/-?\d+/); return m?parseInt(m[0],10):0; }
+function rangeNum(min,max){ if(!isEmptyVal(max)) return statNum(max); return statNum(min); }
+function valClass(txt){ if(txt==='-') return 'zero'; return String(txt).charAt(0)==='-'?'neg':'pos'; }
+
+/* 아이템의 표시 가능한 스탯 목록 [label, rangeText] (값 있는 것만) */
+var STAT_DEFS = [
+  ['공','minAtk','maxAtk'],['방','minDef','maxDef'],['순','minDex','maxDex'],['내','minHP','maxHP'],
+  ['크리','minCrit','maxCrit'],['회피','minEva','maxEva'],['명중','hit','hit'],['매력','minCharm','maxCharm']
+];
+function itemStats(it){
+  var out=[];
+  for(var i=0;i<STAT_DEFS.length;i++){
+    var d=STAT_DEFS[i];
+    var r=statRange(it[d[1]], it[d[2]]);
+    if(r!=='-') out.push([d[0], r]);
+  }
+  return out;
+}
+function sortValue(it,key){
+  if(key==='total') return itemTotal(it);
+  var m={atk:['minAtk','maxAtk'],def:['minDef','maxDef'],dex:['minDex','maxDex'],hp:['minHP','maxHP'],
+    crit:['minCrit','maxCrit'],eva:['minEva','maxEva'],hit:['hit','hit'],charm:['minCharm','maxCharm']};
+  var d=m[key]; if(!d) return 0; return rangeNum(it[d[0]], it[d[1]]);
+}
+
+/* 합계 스탯: +는 최고치, -는 최소페널티(둘 다 max값) · 내구력은 3당 1로 환산(÷3) */
+function itemTotal(it){
+  return rangeNum(it.minAtk,it.maxAtk)+rangeNum(it.minDef,it.maxDef)+rangeNum(it.minDex,it.maxDex)+rangeNum(it.minHP,it.maxHP)/3;
+}
+function hasBaseStat(it){
+  return statRange(it.minAtk,it.maxAtk)!=='-'||statRange(it.minDef,it.maxDef)!=='-'||
+         statRange(it.minDex,it.maxDex)!=='-'||statRange(it.minHP,it.maxHP)!=='-';
+}
+function fmtTotal(v){
+  var r=Math.round(v*100)/100;
+  var s=String(r);
+  return (r>0?'+':'')+s;
+}
+function totalClass(v){ return v>0?'pos':(v<0?'neg':'zero'); }
+
+function iconUrl(it){
+  var key=trim(it.gfx); if(key===''||key==='0') key=trim(it.id); if(key==='') return ICON_DEFAULT;
+  return ICON_BASE+key+'.png';
+}
+function imgTag(it){
+  return '<img src="'+esc(iconUrl(it))+'" loading="lazy" alt="" onerror="this.onerror=null;this.src=\''+ICON_DEFAULT+'\'">';
+}
+
+function hasMagic(it){ return it.magicName && it.magicName!=='주술없음' && !isEmptyVal(it.stamina); }
+
+/* ===== 카드 ===== */
+function cardHTML(it, idx, pos){
+  var color = CAT_COLOR[it.cat] || CAT_COLOR['기타'];
+  var stats = itemStats(it);
+  var sub = itemSubtype(it);
+  var typeLabel = it.cat + (sub ? ' · ' + sub : '');
+
+  /* 스탯 인라인 */
+  var statHtml;
+  if(stats.length){
+    statHtml='<div class="ic-stats">'+stats.map(function(s){
+      return '<span class="st"><i>'+esc(s[0])+'</i><b class="'+valClass(s[1])+'">'+esc(s[1])+'</b></span>';
+    }).join('')+'</div>';
+  }else{
+    var d=trim(it.desc);
+    var body=(d && d!=='미확인') ? esc(d) : '옵션 정보 없음';
+    statHtml='<div class="ic-desc">'+body+'</div>';
+  }
+
+  /* 합계 (타입 줄 우측) */
+  var totalHtml='';
+  if(hasBaseStat(it)){
+    var tv=itemTotal(it);
+    totalHtml='<span class="ic-total"><span class="l">합계</span><b class="'+totalClass(tv)+'">'+esc(fmtTotal(tv))+'</b></span>';
+  }
+
+  /* 메타 라인: 타수 / 세트 / 주술 (있는 것만) */
+  var meta=[];
+  if(it.cat==='무기'){ var h=statRange(it.minHit,it.maxHit); if(h!=='-') meta.push('<span class="m hit">⚔ '+esc(h)+'타</span>'); }
+  if(it.setEff) meta.push('<span class="m set">✦ '+esc(it.setEff)+'</span>');
+  if(hasMagic(it)) meta.push('<span class="m magic">🔮 '+esc(it.magicName)+'</span>');
+  var metaHtml = meta.length ? '<div class="ic-meta">'+meta.join('')+'</div>' : '';
+
+  var route = it.route ? esc(it.route) : '미등록';
+  return '<article class="item-card" style="--cc:'+color+';--i:'+(pos||0)+'" data-idx="'+idx+'">'+
+      '<div class="ic-top">'+
+        '<div class="ic-img">'+imgTag(it)+'</div>'+
+        '<div class="ic-head">'+
+          '<div class="ic-name">'+esc(it.name)+'</div>'+
+          '<div class="ic-type-row"><span class="ic-type">'+esc(typeLabel)+'</span>'+totalHtml+'</div>'+
+        '</div>'+
+      '</div>'+
+      statHtml+
+      metaHtml+
+      '<div class="ic-route">'+route+'</div>'+
+    '</article>';
+}
+
+/* ===== 텍스트형 표 ===== */
+function tableHTML(list){
+  var head='<thead>'+
+    '<tr>'+
+      '<th rowspan="2">아이템</th><th rowspan="2">분류</th>'+
+      '<th class="r grp" colspan="4">기본옵션</th>'+
+      '<th class="r" rowspan="2">합계</th>'+
+      '<th class="r grp sp" colspan="3">특수</th>'+
+      '<th rowspan="2">주술</th>'+
+    '</tr>'+
+    '<tr>'+
+      '<th class="r sub">공</th><th class="r sub">방</th><th class="r sub">순</th><th class="r sub">내</th>'+
+      '<th class="r sub sp">크리</th><th class="r sub sp">명중</th><th class="r sub sp">회피</th>'+
+    '</tr>'+
+  '</thead>';
+  var rows=list.map(function(it){
+    var idx=ITEMS.indexOf(it);
+    var color=CAT_COLOR[it.cat]||CAT_COLOR['기타'];
+    function cell(min,max,extra){ var r=statRange(min,max); return '<td class="r'+(extra||'')+'"><span class="it-stat '+valClass(r)+'">'+esc(r)+'</span></td>'; }
+    var totalCell;
+    if(hasBaseStat(it)){ var tv=itemTotal(it); totalCell='<td class="r"><span class="it-total '+totalClass(tv)+'">'+esc(fmtTotal(tv))+'</span></td>'; }
+    else totalCell='<td class="r"><span class="it-stat zero">-</span></td>';
+    var mg = hasMagic(it)? esc(it.magicName) : '<span style="color:var(--t4)">-</span>';
+    return '<tr data-idx="'+idx+'">'+
+      '<td><div class="it-name">'+esc(it.name)+'</div><div class="it-route">'+esc(it.route||'미등록')+'</div></td>'+
+      '<td><span class="it-cat" style="background:'+color+'">'+esc(it.cat)+'</span></td>'+
+      cell(it.minAtk,it.maxAtk)+cell(it.minDef,it.maxDef)+cell(it.minDex,it.maxDex)+cell(it.minHP,it.maxHP)+
+      totalCell+
+      cell(it.minCrit,it.maxCrit,' sp')+cell(it.hit,it.hit,' sp')+cell(it.minEva,it.maxEva,' sp')+
+      '<td style="font-size:12px;">'+mg+'</td>'+
+    '</tr>';
+  }).join('');
+  return '<table class="item-table">'+head+'<tbody>'+rows+'</tbody></table>';
+}
+
+/* ===== 필터/정렬 ===== */
+function applyFilter(){
+  var arr=ITEMS.slice();
+  if(CAT!=='전체') arr=arr.filter(function(i){ return i.cat===CAT; });
+  if(SUBCATS[CAT] && SUBCAT!=='전체') arr=arr.filter(function(i){ return itemSubtype(i)===SUBCAT; });
+  if(MAGIC!=='전체'){
+    if(MAGIC==='__has__') arr=arr.filter(function(i){ return hasMagic(i); });
+    else arr=arr.filter(function(i){ return i.magicName===MAGIC; });
+  }
+  var q=norm(QUERY);
+  if(q){
+    arr=arr.filter(function(i){ return norm(i.name).indexOf(q)>=0 || norm(i.desc).indexOf(q)>=0; });
+  }
+  if(SORT==='name'){ arr.sort(function(a,b){ return a.name.localeCompare(b.name,'ko'); }); }
+  else if(SORT!=='default'){
+    arr.sort(function(a,b){ var av=sortValue(a,SORT), bv=sortValue(b,SORT); if(bv!==av) return bv-av; return (a.o||0)-(b.o||0); });
+  } else { arr.sort(function(a,b){ return (a.o||0)-(b.o||0); }); }
+  return arr;
+}
+
+function buildCatChips(){
+  var counts={'전체':ITEMS.length};
+  for(var i=0;i<ITEMS.length;i++){ var c=ITEMS[i].cat; counts[c]=(counts[c]||0)+1; }
+  var html='';
+  for(var j=0;j<CAT_ORDER.length;j++){
+    var k=CAT_ORDER[j]; var n=counts[k]||0;
+    if(k!=='전체' && n===0) continue;
+    html+='<span class="f-chip'+(CAT===k?' is-on':'')+'" data-v="'+esc(k)+'">'+esc(k)+'<span class="cnt">'+n+'</span></span>';
+  }
+  byId('catFilter').innerHTML=html;
+}
+
+function buildSubChips(){
+  var box=byId('subFilter');
+  var subs=SUBCATS[CAT];
+  if(!subs){ box.innerHTML=''; box.style.display='none'; return; }
+  var counts={};
+  for(var i=0;i<ITEMS.length;i++){ if(ITEMS[i].cat===CAT){ var s=itemSubtype(ITEMS[i]); counts[s]=(counts[s]||0)+1; } }
+  var color=CAT_COLOR[CAT]||CAT_COLOR['기타'];
+  box.style.setProperty('--catcolor', color);
+  var total=0; for(var t in counts) total+=counts[t];
+  var html='<span class="f-subchip'+(SUBCAT==='전체'?' is-on':'')+'" data-v="전체">전체<span class="cnt">'+total+'</span></span>';
+  for(var j=0;j<subs.length;j++){
+    var k=subs[j]; var n=counts[k]||0; if(n===0) continue;
+    html+='<span class="f-subchip'+(SUBCAT===k?' is-on':'')+'" data-v="'+esc(k)+'">'+(SUBICON[k]||'')+' '+esc(k)+'<span class="cnt">'+n+'</span></span>';
+  }
+  box.innerHTML=html; box.style.display='flex';
+}
+
+function buildMagicOptions(){
+  var counts={}, hasCount=0;
+  for(var i=0;i<ITEMS.length;i++){
+    if(hasMagic(ITEMS[i])){ var m=ITEMS[i].magicName; counts[m]=(counts[m]||0)+1; hasCount++; }
+  }
+  /* 주술명 정렬: 기본이름 → 레벨 순 */
+  var names=Object.keys(counts).sort(function(a,b){
+    function base(s){ return s.replace(/\s*Lv\d+\s*$/,''); }
+    function lv(s){ var m=s.match(/Lv(\d+)/); return m?parseInt(m[1],10):0; }
+    var ba=base(a), bb=base(b);
+    if(ba!==bb) return ba.localeCompare(bb,'ko');
+    return lv(a)-lv(b);
+  });
+  var html='<option value="전체">전체 아이템</option>';
+  html+='<option value="__has__">주술 있는 것만 ('+hasCount+')</option>';
+  for(var j=0;j<names.length;j++){
+    var n=names[j];
+    html+='<option value="'+esc(n)+'"'+(MAGIC===n?' selected':'')+'>'+esc(n)+' ('+counts[n]+')</option>';
+  }
+  var sel=byId('magicSel');
+  sel.innerHTML=html;
+  sel.value = MAGIC;
+}
+
+function render(){
+  var arr=applyFilter();
+  byId('statTotal').textContent=ITEMS.length;
+  byId('statShown').textContent=arr.length;
+  byId('statCat').textContent=CAT;
+
+  var grid=byId('grid'), empty=byId('empty'), more=byId('loadmore'), deck=byId('deck');
+  if(!arr.length){
+    grid.innerHTML=''; grid.style.display='none'; deck.style.display='none';
+    empty.style.display='block'; more.style.display='none'; return;
+  }
+  empty.style.display='none';
+
+  if(VIEW==='deck'){
+    grid.style.display='none'; more.style.display='none'; deck.style.display='flex';
+    renderDeck(arr);
+    return;
+  }
+  deck.style.display='none'; grid.style.display='';
+
+  if(VIEW==='text'){
+    grid.className='text-view';
+    grid.innerHTML=tableHTML(arr);
+    more.style.display='none';
+    var tbl=grid.querySelector('.item-table'), r1=grid.querySelector('.item-table thead tr:first-child');
+    if(tbl&&r1) tbl.style.setProperty('--h1', r1.offsetHeight+'px');
+  }else{
+    grid.className='';
+    var slice=arr.slice(0,SHOWN);
+    grid.innerHTML=slice.map(function(it,pos){ return cardHTML(it, ITEMS.indexOf(it), pos); }).join('');
+    more.style.display = arr.length>SHOWN ? 'block' : 'none';
+  }
+}
+
+/* ===== 3D 덱 ===== */
+var DECK_I=0, deckList=[], deckMoved=false, deckSig='';
+function renderDeck(list){
+  var sig=list.length+'|'+(list.length?list[0].id:'')+'|'+(list.length?list[list.length-1].id:'');
+  if(sig!==deckSig){ DECK_I=0; deckSig=sig; }
+  deckList=list;
+  if(DECK_I>=list.length) DECK_I=0;
+  if(DECK_I<0) DECK_I=0;
+  var stage=byId('deckStage');
+  stage.innerHTML=list.map(function(it,i){
+    return '<div class="deck-card" data-i="'+i+'"><div class="dcard">'+detailCardHTML(it)+'</div></div>';
+  }).join('');
+  layoutDeck();
+}
+function layoutDeck(){
+  var stage=byId('deckStage'); if(!stage) return;
+  var cards=stage.children, W=stage.clientWidth||900;
+  var spread=Math.min(210, Math.max(120, W*0.23));
+  for(var i=0;i<cards.length;i++){
+    var el=cards[i], d=i-DECK_I, ad=Math.abs(d);
+    if(ad>4){ el.style.display='none'; continue; }
+    el.style.display='';
+    var tx=d*spread, ry=Math.max(-44,Math.min(44,-d*20)), tz=-ad*170,
+        sc=Math.max(0.66,1-ad*0.11), op=ad>=4?0:(1-ad*0.24);
+    el.style.transform='translateX('+tx+'px) translateZ('+tz+'px) rotateY('+ry+'deg) scale('+sc+')';
+    el.style.opacity=op; el.style.zIndex=String(100-ad);
+    el.classList.toggle('is-center', d===0);
+  }
+  var cnt=byId('deckCount');
+  if(cnt) cnt.innerHTML=deckList.length?('<b>'+(DECK_I+1)+'</b> / '+deckList.length):'';
+}
+function deckGo(n){ if(!deckList.length) return; DECK_I=Math.max(0,Math.min(deckList.length-1,n)); layoutDeck(); }
+
+/* ===== 상세 카드 마크업 (모달 · 덱 공용) ===== */
+function detailCardHTML(it){
+  var color=CAT_COLOR[it.cat]||CAT_COLOR['기타'];
+  var sub=itemSubtype(it);
+  var badges='<span class="modal-badge" style="background:'+color+'">'+esc(it.cat)+'</span>';
+  if(sub) badges+='<span class="modal-badge" style="background:var(--white);color:'+color+';border:1.5px solid '+color+'">'+(SUBICON[sub]||'')+' '+esc(sub)+'</span>';
+  if(it.cat==='무기'){ var h=statRange(it.minHit,it.maxHit); if(h!=='-') badges+='<span class="modal-badge" style="background:var(--err)">공격횟수 '+esc(h)+'타</span>'; }
+  if(it.setEff) badges+='<span class="modal-badge set">'+esc(it.setEff)+'</span>';
+
+  var body='';
+  var stats=itemStats(it);
+  if(stats.length){
+    body+='<div class="modal-section"><div class="modal-section-title">상세 옵션</div><div class="modal-stat-grid">';
+    body+=stats.map(function(s){ return '<div class="modal-stat-box"><span class="modal-stat-label">'+esc(s[0])+'</span><span class="modal-stat-val '+valClass(s[1])+'">'+esc(s[1])+'</span></div>'; }).join('');
+    body+='</div>';
+    if(hasBaseStat(it)){
+      var tv=itemTotal(it);
+      body+='<div class="modal-total"><span class="l">공방순내 합계 <span style="font-weight:400;color:var(--t3)">(내÷3)</span></span><span class="v '+totalClass(tv)+'">'+esc(fmtTotal(tv))+'</span></div>';
+    }
+    body+='</div>';
+  }
+  body+='<div class="modal-section"><div class="modal-section-title">획득 경로</div><div class="modal-obtain">'+(it.route?esc(it.route):'미등록')+'</div></div>';
+  if(hasMagic(it)){
+    body+='<div class="modal-section"><div class="modal-section-title">주술</div><div class="modal-magic">'+
+      '<div class="modal-magic-box"><span class="l">주술</span><span class="v">'+esc(it.magicName)+'</span></div>'+
+      '<div class="modal-magic-box"><span class="l">기력소모</span><span class="v" style="color:var(--a1)">'+esc(it.stamina)+'</span></div>'+
+    '</div></div>';
+  }
+  var d=trim(it.desc);
+  if(d && d!=='미확인'){
+    body+='<div class="modal-section"><div class="modal-section-title">설명</div><div class="modal-desc">'+esc(d).replace(/\n/g,'<br>')+'</div></div>';
+  }
+  return '<div class="modal-hero">'+
+      '<div class="modal-img-box">'+imgTag(it)+'</div>'+
+      '<div class="modal-hero-info"><div class="modal-name">'+esc(it.name)+'</div><div class="modal-badges">'+badges+'</div></div>'+
+    '</div>'+
+    '<div class="modal-body">'+body+'</div>';
+}
+
+/* ===== 모달 ===== */
+function openModal(it){
+  byId('modalContent').innerHTML=detailCardHTML(it);
+  byId('item-modal').classList.add('open');
+  byId('item-modal').querySelector('.modal-card').scrollTop=0;
+}
+function closeModal(){ byId('item-modal').classList.remove('open'); }
+
+/* ===== 이벤트 ===== */
+function bindEvents(){
+  byId('search').addEventListener('input', function(){ QUERY=this.value; SHOWN=PAGE_STEP; render(); });
+  byId('sortSel').addEventListener('change', function(){ SORT=this.value; SHOWN=PAGE_STEP; render(); });
+  byId('magicSel').addEventListener('change', function(){ MAGIC=this.value; SHOWN=PAGE_STEP; render(); });
+
+  byId('catFilter').addEventListener('click', function(e){
+    var chip=e.target.closest('.f-chip'); if(!chip) return;
+    CAT=chip.getAttribute('data-v'); SUBCAT='전체'; SHOWN=PAGE_STEP;
+    buildCatChips(); buildSubChips(); render();
+  });
+  byId('subFilter').addEventListener('click', function(e){
+    var chip=e.target.closest('.f-subchip'); if(!chip) return;
+    SUBCAT=chip.getAttribute('data-v'); SHOWN=PAGE_STEP;
+    buildSubChips(); render();
+  });
+  byId('viewSeg').addEventListener('click', function(e){
+    var btn=e.target.closest('button'); if(!btn) return;
+    VIEW=btn.getAttribute('data-v');
+    Array.prototype.forEach.call(this.querySelectorAll('button'),function(b){ b.classList.toggle('active', b===btn); });
+    render();
+  });
+  byId('loadmore').addEventListener('click', function(){ SHOWN+=PAGE_STEP; render(); });
+
+  byId('grid').addEventListener('click', function(e){
+    var el=e.target.closest('[data-idx]'); if(!el) return;
+    var it=ITEMS[parseInt(el.getAttribute('data-idx'),10)]; if(it) openModal(it);
+  });
+
+  /* 덱: 화살표 / 좌우카드 클릭 / 드래그·스와이프 / 키보드 / 리사이즈 */
+  byId('deckPrev').addEventListener('click', function(){ deckGo(DECK_I-1); });
+  byId('deckNext').addEventListener('click', function(){ deckGo(DECK_I+1); });
+  byId('deckStage').addEventListener('click', function(e){
+    if(deckMoved){ deckMoved=false; return; }
+    var card=e.target.closest('.deck-card'); if(!card) return;
+    var i=parseInt(card.getAttribute('data-i'),10);
+    if(i!==DECK_I) deckGo(i);
+  });
+  (function(){
+    var stage=byId('deckStage'), active=false, startX=0, startI=0;
+    stage.addEventListener('pointerdown', function(e){ active=true; startX=e.clientX; startI=DECK_I; deckMoved=false; });
+    window.addEventListener('pointermove', function(e){
+      if(!active) return;
+      var dx=e.clientX-startX;
+      if(Math.abs(dx)>6) deckMoved=true;
+      var step=Math.round(-dx/70);
+      var ni=Math.max(0,Math.min(deckList.length-1,startI+step));
+      if(ni!==DECK_I){ DECK_I=ni; layoutDeck(); }
+    });
+    window.addEventListener('pointerup', function(){ active=false; });
+    window.addEventListener('pointercancel', function(){ active=false; });
+  })();
+  window.addEventListener('resize', function(){ if(VIEW==='deck') layoutDeck(); });
+
+  byId('modalClose').addEventListener('click', closeModal);
+  byId('item-modal').addEventListener('click', function(e){ if(e.target===this) closeModal(); });
+  document.addEventListener('keydown', function(e){
+    if(e.key==='Escape'){ closeModal(); return; }
+    if(VIEW==='deck' && !byId('item-modal').classList.contains('open')){
+      if(e.key==='ArrowLeft'){ deckGo(DECK_I-1); e.preventDefault(); }
+      else if(e.key==='ArrowRight'){ deckGo(DECK_I+1); e.preventDefault(); }
+    }
+  });
+}
+
+/* ===== 사이드바 / 다크모드 ===== */
+var sidebar=byId('sidebar'), main=byId('main'), toggleBtn=byId('toggleBtn'), backdrop=byId('sbBackdrop');
+function setSidebar(open){
+  sidebar.classList.toggle('open', open);
+  main.classList.toggle('shifted', open);
+  toggleBtn.classList.toggle('sb-open', open);
+  toggleBtn.textContent = open ? '✕' : '☰';
+  if(window.innerWidth<=820) backdrop.classList.toggle('show', open);
+  try{ localStorage.setItem('sa2-sb', open?'1':'0'); }catch(e){}
+}
+toggleBtn.addEventListener('click', function(){ setSidebar(!sidebar.classList.contains('open')); });
+backdrop.addEventListener('click', function(){ setSidebar(false); });
+(function(){ try{ var s=localStorage.getItem('sa2-sb'); if(s==='1'&&window.innerWidth>820) setSidebar(true); }catch(e){} })();
+
+function toggleDark(){
+  var h=document.documentElement;
+  var n=h.getAttribute('data-theme')==='dark'?'light':'dark';
+  h.setAttribute('data-theme', n);
+  try{ localStorage.setItem('sa2-theme', n); }catch(e){}
+}
+try{ var sv=localStorage.getItem('sa2-theme'); if(sv) document.documentElement.setAttribute('data-theme', sv); }catch(e){}
+
+/* ===== 라이브 데이터 로딩(서버 최신 itemset6.txt 파싱) ===== */
+var IDX={name:0,sys:1,desc:2,setStat:3,setCmd1:11,setCmd2:12,id:16,gfx:17,type:19,setCode:34,
+  minHit:35,maxHit:36,minAtk:37,maxAtk:38,minDef:39,maxDef:40,minDex:41,maxDex:42,minHP:43,maxHP:44,
+  minCharm:49,maxCharm:50,minEva:51,maxEva:52,magic:55,stamina:57,hit:61,minCrit:75,maxCrit:76};
+function intOnly(x){ var s=trim(x); if(!s) return '-'; var m=s.match(/-?\d+/); return m?m[0]:'-'; }
+function numOf(x){ var v=Number(trim(x)); return isFinite(v)?v:0; }
+function partToBase(p){ p=parseInt(p,10);
+  if([0,1,2,3,4,17,18,19].indexOf(p)>=0) return '무기';
+  if([6,7].indexOf(p)>=0) return '방어구';
+  if([8,9,10,11,13,14,15].indexOf(p)>=0) return '장신구';
+  if([20].indexOf(p)>=0) return '소모';
+  if([24,25,26,27].indexOf(p)>=0) return '토템';
+  return '기타';
+}
+function detectCat(name,route,desc,part){
+  var all=norm(name+' '+route+' '+desc); var base=partToBase(part);
+  if(all.indexOf('초보자')>=0) return '초보자';
+  if(all.indexOf('페트병')>=0||all.indexOf('펫병')>=0) return '페트병';
+  if(all.indexOf('변신')>=0||all.indexOf('캐릭터')>=0) return '캐릭터';
+  if(all.indexOf('요리')>=0||all.indexOf('고기')>=0||all.indexOf('스프')>=0) return '요리';
+  if(all.indexOf('이벤트')>=0) return '이벤트';
+  if(all.indexOf('보조')>=0) return '보조';
+  return base;
+}
+function parseMagic(text){
+  var map={}, lines=String(text||'').split(/\r?\n/);
+  for(var i=0;i<lines.length;i++){ var line=trim(lines[i]); if(!line||line.charAt(0)==='#'||line.indexOf('//')===0) continue;
+    var a=line.split(','); var nm=trim(a[0]), code=trim(a[4]); if(nm&&code) map[code]=nm; }
+  return map;
+}
+function parseSetEffect(a){
+  var c1=trim(a[IDX.setCmd1]), c2=trim(a[IDX.setCmd2]);
+  if(c1!=='ITEM_suitEquip'&&c2!=='ITEM_ResuitEquip') return '';
+  if(isEmptyVal(intOnly(a[IDX.setCode]))) return '';
+  var m=trim(a[IDX.setStat]).match(/^([A-Z_]+)\s*:\s*(-?\d+)/i); if(!m) return '';
+  var map={MSTR:'공',MTGH:'방',MDEX:'순',MVITAL:'내'};
+  var label=map[(m[1]||'').toUpperCase()]; if(!label) return '';
+  var v=Number(m[2]); if(!isFinite(v)||v===0) return '';
+  return '세트효과 '+label+(v>0?'+':'')+v;
+}
+function parseItem(line, magicMap, order){
+  var a=String(line||'').split(',');
+  var name=trim(a[IDX.name]), id=trim(a[IDX.id]);
+  if(!name||!id) return null;
+  var route=trim(a[IDX.sys]), desc=trim(a[IDX.desc]), part=numOf(a[IDX.type]);
+  var magicCode=intOnly(a[IDX.magic]), stamina=intOnly(a[IDX.stamina]), magicName='주술없음';
+  if(magicCode!=='-'&&magicMap[magicCode]) magicName=magicMap[magicCode];
+  return {o:order,name:name,id:id,gfx:trim(a[IDX.gfx]),route:route,desc:desc,part:part,
+    cat:detectCat(name,route,desc,part),setEff:parseSetEffect(a),
+    minHit:intOnly(a[IDX.minHit]),maxHit:intOnly(a[IDX.maxHit]),
+    minAtk:intOnly(a[IDX.minAtk]),maxAtk:intOnly(a[IDX.maxAtk]),
+    minDef:intOnly(a[IDX.minDef]),maxDef:intOnly(a[IDX.maxDef]),
+    minDex:intOnly(a[IDX.minDex]),maxDex:intOnly(a[IDX.maxDex]),
+    minHP:intOnly(a[IDX.minHP]),maxHP:intOnly(a[IDX.maxHP]),
+    minCrit:intOnly(a[IDX.minCrit]),maxCrit:intOnly(a[IDX.maxCrit]),
+    minEva:intOnly(a[IDX.minEva]),maxEva:intOnly(a[IDX.maxEva]),
+    hit:intOnly(a[IDX.hit]),minCharm:intOnly(a[IDX.minCharm]),maxCharm:intOnly(a[IDX.maxCharm]),
+    magicName:magicName,stamina:stamina};
+}
+async function fetchTextSmart(url){
+  var res=await fetch(url,{cache:'no-store'}); if(!res.ok) return '';
+  var buf=await res.arrayBuffer();
+  var encs=['utf-8','euc-kr','windows-949']; var best='',bestScore=-1e9;
+  for(var i=0;i<encs.length;i++){ try{
+    var txt=new TextDecoder(encs[i],{fatal:false}).decode(buf);
+    var broken=(txt.match(/\uFFFD/g)||[]).length, kor=(txt.match(/[가-힣]/g)||[]).length;
+    var sc=kor*2-broken*80; if(sc>bestScore){ bestScore=sc; best=txt; }
+  }catch(e){} }
+  return best;
+}
+async function loadLive(){
+  try{
+    var magicText=await fetchTextSmart(MAGIC_FILE);
+    var magicMap=parseMagic(magicText);
+    var itemText=await fetchTextSmart(DATA_FILE);
+    if(!itemText) throw new Error('no data');
+    var lines=itemText.split(/\r?\n/), parsed=[];
+    for(var i=0;i<lines.length;i++){ var line=trim(lines[i]); if(!line||line.charAt(0)==='#'||line.indexOf('//')===0) continue;
+      var it=parseItem(line, magicMap, parsed.length); if(it) parsed.push(it); }
+    if(parsed.length){
+      ITEMS=parsed;
+      buildCatChips(); buildSubChips(); buildMagicOptions(); render();
+      byId('loadStatus').textContent='서버 최신 '+ITEMS.length+'개 ✓';
+    }
+  }catch(e){
+    byId('loadStatus').textContent='아이템 '+ITEMS.length+'개';
+  }
+}
+
+/* ===== 시작 ===== */
+bindEvents();
+buildCatChips();
+buildSubChips();
+buildMagicOptions();
+render();
+byId('loadStatus').textContent='아이템 '+ITEMS.length+'개';
+loadLive();
+</script>
+</body>
+</html>
