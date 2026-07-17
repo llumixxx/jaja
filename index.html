@@ -193,6 +193,8 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--t1);
 /* ── 펫 정보 성장률 ── */
 .pi-sg-item{background:var(--s1);border:1.5px solid var(--border);border-radius:9px;padding:5px 9px;
   display:flex;align-items:center;justify-content:space-between;min-width:0;}
+.pi-si-init{background:rgba(34,182,201,.07);border-color:rgba(34,182,201,.2);}
+[data-theme="dark"] .pi-si-init{background:rgba(34,182,201,.12);}
 .pi-sg-lbl{font-size:10px;font-weight:700;color:var(--t3);flex-shrink:0;}
 .pi-sg-right{display:flex;align-items:center;gap:2px;flex-shrink:0;}
 .pi-sg-ic{font-size:12px;font-weight:800;font-family:'Nunito',sans-serif;color:var(--t2);}
@@ -426,6 +428,13 @@ footer{text-align:center;padding:30px;color:var(--t3);font-size:11px;font-family
                     <span style="font-size:10px;font-weight:800;color:var(--t2);">S급 총성장률</span>
                     <span style="font-size:15px;font-weight:900;font-family:'Nunito',sans-serif;color:var(--a1);" id="pi-sg-total">—</span>
                   </div>
+                  <div style="font-size:9px;letter-spacing:1.5px;color:var(--t3);font-family:'Nunito',sans-serif;font-weight:800;text-transform:uppercase;margin:12px 0 7px;">S초기치 <span style="font-size:8px;color:var(--t4);letter-spacing:0;">S급(8등급) Lv.1</span></div>
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;">
+                    <div class="pi-sg-item pi-si-init pi-sg-atk"><span class="pi-sg-lbl">⚔ 공격</span><span class="pi-sg-right"><span class="pi-sg-val" id="pi-si-atk">—</span></span></div>
+                    <div class="pi-sg-item pi-si-init pi-sg-def"><span class="pi-sg-lbl">🛡 방어</span><span class="pi-sg-right"><span class="pi-sg-val" id="pi-si-def">—</span></span></div>
+                    <div class="pi-sg-item pi-si-init pi-sg-agi"><span class="pi-sg-lbl">💨 순발</span><span class="pi-sg-right"><span class="pi-sg-val" id="pi-si-agi">—</span></span></div>
+                    <div class="pi-sg-item pi-si-init pi-sg-hp"><span class="pi-sg-lbl">❤ 내구</span><span class="pi-sg-right"><span class="pi-sg-val" id="pi-si-hp">—</span></span></div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -514,7 +523,7 @@ let PETS = SEED.slice().filter(p => String(p.how||"").replace(/\s+/g,"").trim() 
 const IMG_BASE = "https://sa000001.com/sa2/info/img/";
 
 function num(v){ const n = Number(v); return isFinite(n) ? n : 0; }
-function cut2(n){ n=Number(n); if(!isFinite(n)) return "-"; return (Math.floor(n*100)/100).toFixed(2).replace(/\.?0+$/, ""); }
+function cut2(n){ n=Number(n); if(!isFinite(n)) return "-"; return (Math.floor(n*1000)/1000).toFixed(3); }
 function dropDecimalInt(v){ v=Number(v); return isFinite(v)?Math.floor(v):0; }
 function rankInfoB(sum){ if(sum>=100)return 475; if(sum>=95)return 495; if(sum>=90)return 515; if(sum>=85)return 535; if(sum>=80)return 555; return 575; }
 function disp(h,a,d,s){ return { h:h*4+a+d+s, a:h*0.1+a+d*0.1+s*0.05, d:h*0.1+a*0.1+d+s*0.05, s:s }; }
@@ -621,6 +630,10 @@ function renderPetInfo(){
   document.getElementById("pi-sg-agi").textContent = cut2(st.growth.s);
   document.getElementById("pi-sg-hp").textContent = cut2(st.growth.h);
   document.getElementById("pi-sg-total").textContent = cut2(st.totalGrowth);
+  document.getElementById("pi-si-atk").textContent = cut2(st.init.a);
+  document.getElementById("pi-si-def").textContent = cut2(st.init.d);
+  document.getElementById("pi-si-agi").textContent = cut2(st.init.s);
+  document.getElementById("pi-si-hp").textContent = cut2(st.init.h);
 }
 
 /* ===== 스탯 스텝퍼 ===== */
