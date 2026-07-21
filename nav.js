@@ -11,6 +11,7 @@ const SA_NAV_ITEMS = [
   { href: "quiz.html", icon: "🧠", label: "퀴즈마스터" },
   { href: "maps.html", icon: "🗺️", label: "지도정보" },
   { href: "expcalc.html", icon: "📈", label: "경험치 계산기" },
+  { href: "sellcalc.html", icon: "💰", label: "판매 계산기" },
   // 새 메뉴를 추가하려면 아래처럼 한 줄만 더 넣으면 됩니다:
   // { href: "새파일명.html", icon: "✨", label: "메뉴이름" },
 ];
