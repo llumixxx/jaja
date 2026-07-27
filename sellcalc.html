@@ -332,7 +332,7 @@ summary::marker{ content:""; }
     <details style="margin-top:14px;">
       <summary style="cursor:pointer;font-size:12px;font-weight:800;color:var(--t2);list-style:none;">🏹 마릿수별 사냥 소요시간 (직접 수정) ▾</summary>
       <div class="hunt-time-edit-grid" id="huntTimeEditGrid" style="margin-top:12px;"></div>
-      <div class="result-note" style="margin-top:10px;">기본값은 참고용 실측 중간값이에요. 정밀하게 재려면 <a href="expcalc.html" style="color:var(--a1);font-weight:800;">경험치 계산기</a>의 스톱워치를 쓰면 돼요.</div>
+      <div class="result-note" style="margin-top:10px;">사냥터의 경험치는 다굴을 가지 않아도 똑같이 얻게 되므로 활사냥이 압도적으로 유리합니다. 해당 시간은 활 사냥 기준으로 설정된 임시 값으로 보다 정확한 데이터는 직접 체크하셔서 입력하시길 바랍니다.<br><br>정밀하게 재려면 <a href="expcalc.html" style="color:var(--a1);font-weight:800;">경험치 계산기</a>의 스톱워치를 쓰면 돼요.</div>
     </details>
   </div>
 
@@ -557,7 +557,7 @@ function fmtTime(totalSeconds){
 }
 
 /* ── 사냥 소요시간 그리드 ── */
-const DEFAULT_HUNT_TIMES = { 1:12.8, 2:20.5, 3:31.5, 4:46.0, 5:61.4 };
+const DEFAULT_HUNT_TIMES = { 1:10, 2:15, 3:20, 4:25, 5:30 };
 function renderHuntTimeEditGrid(){
   document.getElementById('huntTimeEditGrid').innerHTML = Object.keys(DEFAULT_HUNT_TIMES).map(n=>`
     <div class="hunt-time-edit-cell">
