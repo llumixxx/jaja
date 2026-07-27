@@ -16,6 +16,14 @@ const SA_NAV_ITEMS = [
   // { href: "새파일명.html", icon: "✨", label: "메뉴이름" },
 ];
 
+/* 하단 제작자 표기 (모든 페이지 공통 노출) */
+const SA_NAV_CREDIT =
+  `<div class="sb-nav-credit" style="margin-top:9px;padding:6px 10px;border-radius:11px;` +
+  `background:var(--s1,rgba(125,150,180,.10));border:1.5px solid var(--border,rgba(125,150,180,.22));` +
+  `text-align:center;font-size:11px;font-weight:800;letter-spacing:.2px;` +
+  `color:var(--t2,#4c6a8c);font-family:'Nunito',sans-serif;">` +
+  `🌱 만든이 : 야채부락리 족장 애호박</div>`;
+
 (function renderSaNav(){
   const nav = document.getElementById("sbNav");
   if(!nav) return;
@@ -29,7 +37,7 @@ const SA_NAV_ITEMS = [
 
   /* sbNav 엘리먼트에 data-expanded="true"가 있으면 토글 버튼 없이 항상 전체 메뉴를 보여줍니다. */
   if(nav.dataset.expanded === "true"){
-    nav.innerHTML = `<div class="sb-nav-list open">${listHTML}</div>`;
+    nav.innerHTML = `<div class="sb-nav-list open">${listHTML}</div>` + SA_NAV_CREDIT;
     return;
   }
 
@@ -39,7 +47,8 @@ const SA_NAV_ITEMS = [
       `<span class="sb-nav-toggle-label">${currentItem.label}</span>` +
       `<span class="sb-nav-toggle-chevron">▾</span>` +
     `</button>` +
-    `<div class="sb-nav-list" id="sbNavList">${listHTML}</div>`;
+    `<div class="sb-nav-list" id="sbNavList">${listHTML}</div>` +
+    SA_NAV_CREDIT;
 
   const toggleBtn = document.getElementById("sbNavToggle");
   const list = document.getElementById("sbNavList");
