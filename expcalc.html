@@ -271,7 +271,7 @@ footer{text-align:center;padding:30px;color:var(--t3);font-size:11px;font-family
     <div class="card-title">마릿수별 사냥 소요시간 (직접 수정 가능)</div>
     <div class="hunt-time-edit-grid" id="huntTimeEditGrid"></div>
     <div class="result-note" style="margin-top:12px;">
-      기본값은 1~5마리 실측 데이터로 1만 번 시뮬레이션한 중간값이에요. 아래 스톱워치로 직접 재서 "적용" 누르면 해당 마릿수 칸에 바로 반영돼요.
+      사냥터의 경험치는 다굴을 가지 않아도 똑같이 얻게 되므로 활사냥이 압도적으로 유리합니다. 해당 시간은 활 사냥 기준으로 설정된 임시 값으로 보다 정확한 데이터는 직접 체크하셔서 입력하시길 바랍니다.<br><br>아래 스톱워치로 직접 재서 "적용" 누르면 해당 마릿수 칸에 바로 반영돼요.
     </div>
 
     <div class="stopwatch-box">
@@ -404,9 +404,9 @@ function renderBracketTable(highlightLevel){
 renderBracketTable();
 
 /* ═══════════════════════════════════════════════════════════
-   마릿수별 사냥 소요시간 (직접 수정 가능, 기본값은 실측 데이터 1만회 시뮬레이션 중간값)
+   마릿수별 사냥 소요시간 (직접 수정 가능, 기본값은 활 사냥 기준 임시 값)
    ═══════════════════════════════════════════════════════════ */
-const DEFAULT_HUNT_TIMES = { 1:12.8, 2:20.5, 3:31.5, 4:46.0, 5:61.4 };
+const DEFAULT_HUNT_TIMES = { 1:10, 2:15, 3:20, 4:25, 5:30 };
 function renderHuntTimeEditGrid(){
   const grid = document.getElementById('huntTimeEditGrid');
   grid.innerHTML = Object.keys(DEFAULT_HUNT_TIMES).map(n=>`
