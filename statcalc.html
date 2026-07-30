@@ -1,0 +1,1350 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>쟈쟈서버 능력치 계산기</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f2f7fd; --bg2:#e8f2fc; --white:#ffffff;
+  --s1:#f0f7fd; --s2:#e3f0fb;
+  --border:#dbe9f7; --border2:#bcd8f2;
+  --a1:#2f7fd6; --a2:#22b6c9; --a3:#5aa8ea; --a4:#f5a623; --a5:#6fd0a0;
+  --t1:#12253f; --t2:#4c6a8c; --t3:#8ea6c2; --t4:#c7dcf0;
+  --ok:#3d9e6e; --err:#e05a5a; --pos:#2f7fd6; --neg:#e05a5a;
+  --atk:#e0684a; --def:#2f7fd6; --dur:#3aab7d; --dex:#9b6fd6;
+  --shadow:0 4px 24px rgba(47,127,214,0.12);
+  --shadow2:0 8px 32px rgba(47,127,214,0.18);
+}
+[data-theme="dark"] {
+  --bg:#0a1420; --bg2:#0f1e30; --white:#132335;
+  --s1:#16283c; --s2:#1c3149;
+  --border:#233c56; --border2:#2c4a68;
+  --t1:#e6f0fb; --t2:#a9c2dc; --t3:#7391b0; --t4:#4a637d;
+  --pos:#5aa8ea; --neg:#f08a8a;
+  --atk:#f08a6e; --def:#5aa8ea; --dur:#7fdcb4; --dex:#b78fe8;
+  --shadow:0 4px 24px rgba(0,0,0,0.4);
+  --shadow2:0 8px 32px rgba(0,0,0,0.5);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--t1);min-height:100vh;
+  background-image:radial-gradient(circle at 12% 8%, rgba(47,127,214,0.08) 0%, transparent 50%),
+    radial-gradient(circle at 88% 90%, rgba(34,182,201,0.07) 0%, transparent 50%);}
+
+/* ===== 사이드바 ===== */
+.sidebar{width:300px;height:100vh;background:var(--white);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;position:fixed;left:-300px;top:0;z-index:200;
+  transition:left .32s cubic-bezier(.4,0,.2,1);box-shadow:4px 0 24px rgba(47,127,214,0.08);}
+.sidebar.open{left:0;}
+.sb-head{padding:20px 16px 15px;border-bottom:1px solid var(--border);}
+.sb-logo{display:flex;align-items:center;gap:8px;font-family:'Nunito',sans-serif;font-weight:900;
+  font-size:16px;color:var(--a1);margin-bottom:4px;}
+.sb-logo-dot{width:8px;height:8px;background:var(--a2);border-radius:50%;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(2)}}
+.sb-sub{font-size:10.5px;color:var(--t3);font-family:'Nunito',sans-serif;font-weight:700;letter-spacing:.5px;}
+.sb-nav{padding:11px 14px;border-bottom:1px solid var(--border);}
+.sb-nav-toggle{width:100%;display:flex;align-items:center;gap:10px;padding:11px 13px;border-radius:12px;
+  font-size:13px;font-weight:800;color:var(--t1);background:var(--s1);border:none;
+  cursor:pointer;font-family:inherit;transition:background .18s;}
+.sb-nav-toggle:hover{background:var(--s2);}
+.sb-nav-toggle-label{flex:1;text-align:left;}
+.sb-nav-toggle-chevron{color:var(--t3);font-size:11px;transition:transform .3s cubic-bezier(.4,0,.2,1);}
+.sb-nav-toggle.open .sb-nav-toggle-chevron{transform:rotate(180deg);}
+.sb-nav-list{max-height:0;overflow:hidden;transition:max-height .4s cubic-bezier(.33,1,.68,1);
+  display:flex;flex-direction:column;gap:2px;perspective:700px;}
+.sb-nav-list.open{max-height:600px;margin-top:5px;padding-top:2px;}
+.sb-nav-list a{display:flex;align-items:center;gap:10px;text-decoration:none;padding:10px 13px;border-radius:10px;
+  font-size:12.5px;font-weight:700;color:var(--t2);background:transparent;border:none;
+  opacity:0;transform:rotateX(-82deg);transform-origin:center top;
+  transition:opacity .26s ease,transform .5s cubic-bezier(.34,1.32,.5,1),background .16s ease,color .16s ease;}
+.sb-nav-list.open a{opacity:1;transform:rotateX(0);}
+.sb-nav-list.open a:nth-child(1){transition-delay:.02s;}
+.sb-nav-list.open a:nth-child(2){transition-delay:.07s;}
+.sb-nav-list.open a:nth-child(3){transition-delay:.12s;}
+.sb-nav-list.open a:nth-child(4){transition-delay:.17s;}
+.sb-nav-list.open a:nth-child(5){transition-delay:.22s;}
+.sb-nav-list.open a:nth-child(6){transition-delay:.27s;}
+.sb-nav-list.open a:nth-child(7){transition-delay:.32s;}
+.sb-nav-list.open a:nth-child(8){transition-delay:.37s;}
+.sb-nav-list.open a:nth-child(9){transition-delay:.42s;}
+.sb-nav-list.open a:nth-child(10){transition-delay:.47s;}
+.sb-nav-list a:hover{background:var(--s1);color:var(--a1);}
+.sb-nav-list a.on{background:rgba(47,127,214,.12);color:var(--a1);font-weight:800;}
+[data-theme="dark"] .sb-nav-list a.on{background:rgba(90,168,234,.16);}
+@media(prefers-reduced-motion:reduce){
+  .sb-nav-list a{transition:background .16s ease,color .16s ease;transform:none;opacity:1;}
+  .sb-nav-list.open a{transition-delay:0s;}
+}
+.sb-body{padding:16px;flex:1;overflow-y:auto;min-height:0;}
+.sb-body::-webkit-scrollbar{width:4px;} .sb-body::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px;}
+.f-group{margin-bottom:18px;}
+.f-group:last-child{margin-bottom:0;}
+.f-section{font-size:10px;letter-spacing:1.2px;color:var(--t3);text-transform:uppercase;margin:0 0 8px 2px;
+  font-family:'Nunito',sans-serif;font-weight:800;}
+.f-input,.f-select{width:100%;padding:10px 13px;background:var(--s1);border:1px solid var(--border);
+  border-radius:11px;font-family:inherit;font-size:15px;color:var(--t1);outline:none;transition:border-color .15s,background .15s;}
+.f-input::placeholder{color:var(--t3);}
+.f-input:focus,.f-select:focus{border-color:var(--a1);background:var(--white);}
+.f-chip-wrap{display:flex;flex-wrap:wrap;gap:6px;}
+.f-chip{background:var(--white);border:1px solid var(--border);color:var(--t2);padding:6px 11px;
+  border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:.15s;}
+.f-chip:hover{border-color:var(--a3);color:var(--a1);}
+.f-chip.is-on{background:var(--a1);border-color:var(--a1);color:#fff;}
+.f-seg{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.f-seg3{grid-template-columns:1fr 1fr 1fr;}
+.f-seg button{background:var(--white);border:1px solid var(--border);color:var(--t2);padding:9px 4px;
+  border-radius:11px;font-size:12px;cursor:pointer;font-weight:700;font-family:inherit;transition:.15s;}
+.f-seg button:hover{border-color:var(--a3);color:var(--a1);}
+.f-seg button.active{background:var(--a1);color:#fff;border-color:var(--a1);}
+.sb-footer{padding:12px 16px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+.sb-footer-txt{font-size:10.5px;color:var(--t3);}
+.dark-toggle{width:34px;height:34px;border-radius:10px;border:1px solid var(--border);background:var(--s1);
+  cursor:pointer;font-size:14px;transition:.15s;}
+.dark-toggle:hover{border-color:var(--a3);background:var(--white);}
+[data-theme="dark"] .toggle-moon{display:inline;} [data-theme="dark"] .toggle-sun{display:none !important;}
+[data-theme="light"] .toggle-moon{display:none !important;} [data-theme="light"] .toggle-sun{display:inline;}
+.toggle-btn{position:fixed;top:16px;left:16px;z-index:300;width:42px;height:42px;background:var(--white);
+  border:1.5px solid var(--border);border-radius:13px;cursor:pointer;font-size:17px;color:var(--t2);
+  box-shadow:var(--shadow);transition:left .32s cubic-bezier(.4,0,.2,1),border-color .15s,transform .15s;}
+.toggle-btn:hover{border-color:var(--a1);box-shadow:var(--shadow2);transform:scale(1.05);}
+.toggle-btn.sb-open{left:314px;}
+@media(max-width:820px){ .toggle-btn.sb-open{left:auto;right:16px;} .main.shifted{margin-left:0;} }
+.sb-backdrop{position:fixed;inset:0;background:rgba(18,37,63,.35);z-index:150;opacity:0;pointer-events:none;transition:opacity .3s;}
+.sb-backdrop.show{opacity:1;pointer-events:auto;}
+
+/* ===== 메인 ===== */
+.main{flex:1;min-height:100vh;transition:margin-left .32s cubic-bezier(.4,0,.2,1);}
+.main.shifted{margin-left:300px;}
+.main-inner{max-width:1240px;margin:0 auto;padding:74px 26px 90px;}
+.page-head{text-align:center;padding:8px 0 26px;}
+.wind-badge{display:inline-flex;align-items:center;gap:7px;background:var(--white);border:1px solid var(--border2);
+  border-radius:20px;padding:6px 15px;font-size:10.5px;font-weight:800;color:var(--a1);
+  font-family:'Nunito',sans-serif;letter-spacing:.6px;margin-bottom:15px;box-shadow:0 2px 12px rgba(47,127,214,.08);}
+.wind-badge-dot{width:6px;height:6px;background:var(--a2);border-radius:50%;animation:pulse 2s infinite;}
+.page-title{font-size:40px;font-weight:900;letter-spacing:-1.4px;line-height:1.05;color:var(--a1);
+  background:linear-gradient(115deg,var(--a1),var(--a2) 55%,var(--a3));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+.page-sub{font-size:13px;color:var(--t3);margin-top:9px;font-weight:600;}
+.stats-row{display:flex;gap:10px;justify-content:center;margin-bottom:24px;flex-wrap:wrap;}
+.stat-chip{display:inline-flex;align-items:baseline;gap:5px;font-size:11.5px;color:var(--t3);
+  font-family:'Nunito',sans-serif;font-weight:700;background:var(--white);border:1px solid var(--border);
+  padding:7px 14px;border-radius:12px;box-shadow:0 1px 4px rgba(47,127,214,.05);}
+.stat-chip b{color:var(--a1);font-size:15px;font-weight:900;}
+.stat-chip b.warn{color:var(--err);}
+
+.panel{background:var(--white);border:1px solid var(--border);border-radius:18px;padding:18px 19px;
+  box-shadow:0 1px 3px rgba(47,127,214,.05);}
+.panel + .panel{margin-top:16px;}
+.p-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;flex-wrap:wrap;}
+.p-title{font-size:14.5px;font-weight:900;color:var(--t1);letter-spacing:-.3px;}
+.p-note{font-size:11px;color:var(--t3);font-weight:700;}
+.mini-btn{background:var(--s1);border:1px solid var(--border);color:var(--t2);padding:6px 11px;border-radius:9px;
+  font-size:11.5px;font-weight:800;cursor:pointer;font-family:inherit;transition:.15s;}
+.mini-btn:hover{border-color:var(--a3);color:var(--a1);background:var(--white);}
+.mini-btn.pri{background:var(--a1);border-color:var(--a1);color:#fff;}
+.mini-btn.pri:hover{filter:brightness(1.07);color:#fff;}
+.calc-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start;}
+@media(max-width:940px){.calc-grid{grid-template-columns:1fr;}}
+
+/* ===== 포인트 게이지 ===== */
+.pool{margin-bottom:16px;}
+.pool-bar{display:flex;height:12px;border-radius:99px;overflow:hidden;background:var(--s2);box-shadow:inset 0 1px 3px rgba(18,37,63,.1);}
+.pool-bar i{display:block;height:100%;transition:width .2s cubic-bezier(.22,1,.36,1);}
+.pool-legend{display:flex;flex-wrap:wrap;gap:5px 12px;margin-top:8px;font-size:10.5px;font-weight:800;
+  color:var(--t3);font-family:'Nunito',sans-serif;}
+.pool-legend em{font-style:normal;display:inline-block;width:8px;height:8px;border-radius:3px;margin-right:4px;}
+
+.stat-row{padding:12px 0 14px;border-top:1px dashed var(--border);}
+.stat-row:first-child{border-top:none;}
+.sr-top{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:9px;}
+.sr-name{font-size:14.5px;font-weight:900;min-width:52px;letter-spacing:-.3px;}
+.sr-num{width:70px;text-align:right;padding:6px 9px;border-radius:10px;border:1px solid var(--border);
+  background:var(--s1);color:var(--t1);font-family:'Nunito',sans-serif;font-weight:900;font-size:14px;}
+.sr-num:focus{outline:none;border-color:var(--a1);background:var(--white);}
+.sr-btn{width:30px;height:30px;border-radius:9px;border:1px solid var(--border);background:var(--white);
+  color:var(--t2);font-weight:900;font-size:11px;cursor:pointer;font-family:'Nunito',sans-serif;transition:.15s;}
+.sr-btn:hover{border-color:var(--a1);color:var(--a1);}
+.sr-btn.max{width:auto;padding:0 9px;}
+.gauge{position:relative;height:26px;border-radius:13px;background:var(--s2);cursor:pointer;
+  overflow:hidden;touch-action:none;box-shadow:inset 0 2px 5px rgba(18,37,63,.09);}
+.g-avail{position:absolute;left:0;top:0;bottom:0;background:var(--gc);opacity:.16;transition:width .2s;}
+.g-fill{position:absolute;left:0;top:0;bottom:0;background:var(--gc);transition:width .18s cubic-bezier(.22,1,.36,1);
+  background-image:repeating-linear-gradient(115deg,rgba(255,255,255,.22) 0 9px,rgba(255,255,255,0) 9px 20px);
+  background-size:200% 100%;animation:flow 1.6s linear infinite;box-shadow:0 0 12px var(--gc);}
+@keyframes flow{from{background-position:0 0}to{background-position:-40px 0}}
+@media(prefers-reduced-motion:reduce){.g-fill{animation:none;}}
+.g-cap{position:absolute;top:0;bottom:0;width:2px;background:var(--gc);opacity:.55;}
+.g-val{position:absolute;right:11px;top:0;bottom:0;display:flex;align-items:center;
+  font-family:'Nunito',sans-serif;font-weight:900;font-size:12.5px;color:var(--t2);}
+.g-in{position:absolute;left:11px;top:0;bottom:0;display:flex;align-items:center;
+  font-family:'Nunito',sans-serif;font-weight:900;font-size:12.5px;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.25);}
+.sr-rule{font-size:11px;color:var(--t3);font-weight:600;margin-top:7px;}
+.preset-wrap{display:flex;gap:6px;flex-wrap:wrap;margin-top:14px;padding-top:14px;border-top:1px solid var(--border);}
+
+/* ===== 장비창 ===== */
+.equip-win{background:linear-gradient(160deg,var(--s1),var(--white));border:1px solid var(--border2);
+  border-radius:16px;padding:13px;}
+.eq-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;}
+.slot{position:relative;background:var(--white);border:1.5px dashed var(--border2);border-radius:14px;
+  padding:8px 6px 7px;min-height:96px;display:flex;flex-direction:column;align-items:center;
+  cursor:pointer;transition:.18s;box-shadow:inset 0 2px 8px rgba(47,127,214,.06);}
+.slot:hover{border-color:var(--a3);transform:translateY(-2px);}
+.slot.filled{border-style:solid;border-color:var(--rc,var(--a3));background:linear-gradient(170deg,var(--white),var(--s2));}
+.slot.sel{box-shadow:0 0 0 2px var(--a1);}
+.slot.drop{border-color:var(--a2);background:rgba(34,182,201,.14);transform:scale(1.04);}
+.slot.dim{opacity:.4;}
+.slot .s-label{font-size:9.5px;font-weight:800;color:var(--t3);font-family:'Nunito',sans-serif;letter-spacing:.4px;}
+.slot .s-icon{width:42px;height:42px;display:flex;align-items:center;justify-content:center;margin:3px 0 2px;}
+.slot .s-icon img{width:100%;height:100%;object-fit:contain;image-rendering:pixelated;}
+.slot .s-icon .ghost{font-size:20px;opacity:.24;filter:grayscale(1);}
+.slot .s-name{font-size:10.5px;font-weight:800;color:var(--t1);text-align:center;line-height:1.25;
+  word-break:break-all;max-height:26px;overflow:hidden;}
+.slot .s-empty{font-size:10.5px;color:var(--t4);font-weight:700;margin-top:2px;}
+.slot .s-rare{position:absolute;top:5px;left:6px;font-size:9px;font-weight:900;padding:2px 5px;border-radius:6px;
+  color:#fff;background:var(--rc);font-family:'Noto Sans KR';}
+.slot .s-off{position:absolute;top:4px;right:5px;width:18px;height:18px;border-radius:6px;border:none;
+  background:var(--s2);color:var(--t3);font-size:11px;line-height:1;cursor:pointer;display:none;}
+.slot.filled .s-off{display:block;}
+.slot .s-off:hover{background:var(--err);color:#fff;}
+.slot.soon{cursor:default;opacity:.5;}
+.slot.soon:hover{transform:none;border-color:var(--border2);}
+@keyframes equipPop{0%{transform:scale(.86)}60%{transform:scale(1.07)}100%{transform:scale(1)}}
+.slot.pop{animation:equipPop .34s cubic-bezier(.22,1,.36,1);}
+.eq-center{grid-row:span 3;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+  background:radial-gradient(circle at 50% 32%, var(--s2), var(--white) 72%);border:1px solid var(--border);
+  border-radius:14px;padding:10px 8px;}
+.eq-lv{font-family:'Nunito',sans-serif;font-weight:900;font-size:21px;color:var(--a1);line-height:1;}
+.eq-reb{font-size:11px;font-weight:800;color:var(--t2);}
+.eq-mini{width:100%;display:flex;flex-direction:column;gap:4px;margin-top:5px;}
+.eq-mini div{display:flex;justify-content:space-between;font-size:10.5px;font-weight:800;color:var(--t2);
+  font-family:'Nunito',sans-serif;}
+.eq-mini b{color:var(--t1);}
+
+/* ===== 옵션 편집 ===== */
+.opt-name{font-size:15px;font-weight:900;}
+.opt-sub{font-size:11px;color:var(--t3);font-weight:700;margin-top:2px;}
+.rare-wrap{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 4px;}
+.rare-chip{border:1.5px solid var(--border);background:var(--white);color:var(--t2);border-radius:10px;
+  padding:6px 10px;font-size:11.5px;font-weight:800;cursor:pointer;font-family:inherit;transition:.15s;}
+.rare-chip:hover{border-color:var(--rc);color:var(--rc);}
+.rare-chip.on{background:var(--rc);border-color:var(--rc);color:#fff;}
+.rare-chip small{font-family:'Nunito',sans-serif;font-weight:700;opacity:.7;margin-left:4px;font-size:9.5px;}
+.rare-gain{background:var(--s1);border-radius:11px;padding:9px 12px;margin-top:9px;font-size:11.5px;
+  color:var(--t2);font-weight:700;line-height:1.7;}
+.orow{padding:11px 0;border-top:1px dashed var(--border);}
+.orow:first-of-type{border-top:none;}
+.orow-top{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.orow-name{font-size:12.5px;font-weight:800;}
+.orow-val{font-family:'Nunito',sans-serif;font-weight:900;font-size:15px;}
+.orow-val.neg{color:var(--neg);}
+.orange{display:flex;align-items:center;gap:8px;margin-top:6px;}
+.orange span{font-size:10px;color:var(--t3);font-weight:800;font-family:'Nunito',sans-serif;min-width:26px;text-align:center;}
+.orange input[type=range]{flex:1;}
+input[type=range]{-webkit-appearance:none;appearance:none;background:transparent;width:100%;height:18px;}
+input[type=range]::-webkit-slider-runnable-track{height:6px;background:var(--s2);border-radius:99px;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;
+  background:var(--a1);border:2px solid var(--white);margin-top:-5px;cursor:pointer;box-shadow:0 1px 5px rgba(47,127,214,.4);}
+input[type=range]::-moz-range-track{height:6px;background:var(--s2);border-radius:99px;}
+input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:var(--a1);border:2px solid var(--white);cursor:pointer;}
+.fixed-tag{font-size:10.5px;color:var(--t3);font-weight:700;margin-top:4px;}
+
+/* ===== 결과 ===== */
+.res-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.res{border:1px solid var(--border);border-radius:14px;padding:13px 14px;background:var(--s1);position:relative;overflow:hidden;}
+.res::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--c);}
+.res .l{font-size:11px;font-weight:800;color:var(--t3);font-family:'Nunito',sans-serif;letter-spacing:.4px;}
+.res .v{font-family:'Nunito',sans-serif;font-weight:900;font-size:30px;line-height:1.1;color:var(--c);letter-spacing:-1px;}
+.res .d{font-size:11px;font-weight:800;color:var(--t3);font-family:'Nunito',sans-serif;height:15px;}
+.res .d b.up{color:var(--ok);} .res .d b.dn{color:var(--err);}
+.bars{display:flex;height:7px;border-radius:99px;overflow:hidden;background:var(--s2);margin-top:8px;}
+.bars i{display:block;height:100%;}
+.legend{display:flex;flex-wrap:wrap;gap:4px 10px;margin-top:6px;font-size:10px;font-weight:700;color:var(--t3);font-family:'Nunito',sans-serif;}
+.legend em{font-style:normal;display:inline-block;width:7px;height:7px;border-radius:2px;margin-right:3px;}
+.extra{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;padding-top:13px;border-top:1px solid var(--border);}
+.ex{background:var(--s1);border:1px solid var(--border);border-radius:11px;padding:7px 12px;font-size:11.5px;
+  font-weight:800;color:var(--t2);font-family:'Nunito',sans-serif;}
+.ex b{color:var(--a1);font-size:13.5px;margin-left:4px;}
+.ex.pct b{color:var(--a2);}
+.set-list{margin-top:11px;display:flex;flex-wrap:wrap;gap:6px;}
+.set-tag{background:rgba(111,208,160,.16);border:1px solid var(--a5);color:var(--ok);border-radius:9px;
+  padding:5px 10px;font-size:11px;font-weight:800;}
+.magic-list{margin-top:9px;font-size:11.5px;color:var(--t2);font-weight:700;line-height:1.7;}
+
+/* ===== 소울 ===== */
+.soul-alloc{margin-top:12px;}
+.sa-head{display:flex;justify-content:space-between;align-items:center;font-size:11.5px;font-weight:800;color:var(--t2);margin-bottom:7px;}
+.sa-head b{color:var(--a1);font-family:'Nunito',sans-serif;}
+.sa-row{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
+.sa-row .nm{font-size:12px;font-weight:800;min-width:34px;}
+.sa-row .gauge{flex:1;height:20px;border-radius:10px;}
+.sa-row .g-val{font-size:11px;}
+.soul-lv-list{margin-top:11px;display:flex;flex-wrap:wrap;gap:6px;}
+.slv{border:1px solid var(--border);border-radius:9px;padding:5px 9px;font-size:11px;font-weight:800;color:var(--t3);}
+.slv.on{background:rgba(34,182,201,.14);border-color:var(--a2);color:var(--a2);}
+
+/* ===== 아이템 목록 ===== */
+.inv-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:26px 0 13px;flex-wrap:wrap;}
+.inv-title{font-size:17px;font-weight:900;letter-spacing:-.5px;}
+#invGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(232px,1fr));gap:12px;}
+.inv-card{background:var(--white);border:1px solid var(--border);border-radius:15px;padding:12px 13px;
+  display:flex;gap:11px;align-items:flex-start;cursor:grab;position:relative;overflow:hidden;
+  box-shadow:0 1px 3px rgba(47,127,214,.05);transition:transform .2s,box-shadow .2s,border-color .2s;}
+.inv-card:hover{transform:translateY(-3px);border-color:var(--border2);box-shadow:0 12px 26px rgba(47,127,214,.14);}
+.inv-card:active{cursor:grabbing;}
+.inv-card.on{border-color:var(--a1);background:linear-gradient(170deg,var(--white),var(--s2));}
+.inv-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--cc);}
+.iv-img{width:44px;height:44px;flex-shrink:0;border-radius:12px;background:linear-gradient(145deg,var(--s1),var(--s2));
+  display:flex;align-items:center;justify-content:center;box-shadow:inset 0 0 0 1px var(--border);}
+.iv-img img{width:82%;height:82%;object-fit:contain;image-rendering:pixelated;}
+.iv-body{min-width:0;flex:1;}
+.iv-name{font-size:13px;font-weight:800;line-height:1.3;word-break:break-all;}
+.iv-part{font-size:10.5px;color:var(--t3);font-weight:700;margin-top:2px;}
+.iv-opt{margin-top:6px;display:flex;flex-wrap:wrap;gap:3px 9px;font-family:'Nunito',sans-serif;font-size:11.5px;font-weight:800;}
+.iv-opt span i{font-style:normal;color:var(--t3);font-size:10px;margin-right:2px;}
+.iv-opt .pos{color:var(--t1);} .iv-opt .neg{color:var(--neg);}
+.iv-eq{position:absolute;right:9px;bottom:9px;font-size:10px;font-weight:900;color:var(--a1);
+  font-family:'Nunito',sans-serif;letter-spacing:.4px;}
+.more-wrap{text-align:center;margin-top:20px;}
+
+/* ===== 툴팁 / 토스트 ===== */
+#tip{position:fixed;z-index:400;pointer-events:none;opacity:0;transition:opacity .12s;
+  background:var(--white);border:1px solid var(--border2);border-radius:14px;padding:12px 14px;
+  box-shadow:var(--shadow2);max-width:270px;font-size:12px;}
+#tip.on{opacity:1;}
+#tip .tn{font-size:13.5px;font-weight:900;margin-bottom:2px;}
+#tip .tp{font-size:10.5px;color:var(--t3);font-weight:700;margin-bottom:8px;}
+#tip .tr{display:flex;justify-content:space-between;gap:14px;font-family:'Nunito',sans-serif;font-weight:800;font-size:12px;padding:1px 0;}
+#tip .tr span{color:var(--t3);}
+#tip .tr b.neg{color:var(--neg);}
+#tip .tx{margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:11px;color:var(--t2);font-weight:600;line-height:1.5;}
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(16px);opacity:0;z-index:500;
+  background:var(--a1);color:#fff;font-weight:800;font-size:12.5px;padding:10px 18px;border-radius:99px;
+  transition:.25s;pointer-events:none;box-shadow:var(--shadow2);}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+
+<button class="toggle-btn" id="toggleBtn">☰</button>
+<div class="sb-backdrop" id="sbBackdrop"></div>
+
+<div class="sidebar" id="sidebar">
+  <div class="sb-head">
+    <div class="sb-logo"><span class="sb-logo-dot"></span>SA 쟈쟈</div>
+    <div class="sb-sub">JYAJYA SERVER TOOLS</div>
+  </div>
+  <div class="sb-nav" id="sbNav"></div>
+  <div class="sb-body">
+    <div class="f-group">
+      <div class="f-section">환생</div>
+      <select id="rebSel" class="f-select"></select>
+    </div>
+    <div class="f-group">
+      <div class="f-section">레벨</div>
+      <input type="number" id="lvInput" class="f-input" min="1" max="140" value="140">
+    </div>
+    <div class="f-group">
+      <div class="f-section">착용 시 옵션 기본값</div>
+      <div class="f-seg f-seg3" id="rollSeg">
+        <button data-r="min">최소</button>
+        <button data-r="avg">평균</button>
+        <button data-r="max" class="active">최대</button>
+      </div>
+      <button class="mini-btn" id="btnReroll" style="width:100%;margin-top:6px;">착용중 전부 이 값으로</button>
+    </div>
+    <div class="f-group">
+      <div class="f-section">아이템 검색</div>
+      <input type="text" id="search" class="f-input" placeholder="아이템 이름 검색...">
+    </div>
+    <div class="f-group">
+      <div class="f-section">착용 부위</div>
+      <div class="f-chip-wrap" id="partFilter"></div>
+    </div>
+    <div class="f-group">
+      <div class="f-section">정렬</div>
+      <select id="sortSel" class="f-select">
+        <option value="default">기본정렬</option>
+        <option value="atk">공격 높은순</option>
+        <option value="def">방어 높은순</option>
+        <option value="dex">순발 높은순</option>
+        <option value="hp">내구 높은순</option>
+        <option value="name">이름순</option>
+      </select>
+    </div>
+    <div class="f-group">
+      <div class="f-section">기본 보정치 (선택)</div>
+      <div class="f-seg">
+        <input type="number" class="f-input base" data-k="atk" value="0" placeholder="공">
+        <input type="number" class="f-input base" data-k="def" value="0" placeholder="방">
+        <input type="number" class="f-input base" data-k="hp" value="0" placeholder="내">
+        <input type="number" class="f-input base" data-k="dex" value="0" placeholder="순">
+      </div>
+    </div>
+  </div>
+  <div class="sb-footer">
+    <span class="sb-footer-txt" id="loadStatus">로딩중...</span>
+    <button class="dark-toggle" onclick="toggleDark()"><span class="toggle-moon">🌙</span><span class="toggle-sun">☀️</span></button>
+  </div>
+</div>
+
+<div class="main" id="main">
+  <div class="main-inner">
+    <div class="page-head">
+      <div class="wind-badge"><span class="wind-badge-dot"></span><span>SA JYAJYA SERVER</span></div>
+      <div class="page-title">쟈쟈서버 능력치 계산기</div>
+      <div class="page-sub">스탯 분배 · 장비 착용 · 레어리티 · 소울까지 한 번에 계산</div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-chip"><b id="chipTotal">-</b>총 포인트</div>
+      <div class="stat-chip"><b id="chipLeft">-</b>남은 포인트</div>
+      <div class="stat-chip"><b id="chipEq">0</b>착용 장비</div>
+      <div class="stat-chip"><b id="chipStam">0</b>총 기력</div>
+    </div>
+
+    <div class="calc-grid">
+      <div>
+        <div class="panel">
+          <div class="p-head">
+            <div class="p-title">능력치 분배</div>
+            <div style="display:flex;gap:6px;">
+              <button class="mini-btn" id="btnReset">초기화</button>
+              <button class="mini-btn pri" id="btnSave">빌드 저장</button>
+            </div>
+          </div>
+          <div class="pool">
+            <div class="pool-bar" id="poolBar"></div>
+            <div class="pool-legend" id="poolLegend"></div>
+          </div>
+          <div id="statRows"></div>
+          <div class="preset-wrap" id="presets"></div>
+        </div>
+
+        <div class="panel" id="optPanel">
+          <div class="p-head">
+            <div><div class="opt-name" id="optName">장비를 선택해줘</div><div class="opt-sub" id="optSub">장비창에서 착용한 칸을 누르면 옵션과 레어리티를 조정할 수 있어</div></div>
+            <button class="mini-btn" id="btnUnequipOne" style="display:none;">해제</button>
+          </div>
+          <div id="optBody"></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="panel">
+          <div class="p-head">
+            <div class="p-title">장비창</div>
+            <div class="p-note">끌어다 놓거나 클릭해서 착용 · 칸을 누르면 옵션 조정</div>
+          </div>
+          <div class="equip-win"><div class="eq-grid" id="eqGrid"></div></div>
+        </div>
+
+        <div class="panel">
+          <div class="p-head">
+            <div class="p-title">최종 능력치</div>
+            <div class="p-note" id="resNote"></div>
+          </div>
+          <div class="res-grid" id="resGrid"></div>
+          <div class="extra" id="extra"></div>
+          <div class="extra" id="extraPct" style="border-top:none;padding-top:0;margin-top:8px;"></div>
+          <div class="set-list" id="setList"></div>
+          <div class="magic-list" id="magicList"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="inv-head">
+      <div class="inv-title">아이템 목록 <span class="p-note" id="invCount"></span></div>
+      <button class="mini-btn" id="btnUnequipAll">전부 벗기</button>
+    </div>
+    <div id="invGrid"></div>
+    <div class="more-wrap"><button class="mini-btn" id="btnMore" style="display:none;">더 보기</button></div>
+  </div>
+</div>
+
+<div id="tip"></div>
+<div class="toast" id="toast"></div>
+
+<script src="nav.js"></script>
+<script>
+/* ===== 데이터 소스 (아이템도감과 동일) ===== */
+var DATA_FILE  = "https://sa000001.com/sa2/info/data/itemset6.txt";
+var MAGIC_FILE = "https://sa000001.com/sa2/info/data/magic.txt";
+var ICON_BASE  = "https://sa000001.com/sa2/info/img/item/";
+var ICON_DEFAULT = "https://sa000001.com/sa2/info/img/item/default.png";
+
+/* ===== 서버 규칙 ===== */
+var REB_BASE = [20, 65, 100, 130, 160, 200];
+var PER_LEVEL = 3, MAX_LV = 140;
+
+var STATS = [
+  {k:'vit', n:'체력',   c:'#3aab7d', rule:'1p당 내구 +4 · 10p마다 공격 +1, 방어 +1'},
+  {k:'hel', n:'건강',   c:'#22b6c9', rule:'1p당 방어 +1, 내구 +1 · 10p마다 공격 +1'},
+  {k:'str', n:'완력',   c:'#e0684a', rule:'1p당 공격 +1, 내구 +1 · 10p마다 방어 +1'},
+  {k:'spd', n:'스피드', c:'#9b6fd6', rule:'1p당 순발 +1, 내구 +1 · 20p마다 공격 +1, 방어 +1'}
+];
+function statContrib(a){
+  return {
+    atk:{vit:Math.floor(a.vit/10), hel:Math.floor(a.hel/10), str:a.str,                spd:Math.floor(a.spd/20)},
+    def:{vit:Math.floor(a.vit/10), hel:a.hel,                str:Math.floor(a.str/10), spd:Math.floor(a.spd/20)},
+    hp :{vit:a.vit*4,              hel:a.hel,                str:a.str,                spd:a.spd},
+    dex:{vit:0,                    hel:0,                    str:0,                    spd:a.spd}
+  };
+}
+function sumObj(o){ var t=0; for(var k in o) t+=o[k]; return t; }
+var RES = [{k:'atk',n:'공격력',v:'--atk'},{k:'def',n:'방어력',v:'--def'},{k:'hp',n:'내구력',v:'--dur'},{k:'dex',n:'순발력',v:'--dex'}];
+var SRC_COLOR = {vit:'#3aab7d', hel:'#22b6c9', str:'#e0684a', spd:'#9b6fd6', item:'#f5a623', soul:'#e070a8'};
+var SRC_NAME  = {vit:'체력', hel:'건강', str:'완력', spd:'스피드', item:'장비', soul:'소울'};
+
+/* ===== 레어리티 ===== */
+var RARITY = ['없음','고급','희귀','영웅','전설','신화'];
+var RARITY_COLOR = {'없음':'#8ea6c2','고급':'#3d9e6e','희귀':'#2f7fd6','영웅':'#9b6fd6','전설':'#f5a623','신화':'#e05a5a'};
+var RARITY_PROB  = {'고급':'63.22%','희귀':'27.00%','영웅':'8.00%','전설':'1.75%','신화':'0.03%'};
+/* 무기[창·곤봉·도끼·활] : 공격력 / 관통 / 명중 / 크리 */
+/* 방어구[투구·갑옷]     : 방어력 / 쉴드 / 내구력 / 회피 */
+/* 토템[삼위일체 계열]   : PvE 파티 뎀증 / 뎀감 / 페트판매 금액증가 */
+/* 악세서리(거울 포함)   : PvE 파티 뎀증 / 뎀감 / 은혜회복 증가 */
+var RARITY_TABLE = {
+  weapon:{'고급':{atk:3,pen:3,hit:1,crit:2},'희귀':{atk:4,pen:4,hit:2,crit:3},'영웅':{atk:5,pen:5,hit:3,crit:4},'전설':{atk:8,pen:8,hit:4,crit:6},'신화':{atk:14,pen:14,hit:6,crit:8}},
+  armor: {'고급':{def:3,shield:3,hp:1,eva:2},'희귀':{def:4,shield:4,hp:2,eva:3},'영웅':{def:5,shield:5,hp:3,eva:4},'전설':{def:8,shield:8,hp:4,eva:6},'신화':{def:14,shield:14,hp:6,eva:8}},
+  totem: {'고급':{dmgUp:0.3,dmgDown:0.1,petSell:1},'희귀':{dmgUp:0.6,dmgDown:0.2,petSell:3},'영웅':{dmgUp:0.9,dmgDown:0.4,petSell:6},'전설':{dmgUp:1.5,dmgDown:0.6,petSell:10},'신화':{dmgUp:3.0,dmgDown:1.5,petSell:20}},
+  acc:   {'고급':{dmgUp:0.3,dmgDown:0.1,grace:0.5},'희귀':{dmgUp:0.6,dmgDown:0.2,grace:1.0},'영웅':{dmgUp:0.9,dmgDown:0.4,grace:2.0},'전설':{dmgUp:1.5,dmgDown:0.6,grace:3.0},'신화':{dmgUp:3.0,dmgDown:1.5,grace:5.0}}
+};
+var OPT_NAME = {atk:'공격력',def:'방어력',dex:'순발력',hp:'내구력',crit:'크리',eva:'회피',charm:'매력',
+  pen:'관통',hit:'명중',shield:'쉴드',dmgUp:'PvE 파티 뎀증',dmgDown:'PvE 파티 뎀감',petSell:'페트판매 금액',grace:'은혜회복',exp:'경험치',move:'이동속도'};
+var PCT_KEYS = ['dmgUp','dmgDown','grace','petSell','exp','move'];
+
+/* ===== 소울 ===== */
+var SOUL_GRADE = {'일반':{stat:4,sp:0},'고급':{stat:7,sp:0},'희귀':{stat:9,sp:0},'영웅':{stat:11,sp:1},'전설':{stat:13,sp:2},'신화':{stat:18,sp:5}};
+var SOUL_LV = [
+  {lv:100,   k:'exp',    v:10, t:'경험치 +10%'},
+  {lv:500,   k:'move',   v:5,  t:'이동속도 +5%'},
+  {lv:1000,  k:'eva',    v:2,  t:'회피 +2'},
+  {lv:1500,  k:'crit',   v:2,  t:'크리 +2'},
+  {lv:2000,  k:'shield', v:3,  t:'쉴드 +3'},
+  {lv:2500,  k:'pen',    v:3,  t:'관통 +3'},
+  {lv:3000,  k:'hit',    v:2,  t:'명중 +2'},
+  {lv:5000,  k:'exp',    v:30, t:'경험치 +30%'},
+  {lv:10000, k:'exp',    v:60, t:'경험치 +60%'}
+];
+
+/* ===== 장비 슬롯 ===== */
+var WEAPON_PARTS=[0,1,2,3,4,17,18,19], ACC_PARTS=[8,9,10,11,12,13,14,15], TOTEM_PARTS=[24,25,26,27];
+function isTrinity(it){ return it.name.indexOf('삼위일체')>=0; }
+function itemType(it){
+  var p=parseInt(it.part,10);
+  if(WEAPON_PARTS.indexOf(p)>=0) return 'weapon';
+  if(p===6) return 'head';
+  if(p===7) return 'body';
+  if(ACC_PARTS.indexOf(p)>=0) return 'acc';
+  if(TOTEM_PARTS.indexOf(p)>=0) return isTrinity(it)?'trinity':'totem';
+  return null;
+}
+var SLOTS = [
+  {k:'head',   label:'투구',     icon:'⛑',  type:'head',    rare:'armor'},
+  {k:'acc1',   label:'악세서리', icon:'📿', type:'acc',     rare:'acc'},
+  {k:'weapon', label:'무기',     icon:'🔱', type:'weapon',  rare:'weapon'},
+  {k:'acc2',   label:'악세서리', icon:'💍', type:'acc',     rare:'acc'},
+  {k:'body',   label:'갑옷',     icon:'🛡', type:'body',    rare:'armor'},
+  {k:'soul',   label:'소울',     icon:'🌟', type:'soul',    rare:null},
+  {k:'trinity',label:'삼위일체', icon:'🔮', type:'trinity', rare:'totem'},
+  {k:'totem',  label:'토템',     icon:'🗿', type:'totem',   rare:'totem'},
+  {k:'enchant',label:'강화',     icon:'⚒',  type:'soon',    rare:null}
+];
+function slotDef(k){ for(var i=0;i<SLOTS.length;i++) if(SLOTS[i].k===k) return SLOTS[i]; return null; }
+var TYPE_LABEL={weapon:'무기',head:'투구',body:'갑옷',acc:'악세서리',totem:'토템',trinity:'삼위일체'};
+var PART_COLOR={weapon:'#e0684a',head:'#2f7fd6',body:'#2f7fd6',acc:'#9b6fd6',totem:'#3aab7d',trinity:'#22b6c9'};
+/* 악세서리 세부부위 (같은 부위 2개 동시착용 불가) */
+function accKind(it){
+  var n=it.name;
+  if(n.indexOf('목걸이')>=0||n.indexOf('팬던트')>=0||n.indexOf('펜던트')>=0||n.indexOf('쇠사슬')>=0) return '목걸이';
+  if(n.indexOf('반지')>=0) return '반지';
+  if(n.indexOf('귀걸이')>=0) return '귀걸이';
+  if(n.indexOf('팔찌')>=0) return '팔찌';
+  if(n.indexOf('거울')>=0) return '거울';
+  if(n.indexOf('부적')>=0) return '부적';
+  return '기타장신구';
+}
+
+/* ===== SEED ===== */
+var SEED = [{"o":0,"name":"바람의 창","id":"89500","gfx":"50017","route":"상인의 장터 (패키지 상점) <바람 패키지상자>","part":3,"setEff":"","minAtk":"-30","maxAtk":"-30","minDef":"0","maxDef":"0","minDex":"30","maxDex":"30","minHP":"0","maxHP":"0","minCrit":"5","maxCrit":"5","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0","cat":"무기"},{"o":1,"name":"바람의 갑옷","id":"89501","gfx":"50018","route":"상인의 장터 (패키지 상점) <바람 패키지상자>","part":7,"setEff":"","minAtk":"-30","maxAtk":"-30","minDef":"10","maxDef":"10","minDex":"30","maxDex":"30","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0","cat":"방어구"},{"o":2,"name":"바람의 투구","id":"89502","gfx":"50019","route":"상인의 장터 (패키지 상점) <바람 패키지상자>","part":6,"setEff":"","minAtk":"-20","maxAtk":"-20","minDef":"10","maxDef":"10","minDex":"20","maxDex":"20","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0","cat":"방어구"},{"o":4,"name":"헤티아의 암흑 창","id":"88430","gfx":"36096","route":"정령의 마을 - 천공의 대장장이(50%)","part":3,"setEff":"","minAtk":"52","maxAtk":"60","minDef":"0","maxDef":"0","minDex":"-12","maxDex":"-9","minHP":"0","maxHP":"0","minCrit":"5","maxCrit":"5","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"은혜의 정령 Lv5","stamina":"25","cat":"무기"},{"o":5,"name":"카루의 투구","id":"89130","gfx":"36080","route":"기억하는자 제작 (바커 발톱+땅의 돌)","part":6,"setEff":"세트효과 방+20","minAtk":"0","maxAtk":"0","minDef":"20","maxDef":"35","minDex":"-19","maxDex":"-12","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"-","cat":"방어구"},{"o":6,"name":"카루의 갑옷","id":"89131","gfx":"36081","route":"기억하는자 제작 (바커 발톱+땅의 돌)","part":7,"setEff":"세트효과 방+20","minAtk":"0","maxAtk":"0","minDef":"32","maxDef":"40","minDex":"-22","maxDex":"-18","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0","cat":"방어구"},{"o":7,"name":"요루의 투구","id":"89132","gfx":"36082","route":"기억하는자 제작 (바커 발톱+물의 돌)","part":6,"setEff":"세트효과 내+60","minAtk":"0","maxAtk":"0","minDef":"20","maxDef":"35","minDex":"-21","maxDex":"-18","minHP":"6","maxHP":"18","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"-","cat":"방어구"},{"o":8,"name":"요루의 갑옷","id":"89133","gfx":"36083","route":"기억하는자 제작 (바커 발톱+물의 돌)","part":7,"setEff":"세트효과 내+60","minAtk":"0","maxAtk":"0","minDef":"29","maxDef":"33","minDex":"-22","maxDex":"-20","minHP":"9","maxHP":"27","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0","cat":"방어구"},{"o":9,"name":"이루의 투구","id":"89134","gfx":"36084","route":"기억하는자 제작 (바커 발톱+불의 돌)","part":6,"setEff":"세트효과 공+20","minAtk":"5","maxAtk":"8","minDef":"25","maxDef":"38","minDex":"-29","maxDex":"-23","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"-","cat":"방어구"},{"o":10,"name":"이루의 갑옷","id":"89135","gfx":"36085","route":"기억하는자 제작 (바커 발톱+불의 돌)","part":7,"setEff":"세트효과 공+20","minAtk":"8","maxAtk":"10","minDef":"30","maxDef":"37","minDex":"-28","maxDex":"-25","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0","cat":"방어구"},{"o":11,"name":"그루의 투구","id":"89136","gfx":"36086","route":"기억하는자 제작 (바커 발톱+바람의 돌)","part":6,"setEff":"세트효과 순+20","minAtk":"-35","maxAtk":"-30","minDef":"22","maxDef":"36","minDex":"14","maxDex":"17","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"-","cat":"방어구"},{"o":12,"name":"그루의 갑옷","id":"89137","gfx":"36087","route":"기억하는자 제작 (바커 발톱+바람의 돌)","part":7,"setEff":"세트효과 순+20","minAtk":"-35","maxAtk":"-30","minDef":"29","maxDef":"34","minDex":"16","maxDex":"18","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0","cat":"방어구"},{"o":13,"name":"테라시온의 곤봉","id":"89138","gfx":"36088","route":"[일일레이드] 테라시온의 보상","part":2,"setEff":"세트효과 방+20","minAtk":"32","maxAtk":"50","minDef":"3","maxDef":"5","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"3","maxCrit":"3","minEva":"2","maxEva":"2","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0","cat":"무기"},{"o":14,"name":"실프리온의 곤봉","id":"89139","gfx":"36089","route":"[일일레이드] 실프리온의 보상","part":2,"setEff":"세트효과 순+20","minAtk":"32","maxAtk":"50","minDef":"0","maxDef":"0","minDex":"3","maxDex":"5","minHP":"0","maxHP":"0","minCrit":"3","maxCrit":"3","minEva":"2","maxEva":"2","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0","cat":"무기"},{"o":15,"name":"테라시온의 도끼","id":"89140","gfx":"36090","route":"[일일레이드] 테라시온의 보상","part":1,"setEff":"세트효과 방+20","minAtk":"77","maxAtk":"93","minDef":"-14","maxDef":"-12","minDex":"-28","maxDex":"-26","minHP":"0","maxHP":"0","minCrit":"3","maxCrit":"3","minEva":"0","maxEva":"0","hit":"2","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0","cat":"무기"},{"o":16,"name":"이그니온의 도끼","id":"89141","gfx":"36091","route":"[일일레이드] 이그니온의 보상","part":1,"setEff":"세트효과 공+20","minAtk":"87","maxAtk":"103","minDef":"-22","maxDef":"-20","minDex":"-30","maxDex":"-28","minHP":"0","maxHP":"0","minCrit":"3","maxCrit":"3","minEva":"0","maxEva":"0","hit":"2","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0","cat":"무기"},{"o":17,"name":"포세이온의 활","id":"89142","gfx":"36092","route":"[일일레이드] 포세이온의 보상","part":4,"setEff":"세트효과 내+60","minAtk":"18","maxAtk":"21","minDef":"-14","maxDef":"-13","minDex":"0","maxDex":"0","minHP":"9","maxHP":"12","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"3","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0","cat":"무기"},{"o":18,"name":"이그니온의 활","id":"89143","gfx":"36093","route":"[일일레이드] 이그니온의 보상","part":4,"setEff":"세트효과 공+20","minAtk":"23","maxAtk":"26","minDef":"-16","maxDef":"-14","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"2","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0","cat":"무기"},{"o":19,"name":"실프리온의 창","id":"89144","gfx":"36094","route":"[일일레이드] 실프리온의 보상","part":3,"setEff":"세트효과 순+20","minAtk":"50","maxAtk":"62","minDef":"0","maxDef":"0","minDex":"-15","maxDex":"-7","minHP":"0","maxHP":"0","minCrit":"5","maxCrit":"5","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0","cat":"무기"},{"o":20,"name":"포세이온의 창","id":"89145","gfx":"36095","route":"[일일레이드] 포세이온의 보상","part":3,"setEff":"세트효과 내+60","minAtk":"50","maxAtk":"62","minDef":"0","maxDef":"0","minDex":"-25","maxDex":"-19","minHP":"30","maxHP":"36","minCrit":"5","maxCrit":"5","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0","cat":"무기"},{"o":32,"name":"신목의 창","id":"70053","gfx":"51475","route":"쟈쟈서버 오픈기념","part":3,"setEff":"세트효과 방+10","minAtk":"50","maxAtk":"56","minDef":"5","maxDef":"7","minDex":"-20","maxDex":"-18","minHP":"0","maxHP":"0","minCrit":"5","maxCrit":"5","minEva":"0","maxEva":"0","hit":"-","minCharm":"3","maxCharm":"5","magicName":"주술없음","stamina":"-","cat":"무기"},{"o":33,"name":"신목의 갑옷","id":"70054","gfx":"51473","route":"쟈쟈서버 오픈기념","part":7,"setEff":"세트효과 방+10","minAtk":"0","maxAtk":"0","minDef":"35","maxDef":"40","minDex":"-25","maxDex":"-20","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"-","cat":"방어구"},{"o":34,"name":"신목의 목걸이","id":"70055","gfx":"51474","route":"쟈쟈서버 오픈기념","part":10,"setEff":"세트효과 방+10","minAtk":"2","maxAtk":"4","minDef":"8","maxDef":"12","minDex":"-5","maxDex":"-1","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"-","cat":"장신구"},{"o":37,"name":"정령왕의 활","id":"2775","gfx":"20325","route":"옛일을 아는자 이벤트","part":4,"setEff":"","minAtk":"18","maxAtk":"29","minDef":"-9","maxDef":"-16","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"2","minCharm":"0","maxCharm":"0","magicName":"윤택의 정령 Lv3","stamina":"16","cat":"무기"},{"o":38,"name":"바람의 쇠사슬 [바람]","id":"2735","gfx":"22016","route":"바람의 하프(천지동굴이벤트)","part":10,"setEff":"","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"3","maxCharm":"3","magicName":"주술없음","stamina":"0","cat":"장신구"},{"o":39,"name":"불의 깃털장식[불]","id":"2707","gfx":"22011","route":"정령의 의식을 받아라(진홍동굴이벤트)","part":10,"setEff":"","minAtk":"2","maxAtk":"2","minDef":"-7","maxDef":"-7","minDex":"5","maxDex":"5","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"3","maxCharm":"3","magicName":"주술없음","stamina":"0","cat":"장신구"},{"o":40,"name":"대지의 인연[땅]","id":"2701","gfx":"22026","route":"엄마의 흔적(유리동굴이벤트)","part":10,"setEff":"","minAtk":"-4","maxAtk":"-4","minDef":"5","maxDef":"5","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"3","maxCharm":"3","magicName":"주술없음","stamina":"0","cat":"장신구"},{"o":41,"name":"물의 반지[물]","id":"2770","gfx":"22124","route":"물의 여신을 도와주세요(벽청동굴이벤트)","part":11,"setEff":"","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"3","maxCharm":"3","magicName":"주술없음","stamina":"0","cat":"장신구"},{"o":42,"name":"마쥬의 도끼","id":"2688","gfx":"20042","route":"마쥬의 우편배달 이벤트","part":1,"setEff":"","minAtk":"50","maxAtk":"50","minDef":"-20","maxDef":"-20","minDex":"-20","maxDex":"-20","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"윤택의 정령 Lv3","stamina":"20","cat":"무기"},{"o":43,"name":"마쥬의 창","id":"2689","gfx":"20452","route":"마쥬의 우편배달 이벤트","part":3,"setEff":"","minAtk":"45","maxAtk":"45","minDef":"0","maxDef":"0","minDex":"-10","maxDex":"-10","minHP":"0","maxHP":"0","minCrit":"5","maxCrit":"5","minEva":"0","maxEva":"0","hit":"-","minCharm":"4","maxCharm":"4","magicName":"치유의 정령 Lv3","stamina":"10","cat":"무기"},{"o":44,"name":"마쥬의 곤봉","id":"2690","gfx":"20116","route":"마쥬의 우편배달 이벤트","part":2,"setEff":"","minAtk":"35","maxAtk":"35","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"2","maxCrit":"2","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"은혜의 정령 Lv3","stamina":"40","cat":"무기"},{"o":45,"name":"카이의 도끼","id":"2438","gfx":"20003","route":"[일일] 카이 할머니의 목걸이를 찾자","part":1,"setEff":"","minAtk":"20","maxAtk":"35","minDef":"-12","maxDef":"-8","minDex":"-12","maxDex":"-8","minHP":"0","maxHP":"0","minCrit":"5","maxCrit":"5","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0","cat":"무기"},{"o":46,"name":"툰가의 곤봉","id":"2439","gfx":"20100","route":"[일일] 툰가의 반성문 받기","part":2,"setEff":"","minAtk":"10","maxAtk":"25","minDef":"-8","maxDef":"-6","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"5","maxCrit":"5","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0","cat":"무기"},{"o":64,"name":"우리의 반지","id":"88221","gfx":"24703","route":"상인의 장터 (소모품상점)","part":11,"setEff":"","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0","cat":"장신구"},{"o":66,"name":"우리의 반지2","id":"88228","gfx":"24703","route":"상인의 장터 (마일리지상점)","part":11,"setEff":"","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0","cat":"장신구"},{"o":67,"name":"얼음 손톱","id":"88125","gfx":"51270","route":"테로노돈 보상병(25%)","part":0,"setEff":"","minAtk":"20","maxAtk":"20","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"은혜의 정령 Lv4","stamina":"40","cat":"무기"},{"o":68,"name":"대지의 심장","id":"88130","gfx":"51261","route":"흑룡 보상병(3%)","part":27,"setEff":"","minAtk":"0","maxAtk":"0","minDef":"10","maxDef":"15","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"-","cat":"토템"},{"o":69,"name":"풍신의 주머니","id":"88131","gfx":"51108","route":"흑룡 보상병(3%)","part":27,"setEff":"","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"10","maxDex":"15","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"-","cat":"토템"},{"o":70,"name":"불사조의 정신","id":"88132","gfx":"51112","route":"흑룡 보상병(3%)","part":27,"setEff":"","minAtk":"10","maxAtk":"15","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"-","cat":"토템"},{"o":71,"name":"헤티아의 눈물","id":"88133","gfx":"55089","route":"흑룡 보상병(3%)","part":27,"setEff":"","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"30","maxHP":"45","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"-","cat":"토템"},{"o":72,"name":"검은불꽃 장궁","id":"88141","gfx":"51258","route":"언딘 보상병(2%)","part":4,"setEff":"","minAtk":"21","maxAtk":"32","minDef":"0","maxDef":"0","minDex":"-17","maxDex":"-12","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"2","minCharm":"0","maxCharm":"0","magicName":"은혜의 정령 Lv4","stamina":"40","cat":"무기"},{"o":73,"name":"달의 도끼","id":"13305","gfx":"56168","route":"눈꽃섬 포우렌으로","part":1,"setEff":"","minAtk":"42","maxAtk":"42","minDef":"-11","maxDef":"-11","minDex":"-11","maxDex":"-11","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"윤택의 정령 Lv3","stamina":"12","cat":"무기"},{"o":74,"name":"공간의 목걸이","id":"13372","gfx":"22040","route":"공간의 틈새를 막으러 공간의 탑으로","part":10,"setEff":"","minAtk":"3","maxAtk":"3","minDef":"-6","maxDef":"-6","minDex":"3","maxDex":"3","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0","cat":"장신구"},{"o":76,"name":"얼음 옷","id":"88204","gfx":"51271","route":"테로노돈 보상병(20%)","part":7,"setEff":"","minAtk":"2","maxAtk":"5","minDef":"20","maxDef":"30","minDex":"2","maxDex":"5","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"윤택의 정령 Lv4","stamina":"20","cat":"방어구"},{"o":82,"name":"헤메라의 소울 팬던트","id":"88587","gfx":"56369","route":"하이하모 신전에서 영웅의 길로 이벤트","part":10,"setEff":"","minAtk":"-5","maxAtk":"-1","minDef":"0","maxDef":"0","minDex":"1","maxDex":"5","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"5","maxEva":"5","hit":"-","minCharm":"10","maxCharm":"10","magicName":"주술없음","stamina":"-","cat":"장신구"},{"o":83,"name":"타니토스 소울 팬던트","id":"88581","gfx":"56375","route":"타니토스의 신전에서 네메시스의 길로","part":10,"setEff":"","minAtk":"1","maxAtk":"5","minDef":"0","maxDef":"0","minDex":"-5","maxDex":"-1","minHP":"0","maxHP":"0","minCrit":"5","maxCrit":"5","minEva":"0","maxEva":"0","hit":"-","minCharm":"10","maxCharm":"10","magicName":"주술없음","stamina":"-","cat":"장신구"},{"o":85,"name":"의식의 투구","id":"2405","gfx":"21542","route":"성인식 이벤트","part":6,"setEff":"","minAtk":"0","maxAtk":"0","minDef":"18","maxDef":"18","minDex":"-5","maxDex":"-5","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0","cat":"방어구"},{"o":86,"name":"의식의 갑옷","id":"2406","gfx":"51456","route":"성인식 이벤트","part":7,"setEff":"","minAtk":"0","maxAtk":"0","minDef":"34","maxDef":"34","minDex":"-12","maxDex":"-12","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"윤택의 정령 Lv2","stamina":"12","cat":"방어구"},{"o":87,"name":"의식의 곤봉","id":"2407","gfx":"51457","route":"성인식 이벤트","part":2,"setEff":"","minAtk":"20","maxAtk":"20","minDef":"8","maxDef":"8","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0","cat":"무기"},{"o":93,"name":"보급 창","id":"29010","gfx":"20402","route":"초기지급","part":3,"setEff":"세트효과 방+15","minAtk":"30","maxAtk":"30","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0","cat":"무기"},{"o":94,"name":"보급 갑옷","id":"29011","gfx":"21011","route":"초기지급","part":7,"setEff":"세트효과 방+15","minAtk":"0","maxAtk":"0","minDef":"20","maxDef":"20","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"-","cat":"방어구"},{"o":95,"name":"보급 투구","id":"29012","gfx":"21514","route":"초기지급","part":6,"setEff":"세트효과 방+15","minAtk":"0","maxAtk":"0","minDef":"10","maxDef":"10","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"-","cat":"방어구"},{"o":102,"name":"운명의 팔찌","id":"13453","gfx":"22073","route":"오랑이 퀘스트","part":9,"setEff":"","minAtk":"3","maxAtk":"3","minDef":"3","maxDef":"3","minDex":"-3","maxDex":"-3","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"10","maxCharm":"10","magicName":"부활 수호의 정령 Lv1","stamina":"20","cat":"장신구"},{"o":103,"name":"용맹의 귀걸이","id":"13454","gfx":"22090","route":"오랑이 퀘스트","part":13,"setEff":"","minAtk":"6","maxAtk":"6","minDef":"0","maxDef":"0","minDex":"-3","maxDex":"-3","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"5","maxEva":"5","hit":"-","minCharm":"10","maxCharm":"10","magicName":"주술없음","stamina":"-","cat":"장신구"},{"o":104,"name":"강인함의 반지","id":"13455","gfx":"22118","route":"오랑이 퀘스트","part":11,"setEff":"","minAtk":"-3","maxAtk":"-3","minDef":"6","maxDef":"6","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"5","maxCrit":"5","minEva":"0","maxEva":"0","hit":"-","minCharm":"10","maxCharm":"10","magicName":"주술없음","stamina":"-","cat":"장신구"},{"o":105,"name":"순발력의 목걸이","id":"13456","gfx":"22118","route":"오랑이 퀘스트","part":9,"setEff":"","minAtk":"0","maxAtk":"0","minDef":"-3","maxDef":"-3","minDex":"6","maxDex":"6","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"10","maxCharm":"10","magicName":"부활 거울의 정령 Lv1","stamina":"20","cat":"장신구"},{"o":107,"name":"얼음 투구","id":"88124","gfx":"51272","route":"테로노돈 보상병(25%)","part":6,"setEff":"","minAtk":"0","maxAtk":"0","minDef":"20","maxDef":"20","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0","cat":"방어구"},{"o":108,"name":"얼음 부메랑","id":"88126","gfx":"51269","route":"테로노돈 보상병(20%)","part":17,"setEff":"","minAtk":"20","maxAtk":"20","minDef":"0","maxDef":"0","minDex":"10","maxDex":"10","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"독안개의 정령 Lv5","stamina":"14","cat":"무기"},{"o":109,"name":"머슬 링귀걸이","id":"88127","gfx":"51265","route":"테로노돈 보상병(2%)","part":13,"setEff":"","minAtk":"3","maxAtk":"5","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"8","maxHP":"12","minCrit":"0","maxCrit":"0","minEva":"4","maxEva":"6","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"-","cat":"장신구"},{"o":110,"name":"번개의 반지","id":"88128","gfx":"51266","route":"테로노돈 보상병(2%)","part":11,"setEff":"","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"6","maxDex":"8","minHP":"8","maxHP":"12","minCrit":"6","maxCrit":"8","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"-","cat":"장신구"},{"o":111,"name":"삼위일체","id":"88129","gfx":"51097","route":"테로노돈 보상병(6%)","part":24,"setEff":"","minAtk":"3","maxAtk":"3","minDef":"3","maxDef":"3","minDex":"3","maxDex":"3","minHP":"9","maxHP":"9","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"-","cat":"토템"},{"o":112,"name":"미라쥬","id":"88134","gfx":"51113","route":"흑룡 보상병(5%)","part":9,"setEff":"","minAtk":"5","maxAtk":"5","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"거울의 정령 Lv1","stamina":"5","cat":"장신구"},{"o":113,"name":"미라쥬","id":"88135","gfx":"51113","route":"흑룡 보상병(5%)","part":9,"setEff":"","minAtk":"5","maxAtk":"5","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"거울의 정령 Lv1","stamina":"15","cat":"장신구"},{"o":115,"name":"흑룡의 발톱","id":"88137","gfx":"51264","route":"언딘 보상병(5%)","part":2,"setEff":"","minAtk":"41","maxAtk":"41","minDef":"0","maxDef":"0","minDex":"10","maxDex":"10","minHP":"0","maxHP":"0","minCrit":"5","maxCrit":"5","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"은혜의 정령 Lv3","stamina":"40","cat":"무기"},{"o":116,"name":"냉동 참다랑어","id":"88138","gfx":"51259","route":"언딘 보상병(5%)","part":2,"setEff":"","minAtk":"51","maxAtk":"51","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"5","maxCrit":"5","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"-","cat":"무기"},{"o":117,"name":"열공의 도끼","id":"88139","gfx":"51273","route":"언딘 보상병(5%)","part":1,"setEff":"","minAtk":"71","maxAtk":"71","minDef":"-10","maxDef":"-10","minDex":"-10","maxDex":"-10","minHP":"0","maxHP":"0","minCrit":"5","maxCrit":"5","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0","cat":"무기"},{"o":119,"name":"냉동 황새치","id":"88142","gfx":"51260","route":"헤티아 보상병(5%)","part":3,"setEff":"","minAtk":"61","maxAtk":"61","minDef":"0","maxDef":"0","minDex":"-10","maxDex":"-10","minHP":"0","maxHP":"0","minCrit":"5","maxCrit":"5","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"-","cat":"무기"},{"o":120,"name":"미리네아의 거울","id":"88143","gfx":"51114","route":"헤티아 보상병(2%)","part":15,"setEff":"","minAtk":"7","maxAtk":"7","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"거울의 정령 Lv2","stamina":"25","cat":"장신구"},{"o":121,"name":"초신성의 갑옷","id":"88144","gfx":"51274","route":"언딘 보상병(1%)","part":7,"setEff":"","minAtk":"7","maxAtk":"10","minDef":"41","maxDef":"49","minDex":"-10","maxDex":"-7","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"윤택의 정령 Lv5","stamina":"24","cat":"방어구"},{"o":122,"name":"헤티아의 창","id":"88145","gfx":"51263","route":"헤티아 보상병(2%)","part":3,"setEff":"","minAtk":"56","maxAtk":"60","minDef":"16","maxDef":"20","minDex":"-30","maxDex":"-26","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"은혜의 정령 Lv3","stamina":"30","cat":"무기"},{"o":123,"name":"헤티아의 머리 장식","id":"88146","gfx":"51275","route":"헤티아 보상병(2%)","part":6,"setEff":"","minAtk":"3","maxAtk":"5","minDef":"20","maxDef":"24","minDex":"0","maxDex":"0","minHP":"6","maxHP":"12","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"고등정화의 정령 Lv2","stamina":"18","cat":"방어구"},{"o":124,"name":"헤티아의 빛나는 창","id":"88147","gfx":"51262","route":"정령의 마을 - 천공의 대장장이(50%)","part":3,"setEff":"","minAtk":"57","maxAtk":"65","minDef":"0","maxDef":"0","minDex":"-12","maxDex":"-9","minHP":"6","maxHP":"12","minCrit":"5","maxCrit":"5","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"은혜의 정령 Lv4","stamina":"30","cat":"무기"},{"o":125,"name":"삼위일체(改)","id":"88148","gfx":"51098","route":"스라인마을 - 신비한 대장장이 (20%)","part":24,"setEff":"","minAtk":"5","maxAtk":"7","minDef":"5","maxDef":"7","minDex":"5","maxDex":"7","minHP":"15","maxHP":"21","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"-","cat":"토템"},{"o":126,"name":"삼위일체(眞)","id":"88149","gfx":"51099","route":"정령의 마을 - 천공의 대장장이(10%)","part":24,"setEff":"","minAtk":"8","maxAtk":"10","minDef":"8","maxDef":"10","minDex":"8","maxDex":"10","minHP":"24","maxHP":"30","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"-","cat":"토템"},{"o":132,"name":"영웅 샴기르의 활","id":"88794","gfx":"36033","route":"상인의 장터 (마일리지상점)","part":4,"setEff":"","minAtk":"21","maxAtk":"34","minDef":"-10","maxDef":"-7","minDex":"-10","maxDex":"-7","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"2","minCharm":"0","maxCharm":"0","magicName":"은혜의 정령 Lv4","stamina":"40","cat":"무기"},{"o":133,"name":"영웅 샴기르의 도끼","id":"88233","gfx":"36027","route":"상인의 장터 (마일리지상점)","part":1,"setEff":"","minAtk":"70","maxAtk":"76","minDef":"-12","maxDef":"-10","minDex":"-12","maxDex":"-10","minHP":"6","maxHP":"12","minCrit":"3","maxCrit":"3","minEva":"0","maxEva":"0","hit":"2","minCharm":"0","maxCharm":"0","magicName":"거울의 정령 Lv1","stamina":"10","cat":"무기"},{"o":134,"name":"영웅 샴기르의 곤봉","id":"88234","gfx":"36026","route":"상인의 장터 (마일리지상점)","part":2,"setEff":"","minAtk":"44","maxAtk":"56","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"6","maxHP":"12","minCrit":"3","maxCrit":"3","minEva":"2","maxEva":"2","hit":"-","minCharm":"0","maxCharm":"0","magicName":"은혜의 정령 Lv4","stamina":"35","cat":"무기"},{"o":135,"name":"영웅 샴기르의 머리장식","id":"88235","gfx":"36025","route":"상인의 장터 (마일리지상점)","part":6,"setEff":"","minAtk":"0","maxAtk":"0","minDef":"15","maxDef":"20","minDex":"7","maxDex":"9","minHP":"6","maxHP":"12","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"오로라의 정령","stamina":"35","cat":"방어구"},{"o":136,"name":"영웅 샴기르의 옷","id":"88236","gfx":"36024","route":"상인의 장터 (마일리지상점)","part":7,"setEff":"","minAtk":"0","maxAtk":"0","minDef":"30","maxDef":"40","minDex":"9","maxDex":"12","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"무지개의 정령","stamina":"25","cat":"방어구"},{"o":143,"name":"트위스터 창","id":"88312","gfx":"55929","route":"신전으로 이벤트 보상","part":3,"setEff":"","minAtk":"60","maxAtk":"60","minDef":"0","maxDef":"0","minDex":"-12","maxDex":"-12","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"5","maxCharm":"5","magicName":"치유의 정령 Lv3","stamina":"10","cat":"무기"},{"o":144,"name":"루나의 곤봉","id":"88337","gfx":"51717","route":"개인듀얼 아이템꾸러미，개인듀얼 아이템꾸러미2 랜덤획득","part":2,"setEff":"","minAtk":"30","maxAtk":"30","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"9","maxHP":"9","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"은혜의 정령 Lv3","stamina":"30","cat":"무기"},{"o":145,"name":"루나의 머리장식","id":"88338","gfx":"51744","route":"개인듀얼 아이템꾸러미，개인듀얼 아이템꾸러미2 랜덤획득","part":6,"setEff":"","minAtk":"-5","maxAtk":"-5","minDef":"12","maxDef":"12","minDex":"15","maxDex":"15","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"오로라의 정령","stamina":"42","cat":"방어구"},{"o":146,"name":"루나의 옷","id":"88339","gfx":"51741","route":"개인듀얼 아이템꾸러미，개인듀얼 아이템꾸러미2 랜덤획득","part":7,"setEff":"","minAtk":"-10","maxAtk":"-10","minDef":"10","maxDef":"10","minDex":"18","maxDex":"18","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"무지개의 정령","stamina":"28","cat":"방어구"},{"o":149,"name":"영험한 힘을 가진 갑옷","id":"88432","gfx":"24345","route":"","part":7,"setEff":"","minAtk":"0","maxAtk":"0","minDef":"48","maxDef":"48","minDex":"-12","maxDex":"-12","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"은혜의 정령 Lv5","stamina":"30","cat":"방어구"},{"o":160,"name":"타니토스의 창","id":"88576","gfx":"56376","route":"타니토스신전 어둠 장인","part":3,"setEff":"","minAtk":"47","maxAtk":"58","minDef":"0","maxDef":"0","minDex":"-12","maxDex":"-10","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"은혜의 정령 Lv4","stamina":"35","cat":"무기"},{"o":161,"name":"타니토스의 도끼","id":"88577","gfx":"56374","route":"타니토스신전 어둠 장인","part":1,"setEff":"","minAtk":"57","maxAtk":"68","minDef":"-13","maxDef":"-11","minDex":"-13","maxDex":"-11","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"은혜의 정령 Lv4","stamina":"35","cat":"무기"},{"o":162,"name":"타니토스의 곤봉","id":"88578","gfx":"56373","route":"타니토스신전 어둠 장인","part":2,"setEff":"","minAtk":"35","maxAtk":"48","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"은혜의 정령 Lv4","stamina":"35","cat":"무기"},{"o":163,"name":"타니토스의 갑옷","id":"88579","gfx":"56372","route":"타니토스신전 어둠 장인","part":7,"setEff":"","minAtk":"2","maxAtk":"2","minDef":"30","maxDef":"40","minDex":"-11","maxDex":"-9","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"무지개의 정령","stamina":"25","cat":"방어구"},{"o":164,"name":"타니토스의 투구","id":"88580","gfx":"56377","route":"타니토스신전 어둠 장인","part":6,"setEff":"","minAtk":"2","maxAtk":"2","minDef":"15","maxDef":"20","minDex":"-11","maxDex":"-9","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"오로라의 정령","stamina":"35","cat":"방어구"},{"o":165,"name":"헤메라의 창","id":"88582","gfx":"56370","route":"헤메라신전 빛의 장인 제작","part":3,"setEff":"","minAtk":"45","maxAtk":"56","minDef":"0","maxDef":"0","minDex":"-10","maxDex":"-8","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"은혜의 정령 Lv4","stamina":"35","cat":"무기"},{"o":166,"name":"헤메라의 도끼","id":"88583","gfx":"56368","route":"헤메라신전 빛의 장인 제작","part":1,"setEff":"","minAtk":"55","maxAtk":"66","minDef":"-12","maxDef":"-10","minDex":"-12","maxDex":"-10","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"은혜의 정령 Lv4","stamina":"35","cat":"무기"},{"o":167,"name":"헤메라의 곤봉","id":"88584","gfx":"56367","route":"헤메라신전 빛의 장인 제작","part":2,"setEff":"","minAtk":"33","maxAtk":"46","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"은혜의 정령 Lv4","stamina":"35","cat":"무기"},{"o":168,"name":"헤메라의 갑옷","id":"88585","gfx":"56366","route":"헤메라신전 빛의 장인 제작","part":7,"setEff":"","minAtk":"0","maxAtk":"0","minDef":"30","maxDef":"40","minDex":"-9","maxDex":"-7","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"무지개의 정령","stamina":"25","cat":"방어구"},{"o":169,"name":"헤메라의 투구","id":"88586","gfx":"56371","route":"헤메라신전 빛의 장인 제작","part":6,"setEff":"","minAtk":"0","maxAtk":"0","minDef":"15","maxDef":"20","minDex":"-9","maxDex":"-7","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"오로라의 정령","stamina":"35","cat":"방어구"},{"o":178,"name":"늑대쓰개","id":"88825","gfx":"51337","route":"헬 타우루스 보상보따리","part":6,"setEff":"","minAtk":"1","maxAtk":"9","minDef":"10","maxDef":"20","minDex":"0","maxDex":"0","minHP":"6","maxHP":"12","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"오로라의 정령","stamina":"30","cat":"방어구"},{"o":179,"name":"지옥견 털옷","id":"88826","gfx":"51344","route":"헬 바이론 보상보따리","part":7,"setEff":"","minAtk":"1","maxAtk":"12","minDef":"25","maxDef":"40","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"무지개의 정령","stamina":"20","cat":"방어구"},{"o":180,"name":"삼수정 곤봉","id":"88827","gfx":"51341","route":"헬 바이론 보상보따리","part":3,"setEff":"","minAtk":"32","maxAtk":"58","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"6","maxHP":"12","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"은혜의 정령 Lv3","stamina":"30","cat":"무기"},{"o":181,"name":"지옥의 투구","id":"88828","gfx":"51338","route":"헬 타우루스 보상보따리","part":6,"setEff":"","minAtk":"1","maxAtk":"5","minDef":"18","maxDef":"24","minDex":"0","maxDex":"0","minHP":"6","maxHP":"12","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"고등정화의 정령 Lv1","stamina":"9","cat":"방어구"},{"o":182,"name":"지옥의 창","id":"88829","gfx":"51342","route":"지옥문 소호자 보상보따리","part":3,"setEff":"","minAtk":"46","maxAtk":"65","minDef":"5","maxDef":"10","minDex":"-34","maxDex":"-28","minHP":"6","maxHP":"12","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"은혜의 정령 Lv2","stamina":"25","cat":"무기"},{"o":183,"name":"지옥의 갑옷","id":"88830","gfx":"51343","route":"지옥문 수호자 보상보따리","part":7,"setEff":"","minAtk":"1","maxAtk":"10","minDef":"35","maxDef":"49","minDex":"-10","maxDex":"-7","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"윤택의 정령 Lv3","stamina":"35","cat":"방어구"},{"o":184,"name":"용암 부메랑","id":"88831","gfx":"51340","route":"헬 바이론 보상보따리","part":17,"setEff":"","minAtk":"20","maxAtk":"20","minDef":"0","maxDef":"0","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"-","cat":"무기"},{"o":193,"name":"심해 갑옷","id":"88919","gfx":"36064","route":"난파된 해적선 3단계 (바이겔)","part":7,"setEff":"","minAtk":"5","maxAtk":"5","minDef":"30","maxDef":"30","minDex":"-10","maxDex":"-10","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"오로라의 정령","stamina":"28","cat":"방어구"},{"o":194,"name":"옥토의 옷","id":"88920","gfx":"36071","route":"난파된 해적선 4단계 (옥토)","part":7,"setEff":"","minAtk":"0","maxAtk":"0","minDef":"25","maxDef":"35","minDex":"7","maxDex":"10","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"무지개의 정령","stamina":"20","cat":"방어구"},{"o":195,"name":"메가죠의 도끼","id":"88921","gfx":"36066","route":"난파된 해적선 5단계 (메가죠)","part":1,"setEff":"","minAtk":"30","maxAtk":"80","minDef":"-20","maxDef":"-10","minDex":"-20","maxDex":"-10","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"5","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"-","cat":"무기"},{"o":197,"name":"악몽의 모자","id":"88923","gfx":"36069","route":"난파된 해적선 6단계(바다의 악몽)","part":6,"setEff":"","minAtk":"7","maxAtk":"9","minDef":"15","maxDef":"20","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"고등정화의 정령 Lv2","stamina":"5","cat":"방어구"},{"o":198,"name":"심해의 활","id":"88924","gfx":"36070","route":"상점) 불가사리 150개 / 제작 카우지집게 + 악몽의뼈조각 + 10만S","part":4,"setEff":"","minAtk":"21","maxAtk":"32","minDef":"-17","maxDef":"-12","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"2","minCharm":"0","maxCharm":"0","magicName":"은혜의 정령 Lv4","stamina":"40","cat":"무기"},{"o":201,"name":"삼위일체(神)","id":"88992","gfx":"51099","route":"","part":24,"setEff":"","minAtk":"7","maxAtk":"14","minDef":"7","maxDef":"14","minDex":"7","maxDex":"14","minHP":"21","maxHP":"42","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"-","cat":"토템"},{"o":202,"name":"드래곤 뼈갑옷","id":"88993","gfx":"52143","route":"","part":7,"setEff":"","minAtk":"7","maxAtk":"10","minDef":"45","maxDef":"54","minDex":"-15","maxDex":"-12","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"은혜의 정령 Lv4","stamina":"30","cat":"방어구"},{"o":203,"name":"카오닉스의 창","id":"88994","gfx":"52148","route":"","part":3,"setEff":"","minAtk":"56","maxAtk":"60","minDef":"21","maxDef":"25","minDex":"-35","maxDex":"-31","minHP":"0","maxHP":"0","minCrit":"5","maxCrit":"5","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"은혜의 정령 Lv3","stamina":"30","cat":"무기"},{"o":204,"name":"불타는 카오닉스의 창","id":"88995","gfx":"51342","route":"","part":3,"setEff":"","minAtk":"62","maxAtk":"70","minDef":"0","maxDef":"0","minDex":"-17","maxDex":"-14","minHP":"6","maxHP":"12","minCrit":"5","maxCrit":"5","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"은혜의 정령 Lv4","stamina":"30","cat":"무기"},{"o":205,"name":"카오닉스의 투구","id":"88996","gfx":"52146","route":"","part":6,"setEff":"","minAtk":"3","maxAtk":"5","minDef":"25","maxDef":"29","minDex":"-5","maxDex":"-5","minHP":"6","maxHP":"12","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"고등정화의 정령 Lv2","stamina":"18","cat":"방어구"},{"o":208,"name":"어둠의 비늘","id":"88999","gfx":"52137","route":"","part":25,"setEff":"","minAtk":"0","maxAtk":"0","minDef":"0","maxDef":"0","minDex":"-100","maxDex":"-100","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"0","cat":"토템"},{"o":209,"name":"뿅뿅 목걸이","id":"89000","gfx":"52142","route":"","part":10,"setEff":"","minAtk":"1","maxAtk":"5","minDef":"-10","maxDef":"-10","minDex":"1","maxDex":"5","minHP":"0","maxHP":"0","minCrit":"0","maxCrit":"0","minEva":"0","maxEva":"0","hit":"3","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"-","cat":"장신구"},{"o":210,"name":"뼈 결정 반지","id":"89001","gfx":"52140","route":"","part":11,"setEff":"","minAtk":"6","maxAtk":"8","minDef":"8","maxDef":"12","minDex":"0","maxDex":"0","minHP":"0","maxHP":"0","minCrit":"6","maxCrit":"8","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"9","cat":"장신구"},{"o":211,"name":"늑대발톱 도끼","id":"89002","gfx":"52138","route":"","part":1,"setEff":"","minAtk":"60","maxAtk":"70","minDef":"-20","maxDef":"-20","minDex":"-20","maxDex":"-20","minHP":"0","maxHP":"0","minCrit":"5","maxCrit":"5","minEva":"0","maxEva":"0","hit":"-","minCharm":"0","maxCharm":"0","magicName":"주술없음","stamina":"-","cat":"무기"}];
+
+/* ===== 상태 ===== */
+var ITEMS=[], ROLL='max', QUERY='', PART_F='전체', SORT='default', SHOWN=40, STEP=40, SELSLOT=null;
+var S = {
+  reb:0, lv:140, a:{vit:0,hel:0,str:0,spd:0}, base:{atk:0,def:0,hp:0,dex:0},
+  eq:{},                       /* slotKey → {uid, r, o:{}} */
+  soul:{on:false, grade:'영웅', lv:1000, st:{atk:0,def:0,dex:0}, sp:{hit:0,crit:0,eva:0}}
+};
+
+function byId(id){ return document.getElementById(id); }
+function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function trim(s){ return String(s==null?'':s).replace(/^\s+|\s+$/g,''); }
+function num(v){ var n=parseInt(v,10); return isFinite(n)?n:0; }
+function iconUrl(g){ return g?(ICON_BASE+g+'.png'):ICON_DEFAULT; }
+function toast(t){ var e=byId('toast'); e.textContent=t; e.classList.add('on'); clearTimeout(e._t); e._t=setTimeout(function(){e.classList.remove('on');},1600); }
+function findItem(uid){ for(var i=0;i<ITEMS.length;i++) if(ITEMS[i].uid===uid) return ITEMS[i]; return null; }
+
+/* 아이템 옵션 키 (편집 대상) */
+var ITEM_OPTS=[['atk','Atk'],['def','Def'],['dex','Dex'],['hp','HP'],['crit','Crit'],['eva','Eva'],['charm','Charm']];
+function optRange(it,key){ var mn=num(it['min'+key]), mx=num(it['max'+key]); return {min:Math.min(mn,mx), max:Math.max(mn,mx)}; }
+function defaultOpts(it){
+  var o={};
+  for(var i=0;i<ITEM_OPTS.length;i++){
+    var r=optRange(it,ITEM_OPTS[i][1]);
+    o[ITEM_OPTS[i][0]] = ROLL==='min'?r.min : ROLL==='max'?r.max : Math.round((r.min+r.max)/2);
+  }
+  return o;
+}
+function eqOpts(slotKey){
+  var e=S.eq[slotKey]; if(!e) return null;
+  var it=findItem(e.uid); if(!it) return null;
+  if(!e.o) e.o=defaultOpts(it);
+  return e.o;
+}
+function rarityGain(slotKey){
+  var e=S.eq[slotKey]; if(!e||!e.r||e.r==='없음') return {};
+  var sd=slotDef(slotKey); if(!sd||!sd.rare) return {};
+  return RARITY_TABLE[sd.rare][e.r]||{};
+}
+
+/* ===== 계산 ===== */
+function totalPoints(){ return REB_BASE[S.reb]+(S.lv-1)*PER_LEVEL; }
+function usedPoints(){ return S.a.vit+S.a.hel+S.a.str+S.a.spd; }
+function leftPoints(){ return totalPoints()-usedPoints(); }
+function equippedList(){
+  var arr=[];
+  for(var i=0;i<SLOTS.length;i++){
+    var k=SLOTS[i].k, e=S.eq[k]; if(!e) continue;
+    var it=findItem(e.uid); if(it) arr.push({slot:k, e:e, it:it});
+  }
+  return arr;
+}
+function soulTotals(){
+  var g=SOUL_GRADE[S.soul.grade]||SOUL_GRADE['일반'];
+  var o={atk:0,def:0,dex:0,hit:0,crit:0,eva:0,shield:0,pen:0,exp:0,move:0};
+  if(!S.soul.on) return o;
+  o.atk+=num(S.soul.st.atk); o.def+=num(S.soul.st.def); o.dex+=num(S.soul.st.dex);
+  o.hit+=num(S.soul.sp.hit); o.crit+=num(S.soul.sp.crit); o.eva+=num(S.soul.sp.eva);
+  for(var i=0;i<SOUL_LV.length;i++) if(num(S.soul.lv)>=SOUL_LV[i].lv) o[SOUL_LV[i].k]+=SOUL_LV[i].v;
+  return o;
+}
+function calc(){
+  var c=statContrib(S.a), out={}, parts={}, statBase={};
+  for(var i=0;i<RES.length;i++){
+    var k=RES[i].k; statBase[k]=sumObj(c[k]);
+    out[k]=statBase[k]+num(S.base[k]);
+    parts[k]={vit:c[k].vit, hel:c[k].hel, str:c[k].str, spd:c[k].spd, item:0, soul:0};
+  }
+  var ex={crit:0,eva:0,hit:0,pen:0,shield:0,charm:0,stam:0};
+  var pct={dmgUp:0,dmgDown:0,petSell:0,grace:0,exp:0,move:0};
+  var magics=[], sets={}, list=equippedList();
+  for(var j=0;j<list.length;j++){
+    var row=list[j], it=row.it, o=eqOpts(row.slot);
+    out.atk+=num(o.atk); out.def+=num(o.def); out.dex+=num(o.dex); out.hp+=num(o.hp);
+    parts.atk.item+=num(o.atk); parts.def.item+=num(o.def); parts.dex.item+=num(o.dex); parts.hp.item+=num(o.hp);
+    ex.crit+=num(o.crit); ex.eva+=num(o.eva); ex.charm+=num(o.charm);
+    ex.hit+=num(it.hit); ex.stam+=num(it.stamina);
+    if(it.magicName&&it.magicName!=='주술없음') magics.push(it.name+' · '+it.magicName);
+    if(it.setEff) sets[it.setEff]=(sets[it.setEff]||0)+1;
+    var g=rarityGain(row.slot);
+    for(var gk in g){
+      if(gk==='atk'||gk==='def'||gk==='dex'||gk==='hp'){ out[gk]+=g[gk]; parts[gk].item+=g[gk]; }
+      else if(PCT_KEYS.indexOf(gk)>=0) pct[gk]+=g[gk];
+      else ex[gk]+=g[gk];
+    }
+  }
+  var setOn=[];
+  for(var s in sets){
+    if(sets[s]<2) continue;
+    var m=String(s).match(/(공|방|순|내)\s*([+-]?\d+)/); if(!m) continue;
+    var mk={'공':'atk','방':'def','순':'dex','내':'hp'}[m[1]], mv=num(m[2]);
+    out[mk]+=mv; parts[mk].item+=mv; setOn.push(s+' (착용 '+sets[s]+'개)');
+  }
+  var so=soulTotals();
+  out.atk+=so.atk; out.def+=so.def; out.dex+=so.dex;
+  parts.atk.soul+=so.atk; parts.def.soul+=so.def; parts.dex.soul+=so.dex;
+  ex.hit+=so.hit; ex.crit+=so.crit; ex.eva+=so.eva; ex.shield+=so.shield; ex.pen+=so.pen;
+  pct.exp+=so.exp; pct.move+=so.move;
+  return {out:out, statBase:statBase, parts:parts, ex:ex, pct:pct, magics:magics, sets:setOn, count:list.length};
+}
+
+/* ===== 렌더 : 포인트 / 스탯 ===== */
+function renderChips(){
+  var t=totalPoints(), left=leftPoints();
+  byId('chipTotal').textContent=t;
+  var cl=byId('chipLeft'); cl.textContent=left; cl.className=left<0?'warn':'';
+}
+function renderPool(){
+  var t=totalPoints()||1, h='', l='';
+  for(var i=0;i<STATS.length;i++){
+    var s=STATS[i];
+    h+='<i style="width:'+(S.a[s.k]/t*100)+'%;background:'+s.c+'"></i>';
+    l+='<span><em style="background:'+s.c+'"></em>'+s.n+' '+S.a[s.k]+'</span>';
+  }
+  l+='<span style="margin-left:auto"><em style="background:var(--s2)"></em>남음 '+leftPoints()+'</span>';
+  byId('poolBar').innerHTML=h; byId('poolLegend').innerHTML=l;
+}
+function renderStatRows(){
+  var h='';
+  for(var i=0;i<STATS.length;i++){
+    var s=STATS[i];
+    h+='<div class="stat-row">'+
+       '<div class="sr-top"><span class="sr-name">'+s.n+'</span>'+
+       '<button class="sr-btn" data-add="'+s.k+'" data-v="-10">-10</button>'+
+       '<button class="sr-btn" data-add="'+s.k+'" data-v="-1">-1</button>'+
+       '<input class="sr-num" type="number" min="0" data-set="'+s.k+'" value="'+S.a[s.k]+'">'+
+       '<button class="sr-btn" data-add="'+s.k+'" data-v="1">+1</button>'+
+       '<button class="sr-btn" data-add="'+s.k+'" data-v="10">+10</button>'+
+       '<button class="sr-btn max" data-add="'+s.k+'" data-v="max">MAX</button></div>'+
+       '<div class="gauge" data-g="'+s.k+'" style="--gc:'+s.c+'">'+
+         '<div class="g-avail"></div><div class="g-fill"></div><div class="g-cap"></div>'+
+         '<div class="g-in"></div><div class="g-val"></div>'+
+       '</div>'+
+       '<div class="sr-rule">'+s.rule+'</div></div>';
+  }
+  byId('statRows').innerHTML=h;
+  syncGauges();
+}
+function syncGauges(){
+  var t=totalPoints()||1, left=leftPoints();
+  for(var i=0;i<STATS.length;i++){
+    var k=STATS[i].k, g=byId('statRows').querySelector('[data-g="'+k+'"]');
+    if(!g) continue;
+    var own=S.a[k], cap=Math.min(t, own+Math.max(0,left));
+    g.querySelector('.g-fill').style.width=(own/t*100)+'%';
+    g.querySelector('.g-avail').style.width=(cap/t*100)+'%';
+    g.querySelector('.g-cap').style.left='calc('+(cap/t*100)+'% - 1px)';
+    g.querySelector('.g-cap').style.display= cap>own ? '' : 'none';
+    g.querySelector('.g-in').textContent= own/t>0.14 ? own : '';
+    g.querySelector('.g-val').textContent= own/t>0.14 ? '' : own;
+    var el=byId('statRows').querySelector('[data-set="'+k+'"]');
+    if(el && document.activeElement!==el) el.value=own;
+  }
+}
+function setStat(k, v){
+  var others=usedPoints()-S.a[k];
+  S.a[k]=Math.max(0, Math.min(num(v), totalPoints()-others));  /* 남은 포인트 넘기면 더 안 올라감 */
+  renderChips(); renderPool(); syncGauges(); renderEquip(); renderResult(); saveLocal();
+}
+
+/* ===== 렌더 : 장비창 ===== */
+function renderEquip(){
+  var h='', r=calc();
+  for(var i=0;i<SLOTS.length;i++){
+    var sl=SLOTS[i];
+    if(sl.type==='soon'){
+      h+='<div class="slot soon"><div class="s-label">'+sl.label+'</div><div class="s-icon"><span class="ghost">'+sl.icon+'</span></div><div class="s-empty">준비중</div></div>';
+    } else if(sl.type==='soul'){
+      var on=S.soul.on, sc=RARITY_COLOR[S.soul.grade]||'#e070a8';
+      h+='<div class="slot'+(on?' filled':'')+(SELSLOT==='soul'?' sel':'')+'" data-slot="soul" style="--rc:'+sc+'">'+
+         (on?'<button class="s-off" data-off="soul">×</button><span class="s-rare" style="background:'+sc+'">'+S.soul.grade+'</span>':'')+
+         '<div class="s-label">소울</div><div class="s-icon"><span class="ghost">🌟</span></div>'+
+         (on?'<div class="s-name">Lv.'+num(S.soul.lv)+'</div>':'<div class="s-empty">비어있음</div>')+'</div>';
+    } else {
+      var e=S.eq[sl.k], it=e?findItem(e.uid):null, rc=it?(RARITY_COLOR[e.r]||'var(--a3)'):'var(--a3)';
+      h+='<div class="slot'+(it?' filled':'')+(SELSLOT===sl.k?' sel':'')+'" data-slot="'+sl.k+'" style="--rc:'+rc+'">'+
+         '<button class="s-off" data-off="'+sl.k+'">×</button>'+
+         (it&&e.r&&e.r!=='없음'?'<span class="s-rare">'+e.r+'</span>':'')+
+         '<div class="s-label">'+sl.label+'</div>'+
+         '<div class="s-icon">'+(it?'<img src="'+iconUrl(it.gfx)+'" alt="" onerror="this.style.visibility=\'hidden\'">':'<span class="ghost">'+sl.icon+'</span>')+'</div>'+
+         (it?'<div class="s-name">'+esc(it.name)+'</div>':'<div class="s-empty">비어있음</div>')+'</div>';
+    }
+    if(i===0){
+      h+='<div class="eq-center"><div class="eq-lv">Lv.'+S.lv+'</div><div class="eq-reb">'+S.reb+'환생</div>'+
+         '<div class="eq-mini">'+
+         '<div><span>공격</span><b>'+r.out.atk+'</b></div>'+
+         '<div><span>방어</span><b>'+r.out.def+'</b></div>'+
+         '<div><span>내구</span><b>'+r.out.hp+'</b></div>'+
+         '<div><span>순발</span><b>'+r.out.dex+'</b></div>'+
+         '</div></div>';
+    }
+  }
+  byId('eqGrid').innerHTML=h;
+  byId('chipEq').textContent=equippedList().length+(S.soul.on?1:0);
+}
+
+/* ===== 렌더 : 옵션 편집 ===== */
+function renderOpt(){
+  var nameEl=byId('optName'), subEl=byId('optSub'), body=byId('optBody'), del=byId('btnUnequipOne');
+  if(!SELSLOT){ nameEl.textContent='장비를 선택해줘'; subEl.textContent='장비창에서 착용한 칸을 누르면 옵션과 레어리티를 조정할 수 있어'; body.innerHTML=''; del.style.display='none'; return; }
+  if(SELSLOT==='soul'){ renderSoulEditor(); return; }
+  var e=S.eq[SELSLOT], it=e?findItem(e.uid):null, sd=slotDef(SELSLOT);
+  if(!it){ SELSLOT=null; renderOpt(); return; }
+  del.style.display=''; del.textContent='해제';
+  nameEl.textContent=it.name;
+  subEl.textContent=sd.label+(sd.type==='acc'?' · '+accKind(it):'')+' · '+(it.route||'획득처 미상');
+  var o=eqOpts(SELSLOT), h='';
+  /* 레어리티 */
+  if(sd.rare){
+    h+='<div class="f-section" style="margin-top:4px;">레어리티</div><div class="rare-wrap">';
+    for(var i=0;i<RARITY.length;i++){
+      var rr=RARITY[i];
+      h+='<button class="rare-chip'+((e.r||'없음')===rr?' on':'')+'" data-rare="'+rr+'" style="--rc:'+RARITY_COLOR[rr]+'">'+rr+
+         (RARITY_PROB[rr]?'<small>'+RARITY_PROB[rr]+'</small>':'')+'</button>';
+    }
+    h+='</div>';
+    var g=rarityGain(SELSLOT), gs=[];
+    for(var gk in g) gs.push(OPT_NAME[gk]+' +'+g[gk]+(PCT_KEYS.indexOf(gk)>=0?'%':''));
+    h+='<div class="rare-gain">'+(gs.length?('레어리티 추가 옵션 · '+gs.join(' / ')):'레어리티 없음 — 추가 옵션 없음')+'</div>';
+  }
+  /* 옵션 min~max */
+  h+='<div class="f-section" style="margin-top:14px;">아이템 옵션 (최소~최대 범위에서 지정)</div>';
+  var any=false;
+  for(var j=0;j<ITEM_OPTS.length;j++){
+    var key=ITEM_OPTS[j][0], rg=optRange(it,ITEM_OPTS[j][1]);
+    if(rg.min===0&&rg.max===0) continue;
+    any=true;
+    var val=num(o[key]);
+    h+='<div class="orow"><div class="orow-top"><span class="orow-name">'+OPT_NAME[key]+'</span>'+
+       '<span class="orow-val'+(val<0?' neg':'')+'" data-ov="'+key+'">'+(val>0?'+':'')+val+'</span></div>';
+    if(rg.min===rg.max) h+='<div class="fixed-tag">고정 옵션</div>';
+    else h+='<div class="orange"><span>'+rg.min+'</span><input type="range" data-opt="'+key+'" min="'+rg.min+'" max="'+rg.max+'" value="'+val+'"><span>'+rg.max+'</span></div>';
+    h+='</div>';
+  }
+  if(!any) h+='<div class="rare-gain">이 아이템은 수치 옵션이 없어</div>';
+  else h+='<div class="preset-wrap"><button class="mini-btn" data-roll="min">최소</button><button class="mini-btn" data-roll="avg">평균</button><button class="mini-btn" data-roll="max">최대</button></div>';
+  if(it.setEff) h+='<div class="rare-gain" style="margin-top:10px;">'+esc(it.setEff)+' · 같은 세트 2개 이상 착용 시 1회 적용</div>';
+  body.innerHTML=h;
+}
+function renderSoulEditor(){
+  var g=SOUL_GRADE[S.soul.grade], body=byId('optBody');
+  byId('optName').textContent='소울';
+  byId('optSub').textContent='등급별 총 수치를 공/방/순에 직접 배분 · 소울메이트 레벨 보너스 자동 반영';
+  byId('btnUnequipOne').style.display=''; byId('btnUnequipOne').textContent=S.soul.on?'소울 빼기':'소울 장착';
+  var h='<div class="f-section" style="margin-top:4px;">소울 등급</div><div class="rare-wrap">';
+  for(var k in SOUL_GRADE){
+    var col=RARITY_COLOR[k]||'#8ea6c2';
+    h+='<button class="rare-chip'+(S.soul.grade===k?' on':'')+'" data-sg="'+k+'" style="--rc:'+col+'">'+k+
+       '<small>스탯 '+SOUL_GRADE[k].stat+(SOUL_GRADE[k].sp?' · 특수 '+SOUL_GRADE[k].sp:'')+'</small></button>';
+  }
+  h+='</div>';
+  var us=num(S.soul.st.atk)+num(S.soul.st.def)+num(S.soul.st.dex);
+  h+='<div class="soul-alloc"><div class="sa-head"><span>스탯 배분</span><span><b>'+us+'</b> / '+g.stat+'</span></div>';
+  var SN={atk:'공',def:'방',dex:'순'};
+  for(var kk in SN) h+='<div class="sa-row"><span class="nm">'+SN[kk]+'</span>'+
+    '<div class="gauge" data-sa="'+kk+'" style="--gc:'+SRC_COLOR.soul+'"><div class="g-avail"></div><div class="g-fill"></div><div class="g-val"></div></div></div>';
+  h+='</div>';
+  if(g.sp>0){
+    var up=num(S.soul.sp.hit)+num(S.soul.sp.crit)+num(S.soul.sp.eva);
+    h+='<div class="soul-alloc"><div class="sa-head"><span>특수 배분</span><span><b>'+up+'</b> / '+g.sp+'</span></div>';
+    var PN={hit:'명중',crit:'크리',eva:'회피'};
+    for(var pk in PN) h+='<div class="sa-row"><span class="nm" style="min-width:40px">'+PN[pk]+'</span>'+
+      '<div class="gauge" data-sp="'+pk+'" style="--gc:var(--a2)"><div class="g-avail"></div><div class="g-fill"></div><div class="g-val"></div></div></div>';
+    h+='</div>';
+  }
+  h+='<div class="f-section" style="margin-top:16px;">소울메이트 레벨</div>'+
+     '<input type="number" class="f-input" id="soulLv" min="1" max="10000" value="'+num(S.soul.lv)+'">'+
+     '<div class="soul-lv-list">';
+  for(var i=0;i<SOUL_LV.length;i++){
+    var b=SOUL_LV[i];
+    h+='<span class="slv'+(num(S.soul.lv)>=b.lv?' on':'')+'">Lv.'+b.lv+' '+b.t+'</span>';
+  }
+  h+='</div>';
+  body.innerHTML=h;
+  syncSoulGauges();
+}
+function syncSoulGauges(){
+  var g=SOUL_GRADE[S.soul.grade];
+  var gs=byId('optBody').querySelectorAll('[data-sa]');
+  var used=num(S.soul.st.atk)+num(S.soul.st.def)+num(S.soul.st.dex), left=g.stat-used;
+  for(var i=0;i<gs.length;i++){
+    var k=gs[i].getAttribute('data-sa'), own=num(S.soul.st[k]), cap=Math.min(g.stat, own+Math.max(0,left));
+    gs[i].querySelector('.g-fill').style.width=(own/(g.stat||1)*100)+'%';
+    gs[i].querySelector('.g-avail').style.width=(cap/(g.stat||1)*100)+'%';
+    gs[i].querySelector('.g-val').textContent=own;
+  }
+  var ps=byId('optBody').querySelectorAll('[data-sp]');
+  var used2=num(S.soul.sp.hit)+num(S.soul.sp.crit)+num(S.soul.sp.eva), left2=g.sp-used2;
+  for(var j=0;j<ps.length;j++){
+    var k2=ps[j].getAttribute('data-sp'), own2=num(S.soul.sp[k2]), cap2=Math.min(g.sp, own2+Math.max(0,left2));
+    ps[j].querySelector('.g-fill').style.width=(own2/(g.sp||1)*100)+'%';
+    ps[j].querySelector('.g-avail').style.width=(cap2/(g.sp||1)*100)+'%';
+    ps[j].querySelector('.g-val').textContent=own2;
+  }
+}
+
+/* ===== 렌더 : 결과 ===== */
+function renderResult(){
+  var r=calc(), h='';
+  for(var i=0;i<RES.length;i++){
+    var d=RES[i], k=d.k, v=r.out[k], pureStat=r.statBase[k]+num(S.base[k]), diff=v-pureStat;
+    var p=r.parts[k], keys=['vit','hel','str','spd','item','soul'], tot=0;
+    for(var a=0;a<keys.length;a++) if(p[keys[a]]>0) tot+=p[keys[a]];
+    if(!tot) tot=1;
+    var bars='', leg='';
+    for(var b=0;b<keys.length;b++){
+      var kk=keys[b]; if(p[kk]<=0) continue;
+      bars+='<i style="width:'+(p[kk]/tot*100)+'%;background:'+SRC_COLOR[kk]+'"></i>';
+      leg+='<span><em style="background:'+SRC_COLOR[kk]+'"></em>'+SRC_NAME[kk]+' '+p[kk]+'</span>';
+    }
+    h+='<div class="res" style="--c:var('+d.v+')"><div class="l">'+d.n+'</div>'+
+       '<div class="v">'+v.toLocaleString()+'</div>'+
+       '<div class="d">'+(diff?('<b class="'+(diff>0?'up':'dn')+'">'+(diff>0?'+':'')+diff+'</b> 장비·소울'):'<span style="opacity:.55">스탯만</span>')+'</div>'+
+       '<div class="bars">'+bars+'</div><div class="legend">'+leg+'</div></div>';
+  }
+  byId('resGrid').innerHTML=h;
+  var EXL=[['crit','크리티컬'],['eva','회피'],['hit','명중'],['pen','관통'],['shield','쉴드'],['charm','매력'],['stam','기력']];
+  byId('extra').innerHTML=EXL.map(function(x){ return '<div class="ex">'+x[1]+'<b>'+r.ex[x[0]]+'</b></div>'; }).join('');
+  var PL=[['dmgUp','PvE 뎀증'],['dmgDown','PvE 뎀감'],['grace','은혜회복'],['petSell','페트판매'],['exp','경험치'],['move','이동속도']];
+  byId('extraPct').innerHTML=PL.filter(function(x){ return r.pct[x[0]]; })
+    .map(function(x){ return '<div class="ex pct">'+x[1]+'<b>+'+(Math.round(r.pct[x[0]]*100)/100)+'%</b></div>'; }).join('');
+  byId('chipStam').textContent=r.ex.stam;
+  byId('setList').innerHTML=r.sets.map(function(s){ return '<span class="set-tag">'+esc(s)+'</span>'; }).join('');
+  byId('magicList').innerHTML=r.magics.length?('<b style="color:var(--t1)">주술</b><br>'+r.magics.map(esc).join('<br>')):'';
+  byId('resNote').textContent='착용 '+r.count+'개'+(S.soul.on?' + 소울':'');
+}
+
+/* ===== 렌더 : 아이템 목록 ===== */
+function filteredItems(){
+  var arr=ITEMS.filter(function(i){ return !!itemType(i); });
+  if(PART_F!=='전체') arr=arr.filter(function(i){ return TYPE_LABEL[itemType(i)]===PART_F; });
+  if(QUERY) arr=arr.filter(function(i){ return i.name.indexOf(QUERY)>=0 || String(i.route||'').indexOf(QUERY)>=0; });
+  if(SORT!=='default'){
+    var mp={atk:'Atk',def:'Def',dex:'Dex',hp:'HP'}, key=mp[SORT];
+    arr=arr.slice().sort(function(x,y){
+      if(SORT==='name') return x.name.localeCompare(y.name,'ko');
+      return optRange(y,key).max-optRange(x,key).max;
+    });
+  }
+  return arr;
+}
+function renderInv(){
+  var arr=filteredItems(), list=arr.slice(0,SHOWN), h='', LB={atk:'공',def:'방',dex:'순',hp:'내'};
+  var eqUids={}; equippedList().forEach(function(r){ eqUids[r.e.uid]=1; });
+  for(var i=0;i<list.length;i++){
+    var it=list[i], tp=itemType(it), opt='';
+    ['Atk','Def','Dex','HP'].forEach(function(K){
+      var rg=optRange(it,K), k=K.toLowerCase()==='hp'?'hp':K.toLowerCase();
+      if(rg.min===0&&rg.max===0) return;
+      var txt = rg.min===rg.max ? ((rg.max>0?'+':'')+rg.max) : (rg.min+'~'+(rg.max>0?'+':'')+rg.max);
+      opt+='<span class="'+(rg.max<0?'neg':'pos')+'"><i>'+LB[k]+'</i>'+txt+'</span>';
+    });
+    h+='<div class="inv-card'+(eqUids[it.uid]?' on':'')+'" data-uid="'+esc(it.uid)+'" draggable="true" style="--cc:'+(PART_COLOR[tp]||'#8ea6c2')+'">'+
+       '<div class="iv-img"><img src="'+iconUrl(it.gfx)+'" alt="" onerror="this.style.visibility=\'hidden\'"></div>'+
+       '<div class="iv-body"><div class="iv-name">'+esc(it.name)+'</div>'+
+       '<div class="iv-part">'+TYPE_LABEL[tp]+(tp==='acc'?' · '+accKind(it):'')+(it.setEff?' · 세트':'')+'</div>'+
+       '<div class="iv-opt">'+(opt||'<span style="color:var(--t4)">옵션 없음</span>')+'</div></div>'+
+       (eqUids[it.uid]?'<div class="iv-eq">착용중</div>':'')+'</div>';
+  }
+  byId('invGrid').innerHTML=h;
+  byId('invCount').textContent=arr.length+'개 중 '+list.length+'개 표시';
+  byId('btnMore').style.display=arr.length>SHOWN?'':'none';
+}
+function renderAll(){ renderChips(); renderPool(); syncGauges(); renderEquip(); renderOpt(); renderResult(); renderInv(); saveLocal(); }
+
+/* ===== 착용 ===== */
+function canEquipAcc(slotKey, it){
+  var other = slotKey==='acc1'?'acc2':'acc1', oe=S.eq[other];
+  if(!oe) return true;
+  var oi=findItem(oe.uid); if(!oi) return true;
+  return accKind(oi)!==accKind(it);
+}
+function equipTo(slotKey, uid){
+  var it=findItem(uid), sd=slotDef(slotKey);
+  if(!it||!sd) return false;
+  if(itemType(it)!==sd.type){ toast('이 칸에는 착용할 수 없어'); return false; }
+  if(sd.type==='acc' && !canEquipAcc(slotKey,it)){ toast(accKind(it)+'는 이미 다른 칸에 착용중이야'); return false; }
+  for(var k in S.eq) if(S.eq[k] && S.eq[k].uid===uid) delete S.eq[k];
+  S.eq[slotKey]={uid:uid, r:'없음', o:defaultOpts(it)};
+  SELSLOT=slotKey;
+  renderAll();
+  var el=byId('eqGrid').querySelector('[data-slot="'+slotKey+'"]');
+  if(el){ el.classList.add('pop'); setTimeout(function(){ el.classList.remove('pop'); },340); }
+  return true;
+}
+function autoEquip(uid){
+  var it=findItem(uid); if(!it) return;
+  for(var k in S.eq) if(S.eq[k] && S.eq[k].uid===uid){ delete S.eq[k]; if(SELSLOT===k) SELSLOT=null; renderAll(); return; }
+  var tp=itemType(it);
+  if(!tp){ toast('착용할 수 없는 아이템'); return; }
+  var cands=SLOTS.filter(function(s){ return s.type===tp; });
+  var target=null;
+  for(var i=0;i<cands.length;i++){
+    if(S.eq[cands[i].k]) continue;
+    if(tp==='acc' && !canEquipAcc(cands[i].k,it)) continue;
+    target=cands[i].k; break;
+  }
+  if(!target){
+    if(tp==='acc'){
+      for(var j=0;j<cands.length;j++) if(canEquipAcc(cands[j].k,it)){ target=cands[j].k; break; }
+      if(!target){ toast(accKind(it)+'는 이미 착용중이야'); return; }
+    } else target=cands[0].k;
+  }
+  equipTo(target, uid);
+}
+
+/* ===== 게이지 드래그 ===== */
+function gaugeValue(el, clientX, maxVal){
+  var r=el.getBoundingClientRect();
+  var ratio=Math.max(0, Math.min(1, (clientX-r.left)/r.width));
+  return Math.round(ratio*maxVal);
+}
+function bindGaugeDrag(root){
+  root.addEventListener('pointerdown', function(e){
+    var g=e.target.closest('.gauge'); if(!g) return;
+    g.setPointerCapture(e.pointerId);
+    g._drag=true; applyGauge(g, e.clientX);
+  });
+  root.addEventListener('pointermove', function(e){
+    var g=e.target.closest('.gauge'); if(!g||!g._drag) return;
+    applyGauge(g, e.clientX);
+  });
+  root.addEventListener('pointerup', function(e){
+    var g=e.target.closest('.gauge'); if(g) g._drag=false;
+  });
+  root.addEventListener('pointercancel', function(e){
+    var g=e.target.closest('.gauge'); if(g) g._drag=false;
+  });
+}
+function applyGauge(g, x){
+  if(g.hasAttribute('data-g')){
+    setStat(g.getAttribute('data-g'), gaugeValue(g, x, totalPoints()));
+  } else if(g.hasAttribute('data-sa')){
+    var k=g.getAttribute('data-sa'), t=SOUL_GRADE[S.soul.grade].stat;
+    var others=num(S.soul.st.atk)+num(S.soul.st.def)+num(S.soul.st.dex)-num(S.soul.st[k]);
+    S.soul.st[k]=Math.max(0, Math.min(gaugeValue(g,x,t), t-others));
+    S.soul.on=true; syncSoulGauges(); refreshSoulHead(); renderEquip(); renderResult(); saveLocal();
+  } else if(g.hasAttribute('data-sp')){
+    var k2=g.getAttribute('data-sp'), t2=SOUL_GRADE[S.soul.grade].sp;
+    var o2=num(S.soul.sp.hit)+num(S.soul.sp.crit)+num(S.soul.sp.eva)-num(S.soul.sp[k2]);
+    S.soul.sp[k2]=Math.max(0, Math.min(gaugeValue(g,x,t2), t2-o2));
+    S.soul.on=true; syncSoulGauges(); refreshSoulHead(); renderEquip(); renderResult(); saveLocal();
+  }
+}
+function refreshSoulHead(){
+  var heads=byId('optBody').querySelectorAll('.sa-head b');
+  if(heads[0]) heads[0].textContent=num(S.soul.st.atk)+num(S.soul.st.def)+num(S.soul.st.dex);
+  if(heads[1]) heads[1].textContent=num(S.soul.sp.hit)+num(S.soul.sp.crit)+num(S.soul.sp.eva);
+}
+
+/* ===== 툴팁 ===== */
+var tip=byId('tip');
+function showTipItem(it, x, y, o){
+  var tp=itemType(it), rows='';
+  for(var i=0;i<ITEM_OPTS.length;i++){
+    var k=ITEM_OPTS[i][0], rg=optRange(it,ITEM_OPTS[i][1]);
+    if(rg.min===0&&rg.max===0) continue;
+    var v = o ? num(o[k]) : null;
+    var txt = v!==null ? ((v>0?'+':'')+v) : (rg.min===rg.max?((rg.max>0?'+':'')+rg.max):(rg.min+' ~ '+(rg.max>0?'+':'')+rg.max));
+    rows+='<div class="tr"><span>'+OPT_NAME[k]+'</span><b class="'+((v!==null?v:rg.max)<0?'neg':'')+'">'+txt+'</b></div>';
+  }
+  if(num(it.hit)) rows+='<div class="tr"><span>명중</span><b>+'+num(it.hit)+'</b></div>';
+  if(num(it.stamina)) rows+='<div class="tr"><span>기력</span><b>'+num(it.stamina)+'</b></div>';
+  var x2='';
+  if(it.setEff) x2+='<div>'+esc(it.setEff)+'</div>';
+  if(it.magicName&&it.magicName!=='주술없음') x2+='<div>주술 · '+esc(it.magicName)+'</div>';
+  if(it.route) x2+='<div style="color:var(--t3)">'+esc(it.route)+'</div>';
+  tip.innerHTML='<div class="tn">'+esc(it.name)+'</div><div class="tp">'+TYPE_LABEL[tp]+(tp==='acc'?' · '+accKind(it):'')+'</div>'+
+    (rows||'<div class="tr"><span>옵션 없음</span></div>')+(x2?'<div class="tx">'+x2+'</div>':'');
+  tip.classList.add('on'); moveTip(x,y);
+}
+function moveTip(x,y){
+  var w=tip.offsetWidth||240, h=tip.offsetHeight||140, l=x+16, t=y+16;
+  if(l+w>window.innerWidth-10) l=x-w-16;
+  if(t+h>window.innerHeight-10) t=Math.max(10, y-h-16);
+  tip.style.left=l+'px'; tip.style.top=t+'px';
+}
+function hideTip(){ tip.classList.remove('on'); }
+
+/* ===== 이벤트 ===== */
+(function init(){
+  byId('rebSel').innerHTML=REB_BASE.map(function(p,i){ return '<option value="'+i+'">'+i+'환생 · 기본 '+p+'p</option>'; }).join('');
+  var parts=['전체','무기','투구','갑옷','악세서리','토템','삼위일체'];
+  byId('partFilter').innerHTML=parts.map(function(p){ return '<button class="f-chip'+(p===PART_F?' is-on':'')+'" data-p="'+p+'">'+p+'</button>'; }).join('');
+})();
+
+byId('rebSel').addEventListener('change', function(){ S.reb=num(this.value); renderStatRows(); renderAll(); });
+byId('lvInput').addEventListener('input', function(){
+  S.lv=Math.max(1,Math.min(MAX_LV,num(this.value)||1));
+  renderChips(); renderPool(); syncGauges(); renderEquip(); renderResult(); renderInv(); saveLocal();
+});
+byId('rollSeg').addEventListener('click', function(e){
+  var b=e.target.closest('[data-r]'); if(!b) return;
+  ROLL=b.getAttribute('data-r');
+  var bs=this.querySelectorAll('button'); for(var i=0;i<bs.length;i++) bs[i].classList.remove('active');
+  b.classList.add('active'); toast('앞으로 착용하는 아이템은 '+(ROLL==='min'?'최소':ROLL==='max'?'최대':'평균')+'값으로');
+});
+byId('btnReroll').addEventListener('click', function(){
+  equippedList().forEach(function(r){ r.e.o=defaultOpts(r.it); });
+  renderAll(); toast('착용중인 아이템 옵션을 다시 맞췄어');
+});
+bindGaugeDrag(byId('statRows'));
+bindGaugeDrag(byId('optBody'));
+byId('statRows').addEventListener('click', function(e){
+  var b=e.target.closest('[data-add]'); if(!b) return;
+  var k=b.getAttribute('data-add'), v=b.getAttribute('data-v');
+  if(v==='max') setStat(k, S.a[k]+Math.max(0,leftPoints()));
+  else setStat(k, S.a[k]+num(v));
+  renderStatRows();
+});
+byId('statRows').addEventListener('input', function(e){
+  var el=e.target.closest('[data-set]'); if(!el) return;
+  setStat(el.getAttribute('data-set'), el.value);
+  el.value=S.a[el.getAttribute('data-set')];
+});
+byId('btnReset').addEventListener('click', function(){ S.a={vit:0,hel:0,str:0,spd:0}; renderStatRows(); renderAll(); });
+byId('btnUnequipAll').addEventListener('click', function(){ S.eq={}; S.soul.on=false; SELSLOT=null; renderAll(); });
+byId('btnUnequipOne').addEventListener('click', function(){
+  if(SELSLOT==='soul'){ S.soul.on=!S.soul.on; renderAll(); return; }
+  if(SELSLOT){ delete S.eq[SELSLOT]; SELSLOT=null; renderAll(); }
+});
+
+/* 프리셋 */
+var PRESETS=[{n:'공격형',w:{atk:1,def:0,hp:0,dex:0}},{n:'방어형',w:{atk:0,def:1,hp:.2,dex:0}},
+  {n:'내구형',w:{atk:0,def:.2,hp:1,dex:0}},{n:'순발형',w:{atk:0,def:0,hp:0,dex:1}},
+  {n:'공/내 반반',w:{atk:1,def:0,hp:.35,dex:0}},{n:'균등',w:null}];
+byId('presets').innerHTML=PRESETS.map(function(p,i){ return '<button class="mini-btn" data-pre="'+i+'">'+p.n+'</button>'; }).join('');
+byId('presets').addEventListener('click', function(e){
+  var b=e.target.closest('[data-pre]'); if(!b) return;
+  var p=PRESETS[num(b.getAttribute('data-pre'))], t=totalPoints();
+  if(!p.w){ var q=Math.floor(t/4); S.a={vit:q,hel:q,str:q,spd:t-q*3}; }
+  else S.a=optimize(t,p.w);
+  renderStatRows(); renderAll(); toast(p.n+' 분배 적용');
+});
+function optimize(total,w){
+  var a={vit:0,hel:0,str:0,spd:0}, left=total, guard=0;
+  function score(x){ var c=statContrib(x); return sumObj(c.atk)*w.atk+sumObj(c.def)*w.def+sumObj(c.hp)*w.hp+sumObj(c.dex)*w.dex; }
+  while(left>0&&guard++<1000){
+    var best=null, cur=score(a);
+    for(var i=0;i<STATS.length;i++){
+      var k=STATS[i].k;
+      for(var n=1;n<=Math.min(20,left);n++){
+        var t={vit:a.vit,hel:a.hel,str:a.str,spd:a.spd}; t[k]+=n;
+        var rate=(score(t)-cur)/n;
+        if(!best||rate>best.rate+1e-9) best={k:k,n:n,rate:rate};
+      }
+    }
+    if(!best||best.rate<=0){ a.vit+=left; break; }
+    a[best.k]+=best.n; left-=best.n;
+  }
+  return a;
+}
+
+/* 장비창 */
+byId('eqGrid').addEventListener('click', function(e){
+  var off=e.target.closest('[data-off]');
+  if(off){ var k=off.getAttribute('data-off');
+    if(k==='soul') S.soul.on=false; else delete S.eq[k];
+    if(SELSLOT===k) SELSLOT=null; renderAll(); return; }
+  var sl=e.target.closest('[data-slot]'); if(!sl) return;
+  var key=sl.getAttribute('data-slot');
+  if(key==='soul'){ SELSLOT='soul'; if(!S.soul.on) S.soul.on=true; renderAll(); return; }
+  if(S.eq[key]){ SELSLOT=(SELSLOT===key?null:key); renderEquip(); renderOpt(); return; }
+  var sd=slotDef(key); PART_F=TYPE_LABEL[sd.type]||'전체'; SHOWN=STEP;
+  var chips=byId('partFilter').querySelectorAll('[data-p]');
+  for(var i=0;i<chips.length;i++) chips[i].classList.toggle('is-on', chips[i].getAttribute('data-p')===PART_F);
+  renderInv(); byId('invGrid').scrollIntoView({behavior:'smooth',block:'start'});
+});
+byId('eqGrid').addEventListener('mousemove', function(e){
+  var sl=e.target.closest('[data-slot]'); if(!sl){ hideTip(); return; }
+  var k=sl.getAttribute('data-slot'), e2=S.eq[k];
+  if(!e2){ hideTip(); return; }
+  var it=findItem(e2.uid); if(it) showTipItem(it, e.clientX, e.clientY, e2.o);
+});
+byId('eqGrid').addEventListener('mouseleave', hideTip);
+byId('eqGrid').addEventListener('dragover', function(e){
+  var sl=e.target.closest('[data-slot]'); if(!sl) return;
+  e.preventDefault(); sl.classList.add('drop');
+});
+byId('eqGrid').addEventListener('dragleave', function(e){
+  var sl=e.target.closest('[data-slot]'); if(sl) sl.classList.remove('drop');
+});
+byId('eqGrid').addEventListener('drop', function(e){
+  var sl=e.target.closest('[data-slot]'); if(!sl) return;
+  e.preventDefault(); sl.classList.remove('drop');
+  equipTo(sl.getAttribute('data-slot'), e.dataTransfer.getData('text/plain'));
+});
+
+/* 옵션 편집 */
+byId('optBody').addEventListener('click', function(e){
+  var rb=e.target.closest('[data-rare]');
+  if(rb && SELSLOT && S.eq[SELSLOT]){ S.eq[SELSLOT].r=rb.getAttribute('data-rare'); renderAll(); return; }
+  var sg=e.target.closest('[data-sg]');
+  if(sg){
+    S.soul.grade=sg.getAttribute('data-sg'); S.soul.on=true;
+    var g=SOUL_GRADE[S.soul.grade];
+    var us=num(S.soul.st.atk)+num(S.soul.st.def)+num(S.soul.st.dex);
+    if(us>g.stat) S.soul.st={atk:0,def:0,dex:0};
+    var up=num(S.soul.sp.hit)+num(S.soul.sp.crit)+num(S.soul.sp.eva);
+    if(up>g.sp) S.soul.sp={hit:0,crit:0,eva:0};
+    renderAll(); return;
+  }
+  var rl=e.target.closest('[data-roll]');
+  if(rl && SELSLOT && S.eq[SELSLOT]){
+    var it=findItem(S.eq[SELSLOT].uid), mode=rl.getAttribute('data-roll'), o={};
+    for(var i=0;i<ITEM_OPTS.length;i++){
+      var rg=optRange(it,ITEM_OPTS[i][1]);
+      o[ITEM_OPTS[i][0]] = mode==='min'?rg.min : mode==='max'?rg.max : Math.round((rg.min+rg.max)/2);
+    }
+    S.eq[SELSLOT].o=o; renderAll();
+  }
+});
+byId('optBody').addEventListener('input', function(e){
+  var sl=e.target.closest('[data-opt]');
+  if(sl && SELSLOT && S.eq[SELSLOT]){
+    var k=sl.getAttribute('data-opt'), v=num(sl.value);
+    S.eq[SELSLOT].o[k]=v;
+    var lab=byId('optBody').querySelector('[data-ov="'+k+'"]');
+    if(lab){ lab.textContent=(v>0?'+':'')+v; lab.className='orow-val'+(v<0?' neg':''); }
+    renderEquip(); renderResult(); saveLocal(); return;
+  }
+  if(e.target.id==='soulLv'){
+    S.soul.lv=Math.max(1,Math.min(10000,num(e.target.value)));
+    S.soul.on=true;
+    var lis=byId('optBody').querySelectorAll('.slv');
+    for(var i=0;i<lis.length;i++) lis[i].classList.toggle('on', S.soul.lv>=SOUL_LV[i].lv);
+    renderEquip(); renderResult(); saveLocal();
+  }
+});
+
+/* 목록 */
+byId('invGrid').addEventListener('click', function(e){
+  var c=e.target.closest('[data-uid]'); if(!c) return;
+  autoEquip(c.getAttribute('data-uid'));
+});
+byId('invGrid').addEventListener('dragstart', function(e){
+  var c=e.target.closest('[data-uid]'); if(!c) return;
+  e.dataTransfer.setData('text/plain', c.getAttribute('data-uid'));
+  e.dataTransfer.effectAllowed='copy'; hideTip();
+});
+byId('invGrid').addEventListener('mousemove', function(e){
+  var c=e.target.closest('[data-uid]'); if(!c){ hideTip(); return; }
+  var it=findItem(c.getAttribute('data-uid')); if(it) showTipItem(it, e.clientX, e.clientY, null);
+});
+byId('invGrid').addEventListener('mouseleave', hideTip);
+byId('search').addEventListener('input', function(){ QUERY=trim(this.value); SHOWN=STEP; renderInv(); });
+byId('sortSel').addEventListener('change', function(){ SORT=this.value; SHOWN=STEP; renderInv(); });
+byId('partFilter').addEventListener('click', function(e){
+  var b=e.target.closest('[data-p]'); if(!b) return;
+  PART_F=b.getAttribute('data-p'); SHOWN=STEP;
+  var bs=this.querySelectorAll('[data-p]'); for(var i=0;i<bs.length;i++) bs[i].classList.remove('is-on');
+  b.classList.add('is-on'); renderInv();
+});
+byId('btnMore').addEventListener('click', function(){ SHOWN+=STEP; renderInv(); });
+var baseEls=document.querySelectorAll('.base');
+for(var bi=0;bi<baseEls.length;bi++) baseEls[bi].addEventListener('input', function(){
+  S.base[this.getAttribute('data-k')]=num(this.value); renderEquip(); renderResult(); saveLocal();
+});
+
+/* 저장 */
+function saveLocal(){ try{ localStorage.setItem('sa2-statcalc', JSON.stringify({S:S, roll:ROLL})); }catch(e){} }
+function loadLocal(){
+  try{
+    var raw=localStorage.getItem('sa2-statcalc'); if(!raw) return;
+    var d=JSON.parse(raw);
+    if(d.S){
+      S.reb=num(d.S.reb); S.lv=num(d.S.lv)||140;
+      S.a=d.S.a||S.a; S.base=d.S.base||S.base; S.eq=d.S.eq||{};
+      if(d.S.soul) S.soul=d.S.soul;
+    }
+    if(d.roll) ROLL=d.roll;
+  }catch(e){}
+}
+byId('btnSave').addEventListener('click', function(){ saveLocal(); toast('현재 빌드를 저장했어'); });
+
+/* 사이드바 / 다크모드 */
+var sidebar=byId('sidebar'), main=byId('main'), toggleBtn=byId('toggleBtn'), backdrop=byId('sbBackdrop');
+function setSidebar(open){
+  sidebar.classList.toggle('open',open); main.classList.toggle('shifted',open);
+  toggleBtn.classList.toggle('sb-open',open);
+  backdrop.classList.toggle('show', open&&window.innerWidth<=820);
+  try{ localStorage.setItem('sa2-sb', open?'1':'0'); }catch(e){}
+}
+toggleBtn.addEventListener('click', function(){ setSidebar(!sidebar.classList.contains('open')); });
+backdrop.addEventListener('click', function(){ setSidebar(false); });
+(function(){ try{ var s=localStorage.getItem('sa2-sb'); if(s==='1'&&window.innerWidth>820) setSidebar(true); }catch(e){} })();
+function toggleDark(){
+  var h=document.documentElement, n=h.getAttribute('data-theme')==='dark'?'light':'dark';
+  h.setAttribute('data-theme',n);
+  try{ localStorage.setItem('sa2-theme',n); }catch(e){}
+}
+try{ var sv=localStorage.getItem('sa2-theme'); if(sv) document.documentElement.setAttribute('data-theme',sv); }catch(e){}
+
+/* ===== 라이브 데이터 로딩 (아이템도감과 동일 파서) ===== */
+var IDX={name:0,sys:1,desc:2,setStat:3,setCmd1:11,setCmd2:12,id:16,gfx:17,type:19,setCode:34,
+  minHit:35,maxHit:36,minAtk:37,maxAtk:38,minDef:39,maxDef:40,minDex:41,maxDex:42,minHP:43,maxHP:44,
+  minCharm:49,maxCharm:50,minEva:51,maxEva:52,magic:55,stamina:57,hit:61,minCrit:75,maxCrit:76};
+function intOnly(x){ var s=trim(x); if(!s) return '-'; var m=s.match(/-?\d+/); return m?m[0]:'-'; }
+function numOf(x){ var v=Number(trim(x)); return isFinite(v)?v:0; }
+function parseMagic(text){
+  var map={}, lines=String(text||'').split(/\r?\n/);
+  for(var i=0;i<lines.length;i++){ var line=trim(lines[i]); if(!line||line.charAt(0)==='#'||line.indexOf('//')===0) continue;
+    var a=line.split(','), nm=trim(a[0]), code=trim(a[4]); if(nm&&code) map[code]=nm; }
+  return map;
+}
+function parseSetEffect(a){
+  var c1=trim(a[IDX.setCmd1]), c2=trim(a[IDX.setCmd2]);
+  if(c1!=='ITEM_suitEquip'&&c2!=='ITEM_ResuitEquip') return '';
+  if(intOnly(a[IDX.setCode])==='-') return '';
+  var m=trim(a[IDX.setStat]).match(/^([A-Z_]+)\s*:\s*(-?\d+)/i); if(!m) return '';
+  var map={MSTR:'공',MTGH:'방',MDEX:'순',MVITAL:'내'};
+  var label=map[(m[1]||'').toUpperCase()]; if(!label) return '';
+  var v=Number(m[2]); if(!isFinite(v)||v===0) return '';
+  return '세트효과 '+label+(v>0?'+':'')+v;
+}
+function parseItem(line, magicMap, order){
+  var a=String(line||'').split(',');
+  var name=trim(a[IDX.name]), id=trim(a[IDX.id]);
+  if(!name||!id) return null;
+  var magicCode=intOnly(a[IDX.magic]), magicName='주술없음';
+  if(magicCode!=='-'&&magicMap[magicCode]) magicName=magicMap[magicCode];
+  return {o:order, uid:id+'#'+order, name:name, id:id, gfx:trim(a[IDX.gfx]),
+    route:trim(a[IDX.sys]), part:numOf(a[IDX.type]), setEff:parseSetEffect(a),
+    minAtk:intOnly(a[IDX.minAtk]), maxAtk:intOnly(a[IDX.maxAtk]),
+    minDef:intOnly(a[IDX.minDef]), maxDef:intOnly(a[IDX.maxDef]),
+    minDex:intOnly(a[IDX.minDex]), maxDex:intOnly(a[IDX.maxDex]),
+    minHP:intOnly(a[IDX.minHP]), maxHP:intOnly(a[IDX.maxHP]),
+    minCrit:intOnly(a[IDX.minCrit]), maxCrit:intOnly(a[IDX.maxCrit]),
+    minEva:intOnly(a[IDX.minEva]), maxEva:intOnly(a[IDX.maxEva]),
+    hit:intOnly(a[IDX.hit]), minCharm:intOnly(a[IDX.minCharm]), maxCharm:intOnly(a[IDX.maxCharm]),
+    magicName:magicName, stamina:intOnly(a[IDX.stamina])};
+}
+async function fetchTextSmart(url){
+  var res=await fetch(url,{cache:'no-store'}); if(!res.ok) return '';
+  var buf=await res.arrayBuffer(), encs=['utf-8','euc-kr','windows-949'], best='', bestScore=-1e9;
+  for(var i=0;i<encs.length;i++){ try{
+    var txt=new TextDecoder(encs[i],{fatal:false}).decode(buf);
+    var broken=(txt.match(/\uFFFD/g)||[]).length, kor=(txt.match(/[가-힣]/g)||[]).length;
+    var sc=kor*2-broken*80; if(sc>bestScore){ bestScore=sc; best=txt; }
+  }catch(e){} }
+  return best;
+}
+async function loadLive(){
+  try{
+    var magicMap=parseMagic(await fetchTextSmart(MAGIC_FILE));
+    var itemText=await fetchTextSmart(DATA_FILE);
+    if(!itemText) throw new Error('no data');
+    var lines=itemText.split(/\r?\n/), parsed=[];
+    for(var i=0;i<lines.length;i++){
+      var line=trim(lines[i]); if(!line||line.charAt(0)==='#'||line.indexOf('//')===0) continue;
+      var it=parseItem(line, magicMap, parsed.length); if(it) parsed.push(it);
+    }
+    if(parsed.length){
+      var keep={};
+      for(var k in S.eq) if(S.eq[k]) keep[k]=S.eq[k];
+      ITEMS=parsed;
+      for(var k2 in keep){ if(!findItem(keep[k2].uid)) delete S.eq[k2]; }
+      renderAll();
+      byId('loadStatus').textContent='서버 최신 '+ITEMS.filter(function(i){return !!itemType(i);}).length+'개 ✓';
+    }
+  }catch(e){
+    byId('loadStatus').textContent='장착 아이템 '+ITEMS.filter(function(i){return !!itemType(i);}).length+'개';
+  }
+}
+
+/* ===== 시작 ===== */
+ITEMS=SEED.map(function(it,i){ it.uid=it.id+'#'+(it.o!=null?it.o:i); return it; });
+loadLocal();
+byId('rebSel').value=S.reb; byId('lvInput').value=S.lv;
+var rs=byId('rollSeg').querySelectorAll('button');
+for(var ri=0;ri<rs.length;ri++) rs[ri].classList.toggle('active', rs[ri].getAttribute('data-r')===ROLL);
+var be=document.querySelectorAll('.base');
+for(var bj=0;bj<be.length;bj++) be[bj].value=S.base[be[bj].getAttribute('data-k')]||0;
+renderStatRows();
+renderAll();
+byId('loadStatus').textContent='장착 아이템 '+ITEMS.filter(function(i){return !!itemType(i);}).length+'개';
+loadLive();
+</script>
+</body>
+</html>
