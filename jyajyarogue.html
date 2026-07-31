@@ -1,0 +1,1374 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>쟈쟈로그 · 쟈쟈서버</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f2f7fd; --bg2:#e8f2fc; --white:#ffffff;
+  --s1:#f0f7fd; --s2:#e3f0fb;
+  --border:#dbe9f7; --border2:#bcd8f2;
+  --a1:#2f7fd6; --a2:#22b6c9; --a3:#5aa8ea; --a4:#f5a623; --a5:#6fd0a0;
+  --t1:#12253f; --t2:#4c6a8c; --t3:#8ea6c2; --t4:#c7dcf0;
+  --ok:#3d9e6e; --err:#e05a5a; --pos:#2f7fd6; --neg:#e05a5a;
+  --atk:#e0684a; --def:#2f7fd6; --dur:#3aab7d; --dex:#9b6fd6;
+  --shadow:0 4px 24px rgba(47,127,214,0.12);
+  --shadow2:0 8px 32px rgba(47,127,214,0.18);
+}
+[data-theme="dark"] {
+  --bg:#0a1420; --bg2:#0f1e30; --white:#132335;
+  --s1:#16283c; --s2:#1c3149;
+  --border:#233c56; --border2:#2c4a68;
+  --t1:#e6f0fb; --t2:#a9c2dc; --t3:#7391b0; --t4:#4a637d;
+  --pos:#5aa8ea; --neg:#f08a8a;
+  --atk:#f08a6e; --def:#5aa8ea; --dur:#7fdcb4; --dex:#b78fe8;
+  --shadow:0 4px 24px rgba(0,0,0,0.4);
+  --shadow2:0 8px 32px rgba(0,0,0,0.5);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--t1);min-height:100vh;
+  background-image:radial-gradient(circle at 12% 8%, rgba(47,127,214,0.08) 0%, transparent 50%),
+    radial-gradient(circle at 88% 90%, rgba(34,182,201,0.07) 0%, transparent 50%);}
+
+/* ===== 사이드바 ===== */
+.sidebar{width:300px;height:100vh;background:var(--white);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;position:fixed;left:-300px;top:0;z-index:200;
+  transition:left .32s cubic-bezier(.4,0,.2,1);box-shadow:4px 0 24px rgba(47,127,214,0.08);}
+.sidebar.open{left:0;}
+.sb-head{padding:20px 16px 15px;border-bottom:1px solid var(--border);}
+.sb-logo{display:flex;align-items:center;gap:8px;font-family:'Nunito',sans-serif;font-weight:900;
+  font-size:16px;color:var(--a1);margin-bottom:4px;}
+.sb-logo-dot{width:8px;height:8px;background:var(--a2);border-radius:50%;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(2)}}
+.sb-sub{font-size:10.5px;color:var(--t3);font-family:'Nunito',sans-serif;font-weight:700;letter-spacing:.5px;}
+.sb-nav{padding:11px 14px;border-bottom:1px solid var(--border);}
+.sb-nav-toggle{width:100%;display:flex;align-items:center;gap:10px;padding:11px 13px;border-radius:12px;
+  font-size:13px;font-weight:800;color:var(--t1);background:var(--s1);border:none;
+  cursor:pointer;font-family:inherit;transition:background .18s;}
+.sb-nav-toggle:hover{background:var(--s2);}
+.sb-nav-toggle-label{flex:1;text-align:left;}
+.sb-nav-toggle-chevron{color:var(--t3);font-size:11px;transition:transform .3s cubic-bezier(.4,0,.2,1);}
+.sb-nav-toggle.open .sb-nav-toggle-chevron{transform:rotate(180deg);}
+.sb-nav-list{max-height:0;overflow:hidden;transition:max-height .4s cubic-bezier(.33,1,.68,1);
+  display:flex;flex-direction:column;gap:2px;perspective:700px;}
+.sb-nav-list.open{max-height:600px;margin-top:5px;padding-top:2px;}
+.sb-nav-list a{display:flex;align-items:center;gap:10px;text-decoration:none;padding:10px 13px;border-radius:10px;
+  font-size:12.5px;font-weight:700;color:var(--t2);background:transparent;border:none;
+  opacity:0;transform:rotateX(-82deg);transform-origin:center top;
+  transition:opacity .26s ease,transform .5s cubic-bezier(.34,1.32,.5,1),background .16s ease,color .16s ease;}
+.sb-nav-list.open a{opacity:1;transform:rotateX(0);}
+.sb-nav-list.open a:nth-child(1){transition-delay:.02s;}
+.sb-nav-list.open a:nth-child(2){transition-delay:.07s;}
+.sb-nav-list.open a:nth-child(3){transition-delay:.12s;}
+.sb-nav-list.open a:nth-child(4){transition-delay:.17s;}
+.sb-nav-list.open a:nth-child(5){transition-delay:.22s;}
+.sb-nav-list.open a:nth-child(6){transition-delay:.27s;}
+.sb-nav-list.open a:nth-child(7){transition-delay:.32s;}
+.sb-nav-list.open a:nth-child(8){transition-delay:.37s;}
+.sb-nav-list.open a:nth-child(9){transition-delay:.42s;}
+.sb-nav-list.open a:nth-child(10){transition-delay:.47s;}
+.sb-nav-list a:hover{background:var(--s1);color:var(--a1);}
+.sb-nav-list a.on{background:rgba(47,127,214,.12);color:var(--a1);font-weight:800;}
+[data-theme="dark"] .sb-nav-list a.on{background:rgba(90,168,234,.16);}
+@media(prefers-reduced-motion:reduce){
+  .sb-nav-list a{transition:background .16s ease,color .16s ease;transform:none;opacity:1;}
+  .sb-nav-list.open a{transition-delay:0s;}
+}
+.sb-body{padding:16px;flex:1;overflow-y:auto;min-height:0;}
+.sb-body::-webkit-scrollbar{width:4px;} .sb-body::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px;}
+.f-group{margin-bottom:18px;}
+.f-group:last-child{margin-bottom:0;}
+.f-section{font-size:10px;letter-spacing:1.2px;color:var(--t3);text-transform:uppercase;margin:0 0 8px 2px;
+  font-family:'Nunito',sans-serif;font-weight:800;}
+.f-input,.f-select{width:100%;padding:10px 13px;background:var(--s1);border:1px solid var(--border);
+  border-radius:11px;font-family:inherit;font-size:15px;color:var(--t1);outline:none;transition:border-color .15s,background .15s;}
+.f-input::placeholder{color:var(--t3);}
+.f-input:focus,.f-select:focus{border-color:var(--a1);background:var(--white);}
+.f-chip-wrap{display:flex;flex-wrap:wrap;gap:6px;}
+.f-chip{background:var(--white);border:1px solid var(--border);color:var(--t2);padding:6px 11px;
+  border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:.15s;}
+.f-chip:hover{border-color:var(--a3);color:var(--a1);}
+.f-chip.is-on{background:var(--a1);border-color:var(--a1);color:#fff;}
+.f-seg{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.f-seg3{grid-template-columns:1fr 1fr 1fr;}
+.f-seg button{background:var(--white);border:1px solid var(--border);color:var(--t2);padding:9px 4px;
+  border-radius:11px;font-size:12px;cursor:pointer;font-weight:700;font-family:inherit;transition:.15s;}
+.f-seg button:hover{border-color:var(--a3);color:var(--a1);}
+.f-seg button.active{background:var(--a1);color:#fff;border-color:var(--a1);}
+.sb-footer{padding:12px 16px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+.sb-footer-txt{font-size:10.5px;color:var(--t3);}
+.dark-toggle{width:34px;height:34px;border-radius:10px;border:1px solid var(--border);background:var(--s1);
+  cursor:pointer;font-size:14px;transition:.15s;}
+.dark-toggle:hover{border-color:var(--a3);background:var(--white);}
+[data-theme="dark"] .toggle-moon{display:inline;} [data-theme="dark"] .toggle-sun{display:none !important;}
+[data-theme="light"] .toggle-moon{display:none !important;} [data-theme="light"] .toggle-sun{display:inline;}
+.toggle-btn{position:fixed;top:16px;left:16px;z-index:300;width:42px;height:42px;background:var(--white);
+  border:1.5px solid var(--border);border-radius:13px;cursor:pointer;font-size:17px;color:var(--t2);
+  box-shadow:var(--shadow);transition:left .32s cubic-bezier(.4,0,.2,1),border-color .15s,transform .15s;}
+.toggle-btn:hover{border-color:var(--a1);box-shadow:var(--shadow2);transform:scale(1.05);}
+.toggle-btn.sb-open{left:314px;}
+@media(max-width:820px){ .toggle-btn.sb-open{left:auto;right:16px;} .main.shifted{margin-left:0;} }
+.sb-backdrop{position:fixed;inset:0;background:rgba(18,37,63,.35);z-index:150;opacity:0;pointer-events:none;transition:opacity .3s;}
+.sb-backdrop.show{opacity:1;pointer-events:auto;}
+
+/* ===== 메인 ===== */
+.main{flex:1;min-height:100vh;transition:margin-left .32s cubic-bezier(.4,0,.2,1);}
+.main.shifted{margin-left:300px;}
+.main-inner{max-width:1240px;margin:0 auto;padding:74px 26px 90px;}
+.page-head{text-align:center;padding:8px 0 26px;}
+.wind-badge{display:inline-flex;align-items:center;gap:7px;background:var(--white);border:1px solid var(--border2);
+  border-radius:20px;padding:6px 15px;font-size:10.5px;font-weight:800;color:var(--a1);
+  font-family:'Nunito',sans-serif;letter-spacing:.6px;margin-bottom:15px;box-shadow:0 2px 12px rgba(47,127,214,.08);}
+.wind-badge-dot{width:6px;height:6px;background:var(--a2);border-radius:50%;animation:pulse 2s infinite;}
+.page-title{font-size:40px;font-weight:900;letter-spacing:-1.4px;line-height:1.05;color:var(--a1);
+  background:linear-gradient(115deg,var(--a1),var(--a2) 55%,var(--a3));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+.page-sub{font-size:13px;color:var(--t3);margin-top:9px;font-weight:600;}
+.stats-row{display:flex;gap:10px;justify-content:center;margin-bottom:24px;flex-wrap:wrap;}
+.stat-chip{display:inline-flex;align-items:baseline;gap:5px;font-size:11.5px;color:var(--t3);
+  font-family:'Nunito',sans-serif;font-weight:700;background:var(--white);border:1px solid var(--border);
+  padding:7px 14px;border-radius:12px;box-shadow:0 1px 4px rgba(47,127,214,.05);}
+.stat-chip b{color:var(--a1);font-size:15px;font-weight:900;}
+.stat-chip b.warn{color:var(--err);}
+
+.panel{background:var(--white);border:1px solid var(--border);border-radius:18px;padding:18px 19px;
+  box-shadow:0 1px 3px rgba(47,127,214,.05);}
+.panel + .panel{margin-top:16px;}
+.p-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;flex-wrap:wrap;}
+.p-title{font-size:14.5px;font-weight:900;color:var(--t1);letter-spacing:-.3px;}
+.p-note{font-size:11px;color:var(--t3);font-weight:700;}
+.mini-btn{background:var(--s1);border:1px solid var(--border);color:var(--t2);padding:6px 11px;border-radius:9px;
+  font-size:11.5px;font-weight:800;cursor:pointer;font-family:inherit;transition:.15s;}
+.mini-btn:hover{border-color:var(--a3);color:var(--a1);background:var(--white);}
+.mini-btn.pri{background:var(--a1);border-color:var(--a1);color:#fff;}
+.mini-btn.pri:hover{filter:brightness(1.07);color:#fff;}
+
+/* ===== 쟈쟈로그 전용 ===== */
+.rg-wrap{max-width:980px;margin:0 auto;}
+.rg-hud{display:flex;gap:9px;flex-wrap:wrap;justify-content:center;margin-bottom:16px;}
+.rg-hud .stat-chip b{font-family:'Nunito',sans-serif;}
+
+.rg-stage{background:linear-gradient(160deg,var(--s1),var(--s2));border:1px solid var(--border2);
+  border-radius:20px;padding:18px;position:relative;overflow:hidden;}
+.rg-stage::after{content:'';position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(circle at 80% 12%,rgba(255,255,255,.35),transparent 55%);}
+[data-theme="dark"] .rg-stage::after{background:radial-gradient(circle at 80% 12%,rgba(255,255,255,.06),transparent 55%);}
+.rg-biome{font-size:11px;font-weight:800;letter-spacing:1px;color:var(--a1);font-family:'Nunito',sans-serif;
+  text-align:center;margin-bottom:12px;text-transform:uppercase;}
+
+.rg-field{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center;}
+@media(max-width:700px){.rg-field{grid-template-columns:1fr;}.rg-vs{display:none;}}
+.rg-vs{font-family:'Nunito',sans-serif;font-weight:900;font-size:20px;color:var(--t3);}
+
+.rg-card{background:var(--white);border:1.5px solid var(--border);border-radius:16px;padding:13px;
+  display:flex;flex-direction:column;gap:9px;transition:border-color .2s,transform .2s;}
+.rg-card.foe{border-color:rgba(224,90,90,.4);}
+.rg-card.hallu{border-color:var(--a4);box-shadow:0 0 0 3px rgba(245,166,35,.18);}
+.rg-card.hit{animation:rgHit .32s;}
+@keyframes rgHit{0%,100%{transform:translateX(0)}25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+.rg-card.faint{opacity:.4;filter:grayscale(1);}
+
+.rg-portrait{display:flex;align-items:center;gap:11px;}
+.rg-portrait img{width:66px;height:66px;object-fit:contain;image-rendering:pixelated;
+  background:var(--s1);border-radius:13px;border:1px solid var(--border);padding:3px;flex-shrink:0;}
+.rg-name{font-size:15px;font-weight:900;color:var(--t1);line-height:1.25;}
+.rg-meta{font-size:10.5px;color:var(--t3);font-weight:700;margin-top:2px;}
+
+.rg-tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px;}
+.rg-tag{font-size:9.5px;font-weight:800;padding:2px 7px;border-radius:7px;font-family:'Nunito',sans-serif;
+  background:var(--s2);color:var(--t2);letter-spacing:.3px;}
+.rg-tag.g8{background:linear-gradient(100deg,var(--a4),#ffcf6b);color:#4a2f00;}
+.rg-tag.don{background:rgba(155,111,214,.16);color:var(--dex);}
+.rg-tag.e-earth{background:rgba(111,208,160,.2);color:#2e7a55;}
+.rg-tag.e-water{background:rgba(47,127,214,.16);color:var(--a1);}
+.rg-tag.e-fire{background:rgba(224,104,74,.16);color:var(--atk);}
+.rg-tag.e-wind{background:rgba(34,182,201,.16);color:#1a7d89;}
+[data-theme="dark"] .rg-tag.e-earth{color:#7fdcb4;}
+[data-theme="dark"] .rg-tag.e-fire{color:#f08a6e;}
+
+.rg-hpbar{height:12px;border-radius:99px;background:var(--s2);overflow:hidden;box-shadow:inset 0 1px 3px rgba(18,37,63,.12);}
+.rg-hpfill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--dur),#5fe0ac);transition:width .35s cubic-bezier(.4,0,.2,1);}
+.rg-hpfill.mid{background:linear-gradient(90deg,var(--a4),#ffd27a);}
+.rg-hpfill.low{background:linear-gradient(90deg,var(--err),#ff9090);}
+.rg-hptxt{display:flex;justify-content:space-between;font-size:10.5px;font-weight:800;color:var(--t2);font-family:'Nunito',sans-serif;}
+
+.rg-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;}
+.rg-st{background:var(--s1);border-radius:9px;padding:5px 3px;text-align:center;}
+.rg-st span{display:block;font-size:9px;color:var(--t3);font-weight:800;letter-spacing:.4px;}
+.rg-st b{font-size:13px;font-family:'Nunito',sans-serif;font-weight:900;}
+.rg-st.a b{color:var(--atk);} .rg-st.d b{color:var(--def);}
+.rg-st.h b{color:var(--dur);} .rg-st.s b{color:var(--dex);}
+
+.rg-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px;}
+@media(max-width:520px){.rg-actions{grid-template-columns:repeat(2,1fr);}}
+.rg-btn{background:var(--white);border:1.5px solid var(--border);color:var(--t1);padding:12px 8px;border-radius:13px;
+  font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;transition:.15s;text-align:center;}
+.rg-btn:hover:not(:disabled){border-color:var(--a1);color:var(--a1);transform:translateY(-2px);box-shadow:var(--shadow);}
+.rg-btn:disabled{opacity:.4;cursor:not-allowed;}
+.rg-btn.pri{background:var(--a1);border-color:var(--a1);color:#fff;}
+.rg-btn.pri:hover:not(:disabled){filter:brightness(1.08);color:#fff;}
+.rg-btn.warn{border-color:var(--a4);color:var(--a4);}
+.rg-btn small{display:block;font-size:9.5px;font-weight:700;opacity:.7;margin-top:2px;}
+
+.rg-log{margin-top:14px;background:var(--white);border:1px solid var(--border);border-radius:14px;
+  padding:11px 13px;height:150px;overflow-y:auto;font-size:12.5px;line-height:1.75;color:var(--t2);}
+.rg-log::-webkit-scrollbar{width:4px;}.rg-log::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px;}
+.rg-log div{padding:1px 0;}
+.rg-log .hl{color:var(--a1);font-weight:800;}
+.rg-log .bad{color:var(--err);font-weight:800;}
+.rg-log .good{color:var(--ok);font-weight:800;}
+.rg-log .gold{color:var(--a4);font-weight:900;}
+
+.rg-party{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:9px;margin-top:12px;}
+.rg-slot{background:var(--white);border:1.5px solid var(--border);border-radius:13px;padding:9px;
+  display:flex;gap:9px;align-items:center;cursor:pointer;transition:.15s;}
+.rg-slot:hover{border-color:var(--a3);}
+.rg-slot.active{border-color:var(--a1);background:rgba(47,127,214,.06);}
+.rg-slot.dead{opacity:.4;filter:grayscale(1);cursor:not-allowed;}
+.rg-slot img{width:40px;height:40px;object-fit:contain;image-rendering:pixelated;background:var(--s1);border-radius:9px;flex-shrink:0;}
+.rg-slot .sn{font-size:12px;font-weight:800;color:var(--t1);line-height:1.2;}
+.rg-slot .sh{font-size:10px;color:var(--t3);font-weight:700;font-family:'Nunito',sans-serif;}
+
+.rg-shop{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:11px;}
+.rg-item{background:var(--white);border:1.5px solid var(--border);border-radius:14px;padding:13px;transition:.15s;}
+.rg-item:hover{border-color:var(--a3);}
+.rg-item .ii{font-size:22px;}
+.rg-item .in{font-size:13.5px;font-weight:900;color:var(--t1);margin-top:5px;}
+.rg-item .id{font-size:11px;color:var(--t3);font-weight:600;margin:4px 0 9px;line-height:1.5;min-height:32px;}
+.rg-item .ip{font-family:'Nunito',sans-serif;font-weight:900;color:var(--a4);font-size:13px;}
+
+.rg-title{text-align:center;padding:26px 10px;}
+.rg-title h1{font-size:44px;font-weight:900;letter-spacing:-2px;line-height:1;
+  background:linear-gradient(115deg,var(--a1),var(--a2) 55%,var(--a3));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+.rg-title p{font-size:13px;color:var(--t3);font-weight:600;margin-top:10px;line-height:1.8;}
+
+.rg-pick{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px;margin-top:6px;}
+.rg-pick .rg-card{cursor:pointer;}
+.rg-pick .rg-card:hover{border-color:var(--a1);transform:translateY(-3px);box-shadow:var(--shadow);}
+
+.rg-center{text-align:center;padding:16px 0;}
+.rg-big{font-size:30px;font-weight:900;color:var(--a1);letter-spacing:-1px;}
+.rg-sub{font-size:13px;color:var(--t3);font-weight:700;margin-top:7px;}
+.rg-inline{display:flex;gap:9px;justify-content:center;flex-wrap:wrap;margin-top:18px;}
+.rg-inline .rg-btn{min-width:150px;}
+
+.rg-dexgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:7px;}
+.rg-dex{background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:5px;text-align:center;}
+.rg-dex img{width:100%;height:42px;object-fit:contain;image-rendering:pixelated;}
+.rg-dex span{display:block;font-size:9px;font-weight:800;color:var(--t2);margin-top:2px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+</style>
+</head>
+<body>
+
+<button class="toggle-btn" id="toggleBtn">☰</button>
+<div class="sb-backdrop" id="sbBackdrop"></div>
+
+<div class="sidebar" id="sidebar">
+  <div class="sb-head">
+    <div class="sb-logo"><span class="sb-logo-dot"></span>SA 쟈쟈</div>
+    <div class="sb-sub">JYAJYA SERVER TOOLS</div>
+  </div>
+  <div class="sb-nav" id="sbNav"></div>
+  <div class="sb-body">
+    <div class="f-group">
+      <div class="f-section">플레이어 이름</div>
+      <input type="text" id="nickInput" class="f-input" placeholder="족장 이름" maxlength="12">
+    </div>
+    <div class="f-group">
+      <div class="f-section">기록</div>
+      <div class="f-seg">
+        <div class="rg-st h"><span>최고 웨이브</span><b id="recWave">-</b></div>
+        <div class="rg-st s"><span>총 도전</span><b id="recRuns">-</b></div>
+      </div>
+    </div>
+    <div class="f-group">
+      <div class="f-section">포획 도감 <span id="dexCount" style="color:var(--a1)"></span></div>
+      <div class="rg-dexgrid" id="dexGrid"></div>
+    </div>
+    <div class="f-group">
+      <div class="f-section">설정</div>
+      <div class="f-seg">
+        <button class="mini-btn" id="btnSfx">🔊 사운드</button>
+        <button class="mini-btn" id="btnReset">기록 초기화</button>
+      </div>
+    </div>
+  </div>
+  <div class="sb-footer">
+    <span class="sb-footer-txt" id="loadStatus">로딩중...</span>
+    <button class="dark-toggle" onclick="toggleDark()"><span class="toggle-moon">🌙</span><span class="toggle-sun">☀️</span></button>
+  </div>
+</div>
+
+<div class="main" id="main">
+  <div class="main-inner">
+    <div class="page-head">
+      <div class="wind-badge"><span class="wind-badge-dot"></span><span>SA JYAJYA SERVER</span></div>
+      <div class="page-title">쟈쟈로그</div>
+      <div class="page-sub">30웨이브 로그라이크 · 포획하고 키워서 얼음성까지</div>
+    </div>
+    <div class="rg-wrap" id="app"></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+<script src="nav.js"></script>
+<script>
+/* ============================================================
+   쟈쟈로그 (JYAJYAROGUE)
+   윈드로그(lomxx_cal_wind/windrogue.html)를 쟈쟈서버 규칙으로 재설계
+   - 펫 데이터: pet_data.json (레포) → 공홈 API 폴백
+   - 능력치: 쟈쟈 정식 공식 (disp / rankInfoB / initPct / lvup)
+   - 초기치 굴림: 성장베이스 보정 -2~+2 + 배분치 10포인트 (환각=전부 +2)
+   ============================================================ */
+
+/* ---------- 상수 ---------- */
+const REPO_JSON = 'pet_data.json';
+const API_URL   = 'https://sa000001.com/sa2/info/api/pet_data.php';
+const IMG_BASE  = 'https://sa000001.com/sa2/info/img/';
+const IMG_ALT   = 'https://saworld.net/PetAnimation/';
+const SAVE_KEY  = 'jyajyarogue:v1';
+const MAX_WAVE  = 30;
+const PARTY_MAX = 4;
+
+const ELEMS = ['earth','water','fire','wind'];
+const ELEM_KR = { earth:'지', water:'수', fire:'화', wind:'풍' };
+/* 상성: 지 > 수 > 화 > 풍 > 지 */
+const ADVANTAGE = { earth:'water', water:'fire', fire:'wind', wind:'earth' };
+
+/* 바이옴 — 쟈쟈 지역 기준, how 필드 키워드로 야생펫 후보 결정 */
+const BIOMES = [
+  { id:'plain',  name:'마리너스 평원',   range:[1,5],
+    keys:['마리너스','카루타나','샴기르','쟈쟈','쟈루','성인식','앞마당','목장'] },
+  { id:'mine',   name:'라토토·쿠링 광산', range:[6,10],
+    keys:['라토토','쿠링','아름산','속임수','도둑','광산','탄광','대복도'] },
+  { id:'coast',  name:'사이너스 해안',    range:[11,15],
+    keys:['사이너스','쿠오','포우렌','해저','산소동굴'] },
+  { id:'island', name:'가우린 제도',      range:[16,20],
+    keys:['가우린','하이하모','세르노스','채석장','고야산','숲의'] },
+  { id:'volcano',name:'화산섬 에레보스',   range:[21,25],
+    keys:['에레보스','화산','용암','온천','진홍','에덴','스라인'] },
+  { id:'frozen', name:'얼음성',           range:[26,30],
+    keys:['얼음성','칠흑','천지','몽환','빛의','유리','벽청','범굴','비룡'] },
+];
+
+/* ---------- 아이템 ---------- */
+const ITEMS = {
+  meat_berga: { name:'베르가의 고기', desc:'내구력 30% 회복',       price:30,  icon:'🍗', heal:0.30 },
+  meat_manmo: { name:'만모의 고기',   desc:'내구력 55% 회복',       price:60,  icon:'🍖', heal:0.55 },
+  meat_kaku:  { name:'카쿠의 고기',   desc:'내구력 전체 회복',       price:110, icon:'🥩', heal:1.00 },
+  seed:       { name:'소생의 씨앗',   desc:'쓰러진 펫 1마리 부활 (50%)', price:200, icon:'🌱', revive:0.5 },
+  bait:       { name:'고급 미끼',     desc:'다음 포획 성공률 +25%p', price:80,  icon:'🍡', bait:0.25 },
+};
+
+/* ---------- 기술 ---------- */
+const SKILLS = {
+  all_in:   { name:'배수의진', desc:'이번 공격 2배 · 받는 피해 50%↑', price:150, icon:'⚔️' },
+  breaker:  { name:'가드브레이크', desc:'방어 중인 상대에게만 적중 · 180%', price:180, icon:'💥' },
+  charge:   { name:'모아치기', desc:'이번턴 무방비 · 다음턴 자동 2배 공격', price:120, icon:'🔋' },
+  drain:    { name:'흡수공격', desc:'85% 피해 · 준 피해의 40% 회복', price:220, icon:'🩸' },
+};
+
+/* ---------- 소울 (쟈쟈 소울 시스템) ---------- */
+const SOULS = {
+  normal: { name:'일반 소울', total:4,  price:120,  color:'var(--t3)' },
+  fine:   { name:'고급 소울', total:7,  price:280,  color:'var(--ok)' },
+  rare:   { name:'희귀 소울', total:9,  price:520,  color:'var(--a1)' },
+  hero:   { name:'영웅 소울', total:11, price:900,  color:'var(--dex)' },
+};
+
+/* ============================================================
+   쟈쟈 정식 능력치 공식
+   ============================================================ */
+function num(v){ const n = Number(v); return isFinite(n) ? n : 0; }
+function rankInfoB(sum){
+  if(sum>=100) return 475; if(sum>=95) return 495; if(sum>=90) return 515;
+  if(sum>=85)  return 535; if(sum>=80) return 555; return 575;
+}
+/* 성장베이스(h,a,d,s) → 실제 표시 능력치(내구/공격/방어/순발) */
+function disp(h,a,d,s){
+  return {
+    h: h*4 + a + d + s,
+    a: h*0.1 + a + d*0.1 + s*0.05,
+    d: h*0.1 + a*0.1 + d + s*0.05,
+    s: s
+  };
+}
+/* roll = { rh,ra,rd,rs (-2~2), hb,ab,db,sb (배분치 합 10) } */
+function petStats(pet, level, roll){
+  const baseSum = num(pet.h0)+num(pet.a0)+num(pet.d0)+num(pet.s0);
+  const B  = rankInfoB(baseSum);
+  const ph = num(pet.h0)+num(roll.rh)+num(roll.hb);
+  const pa = num(pet.a0)+num(roll.ra)+num(roll.ab);
+  const pd = num(pet.d0)+num(roll.rd)+num(roll.db);
+  const ps = num(pet.s0)+num(roll.rs)+num(roll.sb);
+  const ip = num(pet.initPct);
+  const init   = disp(ip*ph/100, ip*pa/100, ip*pd/100, ip*ps/100);
+  const growth = disp(ph*B/10000, pa*B/10000, pd*B/10000, ps*B/10000);
+  const L = Math.max(1, level) - 1;
+  return {
+    hp:  Math.max(1, Math.floor(init.h + growth.h * L)),
+    atk: Math.max(1, Math.floor(init.a + growth.a * L)),
+    def: Math.max(1, Math.floor(init.d + growth.d * L)),
+    agi: Math.max(1, Math.floor(init.s + growth.s * L)),
+  };
+}
+
+/* ---------- 초기치 굴림 ---------- */
+function rollInit(force){
+  if(force === 'hallu'){
+    // 8등급(환각) = 성장베이스 보정 전부 +2
+    return { rh:2, ra:2, rd:2, rs:2, ...spread10() };
+  }
+  const r = () => Math.floor(Math.random()*5) - 2;   // -2 ~ +2
+  return { rh:r(), ra:r(), rd:r(), rs:r(), ...spread10() };
+}
+/* 배분치 10포인트를 4스탯에 다항분포로 뿌림 */
+function spread10(){
+  const o = { hb:0, ab:0, db:0, sb:0 };
+  const k = ['hb','ab','db','sb'];
+  for(let i=0;i<10;i++) o[k[Math.floor(Math.random()*4)]]++;
+  return o;
+}
+/* 굴림 → 초기치 등급 (8등급 = 전부 +2 = 환각) */
+function rollGrade(roll){
+  const score = (roll.rh+2)+(roll.ra+2)+(roll.rd+2)+(roll.rs+2); // 0~16
+  if(score === 16) return 8;   // 전부 +2 = 환각
+  if(score === 0)  return 1;   // 전부 -2
+  return Math.max(2, Math.min(7, 2 + Math.round((score - 1) * 5 / 14)));
+}
+
+/* ============================================================
+   상태
+   ============================================================ */
+let PETS = [];
+const state = {
+  scene:'title', wave:1, party:[], active:0, foe:null,
+  stones:0, inv:{}, log:[], busy:false, nick:'',
+  captured:{}, runs:0, best:0, sfx:true, baitOn:false, shopStock:[],
+};
+
+/* ---------- 저장 ---------- */
+function save(){
+  try{
+    localStorage.setItem(SAVE_KEY, JSON.stringify({
+      nick:state.nick, runs:state.runs, best:state.best,
+      captured:state.captured, sfx:state.sfx
+    }));
+  }catch(e){}
+}
+function load(){
+  try{
+    const d = JSON.parse(localStorage.getItem(SAVE_KEY)||'{}');
+    state.nick     = d.nick || '';
+    state.runs     = d.runs || 0;
+    state.best     = d.best || 0;
+    state.captured = d.captured || {};
+    state.sfx      = d.sfx !== false;
+  }catch(e){}
+}
+
+/* ============================================================
+   오디오 — 원본 윈드로그의 Tone.js SFX + 바이옴별 MP3 BGM 이식
+   BGM 파일은 레포 루트의 bgm/ 폴더에 있어야 한다.
+   ============================================================ */
+const audio = { ready:false, muted:false, master:null, currentBgm:null };
+
+async function initAudio(){
+  if(audio.ready) return;
+  if(typeof Tone === 'undefined') return;
+  try{
+    await Tone.start();
+    audio.master = new Tone.Volume(-8).toDestination();
+    audio.ready = true;
+  }catch(e){ /* 실패해도 게임은 돌아감 */ }
+}
+
+function playSfx(name){
+  if(!audio.ready || audio.muted || typeof Tone === 'undefined') return;
+  try{
+    const now = Tone.now();
+    const syn = (osc, env) => new Tone.Synth({ oscillator:osc, envelope:env }).connect(audio.master);
+    const kill = (s, ms) => setTimeout(()=>s.dispose(), ms);
+
+    if(name === 'hit' || name === 'hit_effective'){
+      const s = new Tone.MembraneSynth({ pitchDecay:0.02, octaves:4,
+        envelope:{ attack:0.001, decay:0.15, sustain:0, release:0.05 } }).connect(audio.master);
+      s.triggerAttackRelease(name === 'hit_effective' ? 'C3' : 'G2', 0.12, now);
+      kill(s, 400);
+    }
+    else if(name === 'crit'){
+      const s = syn({type:'sawtooth'}, {attack:0.001,decay:0.3,sustain:0,release:0.1});
+      s.triggerAttackRelease('A4', 0.05, now);
+      s.triggerAttackRelease('E5', 0.08, now + 0.05);
+      s.triggerAttackRelease('A5', 0.15, now + 0.13);
+      kill(s, 600);
+    }
+    else if(name === 'faint'){
+      const s = syn({type:'triangle'}, {attack:0.01,decay:0.4,sustain:0,release:0.3});
+      s.triggerAttackRelease('E4', 0.1,  now);
+      s.triggerAttackRelease('C4', 0.15, now + 0.1);
+      s.triggerAttackRelease('G3', 0.3,  now + 0.25);
+      kill(s, 800);
+    }
+    else if(name === 'victory'){
+      const s = syn({type:'square'}, {attack:0.005,decay:0.2,sustain:0.1,release:0.15});
+      ['C5','E5','G5','C6'].forEach((n,i)=> s.triggerAttackRelease(n, 0.12, now + i*0.1));
+      kill(s, 900);
+    }
+    else if(name === 'swap'){
+      const s = syn({type:'sine'}, {attack:0.01,decay:0.1,sustain:0,release:0.1});
+      s.triggerAttackRelease('G4', 0.08, now);
+      s.triggerAttackRelease('D5', 0.08, now + 0.08);
+      kill(s, 400);
+    }
+    else if(name === 'capture'){
+      const s = syn({type:'triangle'}, {attack:0.01,decay:0.15,sustain:0,release:0.15});
+      s.triggerAttackRelease('A4', 0.1, now);
+      s.triggerAttackRelease('A4', 0.1, now + 0.18);
+      s.triggerAttackRelease('A4', 0.1, now + 0.36);
+      kill(s, 700);
+    }
+    else if(name === 'capture_success'){
+      const s = new Tone.PolySynth(Tone.Synth, { oscillator:{type:'sine'},
+        envelope:{attack:0.01,decay:0.3,sustain:0,release:0.2} }).connect(audio.master);
+      s.triggerAttackRelease(['C5','E5','G5'], 0.4, now);
+      s.triggerAttackRelease(['D5','F5','A5'], 0.4, now + 0.2);
+      s.triggerAttackRelease(['C6','E6','G6'], 0.5, now + 0.4);
+      kill(s, 1200);
+    }
+    else if(name === 'miss'){
+      const s = syn({type:'sine'}, {attack:0.01,decay:0.2,sustain:0,release:0.1});
+      s.triggerAttackRelease('D4', 0.15, now);
+      s.triggerAttackRelease('A3', 0.2,  now + 0.15);
+      kill(s, 500);
+    }
+    else if(name === 'flee'){
+      const s = syn({type:'triangle'}, {attack:0.01,decay:0.15,sustain:0,release:0.1});
+      ['E5','C5','A4','F4'].forEach((n,i)=> s.triggerAttackRelease(n, 0.08, now + i*0.06));
+      kill(s, 500);
+    }
+    else if(name === 'select'){
+      const s = syn({type:'sine'}, {attack:0.001,decay:0.05,sustain:0,release:0.05});
+      s.triggerAttackRelease('E5', 0.04, now);
+      kill(s, 200);
+    }
+  }catch(e){ /* ignore */ }
+}
+
+/* BGM — 바이옴 id를 원본 트랙명에 매핑 (쟈쟈 바이옴 이름이 달라서 별칭이 필요하다) */
+const BGM_FILES = {
+  title:   'bgm/bgm_title.mp3',
+  plain:   'bgm/bgm_meadow.mp3',    // 마리너스 평원
+  mine:    'bgm/bgm_cave.mp3',      // 라토토·쿠링 광산
+  coast:   'bgm/bgm_coast.mp3',     // 사이너스 해안
+  island:  'bgm/bgm_island.mp3',    // 가우린 제도
+  volcano: 'bgm/bgm_volcano.mp3',   // 화산섬 에레보스
+  frozen:  'bgm/bgm_frozen.mp3',    // 얼음성
+  boss:    'bgm/bgm_boss.mp3',
+  ending:  'bgm/bgm_ending.mp3',
+};
+let currentBgmAudio = null;
+
+function startBgm(id){
+  if(audio.muted) return;
+  if(audio.currentBgm === id && currentBgmAudio && !currentBgmAudio.paused) return;
+  stopBgm();
+  const src = BGM_FILES[id];
+  if(!src) return;
+  try{
+    const a = new Audio(src);
+    a.loop = true;
+    a.volume = 0;
+    const pp = a.play();
+    if(pp && pp.catch) pp.catch(()=>{ /* autoplay 차단 — 첫 클릭 때 다시 시도된다 */ });
+    let vol = 0;
+    const fadeIn = setInterval(()=>{
+      vol += 0.035;
+      if(vol >= 0.35){ vol = 0.35; clearInterval(fadeIn); }
+      if(a && !a.paused) a.volume = vol;
+    }, 100);
+    currentBgmAudio = a;
+    audio.currentBgm = id;
+  }catch(e){}
+}
+function stopBgm(){
+  if(currentBgmAudio){
+    try{
+      const a = currentBgmAudio;
+      let vol = a.volume;
+      const fadeOut = setInterval(()=>{
+        vol -= 0.07;
+        if(vol <= 0){ vol = 0; clearInterval(fadeOut); a.pause(); a.src = ''; }
+        try{ a.volume = Math.max(0, vol); }catch(e){}
+      }, 40);
+    }catch(e){}
+    currentBgmAudio = null;
+  }
+  audio.currentBgm = null;
+}
+/* 현재 씬에 맞는 BGM 결정 */
+function sceneBgm(){
+  const sc = state.scene;
+  if(sc === 'title' || sc === 'starter') return 'title';
+  if(sc === 'victory') return 'ending';
+  if(sc === 'over')    return null;
+  if(sc === 'battle' && state.foe && state.foe.boss) return 'boss';
+  return biomeOf(state.wave).id;
+}
+function syncBgm(){
+  const id = sceneBgm();
+  if(id) startBgm(id); else stopBgm();
+}
+function toggleMute(){
+  audio.muted = !audio.muted;
+  state.sfx = !audio.muted;
+  save();
+  if(audio.muted) stopBgm(); else syncBgm();
+  const btn = document.getElementById('btnSfx');
+  if(btn) btn.textContent = audio.muted ? '🔇 음소거' : '🔊 사운드';
+}
+
+/* ============================================================
+   유닛 생성
+   ============================================================ */
+function makeUnit(pet, level, opt){
+  opt = opt || {};
+  const roll  = opt.roll || rollInit(opt.hallu ? 'hallu' : null);
+  const u = {
+    pet, roll, grade: rollGrade(roll), level,
+    uid: 'u' + Math.random().toString(36).slice(2,9),
+    boss: !!opt.boss, wild: !!opt.wild,
+    bossHpMul: opt.bossHpMul, bossStatMul: opt.bossStatMul,
+    soul: null, skills: [],
+    guarding:false, charging:false, allIn:false,
+    hp:0, maxHp:0, atk:0, def:0, agi:0,
+  };
+  refreshStats(u, true);
+  return u;
+}
+/* 능력치 재계산. 길들인 펫(파티)은 훈련 보정을 받는다. */
+function refreshStats(u, full){
+  const st = petStats(u.pet, u.level, u.roll);
+  const hpM  = u.boss ? (u.bossHpMul  || 1.3) : (u.wild ? 1 : 1.14);   // 보스 / 야생 / 길들임
+  const stM  = u.boss ? (u.bossStatMul || 1.02) : (u.wild ? 1 : 1.08);
+  const ratio = full ? 1 : (u.maxHp ? u.hp / u.maxHp : 1);
+  u.maxHp = Math.max(1, Math.floor(st.hp  * hpM));
+  u.atk   = Math.max(1, Math.floor(st.atk * stM));
+  u.def   = Math.max(1, Math.floor(st.def * stM));
+  u.agi   = st.agi;
+  u.hp    = Math.max(1, Math.floor(u.maxHp * ratio));
+}
+function unitName(u){
+  const n = String(u.pet.name||'').replace(/^\uFEFF/,'');
+  if(u.boss) return (u.grade === 8 ? '환각 ' : '우두머리 ') + n;
+  return n;
+}
+function elemOf(pet){
+  let best='earth', v=-1;
+  ELEMS.forEach(e=>{ if(num(pet[e])>v){ v=num(pet[e]); best=e; } });
+  return best;
+}
+/* 상성 배수: 내 속성이 상대의 약점을 찌를수록 강함 (0~100 → /10 스케일) */
+function elemMult(atk, def){
+  let bonus = 0;
+  ELEMS.forEach(e=>{
+    const mine = num(atk.pet[e]) / 10;
+    if(mine <= 0) return;
+    const target = ADVANTAGE[e];
+    const theirs = num(def.pet[target]) / 10;
+    if(theirs > 0) bonus += Math.min(mine, theirs) * 0.055;
+  });
+  return 1 + Math.min(bonus, 0.7);
+}
+function petImg(pet, cls){
+  const c = pet.imageCode;
+  return `<img class="${cls||''}" src="${IMG_BASE}${c}.gif" loading="lazy" alt=""
+    onerror="this.onerror=null;this.src='${IMG_ALT}${c}.gif';">`;
+}
+
+/* ============================================================
+   바이옴 / 스폰
+   ============================================================ */
+function biomeOf(wave){
+  return BIOMES.find(b => wave >= b.range[0] && wave <= b.range[1]) || BIOMES[BIOMES.length-1];
+}
+function candidates(wave){
+  const b = biomeOf(wave);
+  let list = PETS.filter(p => p.rarity === '0' && b.keys.some(k => String(p.how||'').includes(k)));
+  if(list.length < 6) list = PETS.filter(p => p.rarity === '0');
+  return list;
+}
+function wildLevel(wave){
+  return Math.max(1, Math.round(wave * 4.2 + (Math.random()*4 - 2)));
+}
+function spawnWild(wave){
+  const list = candidates(wave);
+  const pet  = list[Math.floor(Math.random()*list.length)];
+  return makeUnit(pet, wildLevel(wave), { wild:true });
+}
+/* 보스: 웨이브가 깊어질수록 강해진다. 15웨이브부터 진짜 환각(전부 +2) 개체 등장 */
+function spawnBoss(wave){
+  const pool = candidates(wave).slice().sort((a,b)=>
+    (num(b.h0)+num(b.a0)+num(b.d0)+num(b.s0)) - (num(a.h0)+num(a.a0)+num(a.d0)+num(a.s0))
+  ).slice(0, 20);
+  const pet = pool[Math.floor(Math.random()*pool.length)] || PETS[0];
+  const t = wave / MAX_WAVE;                       // 0 ~ 1
+  const opt = {
+    boss:true, wild:true,
+    bossHpMul:   1.15 + t * 0.65,                  // 1.25 → 1.8
+    bossStatMul: 0.98 + t * 0.10,                  // 1.00 → 1.08
+  };
+  if(wave >= 15) opt.hallu = true;                 // 8등급 환각
+  else opt.roll = { rh:1, ra:1, rd:1, rs:1, ...spread10() };
+  return makeUnit(pet, wildLevel(wave), opt);
+}
+
+/* ============================================================
+   로그
+   ============================================================ */
+function log(html){
+  state.log.push(html);
+  if(state.log.length > 200) state.log.shift();
+  const el = document.getElementById('rgLog');
+  if(el){ el.innerHTML = state.log.map(l=>`<div>${l}</div>`).join(''); el.scrollTop = el.scrollHeight; }
+}
+
+/* ============================================================
+   전투
+   ============================================================ */
+function me(){ return state.party[state.active]; }
+function alive(u){ return u && u.hp > 0; }
+function partyAlive(){ return state.party.filter(alive).length; }
+
+function soulBonus(u, key){ return u.soul ? (u.soul[key]||0) : 0; }
+function statOf(u, key){
+  const base = u[key] + soulBonus(u, key);
+  return Math.max(1, Math.floor(base));
+}
+
+function hitChance(a, d){
+  const aa = statOf(a,'agi'), dd = statOf(d,'agi');
+  const r = 0.80 + (aa - dd) / (aa + dd + 1) * 0.28;
+  return Math.max(0.55, Math.min(0.97, r));
+}
+function critChance(a, d){
+  const aa = statOf(a,'agi'), dd = statOf(d,'agi');
+  return Math.max(0.02, Math.min(0.30, 0.05 + (aa - dd) / (aa + dd + 1) * 0.22));
+}
+
+function damage(a, d, mult){
+  const atk = statOf(a,'atk') * (mult||1);
+  const def = statOf(d,'def') * (d.guarding ? 1.9 : 1);
+  let dmg = (atk * 2.1 - def * 1.15) * 0.34;
+  dmg *= elemMult(a, d);
+  dmg *= 0.92 + Math.random() * 0.16;
+  if(a.allIn) dmg *= 2;
+  let crit = false;
+  if(Math.random() < critChance(a, d)){ dmg *= 1.6; crit = true; }
+  return { dmg: Math.max(1, Math.floor(dmg)), crit };
+}
+
+function shake(sel){
+  const el = document.querySelector(sel);
+  if(el){ el.classList.add('hit'); setTimeout(()=>el.classList.remove('hit'), 340); }
+}
+
+async function playerAct(kind, arg){
+  if(state.busy || !alive(me()) || !alive(state.foe)) return;
+  state.busy = true;
+  const u = me(), f = state.foe;
+  u.guarding = false;
+
+  if(kind === 'attack' || kind === 'skill'){
+    let mult = 1, label = '공격', drain = 0;
+    if(kind === 'skill'){
+      const s = arg;
+      if(s === 'all_in'){ u.allIn = true; label = '배수의진'; }
+      else if(s === 'breaker'){
+        label = '가드브레이크';
+        if(!f.guarding){
+          log(`<span class="bad">${unitName(f)}</span>이(가) 방어 중이 아니라 <b>가드브레이크</b>가 빗나갔다!`);
+          playSfx('miss'); await enemyTurn(); return;
+        }
+        mult = 1.8; f.guarding = false;
+      }
+      else if(s === 'charge'){
+        u.charging = true;
+        log(`<span class="hl">${unitName(u)}</span>이(가) 힘을 모으는 중... <small>(다음 턴 2배)</small>`);
+        await enemyTurn(); return;
+      }
+      else if(s === 'drain'){ mult = 0.85; drain = 0.4; label = '흡수공격'; }
+      u.skills = u.skills.filter(x => x !== s);
+    }
+    if(u.charging){ mult *= 2; u.charging = false; label = '모아치기'; }
+
+    if(Math.random() > hitChance(u, f)){
+      log(`<span class="hl">${unitName(u)}</span>의 ${label} — <span class="bad">빗나갔다!</span>`);
+      playSfx('miss');
+    } else {
+      const { dmg, crit } = damage(u, f, mult);
+      f.hp = Math.max(0, f.hp - dmg);
+      shake('#foeCard');
+      playSfx(crit ? 'crit' : (elemMult(u, f) > 1.15 ? 'hit_effective' : 'hit'));
+      log(`<span class="hl">${unitName(u)}</span>의 ${label} → <b>${dmg}</b> 피해${crit?' <span class="gold">치명타!</span>':''}`);
+      if(drain){
+        const h = Math.floor(dmg * drain);
+        u.hp = Math.min(u.maxHp, u.hp + h);
+        log(`<span class="good">${unitName(u)}</span>이(가) <b>${h}</b> 회복했다.`);
+      }
+    }
+    u.allIn = false;
+  }
+  else if(kind === 'guard'){
+    u.guarding = true;
+    log(`<span class="hl">${unitName(u)}</span>이(가) 방어 자세를 취했다.`);
+  }
+  else if(kind === 'item'){
+    const it = ITEMS[arg];
+    state.inv[arg]--; if(!state.inv[arg]) delete state.inv[arg];
+    if(it.heal){
+      const h = Math.floor(u.maxHp * it.heal);
+      u.hp = Math.min(u.maxHp, u.hp + h);
+      playSfx('select');
+      log(`<span class="good">${it.name}</span> 사용 — ${unitName(u)} <b>${h}</b> 회복`);
+    } else if(it.bait){
+      state.baitOn = true;
+      log(`<span class="good">${it.name}</span>를 뿌렸다. 다음 포획 확률 상승!`);
+    } else if(it.revive){
+      const down = state.party.find(p => p.hp <= 0);
+      if(down && Math.random() < it.revive){
+        down.hp = Math.floor(down.maxHp * 0.4);
+        playSfx('select'); log(`<span class="good">${unitName(down)}</span>이(가) 되살아났다!`);
+      } else {
+        playSfx('miss'); log(`<span class="bad">소생에 실패했다...</span>`);
+      }
+    }
+  }
+  else if(kind === 'switch'){
+    state.active = arg;
+    playSfx('swap');
+    log(`<span class="hl">${unitName(me())}</span> 교체 투입!`);
+  }
+  else if(kind === 'catch'){
+    return tryCatch();
+  }
+
+  render();
+  if(f.hp <= 0){ await sleep(320); return winBattle(); }
+  await enemyTurn();
+}
+
+async function enemyTurn(){
+  const f = state.foe;
+  await sleep(420);
+  if(!alive(f)){ state.busy = false; return winBattle(); }
+  const u = me();
+  if(!alive(u)){ state.busy = false; return onFaint(); }
+
+  f.guarding = false;
+  // 간단 AI: HP 낮으면 방어, 아니면 공격
+  if(f.hp / f.maxHp < 0.28 && Math.random() < 0.35){
+    f.guarding = true;
+    log(`<span class="bad">${unitName(f)}</span>이(가) 몸을 웅크렸다.`);
+  } else {
+    if(Math.random() > hitChance(f, u)){
+      log(`<span class="bad">${unitName(f)}</span>의 공격 — 빗나갔다!`);
+    } else {
+      let { dmg, crit } = damage(f, u, 1);
+      if(u.allIn) dmg = Math.floor(dmg * 1.5);
+      u.hp = Math.max(0, u.hp - dmg);
+      shake('#meCard');
+      playSfx(crit ? 'crit' : (elemMult(f, u) > 1.15 ? 'hit_effective' : 'hit'));
+      log(`<span class="bad">${unitName(f)}</span>의 공격 → <b>${dmg}</b> 피해${crit?' <span class="gold">치명타!</span>':''}`);
+    }
+  }
+  u.guarding = false;
+  state.busy = false;
+  render();
+  if(u.hp <= 0) return onFaint();
+}
+
+function onFaint(){
+  log(`<span class="bad">${unitName(me())}</span>이(가) 쓰러졌다!`);
+  playSfx('faint');
+  if(partyAlive() === 0) return gameOver();
+  const next = state.party.findIndex(alive);
+  state.active = next;
+  log(`<span class="hl">${unitName(me())}</span> 교체 투입!`);
+  render();
+}
+
+/* ---------- 포획 ---------- */
+async function tryCatch(){
+  const f = state.foe;
+  if(f.boss){
+    log(`<span class="bad">환각 개체는 포획할 수 없다!</span>`);
+    state.busy = false; render(); return;
+  }
+  if(state.party.length >= PARTY_MAX){
+    log(`<span class="bad">파티가 가득 찼다. (최대 ${PARTY_MAX}마리)</span>`);
+    state.busy = false; render(); return;
+  }
+  const hpRate = f.hp / f.maxHp;
+  let rate = 0.08 + (1 - hpRate) * 0.62;
+  if(state.baitOn){ rate += 0.25; state.baitOn = false; }
+  rate = Math.max(0.05, Math.min(0.92, rate));
+
+  playSfx('capture');
+  log(`돌구슬을 던졌다... <small>(성공률 ${(rate*100).toFixed(0)}%)</small>`);
+  await sleep(500);
+
+  if(Math.random() < rate){
+    playSfx('capture_success');
+    f.wild = false;
+    refreshStats(f, false);
+    f.hp = Math.max(1, Math.floor(f.maxHp * 0.5));
+    state.party.push(f);
+    state.captured[f.pet.imageCode] = String(f.pet.name||'').replace(/^\uFEFF/,'');
+    save();
+    log(`<span class="good">포획 성공!</span> <b>${unitName(f)}</b>이(가) 파티에 합류했다!`);
+    if(f.grade === 8) log(`<span class="gold">★ 8등급(환각) 개체다! 대박!</span>`);
+    await sleep(400);
+    return winBattle(true);
+  }
+  playSfx('miss');
+  log(`<span class="bad">포획 실패!</span>`);
+  await enemyTurn();
+}
+
+/* ---------- 승리 / 보상 ---------- */
+function winBattle(caught){
+  const f = state.foe;
+  const gain = Math.floor((15 + state.wave * 9) * (f.boss ? 3 : 1) * (0.9 + Math.random()*0.3));
+  state.stones += gain;
+  playSfx('victory');
+  log(`<span class="gold">웨이브 ${state.wave} 클리어!</span> +${gain} 스톤`);
+
+  // 레벨업 — 싸운 펫은 전부, 대기 중인 펫은 절반만
+  const up = f.boss ? 7 : 4;
+  state.party.forEach((u,i)=>{
+    if(!alive(u)) return;
+    u.level += (i === state.active) ? up : Math.ceil(up/2);
+    refreshStats(u, false);
+  });
+  log(`선두 <b>+${up} 레벨</b> · 대기 펫 <b>+${Math.ceil(up/2)} 레벨</b>`);
+
+  // 전투 후 회복 (보스전 뒤에는 전체 회복 + 쓰러진 펫 부활)
+  if(f.boss){
+    state.party.forEach(u=>{
+      if(u.hp <= 0) u.hp = Math.floor(u.maxHp * 0.3);          // 쓰러진 펫 부활
+      else u.hp = Math.min(u.maxHp, u.hp + Math.floor(u.maxHp*0.6));
+    });
+    log(`<span class="good">모닥불에서 파티를 추스렸다. (쓰러진 펫도 일어섰다)</span>`);
+  } else {
+    state.party.forEach(u=>{ if(alive(u)) u.hp = Math.min(u.maxHp, u.hp + Math.floor(u.maxHp*0.35)); });
+  }
+
+  state.busy = false;
+  if(state.wave >= MAX_WAVE) return victory();
+  state.wave++;
+  if(state.best < state.wave - 1){ state.best = state.wave - 1; save(); }
+
+  // 5웨이브마다 상점
+  if((state.wave - 1) % 5 === 0){ rollShop(); state.scene = 'shop'; }
+  else state.scene = 'next';
+  render();
+}
+
+function nextBattle(){
+  state.foe = (state.wave % 5 === 0) ? spawnBoss(state.wave) : spawnWild(state.wave);
+  if(!alive(me())){ const i = state.party.findIndex(alive); if(i>=0) state.active = i; }
+  state.scene = 'battle';
+  state.log = [];
+  const b = biomeOf(state.wave);
+  log(`<span class="hl">── 웨이브 ${state.wave} · ${b.name} ──</span>`);
+  if(state.foe.boss) log(`<span class="gold">${unitName(state.foe)} (Lv.${state.foe.level}) 등장!</span>`);
+  else log(`야생 <b>${unitName(state.foe)}</b> (Lv.${state.foe.level}) 등장!`);
+  render();
+}
+
+function gameOver(){
+  stopBgm();
+  playSfx('flee');
+  state.runs++;
+  if(state.best < state.wave - 1) state.best = state.wave - 1;
+  save();
+  state.scene = 'over';
+  render();
+}
+function victory(){
+  state.runs++; state.best = MAX_WAVE; save();
+  state.scene = 'victory';
+  render();
+}
+
+/* ---------- 상점 ---------- */
+function rollShop(){
+  const stock = [
+    { t:'item', k:'meat_berga' },
+    { t:'item', k:'meat_manmo' },
+    { t:'item', k:'bait' },
+  ];
+  if(state.wave > 10) stock.push({ t:'item', k:'meat_kaku' });
+  if(state.wave > 15) stock.push({ t:'item', k:'seed' });
+  // 기술 1~2개
+  const sk = Object.keys(SKILLS).sort(()=>Math.random()-0.5).slice(0, state.wave > 15 ? 2 : 1);
+  sk.forEach(k => stock.push({ t:'skill', k }));
+  // 소울 1~2개
+  const pool = state.wave > 20 ? ['fine','rare','hero'] : state.wave > 10 ? ['normal','fine','rare'] : ['normal','fine'];
+  pool.sort(()=>Math.random()-0.5).slice(0,2).forEach(k => stock.push({ t:'soul', k }));
+  state.shopStock = stock;
+}
+function buy(t, k){
+  if(t === 'item'){
+    const it = ITEMS[k];
+    if(state.stones < it.price) return;
+    state.stones -= it.price;
+    state.inv[k] = (state.inv[k]||0) + 1;
+  }
+  else if(t === 'skill'){
+    const s = SKILLS[k], u = me();
+    if(state.stones < s.price) return;
+    if(u.skills.includes(k)) return;
+    state.stones -= s.price;
+    u.skills.push(k);
+  }
+  else if(t === 'soul'){
+    const s = SOULS[k], u = me();
+    if(state.stones < s.price) return;
+    state.stones -= s.price;
+    // 공/방/순 총합을 랜덤 배분 (쟈쟈 소울 규칙)
+    const soul = { atk:0, def:0, agi:0, grade:s.name };
+    const keys = ['atk','def','agi'];
+    for(let i=0;i<s.total;i++) soul[keys[Math.floor(Math.random()*3)]]++;
+    u.soul = soul;
+  }
+  render();
+}
+
+/* ============================================================
+   렌더
+   ============================================================ */
+const app = () => document.getElementById('app');
+function sleep(ms){ return new Promise(r=>setTimeout(r, ms)); }
+function esc(s){ return String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+function unitCard(u, side){
+  const pct  = Math.max(0, u.hp / u.maxHp * 100);
+  const cls  = pct < 25 ? 'low' : pct < 55 ? 'mid' : '';
+  const el   = elemOf(u.pet);
+  const rar  = u.pet.rarity === '1' ? '2등급' : u.pet.rarity === '2' ? '1등급' : '';
+  return `
+  <div class="rg-card ${side==='foe'?'foe':''} ${u.grade===8?'hallu':''} ${u.hp<=0?'faint':''}"${side==='foe'?' id="foeCard"':side==='me'?' id="meCard"':''}>
+    <div class="rg-portrait">
+      ${petImg(u.pet)}
+      <div>
+        <div class="rg-name">${esc(unitName(u))}</div>
+        <div class="rg-meta">Lv.${u.level} · ${u.grade}등급${u.soul?` · ${u.soul.grade}`:''}</div>
+        <div class="rg-tags">
+          <span class="rg-tag e-${el}">${ELEM_KR[el]} ${num(u.pet[el])}</span>
+          ${u.grade===8?'<span class="rg-tag g8">★ 환각</span>':''}
+          ${rar?`<span class="rg-tag don">${rar}</span>`:''}
+          ${u.guarding?'<span class="rg-tag">🛡 방어중</span>':''}
+          ${u.charging?'<span class="rg-tag">🔋 충전중</span>':''}
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="rg-hptxt"><span>내구력</span><span>${u.hp} / ${u.maxHp}</span></div>
+      <div class="rg-hpbar"><div class="rg-hpfill ${cls}" style="width:${pct}%"></div></div>
+    </div>
+    <div class="rg-stats">
+      <div class="rg-st a"><span>공격</span><b>${statOf(u,'atk')}</b></div>
+      <div class="rg-st d"><span>방어</span><b>${statOf(u,'def')}</b></div>
+      <div class="rg-st h"><span>내구</span><b>${u.maxHp}</b></div>
+      <div class="rg-st s"><span>순발</span><b>${statOf(u,'agi')}</b></div>
+    </div>
+  </div>`;
+}
+
+function hud(){
+  const b = biomeOf(state.wave);
+  return `<div class="rg-hud">
+    <div class="stat-chip"><b>${state.wave}</b>/${MAX_WAVE} 웨이브</div>
+    <div class="stat-chip"><b>${state.stones.toLocaleString()}</b>스톤</div>
+    <div class="stat-chip"><b>${state.party.length}</b>/${PARTY_MAX} 파티</div>
+    <div class="stat-chip"><b>${b.name}</b></div>
+  </div>`;
+}
+
+function partyBar(clickable){
+  return `<div class="rg-party">` + state.party.map((u,i)=>{
+    const dead = u.hp<=0;
+    return `<div class="rg-slot ${i===state.active?'active':''} ${dead?'dead':''}"
+      ${clickable && !dead && i!==state.active ? `onclick="playerAct('switch',${i})"` : ''}>
+      ${petImg(u.pet)}
+      <div><div class="sn">${esc(unitName(u))}</div>
+      <div class="sh">Lv.${u.level} · ${u.hp}/${u.maxHp}</div></div>
+    </div>`;
+  }).join('') + `</div>`;
+}
+
+function render(){
+  syncBgm();
+  const s = state.scene;
+  if(s === 'title')   return renderTitle();
+  if(s === 'starter') return renderStarter();
+  if(s === 'battle')  return renderBattle();
+  if(s === 'next')    return renderNext();
+  if(s === 'shop')    return renderShop();
+  if(s === 'over')    return renderOver();
+  if(s === 'victory') return renderVictory();
+}
+
+function renderTitle(){
+  app().innerHTML = `
+  <div class="panel">
+    <div class="rg-title">
+      <h1>쟈쟈로그</h1>
+      <p>야생 페트를 <b>포획</b>하고 키워서 30웨이브를 돌파하는 로그라이크.<br>
+      능력치는 쟈쟈서버 정식 공식(성장베이스 · 초기치%)을 그대로 씁니다.<br>
+      5웨이브마다 <b>환각(8등급) 보스</b>가 나오고, 클리어하면 상점이 열립니다.</p>
+    </div>
+    <div class="rg-inline">
+      <button class="rg-btn pri" onclick="startRun()">도전 시작</button>
+    </div>
+    <div style="margin-top:22px;font-size:11.5px;color:var(--t3);line-height:1.9;text-align:center;">
+      속성 상성 <b>지 → 수 → 화 → 풍 → 지</b> · 속성치가 높을수록 상성 배수 상승<br>
+      돈펫(1·2등급)은 야생에 나오지 않습니다 · 환각 개체는 포획 불가
+    </div>
+  </div>`;
+}
+
+let starterPool = [];
+function startRun(){
+  state.wave = 1; state.stones = 120; state.party = []; state.active = 0;
+  state.inv = {}; state.log = []; state.baitOn = false;
+  const list = candidates(1);
+  starterPool = [];
+  const used = new Set();
+  while(starterPool.length < 3 && used.size < list.length){
+    const p = list[Math.floor(Math.random()*list.length)];
+    if(used.has(p.id)) continue;
+    used.add(p.id);
+    starterPool.push(makeUnit(p, 8, {}));
+  }
+  state.scene = 'starter';
+  render();
+}
+
+function renderStarter(){
+  app().innerHTML = `
+  <div class="panel">
+    <div class="p-head"><div class="p-title">첫 페트를 고르세요</div>
+      <div class="p-note">초기치 굴림은 매번 새로 돌아갑니다</div></div>
+    <div class="rg-pick">
+      ${starterPool.map((u,i)=>`<div onclick="pickStarter(${i})">${unitCard(u,'pick')}</div>`).join('')}
+    </div>
+    <div class="rg-inline"><button class="rg-btn" onclick="startRun()">🎲 다시 굴리기</button></div>
+  </div>`;
+}
+function pickStarter(i){
+  const u = starterPool[i];
+  u.wild = false;
+  state.party = [u];
+  state.active = 0;
+  state.captured[u.pet.imageCode] = String(u.pet.name||'').replace(/^\uFEFF/,'');
+  save(); renderDex();
+  nextBattle();
+}
+
+function renderBattle(){
+  const u = me(), f = state.foe;
+  const items = Object.keys(state.inv);
+  app().innerHTML = hud() + `
+  <div class="rg-stage">
+    <div class="rg-biome">WAVE ${state.wave} · ${biomeOf(state.wave).name}</div>
+    <div class="rg-field">
+      ${unitCard(u,'me')}
+      <div class="rg-vs">VS</div>
+      ${unitCard(f,'foe')}
+    </div>
+  </div>
+  <div class="rg-actions">
+    <button class="rg-btn pri" onclick="playerAct('attack')" ${state.busy?'disabled':''}>공격</button>
+    <button class="rg-btn" onclick="playerAct('guard')" ${state.busy?'disabled':''}>방어<small>받는 피해 감소</small></button>
+    <button class="rg-btn warn" onclick="playerAct('catch')" ${state.busy||f.boss?'disabled':''}>포획<small>${f.boss?'환각은 불가':'돌구슬 던지기'}</small></button>
+  </div>
+  ${u.skills.length ? `<div class="rg-actions">${u.skills.map(k=>`
+    <button class="rg-btn" onclick="playerAct('skill','${k}')" ${state.busy?'disabled':''}>
+      ${SKILLS[k].icon} ${SKILLS[k].name}<small>${SKILLS[k].desc}</small></button>`).join('')}</div>` : ''}
+  ${items.length ? `<div class="rg-actions">${items.map(k=>`
+    <button class="rg-btn" onclick="playerAct('item','${k}')" ${state.busy?'disabled':''}>
+      ${ITEMS[k].icon} ${ITEMS[k].name} ×${state.inv[k]}<small>${ITEMS[k].desc}</small></button>`).join('')}</div>` : ''}
+  ${state.party.length > 1 ? partyBar(true) : ''}
+  <div class="rg-log" id="rgLog"></div>`;
+  const el = document.getElementById('rgLog');
+  el.innerHTML = state.log.map(l=>`<div>${l}</div>`).join('');
+  el.scrollTop = el.scrollHeight;
+}
+
+function renderNext(){
+  app().innerHTML = hud() + `
+  <div class="panel">
+    <div class="rg-center">
+      <div class="rg-big">웨이브 ${state.wave - 1} 돌파</div>
+      <div class="rg-sub">다음은 <b>${biomeOf(state.wave).name}</b> · 웨이브 ${state.wave}${state.wave%5===0?(state.wave>=15?' <span style="color:var(--a4)">— 환각 보스!</span>':' <span style="color:var(--a4)">— 우두머리!</span>'):''}</div>
+    </div>
+    ${partyBar(false)}
+    <div class="rg-inline"><button class="rg-btn pri" onclick="nextBattle()">계속 전진</button></div>
+  </div>`;
+}
+
+function renderShop(){
+  const u = me();
+  app().innerHTML = hud() + `
+  <div class="panel">
+    <div class="p-head"><div class="p-title">🏪 행상인</div>
+      <div class="p-note">보유 스톤 ${state.stones.toLocaleString()}</div></div>
+    <div class="rg-shop">
+      ${state.shopStock.map(x=>{
+        if(x.t === 'item'){ const it = ITEMS[x.k]; return `
+          <div class="rg-item"><div class="ii">${it.icon}</div><div class="in">${it.name}</div>
+          <div class="id">${it.desc}</div><div class="ip">${it.price} 스톤</div>
+          <button class="mini-btn pri" style="width:100%;margin-top:8px" ${state.stones<it.price?'disabled':''}
+            onclick="buy('item','${x.k}')">구매</button></div>`; }
+        if(x.t === 'skill'){ const s = SKILLS[x.k]; const has = u.skills.includes(x.k); return `
+          <div class="rg-item"><div class="ii">${s.icon}</div><div class="in">${s.name}</div>
+          <div class="id">${s.desc}</div><div class="ip">${s.price} 스톤</div>
+          <button class="mini-btn pri" style="width:100%;margin-top:8px" ${state.stones<s.price||has?'disabled':''}
+            onclick="buy('skill','${x.k}')">${has?'보유중':'선두 페트에게'}</button></div>`; }
+        const s = SOULS[x.k]; return `
+          <div class="rg-item"><div class="ii">💎</div><div class="in" style="color:${s.color}">${s.name}</div>
+          <div class="id">공/방/순 총 <b>${s.total}</b> 랜덤 배분<br>선두 페트에게 장착</div><div class="ip">${s.price} 스톤</div>
+          <button class="mini-btn pri" style="width:100%;margin-top:8px" ${state.stones<s.price?'disabled':''}
+            onclick="buy('soul','${x.k}')">장착</button></div>`;
+      }).join('')}
+    </div>
+    ${partyBar(true)}
+    <div class="rg-inline"><button class="rg-btn pri" onclick="state.scene='next';render()">떠나기</button></div>
+  </div>`;
+}
+
+function renderOver(){
+  app().innerHTML = `
+  <div class="panel">
+    <div class="rg-center">
+      <div class="rg-big" style="color:var(--err)">전멸</div>
+      <div class="rg-sub">${esc(state.nick||'이름 없는 족장')} · 웨이브 <b>${state.wave}</b>에서 종료<br>
+      획득 스톤 ${state.stones.toLocaleString()} · 최고 기록 ${state.best}웨이브</div>
+    </div>
+    ${partyBar(false)}
+    <div class="rg-inline"><button class="rg-btn pri" onclick="startRun()">다시 도전</button>
+    <button class="rg-btn" onclick="state.scene='title';render()">처음으로</button></div>
+  </div>`;
+  renderRecords();
+}
+
+function renderVictory(){
+  app().innerHTML = `
+  <div class="panel">
+    <div class="rg-center">
+      <div class="rg-big" style="color:var(--a4)">🏆 얼음성 정복!</div>
+      <div class="rg-sub">${esc(state.nick||'이름 없는 족장')}, 30웨이브를 전부 돌파했습니다.<br>
+      최종 파티 ${state.party.length}마리 · 스톤 ${state.stones.toLocaleString()}</div>
+    </div>
+    ${partyBar(false)}
+    <div class="rg-inline"><button class="rg-btn pri" onclick="startRun()">다시 도전</button></div>
+  </div>`;
+  renderRecords();
+}
+
+/* ---------- 사이드바 ---------- */
+function renderRecords(){
+  document.getElementById('recWave').textContent = state.best || '-';
+  document.getElementById('recRuns').textContent = state.runs || '-';
+}
+function renderDex(){
+  const keys = Object.keys(state.captured);
+  document.getElementById('dexCount').textContent = `${keys.length} / ${PETS.length}`;
+  document.getElementById('dexGrid').innerHTML = keys.slice(-40).reverse().map(c=>
+    `<div class="rg-dex"><img src="${IMG_BASE}${c}.gif"
+      onerror="this.onerror=null;this.src='${IMG_ALT}${c}.gif'"><span>${esc(state.captured[c])}</span></div>`
+  ).join('') || `<div style="font-size:11px;color:var(--t3)">아직 없음</div>`;
+}
+
+/* ============================================================
+   부팅
+   ============================================================ */
+function toggleDark(){
+  const h = document.documentElement;
+  h.dataset.theme = h.dataset.theme === 'dark' ? 'light' : 'dark';
+  try{ localStorage.setItem('sa-theme', h.dataset.theme); }catch(e){}
+}
+(function(){
+  try{ const t = localStorage.getItem('sa-theme'); if(t) document.documentElement.dataset.theme = t; }catch(e){}
+})();
+
+var sidebar = document.getElementById('sidebar'), main = document.getElementById('main'),
+    toggleBtn = document.getElementById('toggleBtn'), backdrop = document.getElementById('sbBackdrop');
+function setSb(open){
+  sidebar.classList.toggle('open', open);
+  main.classList.toggle('shifted', open);
+  toggleBtn.classList.toggle('sb-open', open);
+  backdrop.classList.toggle('show', open && window.innerWidth <= 820);
+}
+toggleBtn.onclick = ()=> setSb(!sidebar.classList.contains('open'));
+backdrop.onclick  = ()=> setSb(false);
+if(window.innerWidth > 1100) setSb(true);
+
+document.getElementById('btnSfx').onclick = toggleMute;
+
+/* 브라우저 자동재생 정책상 오디오는 첫 상호작용 뒤에만 시작할 수 있다 */
+function unlockAudio(){
+  initAudio().then(()=>{ if(!audio.muted) syncBgm(); });
+}
+document.addEventListener('pointerdown', unlockAudio, { once:true });
+document.addEventListener('keydown',     unlockAudio, { once:true });
+document.getElementById('btnReset').onclick = function(){
+  if(!confirm('기록과 도감을 전부 지웁니다. 진행할까요?')) return;
+  state.runs = 0; state.best = 0; state.captured = {}; save();
+  renderRecords(); renderDex();
+};
+document.getElementById('nickInput').oninput = function(){
+  state.nick = this.value.trim(); save();
+};
+
+async function boot(){
+  const st = document.getElementById('loadStatus');
+  let rows = null;
+  try{
+    const r = await fetch(REPO_JSON, { cache:'no-store' });
+    const j = await r.json();
+    rows = j.rows || j;
+    st.textContent = `펫 ${rows.length}종 (레포)`;
+  }catch(e){
+    try{
+      const r = await fetch(API_URL);
+      const j = await r.json();
+      rows = j.rows || j;
+      st.textContent = `펫 ${rows.length}종 (공홈)`;
+    }catch(e2){
+      st.textContent = '펫 데이터 로드 실패';
+      app().innerHTML = `<div class="panel"><div class="rg-center">
+        <div class="rg-big" style="color:var(--err)">데이터를 불러오지 못했습니다</div>
+        <div class="rg-sub">pet_data.json 또는 공홈 API에 접근할 수 없습니다.</div></div></div>`;
+      return;
+    }
+  }
+  PETS = rows.filter(p => p && p.imageCode && num(p.h0) > 0);
+  load();
+  document.getElementById('nickInput').value = state.nick;
+  audio.muted = !state.sfx;
+  document.getElementById('btnSfx').textContent = audio.muted ? '🔇 음소거' : '🔊 사운드';
+  renderRecords(); renderDex();
+  state.scene = 'title';
+  render();
+}
+boot();
+</script>
+</body>
+</html>
