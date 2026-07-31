@@ -13,6 +13,9 @@ const SA_NAV_ITEMS = [
   { href: "maps.html", icon: "🗺️", label: "지도정보" },
   { href: "expcalc.html", icon: "📈", label: "경험치 계산기" },
   { href: "sellcalc.html", icon: "💰", label: "판매 계산기" },
+  // match: 이 페이지들에 있을 때도 메뉴에서 '미니게임'이 선택된 것으로 표시됩니다.
+  { href: "minigame.html", icon: "🎮", label: "미니게임",
+    match: ["jyajyarogue.html", "petsurvival.html"] },
   // 새 메뉴를 추가하려면 아래처럼 한 줄만 더 넣으면 됩니다:
   // { href: "새파일명.html", icon: "✨", label: "메뉴이름" },
 ];
@@ -29,10 +32,11 @@ const SA_NAV_CREDIT =
   const nav = document.getElementById("sbNav");
   if(!nav) return;
   const current = (location.pathname.split("/").pop() || "index.html");
-  const currentItem = SA_NAV_ITEMS.find(i => i.href === current) || SA_NAV_ITEMS[0];
+  const isCurrent = i => i.href === current || (i.match && i.match.indexOf(current) !== -1);
+  const currentItem = SA_NAV_ITEMS.find(isCurrent) || SA_NAV_ITEMS[0];
 
   const listHTML = SA_NAV_ITEMS.map(item => {
-    const isOn = item.href === current;
+    const isOn = isCurrent(item);
     return `<a href="${item.href}"${isOn ? ' class="on"' : ''}>${item.icon} ${item.label}</a>`;
   }).join("");
 
