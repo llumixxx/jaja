@@ -18,14 +18,16 @@ const ELEM_KEY = { earth: '지', water: '수', fire: '화', wind: '풍' };
 const RARITY_KR = { '0': '', '1': '2등급', '2': '1등급' };
 
 /* ───── 밸런스 스케일 ─────
-   이 엔진은 윈드섭 능력치(140렙 기준 내구 ~6000 / 공격 ~430)에 맞춰 튜닝돼 있었다.
-   쟈쟈 정식 공식은 내구 ~1400 / 공격 ~290 스케일이라 적 수치를 같은 비율로 환산한다.
-     적 체력   ← 플레이어 공격력 비   288/430 ≈ 0.67
-     적 공격력 ← 플레이어 내구력 비  1400/6000 ≈ 0.23
-   난이도를 바꾸고 싶으면 이 두 값만 만지면 된다. */
-const ENEMY_HP_SCALE  = 0.67;
-const ENEMY_ATK_SCALE = 0.23;
-const DEF_COEF        = 0.07;   // 방어력 경감 계수 (원본 0.15, 방어 스케일에 맞춰 축소)
+   원본은 윈드 데이터 기준으로 튜닝돼 있었다. 원본 getPetStats 는 ic.str/ic.vit 를 읽는데
+   pet_info_data.json 에는 그 필드가 없어서 항상 기본값(15 / 0.5)으로 떨어진다 —
+   즉 원본의 공격/방어는 사실상 내구력에서만 나온 값이다. 그 상태의 140렙 중앙값이 기준:
+     윈드   내구 6303 / 공격 252 / 방어 252
+     쟈쟈   내구 1618 / 공격 327 / 방어 229
+   적 체력은 플레이어 공격력에, 적 공격력은 플레이어 내구력에 비례해 환산한다.
+   난이도를 바꾸고 싶으면 이 세 값만 만지면 된다. */
+const ENEMY_HP_SCALE  = 1.30;   // 327 / 252
+const ENEMY_ATK_SCALE = 0.26;   // 1618 / 6303
+const DEF_COEF        = 0.042;  // 원본의 (방어경감 / 적공격력) 비율 0.472 를 유지
 
 function num(v){ const n = Number(v); return isFinite(n) ? n : 0; }
 function petImgUrl(code){ return IMG_BASE + code + '.gif'; }   // 쟈쟈 펫 이미지는 gif 만 존재
@@ -215,10 +217,11 @@ function jajaStats(info, roll, level){
   level = level || 140;
   const baseSum = num(info.h0)+num(info.a0)+num(info.d0)+num(info.s0);
   const B  = rankInfoB(baseSum);
-  const ph = num(info.h0)+num(roll.rh)+num(roll.hb);
-  const pa = num(info.a0)+num(roll.ra)+num(roll.ab);
-  const pd = num(info.d0)+num(roll.rd)+num(roll.db);
-  const ps = num(info.s0)+num(roll.rs)+num(roll.sb);
+  const lv = num(info.lvup);          // 성장베이스 = 기본치 + lvup (+ 보정 + 배분치)
+  const ph = num(info.h0)+lv+num(roll.rh)+num(roll.hb);
+  const pa = num(info.a0)+lv+num(roll.ra)+num(roll.ab);
+  const pd = num(info.d0)+lv+num(roll.rd)+num(roll.db);
+  const ps = num(info.s0)+lv+num(roll.rs)+num(roll.sb);
   const ip = num(info.initPct);
   const init   = disp(ip*ph/100, ip*pa/100, ip*pd/100, ip*ps/100);
   const growth = disp(ph*B/10000, pa*B/10000, pd*B/10000, ps*B/10000);
@@ -1814,7 +1817,7 @@ function buildUpgradeOptions() {
   // 3) 패시브 (반복)
   const passives = [
     { name: '공격력 +20%', icon: '⚔️', apply: () => G.passives.atkMul *= 1.2 },
-    { name: '방어력 +3', icon: '🛡️', apply: () => G.passives.defAdd += 3 },
+    { name: '방어력 +2', icon: '🛡️', apply: () => G.passives.defAdd += 2 },
     { name: '최대 HP +25%', icon: '❤️', apply: () => {
       G.passives.hpMul *= 1.25;
       G.player.maxHp = Math.round(G.player.baseHp * G.passives.hpMul);
