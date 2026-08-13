@@ -416,6 +416,11 @@ footer{text-align:center;padding:30px;color:var(--t3);font-size:11px;font-family
 /* ===== 데이터 소스 ===== */
 var DATA_FILE  = "https://sa000001.com/sa2/info/data/itemset6.txt";
 var MAGIC_FILE = "https://sa000001.com/sa2/info/data/magic.txt";
+/* sa000001.com은 CORS 허용 헤더가 없어서(pet_data.php와 동일한 사정) 브라우저에서 직접 fetch하면
+   막힌다. 그래서 펫 데이터와 같은 방식으로, GitHub Actions가 주기적으로 이 두 파일을 레포에
+   그대로 복사해두고(itemset6.txt / magic.txt) 같은 origin에서 읽는다. */
+var LOCAL_DATA_FILE  = "./itemset6.txt";
+var LOCAL_MAGIC_FILE = "./magic.txt";
 var ICON_BASE  = "https://sa000001.com/sa2/info/img/item/";
 var ICON_DEFAULT = "https://sa000001.com/sa2/info/img/item/default.png";
 
@@ -961,11 +966,11 @@ async function fetchTextSmart(url){
   }catch(e){} }
   return best;
 }
-async function loadLive(){
+async function loadFrom(dataUrl, magicUrl, label){
   try{
-    var magicText=await fetchTextSmart(MAGIC_FILE);
+    var magicText=await fetchTextSmart(magicUrl);
     var magicMap=parseMagic(magicText);
-    var itemText=await fetchTextSmart(DATA_FILE);
+    var itemText=await fetchTextSmart(dataUrl);
     if(!itemText) throw new Error('no data');
     var lines=itemText.split(/\r?\n/), parsed=[];
     for(var i=0;i<lines.length;i++){ var line=trim(lines[i]); if(!line||line.charAt(0)==='#'||line.indexOf('//')===0) continue;
@@ -973,11 +978,18 @@ async function loadLive(){
     if(parsed.length){
       ITEMS=parsed;
       buildCatChips(); buildSubChips(); buildMagicOptions(); render();
-      byId('loadStatus').textContent='서버 최신 '+ITEMS.length+'개 ✓';
+      byId('loadStatus').textContent=label+' '+ITEMS.length+'개 ✓';
+      return true;
     }
-  }catch(e){
-    byId('loadStatus').textContent='아이템 '+ITEMS.length+'개';
-  }
+  }catch(e){}
+  return false;
+}
+async function loadLive(){
+  var gotLocal = await loadFrom(LOCAL_DATA_FILE, LOCAL_MAGIC_FILE, '아이템');
+  if(!gotLocal) byId('loadStatus').textContent='아이템 '+ITEMS.length+'개(구버전)';
+  /* sa000001.com이 나중에 CORS를 열어주면 이 시도가 성공해서 자동으로 더 최신 데이터로 덮어씀.
+     지금은 대부분 실패하겠지만 실패해도 조용히 무시됨(이미 로컬 데이터가 떠 있음) */
+  loadFrom(DATA_FILE, MAGIC_FILE, '서버 최신');
 }
 
 /* ===== 시작 ===== */
