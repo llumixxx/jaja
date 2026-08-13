@@ -1,0 +1,283 @@
+# 소비 MP
+# 치유:10, 윤택:20, 은혜:40
+# 부활:
+#
+치유의 정령 Lv1,내구력 회복 500 (자신),MAGIC_Recovery,500,0,0,0,0,
+치유의 정령 Lv2,내구력 회복 600 (자신),MAGIC_Recovery,600,1,0,0,0,
+치유의 정령 Lv3,내구력 회복 700 (자신),MAGIC_Recovery,700,2,0,0,0,
+치유의 정령 Lv4,내구력 회복 800 (자신),MAGIC_Recovery,800,3,0,0,0,
+치유의 정령 Lv5,내구력 회복 900 (자신),MAGIC_Recovery,900,4,0,0,0,
+치유의 정령 Lv6,내구력 회복 1000 (자신),MAGIC_Recovery,1000,5,0,0,0,
+#
+윤택의 정령 Lv1,내구력 회복 500 (한 몸),MAGIC_OtherRecovery,500,10,0,1,0,
+윤택의 정령 Lv2,내구력 회복 600 (한 몸),MAGIC_OtherRecovery,600,11,0,1,0,
+윤택의 정령 Lv3,내구력 회복 700 (한 몸),MAGIC_OtherRecovery,700,12,0,1,0,
+윤택의 정령 Lv4,내구력 회복 800 (한 몸),MAGIC_OtherRecovery,800,13,0,1,0,
+윤택의 정령 Lv5,내구력 회복 900 (한 몸),MAGIC_OtherRecovery,900,14,0,1,0,
+윤택의 정령 Lv6,내구력 회복 1000 (한 몸),MAGIC_OtherRecovery,1000,15,0,1,0,
+#
+윤택의 정령 Lv7,내구력 회복 1120 (한 몸),MAGIC_OtherRecovery,1080,16,0,1,0,
+윤택의 정령 Lv8,내구력 회복 1280 (한 몸),MAGIC_OtherRecovery,1280,17,0,1,0,
+윤택의 정령 Lv9,내구력 회복 1540 (한 몸),MAGIC_OtherRecovery,1540,18,0,1,0,
+윤택의 정령 Lv10,내구력 회복 1880 (한 몸),MAGIC_OtherRecovery,1880,19,0,1,0,
+#
+은혜의 정령 Lv1,내구력 회복 500 (파티 전체),MAGIC_Recovery,500,20,1,8,0,
+은혜의 정령 Lv2,내구력 회복 600 (파티 전체),MAGIC_Recovery,600,21,1,8,0,
+은혜의 정령 Lv3,내구력 회복 700 (파티 전체),MAGIC_Recovery,700,22,1,8,0,
+은혜의 정령 Lv4,내구력 회복 800 (파티 전체),MAGIC_Recovery,800,23,1,8,0,
+은혜의 정령 Lv5,내구력 회복 900 (파티 전체),MAGIC_Recovery,900,24,1,8,0,
+은혜의 정령 Lv6,내구력 회복 1000 (파티 전체),MAGIC_Recovery,1000,25,1,8,0,
+#
+은혜의 정령 Lv7,내구력 회복 1080 (파티 전체),MAGIC_Recovery,720,26,1,8,0,
+은혜의 정령 Lv8,내구력 회복 1280 (파티 전체),MAGIC_Recovery,840,27,1,8,0,
+은혜의 정령 Lv9,내구력 회복 1480 (파티 전체),MAGIC_Recovery,960,28,1,8,0,
+은혜의 정령 Lv10,내구력 회복 1680 (파티 전체),MAGIC_Recovery,1080,29,1,8,0,
+은혜의 정령 Lv11,내구력 회복 1880 (파티 전체),MAGIC_Recovery,1200,30,1,8,0,
+은혜의 정령 Lv12,내구력 회복 2000 (파티 전체),MAGIC_Recovery,1640,31,1,8,0,
+#
+부활의 정령 Lv1,기절상태 회복 후 내구력 회복 100 (한 몸),MAGIC_Ressurect,100,50,1,1,1,
+부활의 정령 Lv2,기절상태 회복 후 내구력 회복 300 (한 몸),MAGIC_Ressurect,300,51,1,1,1,
+부활의 정령 Lv3,기절상태 회복 후 내구력 회복 500 (한 몸),MAGIC_Ressurect,500,52,1,1,1,
+부활의 정령 Lv4,기절상태 회복 후 내구력 회복 700 (한 몸),MAGIC_Ressurect,700,53,1,1,1,
+부활의 정령 Lv5,기절상태 회복 후 내구력 회복 900 (한 몸),MAGIC_Ressurect,900,54,1,1,1,
+부활의 정령 Lv6,기절상태 회복 후 내구력 회복 1200 (한 몸),MAGIC_Ressurect,1200,55,1,1,1,
+부활의 정령 Lv7,기절상태 회복 후 내구력 회복 1500 (한 몸),MAGIC_Ressurect,1500,56,1,1,1,
+부활의 정령 Lv8,기절상태 회복 후 내구력 회복 1800 (한 몸),MAGIC_Ressurect,1800,57,1,1,1,
+부활의 정령 Lv9,기절상태 회복 후 내구력 회복 9999 (한 몸),MAGIC_Ressurect,9999,58,1,1,1,
+부활의 정령 Lv10,기절상태 회복 후 내구력 회복 9999 (파티 전체),MAGIC_Ressurect,9999,59,1,1,1,
+#
+고등정화의 정령 Lv1,이상 상태를 회복 (한 몸),MAGIC_StatusRecovery,홍,60,1,1,0,
+고등정화의 정령 Lv2,이상 상태를 회복 (파티 전체),MAGIC_StatusRecovery,홍,61,1,8,0,
+정화의 정령(독) Lv1,독 상태 회복 (한 몸),MAGIC_StatusRecovery,독,70,1,1,0,
+정화의 정령(독) Lv2,독 상태 회복 (파티 전체),MAGIC_StatusRecovery,독,71,1,8,0,
+정화의 정령(마비) Lv1,마비 상태를 회복 (한 몸),MAGIC_StatusRecovery,쮸,80,1,1,0,
+정화의 정령(마비) Lv2,마비 상태를 회복 (파티 전체),MAGIC_StatusRecovery,쮸,81,1,8,0,
+정화의 정령(석화) Lv1,석화 상태를 회복 (한 몸),MAGIC_StatusRecovery,柯,90,1,1,0,
+정화의 정령(석화) Lv2,석화 상태를 회복 (파티 전체),MAGIC_StatusRecovery,柯,91,1,8,0,
+정화의 정령(혼란) Lv1,혼란 상태를 회복 (한 몸),MAGIC_StatusRecovery,쫘,100,1,1,0,
+정화의 정령(혼란) Lv2,혼란 상태를 회복 (파티 전체),MAGIC_StatusRecovery,쫘,101,1,8,0,
+정화의 정령(만취) Lv1,만취 상태를 회복 (한 몸),MAGIC_StatusRecovery,釐,110,1,1,0,
+정화의 정령(만취) Lv2,만취 상태를 회복 (파티 전체),MAGIC_StatusRecovery,釐,111,1,8,0,
+정화의 정령(잠) Lv1,잠 상태를 회복 (한 몸),MAGIC_StatusRecovery,추,120,1,1,0,
+정화의 정령(잠) Lv2,잠 상태를 회복 (파티 전체),MAGIC_StatusRecovery,추,121,1,8,0,
+#
+# MAGIC_StatusChange // magic.c -> battle_magic.c // MAGIC_StatusChange_Battle
+맹독의 정령 Lv1,3턴 전후 중독 (한 몸),MAGIC_StatusChange,독 turn 3 success 20,130,1,1,0,
+맹독의 정령 Lv2,3턴 전후 중독 (한 몸),MAGIC_StatusChange,독 turn 3 success 25,131,1,1,0,
+맹독의 정령 Lv3,4턴 전후 중독 (한 몸),MAGIC_StatusChange,독 turn 4 success 25,132,1,1,0,
+맹독의 정령 Lv4,4턴 전후 중독 (한 몸),MAGIC_StatusChange,독 turn 4 success 30,133,1,1,0,
+맹독의 정령 Lv5,5턴 전후 중독 (한 몸),MAGIC_StatusChange,독 turn 5 success 25,134,1,1,0,
+독안개의 정령 Lv1,3턴 전후 중독 (파티 전체),MAGIC_StatusChange,독 turn 3 success 20,135,1,8,0,
+독안개의 정령 Lv2,3턴 전후 중독 (파티 전체),MAGIC_StatusChange,독 turn 3 success 25,136,1,8,0,
+독안개의 정령 Lv3,4턴 전후 중독 (파티 전체),MAGIC_StatusChange,독 turn 4 success 25,137,1,8,0,
+독안개의 정령 Lv4,4턴 전후 중독 (파티 전체),MAGIC_StatusChange,독 turn 4 success 30,138,1,8,0,
+독안개의 정령 Lv5,5턴 전후 중독 (파티 전체),MAGIC_StatusChange,독 turn 5 success 25,139,1,8,0,
+경화의 정령 Lv1,3턴 전후 석화 (한 몸),MAGIC_StatusChange,柯 turn 3 success 15,150,1,1,0,
+경화의 정령 Lv2,3턴 전후 석화 (한 몸),MAGIC_StatusChange,柯 turn 3 success 20,151,1,1,0,
+경화의 정령 Lv3,4턴 전후 석화 (한 몸),MAGIC_StatusChange,柯 turn 4 success 25,152,1,1,0,
+경화의 정령 Lv4,4턴 전후 석화 (한 몸),MAGIC_StatusChange,柯 turn 4 success 30,153,1,1,0,
+경화의 정령 Lv5,5턴 전후 석화 (한 몸),MAGIC_StatusChange,柯 turn 5 success 25,154,1,1,0,
+석화의 정령 Lv1,3턴 전후 석화 (파티 전체),MAGIC_StatusChange,柯 turn 3 success 15,155,1,8,0,
+석화의 정령 Lv2,3턴 전후 석화 (파티 전체),MAGIC_StatusChange,柯 turn 3 success 20,156,1,8,0,
+석화의 정령 Lv3,4턴 전후 석화 (파티 전체),MAGIC_StatusChange,柯 turn 4 success 25,157,1,8,0,
+석화의 정령 Lv4,4턴 전후 석화 (파티 전체),MAGIC_StatusChange,柯 turn 4 success 30,158,1,8,0,
+석화의 정령 Lv5,5턴 전후 석화 (파티 전체),MAGIC_StatusChange,柯 turn 5 success 25,159,1,8,0,
+혼란의 정령 Lv1,3턴 전후 혼란 (한 몸),MAGIC_StatusChange,쫘 turn 3 success 20,160,1,1,0,
+혼란의 정령 Lv2,3턴 전후 혼란 (한 몸),MAGIC_StatusChange,쫘 turn 3 success 25,161,1,1,0,
+혼란의 정령 Lv3,4턴 전후 혼란 (한 몸),MAGIC_StatusChange,쫘 turn 4 success 25,162,1,1,0,
+혼란의 정령 Lv4,4턴 전후 혼란 (한 몸),MAGIC_StatusChange,쫘 turn 4 success 30,163,1,1,0,
+혼란의 정령 Lv5,5턴 전후 혼란 (한 몸),MAGIC_StatusChange,쫘 turn 5 success 25,164,1,1,0,
+혼미의 정령 Lv1,3턴 전후 혼란 (파티 전체),MAGIC_StatusChange,쫘 turn 3 success 20,165,1,8,0,
+혼미의 정령 Lv2,3턴 전후 혼란 (파티 전체),MAGIC_StatusChange,쫘 turn 3 success 25,166,1,8,0,
+혼미의 정령 Lv3,4턴 전후 혼란 (파티 전체),MAGIC_StatusChange,쫘 turn 4 success 25,167,1,8,0,
+혼미의 정령 Lv4,4턴 전후 혼란 (파티 전체),MAGIC_StatusChange,쫘 turn 4 success 30,168,1,8,0,
+혼미의 정령 Lv5,5턴 전후 혼란 (파티 전체),MAGIC_StatusChange,쫘 turn 5 success 25,169,1,8,0,
+술의 정령 Lv1,3턴 전후 만취 (한 몸),MAGIC_StatusChange,釐 turn 3 success 20,170,1,1,0,
+술의 정령 Lv2,3턴 전후 만취 (한 몸),MAGIC_StatusChange,釐 turn 3 success 25,171,1,1,0,
+술의 정령 Lv3,4턴 전후 만취 (한 몸),MAGIC_StatusChange,釐 turn 4 success 25,172,1,1,0,
+술의 정령 Lv4,4턴 전후 만취 (한 몸),MAGIC_StatusChange,釐 turn 4 success 30,173,1,1,0,
+술의 정령 Lv5,5턴 전후 만취 (한 몸),MAGIC_StatusChange,釐 turn 5 success 25,174,1,1,0,
+만취의 정령 Lv1,3턴 전후 만취 (파티 전체),MAGIC_StatusChange,釐 turn 3 success 20,175,1,8,0,
+만취의 정령 Lv2,3턴 전후 만취 (파티 전체),MAGIC_StatusChange,釐 turn 3 success 25,176,1,8,0,
+만취의 정령 Lv3,4턴 전후 만취 (파티 전체),MAGIC_StatusChange,釐 turn 4 success 25,177,1,8,0,
+만취의 정령 Lv4,4턴 전후 만취 (파티 전체),MAGIC_StatusChange,釐 turn 4 success 30,178,1,8,0,
+만취의 정령 Lv5,5턴 전후 만취 (파티 전체),MAGIC_StatusChange,釐 turn 5 success 25,179,1,8,0,
+잠의 정령 Lv1,3턴 전후 수면 (한 몸),MAGIC_StatusChange,추 turn 3 success 20,180,1,1,0,
+잠의 정령 Lv2,3턴 전후 수면 (한 몸),MAGIC_StatusChange,추 turn 3 success 25,181,1,1,0,
+잠의 정령 Lv3,4턴 전후 수면 (한 몸),MAGIC_StatusChange,추 turn 4 success 25,182,1,1,0,
+잠의 정령 Lv4,4턴 전후 수면 (한 몸),MAGIC_StatusChange,추 turn 4 success 30,183,1,1,0,
+잠의 정령 Lv5,5턴 전후 수면 (한 몸),MAGIC_StatusChange,추 turn 5 success 25,184,1,1,0,
+혼수의 정령 Lv1,3턴 전후 수면 (파티 전체),MAGIC_StatusChange,추 turn 3 success 20,185,1,8,0,
+혼수의 정령 Lv2,3턴 전후 수면 (파티 전체),MAGIC_StatusChange,추 turn 3 success 25,186,1,8,0,
+혼수의 정령 Lv3,4턴 전후 수면 (파티 전체),MAGIC_StatusChange,추 turn 4 success 25,187,1,8,0,
+혼수의 정령 Lv4,4턴 전후 수면 (파티 전체),MAGIC_StatusChange,추 turn 4 success 30,188,1,8,0,
+혼수의 정령 Lv5,5턴 전후 수면 (파티 전체),MAGIC_StatusChange,추 turn 5 success 25,189,1,8,0,
+#
+대지의 정령 Lv1,지속성 우대 10% 증가 2턴 (전체),MAGIC_FieldAttChange,지 10  turn 2,190,1,4,0,
+대지의 정령 Lv2,지속성 우대 10% 증가 3턴 (전체),MAGIC_FieldAttChange,지 10  turn 3,191,1,4,0,
+대지의 정령 Lv3,지속성 우대 15% 증가 4턴 (전체),MAGIC_FieldAttChange,지 15  turn 4,192,1,4,0,
+대지의 정령 Lv4,지속성 우대 15% 증가 5턴 (전체),MAGIC_FieldAttChange,지 15  turn 5,193,1,4,0,
+대지의 정령 Lv5,지속성 우대 20% 증가 5턴 (전체),MAGIC_FieldAttChange,지 20 turn 5,194,1,4,0,
+대지의 정령 Lv6,지속성 우대 20% 증가 6턴 (전체),MAGIC_FieldAttChange,지 20 turn 5,195,1,4,0,
+
+물의 정령 Lv1,수속성 우대 10% 증가 2턴 (전체),MAGIC_FieldAttChange,수 10  turn 2,200,1,4,0,
+물의 정령 Lv2,수속성 우대 10% 증가 3턴 (전체),MAGIC_FieldAttChange,수 10  turn 3,201,1,4,0,
+물의 정령 Lv3,수속성 우대 15% 증가 4턴 (전체),MAGIC_FieldAttChange,수 15  turn 4,202,1,4,0,
+물의 정령 Lv4,수속성 우대 15% 증가 5턴 (전체),MAGIC_FieldAttChange,수 15  turn 5,203,1,4,0,
+물의 정령 Lv5,수속성 우대 20% 증가 5턴 (전체),MAGIC_FieldAttChange,수 20  turn 5,204,1,4,0,
+물의 정령 Lv6,수속성 우대 20% 증가 6턴 (전체),MAGIC_FieldAttChange,수 20  turn 6,205,1,4,0,
+
+화재의 정령 Lv1,화속성 우대 10% 증가 2턴 (전체),MAGIC_FieldAttChange,화 10  turn 2,210,1,4,0,
+화재의 정령 Lv2,화속성 우대 10% 증가 3턴 (전체),MAGIC_FieldAttChange,화 10  turn 3,211,1,4,0,
+화재의 정령 Lv3,화속성 우대 15% 증가 4턴 (전체),MAGIC_FieldAttChange,화 15  turn 4,212,1,4,0,
+화재의 정령 Lv4,화속성 우대 15% 증가 5턴 (전체),MAGIC_FieldAttChange,화 15  turn 5,213,1,4,0,
+화재의 정령 Lv5,화속성 우대 20% 증가 5턴 (전체),MAGIC_FieldAttChange,화 20  turn 5,214,1,4,0,
+화재의 정령 Lv6,화속성 우대 20% 증가 6턴 (전체),MAGIC_FieldAttChange,화 20  turn 6,215,1,4,0,
+
+질풍의 정령 Lv1,풍속성 우대 10% 2턴 증가 (전체),MAGIC_FieldAttChange,풍 10  turn 2,220,1,4,0,
+질풍의 정령 Lv2,풍속성 우대 10% 3턴 증가 (전체),MAGIC_FieldAttChange,풍 10  turn 3,221,1,4,0,
+질풍의 정령 Lv3,풍속성 우대 15% 4턴 증가 (전체),MAGIC_FieldAttChange,풍 15  turn 4,222,1,4,0,
+질풍의 정령 Lv4,풍속성 우대 15% 5턴 증가 (전체),MAGIC_FieldAttChange,풍 15  turn 5,223,1,4,0,
+질풍의 정령 Lv5,풍속성 우대 20% 5턴 증가 (전체),MAGIC_FieldAttChange,풍 20  turn 5,224,1,4,0,
+질풍의 정령 Lv6,풍속성 우대 20% 6턴 증가 (전체),MAGIC_FieldAttChange,풍 20  turn 6,225,1,4,0,
+#
+조화의 정령,무속성으로 변경 (전체),MAGIC_FieldAttChange,무,230,1,4,0,
+무지개의 정령,속성을 반전 (한 몸),MAGIC_AttReverse,,240,1,1,0,
+오로라의 정령,속성을 반전 (전체),MAGIC_AttReverse,,241,1,8,0,
+#
+빛의 정령 Lv1,피해를 1회 흡수 (한 몸),MAGIC_MagicDef,흡  turn 1,250,1,1,0,
+빛의 정령 Lv2,피해를 2회 흡수 (한 몸),MAGIC_MagicDef,흡  turn 2,251,1,1,0,
+빛의 정령 Lv3,피해를 3회 흡수 (한 몸),MAGIC_MagicDef,흡  turn 3,252,1,1,0,
+생명의 정령 Lv1,피해를 1회 흡수 (파티 전체),MAGIC_MagicDef,흡  turn 1,253,1,8,0,
+생명의 정령 Lv2,피해를 2회 흡수 (파티 전체),MAGIC_MagicDef,흡  turn 2,254,1,8,0,
+생명의 정령 Lv3,피해를 3회 흡수 (파티 전체),MAGIC_MagicDef,흡  turn 3,255,1,8,0,
+거울의 정령 Lv1,피해를 1회 반사 (한 몸),MAGIC_MagicDef,반  turn 1,260,1,1,0,
+거울의 정령 Lv2,피해를 2회 반사 (한 몸),MAGIC_MagicDef,반  turn 2,261,1,1,0,
+거울의 정령 Lv3,피해를 3회 반사 (한 몸),MAGIC_MagicDef,반  turn 3,262,1,1,0,
+기계문명의 정령 Lv1,피해를 1회 반사 (한 몸),MAGIC_MagicDef,반  turn 1,263,1,8,0,
+기계문명의 정령 Lv2,피해를 2회 반사 (한 몸),MAGIC_MagicDef,반  turn 2,264,1,8,0,
+기계문명의 정령 Lv3,피해를 3회 반사 (한 몸),MAGIC_MagicDef,반  turn 3,265,1,8,0,
+수호의 정령 Lv1,피해를 2회 무효 (한 몸),MAGIC_MagicDef,무  turn 2,270,1,1,0,
+수호의 정령 Lv2,피해를 3회 무효 (한 몸),MAGIC_MagicDef,무  turn 3,271,1,1,0,
+수호의 정령 Lv3,피해를 5회 무효 (한 몸),MAGIC_MagicDef,무  turn 5,272,1,1,0,
+고대문명의 정령 Lv1,피해를 2회 무효 (파티 전체),MAGIC_MagicDef,무  turn 2,273,1,8,0,
+고대문명의 정령 Lv2,피해를 3회 무효 (파티 전체),MAGIC_MagicDef,무  turn 3,274,1,8,0,
+고대문명의 정령 Lv3,피해를 5회 무효 (파티 전체),MAGIC_MagicDef,무  turn 5,275,1,8,0,
+부활 빛의 정령 Lv1,기절상태 회복 후 피해를 1회 흡수 (한 몸),MAGIC_ResAndDef,100 흡 turn 1,280,1,1,1,
+부활 거울의 정령 Lv1,기절상태 회복 후 피해를 1회 반사 (한 몸),MAGIC_ResAndDef,100 반 turn 1,290,1,1,1,
+부활 수호의 정령 Lv1,기절상태 회복 후 피해를 2회 무효 (한 몸),MAGIC_ResAndDef,100 무 turn 2,300,1,1,1,
+#
+FLEX낙석,FLEX낙석,MAGIC_AttMagic,지|150|1,301,1,1,0,8
+FLEX천낙석,FLEX천낙석,MAGIC_AttMagic,지|200|2,302,1,9,0,9
+FLEX토류,FLEX토류,MAGIC_AttMagic,지|250|3,303,1,10,0,10
+FLEX대운석,FLEX대운석,MAGIC_AttMagic,지|780|3,304,1,9,0,11
+FLEX지진파,FLEX지진파,MAGIC_AttMagic,지|400|3,305,1,11,0,12
+FLEX극동지상,FLEX극동지상,MAGIC_AttMagic,지|550|4,306,1,11,0,13
+FLEX수성,FLEX수성,MAGIC_AttMagic,수|150|1,307,1,9,0,14
+FLEX폭우,FLEX폭우,MAGIC_AttMagic,수|200|2,308,1,9,0,15
+FLEX빙석,FLEX빙석,MAGIC_AttMagic,수|500|3,309,1,9,0,16
+FLEX빙풍,FLEX빙풍,MAGIC_AttMagic,수|400|3,310,1,9,0,17
+FLEX수중기,FLEX수중기,MAGIC_AttMagic,수|350|3,311,1,9,0,18
+FLEX빙하낙수,FLEX빙하낙수,MAGIC_AttMagic,수|400|4,312,1,11,0,19
+FLEX화염,FLEX화염,MAGIC_AttMagic,화|150|1,313,1,9,0,2
+FLEX대화염,FLEX대화염,MAGIC_AttMagic,화|200|2,314,1,9,0,3
+FLEX화증기,FLEX화증기,MAGIC_AttMagic,화|250|3,315,1,9,0,4
+FLEX화선풍,FLEX화선풍,MAGIC_AttMagic,화|300|3,316,1,9,0,5
+FLEX폭화기둥,FLEX폭화기둥,MAGIC_AttMagic,화|300|3,317,1,11,0,6
+FLEX폭연발,FLEX폭연발,MAGIC_AttMagic,화|550|4,636,1,11,0,7
+FLEX폭연발,삽침랬LV4,MAGIC_AttMagic,화|400|4,318,1,11,0,7
+FLEX약풍,FLEX약풍,MAGIC_AttMagic,풍|500|1,319,1,9,0,20
+FLEX선풍,FLEX선풍,MAGIC_AttMagic,풍|350|2,320,1,9,0,21
+FLEX풍우,FLEX풍우,MAGIC_AttMagic,풍|250|3,321,1,10,0,22
+FLEX산풍,FLEX산풍,MAGIC_AttMagic,풍|460|3,322,1,9,0,23
+FLEX빙산풍,FLEX빙산풍,MAGIC_AttMagic,풍|350|3,323,1,11,0,24
+FLEX빙설폭우,FLEX빙설폭우,MAGIC_AttMagic,풍|400|4,324,1,11,0,25
+FLEX불신지옥,FLEX불신지옥,MAGIC_AttMagic,화|350|5,325,1,11,0,26
+#
+가드브레이크,뚤꽃혤렝둔훙묑샌옵콘,MAGIC_AttSkill,PETSKILL_GuardBreak;3,326,1,1,0,
+모아치기,1턴쉰뒤 그다음턴에 강력한 데미지로 공격,MAGIC_AttSkill,PETSKILL_ChargeAttack;30,327,1,1,0,
+일격필살,명중률이 떨어지지만 강력한 데미지로 공격,MAGIC_AttSkill,PETSKILL_Mighty;40,328,1,1,0,
+배수의 진１,방어력하강-30%　　공격력상승+30%,MAGIC_AttSkill,PETSKILL_Regret;666,329,1,1,0,
+노가드전법,공격하지 않으나 회피율과 반격률을 상승,MAGIC_AttSkill,PETSKILL_NoGuard;150,330,1,1,0,
+변신의 정령 Lv1,자기 자신의 페트로 변신한다 (1분),MAGIC_Metamo,60,350,0,1,0,0
+변신의 정령 Lv2,자기 자신의 페트로 변신한다 (2분),MAGIC_Metamo,120,351,0,1,0,0
+변신의 정령 Lv3,자기 자신의 페트로 변신한다 (3분),MAGIC_Metamo,180,352,0,1,0,0
+허약술,굳묑샌諒힛쀼북코렝徒뫄츌쌥苟슉20%,MAGIC_Metamo,86400,355,0,1,0,0
+#T燉柯녑샌,뒈침랬LV4,MAGIC_AttMagic,지|600|5,356,1,11,0,13
+#T깥莖汽뒈,彊침랬LV4,MAGIC_AttMagic,수|600|5,357,1,11,0,19
+#T삽 쉽Х,삽침랬LV4,MAGIC_AttMagic,화|600|5,358,1,11,0,7
+#T켓섐已루,루침랬LV4,MAGIC_AttMagic,풍|600|5,359,1,11,0,25
+#T쁑莖췻뒈,홍침랬LV5,MAGIC_AttMagic,화|900|5,360,1,11,0,26
+#肯흽,굳묑샌諒힛쀼북코렝徒뫄츌쌥苟슉20%,MAGIC_Weaken,肯 turn 3 success 50,390,1,1,0,0
+#홍竟肯흽,둔홍竟힛쀼북코렝徒뫄츌쌥苟슉20%,MAGIC_Weaken,肯 turn 3 success 50,391,1,8,0,0
+#침랬렝徒 Lv1,瓊 煇ツ㎎㉮밀?20%힛쀼북乖렘데竟,MAGIC_MagicStatusChange,침예|3|20|데,392,1,1,0,0
+#침랬렝徒 Lv2,瓊 煇ツ㎎㉮밀?20%힛쀼북乖렘홍竟,MAGIC_MagicStatusChange,침예|3|20|홍,393,1,8,0,0
+#굴질黎,徠뻥것뜸읊람묑샌둔렘데竟,MAGIC_ToCallDragon,100373|300,394,1,9,0,0
+#퓻람黎,徠뻥퓻람묑샌둔렘寧탤,MAGIC_ToCallDragon,100401|300,395,1,10,0,1
+#굴잉黎,徠뻥잉질횐묑샌둔렘홍竟,MAGIC_ToCallDragon,101422|400,396,1,11,0,2
+#침崍,賈둔홍竟寧쀼북轟랬契땡,MAGIC_Barrier,崍 turn 1 success 50,397,1,3,0,0
+#냇칵,賈둔홍竟轟랬賈痰麓減3쀼북,MAGIC_Nocast,칵 turn 3 success 50,398,1,3,0,0
+#E麓쥣減,E麓쥣減,MAGIC_ToCallDragon,101633|99999,399,1,11,0,2
+#E澗산,E澗산,MAGIC_ToCallDragon,101772|99999,400,1,11,0,2
+#정화의 정령(양뗀)Lv1,양뗀榴檄쀼릿 (한 몸),MAGIC_StatusRecovery,양,402,1,1,0,
+#정화의 정령(양뗀)Lv2,양뗀榴檄쀼릿 (파티 전체),MAGIC_StatusRecovery,양,403,1,8,0,
+#정화의 정령(침崍)Lv1,침崍榴檄쀼릿 (한 몸),MAGIC_StatusRecovery,崍,404,1,1,0,
+#정화의 정령(침崍)Lv2,침崍榴檄쀼릿 (파티 전체),MAGIC_StatusRecovery,崍,405,1,8,0,
+#정화의 정령(냇칵)Lv1,냇칵榴檄쀼릿 (한 몸),MAGIC_StatusRecovery,칵,406,1,1,0,
+#정화의 정령(냇칵)Lv2,냇칵榴檄쀼릿 (파티 전체),MAGIC_StatusRecovery,칵,407,1,8,0,
+#정화의 정령(肯흽)Lv1,肯흽榴檄쀼릿 (한 몸),MAGIC_StatusRecovery,肯,408,1,1,0,
+#정화의 정령(肯흽)Lv2,肯흽榴檄쀼릿 (파티 전체),MAGIC_StatusRecovery,肯,409,1,8,0,
+#긴뼙돨쑹쥣 Lv4,긴 炙 菱성돨녘膠枷롸爐,MAGIC_Metamo,600,410,0,1,0,0
+#팎뇜냇칵,썩뇜냇칵榴檄,MAGIC_StatusRecovery,칵,411,1,8,0,0
+#독안개의 정령 Lv6,櫓뗀榴檄 6턴 전후 (파티 전체),MAGIC_StatusChange,독 turn 6 success 25,412,1,8,0,
+#석화의 정령 Lv6,柯뺏榴檄 6턴 전후 (파티 전체),MAGIC_StatusChange,柯 turn 6 success 25,413,1,8,0,
+#혼미의 정령 Lv6,살쫘榴檄 6턴 전후 (파티 전체),MAGIC_StatusChange,쫘 turn 6 success 25,414,1,8,0,
+#만취의 정령 Lv6,아釐榴檄 6턴 전후 (파티 전체),MAGIC_StatusChange,釐 turn 6 success 25,415,1,8,0,
+#혼수의 정령 Lv6,慷추榴檄 6턴 전후 (파티 전체),MAGIC_StatusChange,추 turn 6 success 25,416,1,8,0,
+#깥裂쑹쥣Lv1,깥예昑瓊 ?0  3쀼북(한 몸),MAGIC_MagicStatusChange,깥예|3|10|데,417,1,1,0,0
+#든裂쑹쥣Lv1,든예昑瓊 ?0  3쀼북(한 몸),MAGIC_MagicStatusChange,든예|3|10|데,418,1,1,0,0
+#삽裂쑹쥣Lv1,삽예昑瓊 ?0  3쀼북(한 몸),MAGIC_MagicStatusChange,삽예|3|10|데,419,1,1,0,0
+#깥裂쑹쥣Lv2,깥예昑瓊 ?0  3쀼북(파티 전체),MAGIC_MagicStatusChange,깥예|3|10|홍,420,1,8,0,0
+#든裂쑹쥣Lv2,든예昑瓊 ?0  3쀼북(파티 전체),MAGIC_MagicStatusChange,든예|3|10|홍,421,1,8,0,0
+#삽裂쑹쥣Lv2,삽예昑瓊 ?0  3쀼북(파티 전체),MAGIC_MagicStatusChange,삽예|3|10|홍,422,1,8,0,0
+#독안개의 정령 Lv7,櫓뗀榴檄 6턴 전후 (파티 전체),MAGIC_StatusChange,독 turn 6 success 30,423,1,8,0,
+#독안개의 정령 Lv8,櫓뗀榴檄 7턴 전후 (파티 전체),MAGIC_StatusChange,독 turn 7 success 35,424,1,8,0,
+#석화의 정령 Lv7,柯뺏榴檄 6턴 전후 (파티 전체),MAGIC_StatusChange,柯 turn 6 success 30,425,1,8,0,
+#석화의 정령 Lv8,柯뺏榴檄 7턴 전후 (파티 전체),MAGIC_StatusChange,柯 turn 7 success 35,426,1,8,0,
+#혼미의 정령 Lv7,살쫘榴檄 6턴 전후 (파티 전체),MAGIC_StatusChange,쫘 turn 6 success 30,427,1,8,0,
+#혼미의 정령 Lv8,살쫘榴檄 7턴 전후 (파티 전체),MAGIC_StatusChange,쫘 turn 7 success 35,428,1,8,0,
+#만취의 정령 Lv7,아釐榴檄 6턴 전후 (파티 전체),MAGIC_StatusChange,釐 turn 6 success 30,429,1,8,0,
+#만취의 정령 Lv8,아釐榴檄 7턴 전후 (파티 전체),MAGIC_StatusChange,釐 turn 7 success 35,430,1,8,0,
+#혼수의 정령 Lv7,慷추榴檄 6턴 전후 (파티 전체),MAGIC_StatusChange,추 turn 6 success 30,431,1,8,0,
+#혼수의 정령 Lv8,慷추榴檄 7턴 전후 (파티 전체),MAGIC_StatusChange,추 turn 7 success 35,432,1,8,0,
+#堅뻬돨쑹쥣 Lv1,둔데竟힛쀼북코렝徒뫄츌쌥苟슉20%,MAGIC_Weaken,肯 turn 3 success 30,433,1,1,0,0
+#堅뻬돨쑹쥣 Lv2,둔데竟巧쀼북코렝徒뫄츌쌥苟슉20%,MAGIC_Weaken,肯 turn 5 success 40,434,1,1,0,0
+#堅뻬돨쑹쥣 Lv3,둔데竟펌쀼북코렝徒뫄츌쌥苟슉20%,MAGIC_Weaken,肯 turn 7 success 50,435,1,1,0,0
+#肯흽돨쑹쥣 Lv1,둔홍竟힛쀼북코렝徒뫄츌쌥苟슉20%,MAGIC_Weaken,肯 turn 3 success 20,436,1,8,0,0
+#肯흽돨쑹쥣 Lv2,둔홍竟愷쀼북코렝徒뫄츌쌥苟슉20%,MAGIC_Weaken,肯 turn 4 success 25,437,1,8,0,0
+#肯흽돨쑹쥣 Lv3,둔홍竟巧쀼북코렝徒뫄츌쌥苟슉20%,MAGIC_Weaken,肯 turn 5 success 30,438,1,8,0,0
+#갔것되裂麓 Lv1,굳묑샌諒좃쀼북轟랬契땡,MAGIC_Barrier,崍 turn 2 success 10,439,1,1,0,0
+#갔것되裂麓 Lv2,굳묑샌諒좃쀼북轟랬契땡,MAGIC_Barrier,崍 turn 2 success 15,440,1,1,0,0
+#갔것되裂麓 Lv3,굳묑샌諒좃쀼북轟랬契땡,MAGIC_Barrier,崍 turn 2 success 20,441,1,1,0,0
+#냇칵돨쑹쥣 Lv1,굳묑샌諒轟랬賈痰麓減3쀼북,MAGIC_Nocast,칵 turn 3 success 15,442,1,1,0,0
+#냇칵돨쑹쥣 Lv2,굳묑샌諒轟랬賈痰麓減3쀼북,MAGIC_Nocast,칵 turn 3 success 20,443,1,1,0,0
+#냇칵돨쑹쥣 Lv3,굳묑샌諒轟랬賈痰麓減3쀼북,MAGIC_Nocast,칵 turn 3 success 30,444,1,1,0,0
+#룐麓돨쑹쥣 Lv1,賈둔홍竟轟랬賈痰麓減3쀼북,MAGIC_Nocast,칵 turn 3 success 10,445,1,8,0,0
+#룐麓돨쑹쥣 Lv2,賈둔홍竟轟랬賈痰麓減3쀼북,MAGIC_Nocast,칵 turn 3 success 15,446,1,8,0,0
+#룐麓돨쑹쥣 Lv2,賈둔홍竟轟랬賈痰麓減3쀼북,MAGIC_Nocast,칵 turn 3 success 20,447,1,8,0,0
+#양뗀,굳묑샌諒힛쀼북코렝徒뫄츌쌥苟슉20%,MAGIC_StatusChange2,양 turn 5 success 50,448,1,1,0,0
+#홍竟양뗀,둔홍竟힛쀼북코렝徒뫄츌쌥苟슉20%,MAGIC_StatusChange2,양 turn 6 success 50,449,1,8,0,0
+#침랬렝徒 Lv1,瓊 煇ツ㎎㉮밀?90%힛쀼북乖렘데竟,MAGIC_MagicStatusChange,침예|3|90|데,460,1,1,0,0
+#침랬렝徒 Lv2,瓊 煇ツ㎎㉮밀?50%힛쀼북乖렘홍竟,MAGIC_MagicStatusChange,침예|3|50|홍,461,1,8,0,0
+#독안개의 정령,둔훙홍竟櫓뗀9쀼북,MAGIC_StatusChange,독 turn 9 success 90,463,1,8,0,
+#석화의 정령,둔훙홍竟柯뺏3쀼북,MAGIC_StatusChange,柯 turn 3 success 500,464,1,8,0,
+#혼미의 정령,둔훙홍竟살쫘6쀼북,MAGIC_StatusChange,쫘 turn 6 success 60,465,1,8,0,
+#만취의 정령,둔훙홍竟釐아9쀼북,MAGIC_StatusChange,釐 turn 9 success 90,466,1,8,0,
+#혼수의 정령,둔훙홍竟삭慷3쀼북,MAGIC_StatusChange,추 turn 3 success 50,467,1,8,0,
+#肯흽돨쑹쥣,둔훙홍竟肯흽6쀼북,MAGIC_Weaken,肯 turn 6 success 80,468,1,8,0,0
+#냇칵돨쑹쥣,둔훙홍竟轟랬賈痰麓減3쀼북,MAGIC_Nocast,칵 turn 3 success 80,469,1,8,0,0
+#겜빪람쁨,彊州임劇셍,MAGIC_Recovery,10000,584,1,8,0,
+#婆播裂폭,살晨裂폭릿삶寧학鄕,MAGIC_Ressurect,100000,585,1,1,1,
+#聾회뗀絞,삽州임劇셍,MAGIC_StatusChange,독 turn 20 success 90,586,1,8,0,
+#旣嶠원솖,皐州임劇셍,MAGIC_MagicDef,반  turn 60,587,1,8,0,
+#행질씐뺏,루州임劇셍,MAGIC_StatusRecovery,홍,588,1,8,0,
