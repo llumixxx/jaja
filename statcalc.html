@@ -1312,8 +1312,11 @@ async function fetchTextSmart(url){
   }catch(e){} }
   return best;
 }
-/* 레포에 자동 생성되는 캐시 파일 (같은 오리진이라 CORS 걸릴 일 없음, GitHub Actions가 주기적으로 갱신) */
-var REPO_ITEM_FILE = './item_data.json';
+/* item.html과 동일한 방식: sa000001.com은 CORS 허용 헤더가 없어서(pet_data.php와 동일한 사정)
+   브라우저에서 직접 fetch하면 막힌다. 그래서 GitHub Actions가 주기적으로 itemset6.txt/magic.txt
+   원본을 레포에 그대로 복사해두고, 같은 origin(로컬 파일)으로 읽는다. */
+var LOCAL_DATA_FILE = "./itemset6.txt";
+var LOCAL_MAGIC_FILE = "./magic.txt";
 
 function applyParsedItems(parsed, statusText){
   if(!parsed.length) return false;
@@ -1326,17 +1329,23 @@ function applyParsedItems(parsed, statusText){
   return true;
 }
 
-/* 1순위: 레포에 저장된 item_data.json (같은 오리진 fetch라 항상 성공) */
+function parseRawItemText(itemText, magicMap){
+  var lines=itemText.split(/\r?\n/), parsed=[];
+  for(var i=0;i<lines.length;i++){
+    var line=trim(lines[i]); if(!line||line.charAt(0)==='#'||line.indexOf('//')===0) continue;
+    var it=parseItem(line, magicMap, parsed.length); if(it) parsed.push(it);
+  }
+  return parsed;
+}
+
+/* 1순위: 레포에 복사된 itemset6.txt/magic.txt (같은 오리진 fetch라 항상 성공, item.html과 동일 방식) */
 async function loadFromRepoCache(){
   try{
-    var res=await fetch(REPO_ITEM_FILE,{cache:'no-store'});
-    if(!res.ok) return false;
-    var data=await res.json();
-    var rows=data.rows||data;
-    if(!rows||!rows.length) return false;
-    var parsed=rows.map(function(it,i){ it.uid=it.id+'#'+(it.o!=null?it.o:i); return it; });
-    var when=data.generatedAt?(' ('+String(data.generatedAt).slice(0,16).replace('T',' ')+')'):'';
-    return applyParsedItems(parsed, '레포 캐시 최신'+when);
+    var magicMap=parseMagic(await fetchTextSmart(LOCAL_MAGIC_FILE));
+    var itemText=await fetchTextSmart(LOCAL_DATA_FILE);
+    if(!itemText) return false;
+    var parsed=parseRawItemText(itemText, magicMap);
+    return applyParsedItems(parsed, '레포 캐시 최신');
   }catch(e){ return false; }
 }
 
@@ -1348,11 +1357,7 @@ async function loadDirectFromServer(){
     var magicMap=parseMagic(await fetchTextSmart(MAGIC_FILE));
     var itemText=await fetchTextSmart(DATA_FILE);
     if(!itemText) throw new Error('no data');
-    var lines=itemText.split(/\r?\n/), parsed=[];
-    for(var i=0;i<lines.length;i++){
-      var line=trim(lines[i]); if(!line||line.charAt(0)==='#'||line.indexOf('//')===0) continue;
-      var it=parseItem(line, magicMap, parsed.length); if(it) parsed.push(it);
-    }
+    var parsed=parseRawItemText(itemText, magicMap);
     return applyParsedItems(parsed, '서버 직접 최신');
   }catch(e){ return false; }
 }
