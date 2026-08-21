@@ -646,7 +646,7 @@ function calc(){
     ex.crit+=num(o.crit); ex.eva+=num(o.eva); ex.charm+=num(o.charm);
     ex.hit+=num(it.hit); ex.stam+=num(it.stamina);
     if(it.magicName&&it.magicName!=='주술없음') magics.push(it.name+' · '+it.magicName);
-    if(it.setEff) sets[it.setEff]=(sets[it.setEff]||0)+1;
+    if(it.setEff){ if(!sets[it.setEff]) sets[it.setEff]=[]; sets[it.setEff].push(itemType(it)); }
     var g=rarityGain(row.slot);
     for(var gk in g){
       if(gk==='atk'||gk==='def'||gk==='dex'||gk==='hp'){ out[gk]+=g[gk]; parts[gk].item+=g[gk]; }
@@ -656,10 +656,12 @@ function calc(){
   }
   var setOn=[];
   for(var s in sets){
-    if(sets[s]<2) continue;
+    var types=sets[s];
+    var hasWeapon=types.indexOf('weapon')>=0, hasHead=types.indexOf('head')>=0, hasBody=types.indexOf('body')>=0;
+    if(!(hasWeapon&&hasHead&&hasBody)) continue; /* 세트옵션은 무기+투구+갑옷 3부위를 모두 착용해야 발동 */
     var m=String(s).match(/(공|방|순|내)\s*([+-]?\d+)/); if(!m) continue;
     var mk={'공':'atk','방':'def','순':'dex','내':'hp'}[m[1]], mv=num(m[2]);
-    out[mk]+=mv; parts[mk].item+=mv; setOn.push(s+' (착용 '+sets[s]+'개)');
+    out[mk]+=mv; parts[mk].item+=mv; setOn.push(s+' (무기·투구·갑옷 착용)');
   }
   var so=soulTotals();
   out.atk+=so.atk; out.def+=so.def; out.dex+=so.dex;
@@ -1310,7 +1312,38 @@ async function fetchTextSmart(url){
   }catch(e){} }
   return best;
 }
-async function loadLive(){
+/* 레포에 자동 생성되는 캐시 파일 (같은 오리진이라 CORS 걸릴 일 없음, GitHub Actions가 주기적으로 갱신) */
+var REPO_ITEM_FILE = './item_data.json';
+
+function applyParsedItems(parsed, statusText){
+  if(!parsed.length) return false;
+  var keep={};
+  for(var k in S.eq) if(S.eq[k]) keep[k]=S.eq[k];
+  ITEMS=parsed;
+  for(var k2 in keep){ if(!findItem(keep[k2].uid)) delete S.eq[k2]; }
+  renderAll();
+  byId('loadStatus').textContent=statusText+' '+ITEMS.filter(function(i){return !!itemType(i);}).length+'개 ✓';
+  return true;
+}
+
+/* 1순위: 레포에 저장된 item_data.json (같은 오리진 fetch라 항상 성공) */
+async function loadFromRepoCache(){
+  try{
+    var res=await fetch(REPO_ITEM_FILE,{cache:'no-store'});
+    if(!res.ok) return false;
+    var data=await res.json();
+    var rows=data.rows||data;
+    if(!rows||!rows.length) return false;
+    var parsed=rows.map(function(it,i){ it.uid=it.id+'#'+(it.o!=null?it.o:i); return it; });
+    var when=data.generatedAt?(' ('+String(data.generatedAt).slice(0,16).replace('T',' ')+')'):'';
+    return applyParsedItems(parsed, '레포 캐시 최신'+when);
+  }catch(e){ return false; }
+}
+
+/* 2순위: 게임 서버 직접 fetch — sa000001.com이 CORS 헤더를 안 내려줘서 대부분의 경우
+   (예: GitHub Pages처럼 다른 오리진에서 여는 경우) 브라우저가 막고 실패함.
+   그래도 혹시 되는 환경(같은 오리진, 확장 프로그램 등)이 있을 수 있어 시도는 남겨둠. */
+async function loadDirectFromServer(){
   try{
     var magicMap=parseMagic(await fetchTextSmart(MAGIC_FILE));
     var itemText=await fetchTextSmart(DATA_FILE);
@@ -1320,17 +1353,14 @@ async function loadLive(){
       var line=trim(lines[i]); if(!line||line.charAt(0)==='#'||line.indexOf('//')===0) continue;
       var it=parseItem(line, magicMap, parsed.length); if(it) parsed.push(it);
     }
-    if(parsed.length){
-      var keep={};
-      for(var k in S.eq) if(S.eq[k]) keep[k]=S.eq[k];
-      ITEMS=parsed;
-      for(var k2 in keep){ if(!findItem(keep[k2].uid)) delete S.eq[k2]; }
-      renderAll();
-      byId('loadStatus').textContent='서버 최신 '+ITEMS.filter(function(i){return !!itemType(i);}).length+'개 ✓';
-    }
-  }catch(e){
-    byId('loadStatus').textContent='장착 아이템 '+ITEMS.filter(function(i){return !!itemType(i);}).length+'개';
-  }
+    return applyParsedItems(parsed, '서버 직접 최신');
+  }catch(e){ return false; }
+}
+
+async function loadLive(){
+  var ok = await loadFromRepoCache();
+  if(!ok) ok = await loadDirectFromServer();
+  if(!ok) byId('loadStatus').textContent='장착 아이템 '+ITEMS.filter(function(i){return !!itemType(i);}).length+'개 (오프라인 캐시)';
 }
 
 /* ===== 시작 ===== */
