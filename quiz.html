@@ -296,6 +296,32 @@ function toChosung(str){
 /* 검색어에 초성 자음이 하나라도 섞여 있으면 초성모드 (숫자/영문 같이 써도 됨: "1ㄷ", "JOTㅈ" 등) */
 function isChosungQuery(q){ return /[ㄱ-ㅎ]/.test(q); }
 
+/* 자음을 연속으로 빠르게 치면 브라우저가 겹받침(ㄳ,ㄵ,ㄶ,ㄺ,ㄻ,ㄼ,ㄽ,ㄾ,ㄿ,ㅀ,ㅄ)으로
+   합쳐버리는 경우가 있어서, 입력값에서 이걸 원래 두 자음으로 다시 풀어준다. */
+const COMPOUND_JAMO = {
+  'ㄳ':'ㄱㅅ', 'ㄵ':'ㄴㅈ', 'ㄶ':'ㄴㅎ',
+  'ㄺ':'ㄹㄱ', 'ㄻ':'ㄹㅁ', 'ㄼ':'ㄹㅂ', 'ㄽ':'ㄹㅅ',
+  'ㄾ':'ㄹㅌ', 'ㄿ':'ㄹㅍ', 'ㅀ':'ㄹㅎ', 'ㅄ':'ㅂㅅ'
+};
+function fixCompoundJamo(el){
+  const val = el.value;
+  let changed = false, out = '';
+  for(const ch of val){
+    if(COMPOUND_JAMO[ch]){ out += COMPOUND_JAMO[ch]; changed = true; }
+    else out += ch;
+  }
+  if(!changed) return;
+  const oldPos = el.selectionStart;
+  let newPos = 0, seen = 0;
+  for(const ch of val){
+    if(seen >= oldPos) break;
+    newPos += (COMPOUND_JAMO[ch] ? COMPOUND_JAMO[ch].length : 1);
+    seen++;
+  }
+  el.value = out;
+  el.setSelectionRange(newPos, newPos);
+}
+
 function highlightSubstring(text, needle){
   if(!needle) return escapeHtml(text);
   const lower = text.toLowerCase(), n = needle.toLowerCase();
@@ -409,7 +435,15 @@ function clearSearch(){
   document.getElementById('search-input').focus();
 }
 
-document.getElementById('search-input').addEventListener('input', render);
+document.getElementById('search-input').addEventListener('input', e=>{
+  if(e.isComposing) return; // 한글 조합 중에는 값을 건드리지 않음 (백스페이스 꼬임 방지)
+  fixCompoundJamo(e.target);
+  render();
+});
+document.getElementById('search-input').addEventListener('compositionend', e=>{
+  fixCompoundJamo(e.target);
+  render();
+});
 
 render();
 </script>
