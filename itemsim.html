@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>쟈쟈서버 아이템 시뮬레이터</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f2f7fd; --bg2:#e8f2fc; --white:#ffffff;
+  --s1:#f0f7fd; --s2:#e3f0fb;
+  --border:#dbe9f7; --border2:#bcd8f2;
+  --a1:#2f7fd6; --a2:#22b6c9; --a3:#5aa8ea; --a4:#f5a623; --a5:#6fd0a0;
+  --t1:#12253f; --t2:#4c6a8c; --t3:#8ea6c2; --t4:#c7dcf0;
+  --ok:#3d9e6e; --err:#e05a5a; --pos:#2f7fd6; --neg:#e05a5a;
+  --shadow:0 4px 24px rgba(47,127,214,0.12);
+  --shadow2:0 8px 32px rgba(47,127,214,0.18);
+}
+[data-theme="dark"] {
+  --bg:#0a1420; --bg2:#0f1e30; --white:#132335;
+  --s1:#16283c; --s2:#1c3149;
+  --border:#233c56; --border2:#2c4a68;
+  --t1:#e6f0fb; --t2:#a9c2dc; --t3:#7391b0; --t4:#4a637d;
+  --pos:#5aa8ea; --neg:#f08a8a;
+  --shadow:0 4px 24px rgba(0,0,0,0.4);
+  --shadow2:0 8px 32px rgba(0,0,0,0.5);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--t1);min-height:100vh;
+  background-image:radial-gradient(circle at 12% 8%, rgba(47,127,214,0.08) 0%, transparent 50%),
+    radial-gradient(circle at 88% 90%, rgba(34,182,201,0.07) 0%, transparent 50%);}
+
+/* ===== 사이드바 (공통 셸) ===== */
+.sidebar{width:300px;height:100vh;background:var(--white);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;position:fixed;left:-300px;top:0;z-index:200;
+  transition:left .32s cubic-bezier(.4,0,.2,1);box-shadow:4px 0 24px rgba(47,127,214,0.08);}
+.sidebar.open{left:0;}
+.sb-head{padding:20px 16px 15px;border-bottom:1px solid var(--border);}
+.sb-logo{display:flex;align-items:center;gap:8px;font-family:'Nunito',sans-serif;font-weight:900;
+  font-size:16px;color:var(--a1);margin-bottom:4px;}
+.sb-logo-dot{width:8px;height:8px;background:var(--a2);border-radius:50%;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(2)}}
+.sb-sub{font-size:10.5px;color:var(--t3);font-family:'Nunito',sans-serif;font-weight:700;letter-spacing:.5px;}
+.sb-nav{padding:11px 14px;border-bottom:1px solid var(--border);}
+.sb-body{padding:16px 16px 16px;flex:1;overflow-y:auto;min-height:0;}
+.sb-body::-webkit-scrollbar{width:4px;} .sb-body::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px;}
+.f-group{margin-bottom:18px;}
+.f-group:last-child{margin-bottom:0;}
+.f-section{font-size:10px;letter-spacing:1.2px;color:var(--t3);text-transform:uppercase;margin:0 0 8px 2px;
+  font-family:'Nunito',sans-serif;font-weight:800;}
+.f-input,.f-select{width:100%;padding:10px 13px;background:var(--s1);border:1px solid var(--border);
+  border-radius:11px;font-family:inherit;font-size:16px;color:var(--t1);outline:none;transition:border-color .15s,background .15s;}
+.f-input::placeholder{color:var(--t3);}
+.f-input:focus,.f-select:focus{border-color:var(--a1);background:var(--white);}
+.sb-footer{padding:12px 16px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+.sb-footer-txt{font-size:10.5px;color:var(--t3);}
+.dark-toggle{width:34px;height:34px;border-radius:10px;border:1px solid var(--border);background:var(--s1);
+  cursor:pointer;font-size:14px;transition:border-color .15s,background .15s;}
+.dark-toggle:hover{border-color:var(--a3);background:var(--white);}
+[data-theme="dark"] .toggle-moon{display:inline;} [data-theme="dark"] .toggle-sun{display:none !important;}
+[data-theme="light"] .toggle-moon{display:none !important;} [data-theme="light"] .toggle-sun{display:inline;}
+
+.toggle-btn{position:fixed;top:16px;left:16px;z-index:300;width:42px;height:42px;background:var(--white);
+  border:1.5px solid var(--border);border-radius:13px;cursor:pointer;font-size:17px;color:var(--t2);
+  box-shadow:var(--shadow);transition:left .32s cubic-bezier(.4,0,.2,1),border-color .15s,transform .15s;}
+.toggle-btn:hover{border-color:var(--a1);box-shadow:var(--shadow2);transform:scale(1.05);}
+.toggle-btn.sb-open{left:314px;}
+@media(max-width:820px){ .toggle-btn.sb-open{left:auto;right:16px;} .main.shifted{margin-left:0;} }
+.sb-backdrop{position:fixed;inset:0;background:rgba(18,37,63,.35);z-index:150;opacity:0;pointer-events:none;transition:opacity .3s;}
+.sb-backdrop.show{opacity:1;pointer-events:auto;}
+
+/* ===== 메인 ===== */
+.main{flex:1;min-height:100vh;transition:margin-left .32s cubic-bezier(.4,0,.2,1);}
+.main.shifted{margin-left:300px;}
+.main-inner{max-width:640px;margin:0 auto;padding:74px 18px 90px;}
+.page-head{text-align:center;padding:8px 0 26px;}
+.wind-badge{display:inline-flex;align-items:center;gap:7px;background:var(--white);border:1px solid var(--border2);
+  border-radius:20px;padding:6px 15px;font-size:10.5px;font-weight:800;color:var(--a1);
+  font-family:'Nunito',sans-serif;letter-spacing:.6px;margin-bottom:15px;box-shadow:0 2px 12px rgba(47,127,214,.08);}
+.wind-badge-dot{width:6px;height:6px;background:var(--a2);border-radius:50%;animation:pulse 2s infinite;}
+.page-title{font-size:32px;font-weight:900;letter-spacing:-1.1px;line-height:1.05;color:var(--a1);
+  background:linear-gradient(115deg,var(--a1),var(--a2) 55%,var(--a3));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+.page-sub{font-size:13px;color:var(--t3);margin-top:9px;font-weight:600;}
+footer{text-align:center;padding:30px 0 10px;font-size:11px;color:var(--t3);}
+
+/* ===== 탭 ===== */
+.tabbar{display:grid;grid-template-columns:1fr 1fr;gap:8px;background:var(--white);border:1px solid var(--border);
+  border-radius:16px;padding:6px;margin-bottom:18px;box-shadow:0 1px 3px rgba(47,127,214,.05);}
+.tabbar button{border:none;background:transparent;padding:13px 6px;border-radius:12px;font-family:inherit;
+  font-size:14.5px;font-weight:800;color:var(--t2);cursor:pointer;transition:background .18s,color .18s;}
+.tabbar button.active{background:var(--a1);color:#fff;box-shadow:0 6px 16px rgba(47,127,214,.28);}
+.tabbar button:not(.active):hover{background:var(--s1);color:var(--a1);}
+.panel{display:none;}
+.panel.active{display:block;}
+
+.card{background:var(--white);border:1px solid var(--border);border-radius:18px;padding:18px 20px;margin-bottom:14px;
+  box-shadow:0 1px 3px rgba(47,127,214,.05);}
+.card h3{font-size:13px;font-weight:800;color:var(--t2);margin-bottom:12px;letter-spacing:.2px;}
+
+/* ===== 아이템 검색 ===== */
+.item-results{margin-top:8px;max-height:280px;overflow-y:auto;display:flex;flex-direction:column;gap:5px;}
+.item-results::-webkit-scrollbar{width:4px;} .item-results::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px;}
+.item-row{display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:11px;cursor:pointer;
+  border:1px solid transparent;transition:.15s;}
+.item-row:hover{background:var(--s1);border-color:var(--border);}
+.item-row img{width:32px;height:32px;border-radius:8px;background:var(--s1);object-fit:contain;image-rendering:pixelated;flex-shrink:0;}
+.item-row .nm{font-size:13px;font-weight:700;color:var(--t1);flex:1;}
+.item-row .ct{font-size:10.5px;color:var(--t3);font-weight:700;background:var(--s1);padding:3px 8px;border-radius:7px;}
+
+/* ===== 가챠 스테이지 (아이템 크게) ===== */
+.gacha-card{position:relative;border-radius:20px;padding:26px 18px 22px;text-align:center;overflow:hidden;
+  background:radial-gradient(circle at 50% 18%, var(--s2), var(--s1) 70%);border:1px solid var(--border);}
+.gacha-swap{position:absolute;top:12px;right:12px;background:var(--white);border:1px solid var(--border);
+  color:var(--t2);font-size:11px;font-weight:800;padding:5px 10px;border-radius:20px;cursor:pointer;z-index:5;}
+.gacha-swap:hover{border-color:var(--a3);color:var(--a1);}
+.gacha-glow{position:absolute;left:50%;top:38%;width:210px;height:210px;transform:translate(-50%,-50%);
+  border-radius:50%;background:radial-gradient(circle, var(--gc,rgba(47,127,214,.35)) 0%, transparent 68%);
+  filter:blur(2px);transition:background .4s;pointer-events:none;}
+.gacha-imgwrap{position:relative;width:132px;height:132px;margin:0 auto 14px;border-radius:26px;
+  background:linear-gradient(150deg,var(--white),var(--s2));box-shadow:0 10px 30px rgba(47,127,214,.18),inset 0 0 0 1px var(--border2);
+  display:flex;align-items:center;justify-content:center;}
+.gacha-imgwrap img{width:78%;height:78%;object-fit:contain;image-rendering:pixelated;position:relative;z-index:2;}
+.gacha-imgwrap.spin img{animation:gachaSpin .55s cubic-bezier(.3,.1,.2,1);}
+@keyframes gachaSpin{0%{transform:scale(1) rotate(0)}35%{transform:scale(1.15) rotate(8deg)}
+  60%{transform:scale(.94) rotate(-6deg)}100%{transform:scale(1) rotate(0)}}
+.gacha-shine{position:absolute;inset:0;border-radius:26px;overflow:hidden;pointer-events:none;}
+.gacha-shine::before{content:'';position:absolute;top:-60%;left:-160%;width:60%;height:220%;
+  background:linear-gradient(100deg,transparent,rgba(255,255,255,.75),transparent);transform:rotate(18deg);}
+.gacha-shine.run::before{animation:shineSweep 1.05s ease;}
+@keyframes shineSweep{from{left:-160%;}to{left:220%;}}
+.gacha-name{font-size:16.5px;font-weight:900;margin-bottom:2px;}
+.gacha-cat{font-size:11.5px;color:var(--t3);font-weight:700;}
+
+.gacha-card.flash-고급{animation:flashG .6s;} .gacha-card.flash-희귀{animation:flashR .6s;}
+.gacha-card.flash-영웅{animation:flashH .6s;} .gacha-card.flash-전설{animation:flashL .7s;}
+.gacha-card.flash-신화{animation:flashM .9s;}
+@keyframes flashG{0%{box-shadow:0 0 0 0 rgba(61,158,110,0)}30%{box-shadow:0 0 40px 8px rgba(61,158,110,.55)}100%{box-shadow:0 0 0 0 rgba(61,158,110,0)}}
+@keyframes flashR{0%{box-shadow:0 0 0 0 rgba(47,127,214,0)}30%{box-shadow:0 0 40px 8px rgba(47,127,214,.55)}100%{box-shadow:0 0 0 0 rgba(47,127,214,0)}}
+@keyframes flashH{0%{box-shadow:0 0 0 0 rgba(155,111,214,0)}30%{box-shadow:0 0 46px 10px rgba(155,111,214,.6)}100%{box-shadow:0 0 0 0 rgba(155,111,214,0)}}
+@keyframes flashL{0%{box-shadow:0 0 0 0 rgba(245,166,35,0)}25%{box-shadow:0 0 55px 14px rgba(245,166,35,.7)}100%{box-shadow:0 0 0 0 rgba(245,166,35,0)}}
+@keyframes flashM{0%{box-shadow:0 0 0 0 rgba(224,90,90,0)}18%{box-shadow:0 0 70px 22px rgba(224,90,90,.85)}
+  40%{box-shadow:0 0 40px 10px rgba(224,90,90,.55)}60%{box-shadow:0 0 70px 22px rgba(224,90,90,.85)}100%{box-shadow:0 0 0 0 rgba(224,90,90,0)}}
+@keyframes screenShake{0%,100%{transform:translate(0,0)}10%{transform:translate(-6px,2px)}20%{transform:translate(5px,-3px)}
+  30%{transform:translate(-4px,3px)}40%{transform:translate(6px,-2px)}50%{transform:translate(-5px,2px)}
+  60%{transform:translate(4px,-3px)}70%{transform:translate(-3px,2px)}80%{transform:translate(3px,-1px)}90%{transform:translate(-2px,1px)}}
+.shake-myth{animation:screenShake .55s;}
+.confetti{position:absolute;inset:0;pointer-events:none;overflow:hidden;border-radius:20px;z-index:6;}
+.confetti span{position:absolute;top:-10%;width:7px;height:11px;opacity:0;border-radius:2px;
+  animation:confettiFall 1.15s ease-in forwards;}
+@keyframes confettiFall{0%{opacity:1;transform:translateY(0) rotate(0deg);}100%{opacity:0;transform:translateY(230px) rotate(420deg);}}
+
+/* 결과 배지 */
+.result-badge{margin-top:10px;}
+.result-grade{display:inline-block;font-family:'Nunito',sans-serif;font-weight:900;font-size:24px;
+  letter-spacing:-.4px;padding:4px 18px;border-radius:14px;}
+.result-prob{font-size:11px;font-weight:700;color:var(--t3);margin-top:6px;}
+.result-stats{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;margin-top:12px;}
+.result-stats span{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:6px 11px;
+  font-size:12.5px;font-weight:800;color:var(--t1);}
+
+.roll-btn{width:100%;padding:16px;border:none;border-radius:16px;background:linear-gradient(120deg,var(--a1),var(--a3));
+  color:#fff;font-size:15.5px;font-weight:900;font-family:inherit;cursor:pointer;letter-spacing:.2px;
+  box-shadow:0 10px 24px rgba(47,127,214,.3);transition:transform .15s,box-shadow .15s;margin:16px 0 8px;}
+.roll-btn:hover{transform:translateY(-2px);box-shadow:0 14px 30px rgba(47,127,214,.4);}
+.roll-btn:active{transform:translateY(0);}
+.roll-btn:disabled{opacity:.5;cursor:default;transform:none;}
+.roll-btn.ghost{background:var(--white);color:var(--a1);border:1.5px solid var(--a1);box-shadow:none;margin-top:0;}
+.multi-row{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:6px;}
+.multi-row button{padding:10px 4px;border-radius:11px;border:1.5px solid var(--border);background:var(--white);
+  color:var(--t2);font-family:inherit;font-size:12.5px;font-weight:800;cursor:pointer;transition:.15s;}
+.multi-row button:hover{border-color:var(--a3);color:var(--a1);background:var(--s1);}
+.reset-link{display:block;text-align:center;margin-top:10px;font-size:11.5px;color:var(--t3);cursor:pointer;
+  text-decoration:underline;background:none;border:none;font-family:inherit;}
+.reset-link:hover{color:var(--a1);}
+
+/* 코인 비용 입력 */
+.cost-row{display:flex;align-items:center;gap:10px;background:var(--s1);border-radius:12px;padding:10px 13px;margin-bottom:2px;}
+.cost-row label{font-size:12px;font-weight:800;color:var(--t2);flex:1;}
+.cost-row input{width:100px;padding:7px 10px;border-radius:9px;border:1px solid var(--border);background:var(--white);
+  font-family:'Nunito',sans-serif;font-weight:800;font-size:13px;color:var(--t1);text-align:right;}
+.cost-row input:focus{outline:none;border-color:var(--a1);}
+.cost-row .unit{font-size:11.5px;color:var(--t3);font-weight:700;}
+
+/* 확률표 */
+.prob-table{display:grid;gap:6px;}
+.prob-row{display:grid;grid-template-columns:52px 1fr 70px 46px;align-items:center;gap:8px;font-size:12.5px;}
+.prob-row b{font-weight:800;}
+.prob-bar-track{height:9px;border-radius:6px;background:var(--s1);overflow:hidden;}
+.prob-bar-fill{height:100%;border-radius:6px;transition:width .4s cubic-bezier(.22,1,.36,1);}
+.prob-row .pct{color:var(--t3);font-family:'Nunito',sans-serif;font-weight:800;text-align:right;font-size:11px;}
+.prob-row .cnt{color:var(--t1);font-family:'Nunito',sans-serif;font-weight:900;text-align:right;}
+
+.stat-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;}
+.stat-pill{flex:1;min-width:96px;background:var(--s1);border-radius:12px;padding:10px 10px;text-align:center;}
+.stat-pill .l{font-size:10px;color:var(--t3);font-weight:700;margin-bottom:3px;}
+.stat-pill b{font-size:16px;font-family:'Nunito',sans-serif;color:var(--a1);}
+
+/* 멀티 뽑기 그리드 */
+.pull-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin-top:14px;}
+.pull-chip{aspect-ratio:1;border-radius:12px;display:flex;align-items:center;justify-content:center;
+  font-size:10.5px;font-weight:900;color:#fff;opacity:0;transform:scale(.5);
+  animation:pullIn .38s cubic-bezier(.22,1.4,.4,1) forwards;text-align:center;line-height:1.25;}
+@keyframes pullIn{to{opacity:1;transform:scale(1);}}
+.pull-chip.rare-pop{animation:pullIn .38s cubic-bezier(.22,1.4,.4,1) forwards, rarePulse 1s ease .38s 2;}
+@keyframes rarePulse{0%,100%{box-shadow:0 0 0 0 rgba(255,255,255,0)}50%{box-shadow:0 0 18px 4px rgba(255,255,255,.7)}}
+
+.empty-hint{text-align:center;padding:40px 10px;color:var(--t3);font-size:13px;}
+.empty-hint .glyph{font-size:30px;margin-bottom:10px;opacity:.5;}
+
+.combined-block{margin-top:14px;background:var(--white);border-radius:12px;padding:12px 14px;text-align:left;}
+.combined-block h4{font-size:10.5px;color:var(--t3);font-weight:800;margin-bottom:8px;letter-spacing:.3px;}
+.combined-line{font-size:12.5px;color:var(--t2);padding:4px 0;display:flex;justify-content:space-between;gap:8px;}
+.combined-line .res{color:var(--a1);font-family:'Nunito',sans-serif;font-weight:900;}
+.combined-line .tag{font-size:9.5px;color:var(--t3);font-weight:700;}
+
+/* ===== 재감정 스탯 ===== */
+.rstat{display:grid;grid-template-columns:40px 1fr 74px;align-items:center;gap:10px;padding:9px 0;
+  border-bottom:1px solid var(--border);}
+.rstat:last-child{border-bottom:none;}
+.rstat .lbl{font-size:12.5px;font-weight:800;color:var(--t2);}
+.rstat .track{position:relative;height:20px;background:var(--s1);border-radius:8px;overflow:hidden;}
+.rstat .fill{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,var(--a3),var(--a1));border-radius:8px;
+  transition:width .5s cubic-bezier(.22,1,.36,1);}
+.rstat .fill.maxed{background:linear-gradient(90deg,var(--a4),#ffb84d);}
+.rstat .valwrap{text-align:right;font-family:'Nunito',sans-serif;}
+.rstat .val{font-size:14.5px;font-weight:900;}
+.rstat .val.up{color:var(--ok);} .rstat .val.down{color:var(--neg);}
+.rstat .rng{font-size:9.5px;color:var(--t3);font-weight:700;}
+.rstat .best{display:inline-block;margin-left:4px;font-size:9px;background:var(--a4);color:#fff;padding:1px 5px;border-radius:6px;font-weight:800;}
+.auto-progress{display:none;margin-top:10px;background:var(--s1);border-radius:12px;padding:12px 14px;text-align:center;}
+.auto-progress.show{display:block;}
+.auto-progress .apct{font-family:'Nunito',sans-serif;font-weight:900;font-size:15px;color:var(--a1);}
+.auto-progress .atrack{height:8px;border-radius:6px;background:var(--border);overflow:hidden;margin-top:8px;}
+.auto-progress .afill{height:100%;background:var(--a1);border-radius:6px;width:0%;transition:width .15s;}
+.auto-progress .astop{margin-top:10px;background:var(--white);border:1px solid var(--border);color:var(--t2);
+  font-family:inherit;font-size:12px;font-weight:800;padding:7px 16px;border-radius:10px;cursor:pointer;}
+.auto-progress .astop:hover{border-color:var(--err);color:var(--err);}
+</style>
+</head>
+<body>
+
+<button class="toggle-btn" id="toggleBtn">☰</button>
+<div class="sb-backdrop" id="sbBackdrop"></div>
+
+<div class="sidebar" id="sidebar">
+  <div class="sb-head">
+    <div class="sb-logo"><span class="sb-logo-dot"></span>SA 쟈쟈</div>
+    <div class="sb-sub">SA JAJA SERVER</div>
+  </div>
+  <div class="sb-nav" id="sbNav"></div>
+  <div class="sb-body">
+    <div class="f-group">
+      <div class="f-section">안내</div>
+      <div style="font-size:12px;color:var(--t2);line-height:1.7;background:var(--s1);border-radius:11px;padding:11px 13px;">
+        레어리티 문서 / 재감정 돋보기를 실제로 쓰기 전에 결과를 미리 뽑아볼 수 있는 페이지입니다.
+        확률·옵션표는 능력치 계산기·아이템도감과 동일해요.
+      </div>
+    </div>
+  </div>
+  <div class="sb-footer">
+    <span class="sb-footer-txt">시뮬레이터</span>
+    <button class="dark-toggle" onclick="toggleDark()"><span class="toggle-moon">🌙</span><span class="toggle-sun">☀️</span></button>
+  </div>
+</div>
+
+<div class="main" id="main">
+  <div class="main-inner">
+    <div class="page-head">
+      <div class="wind-badge"><span class="wind-badge-dot"></span><span>SA JAJA SERVER</span></div>
+      <div class="page-title">아이템 시뮬레이터</div>
+      <div class="page-sub">아이템을 골라서 레어리티·재감정 결과를 미리 뽑아보세요</div>
+    </div>
+
+    <div class="tabbar">
+      <button class="active" data-tab="rarity">📜 레어리티 시뮬레이터</button>
+      <button data-tab="reroll">🔍 재감정 시뮬레이터</button>
+    </div>
+
+    <!-- ===== 레어리티 탭 ===== -->
+    <div class="panel active" id="panel-rarity">
+      <div class="card" id="raritySearchCard">
+        <h3>레어리티 문서를 쓸 아이템 검색</h3>
+        <input type="text" class="f-input" id="raritySearch" placeholder="아이템 이름으로 검색... (예: 창, 갑옷, 목걸이, 삼위일체)">
+        <div class="item-results" id="rarityResults"></div>
+      </div>
+
+      <div class="card" id="rarityStageCard" style="display:none;">
+        <div class="gacha-card" id="rarityGachaCard">
+          <button class="gacha-swap" id="raritySwap">🔄 아이템 바꾸기</button>
+          <div class="gacha-glow" id="rarityGlow"></div>
+          <div class="gacha-imgwrap" id="rarityImgWrap">
+            <div class="gacha-shine" id="rarityShine"></div>
+            <img id="rarityImg" src="" onerror="this.style.opacity=0.15">
+          </div>
+          <div class="gacha-name" id="rarityName"></div>
+          <div class="gacha-cat" id="rarityCat"></div>
+          <div class="result-badge" id="rarityBadge"></div>
+          <div class="combined-block" id="rarityCombinedWrap" style="display:none;">
+            <h4>🔷 최종 능력치 (기본 + 레어리티)</h4>
+            <div id="rarityCombined"></div>
+          </div>
+        </div>
+
+        <div class="cost-row">
+          <label>레어리티 문서 1개당 코인</label>
+          <input type="number" id="rarityCost" value="0" min="0" step="1">
+          <span class="unit">코인</span>
+        </div>
+
+        <button class="roll-btn" id="rollOne">📜 레어리티 문서 사용 (1회)</button>
+        <button class="roll-btn ghost" id="rollTen">🎯 10연 뽑기</button>
+        <div class="pull-grid" id="pullGrid"></div>
+
+        <div class="multi-row" style="grid-template-columns:1fr 1fr;margin-top:10px;">
+          <button id="autoLegendary">🌟 전설까지 자동돌리기</button>
+          <button id="autoMythic">💠 신화까지 자동돌리기</button>
+        </div>
+        <div class="auto-progress" id="rarityAutoProgress">
+          <div class="apct" id="rarityAutoPct">0회</div>
+          <div style="font-size:11px;color:var(--t3);margin-top:2px;" id="rarityAutoMsg"></div>
+          <div class="atrack"><div class="afill" id="rarityAutoFill"></div></div>
+          <button class="astop" id="rarityAutoStop">중단하기</button>
+        </div>
+
+        <button class="reset-link" id="rarityReset">기록 초기화</button>
+      </div>
+
+      <div class="card" id="rarityEmptyCard">
+        <div class="empty-hint"><div class="glyph">📜</div>위에서 레어리티를 매길 아이템을 검색해<br>선택하면 시뮬레이션을 시작할 수 있어요.</div>
+      </div>
+
+      <div class="card" id="rarityStatsCard" style="display:none;">
+        <h3>누적 확률표 <span id="rarityTotalTag" style="color:var(--t3);font-weight:700;">(0회 시도)</span></h3>
+        <div class="prob-table" id="probTable"></div>
+        <div class="stat-row" id="raritySummary"></div>
+      </div>
+    </div>
+
+    <!-- ===== 재감정 탭 ===== -->
+    <div class="panel" id="panel-reroll">
+      <div class="card" id="rerollSearchCard">
+        <h3>재감정할 아이템 검색</h3>
+        <input type="text" class="f-input" id="itemSearch" placeholder="아이템 이름으로 검색... (예: 삼위일체, 도끼, 목걸이)">
+        <div class="item-results" id="itemResults"></div>
+      </div>
+
+      <div class="card" id="rerollCard" style="display:none;">
+        <div class="gacha-card" id="rerollGachaCard">
+          <button class="gacha-swap" id="rerollSwap">🔄 아이템 바꾸기</button>
+          <div class="gacha-glow" id="rerollGlow" style="--gc:rgba(34,182,201,.32);"></div>
+          <div class="gacha-imgwrap" id="rerollImgWrap">
+            <div class="gacha-shine" id="rerollShine"></div>
+            <img id="rerollImg" src="" onerror="this.style.opacity=0.15">
+          </div>
+          <div class="gacha-name" id="rerollName"></div>
+          <div class="gacha-cat" id="rerollCat"></div>
+        </div>
+
+        <div id="rerollStats" style="margin-top:14px;"></div>
+
+        <div class="cost-row" style="margin-top:12px;">
+          <label>재감정 돋보기 1개당 코인</label>
+          <input type="number" id="rerollCost" value="0" min="0" step="1">
+          <span class="unit">코인</span>
+        </div>
+
+        <button class="roll-btn" id="rerollOne">🔍 재감정 돋보기 사용 (1회)</button>
+        <div class="multi-row">
+          <button data-n="10">×10</button>
+          <button data-n="100">×100</button>
+          <button data-n="1000">×1000</button>
+        </div>
+        <button class="roll-btn ghost" id="autoMaxBtn">✨ MAX옵까지 자동돌리기</button>
+        <div class="auto-progress" id="autoProgress">
+          <div class="apct" id="autoPct">0회</div>
+          <div style="font-size:11px;color:var(--t3);margin-top:2px;" id="autoMsg">전체 스탯이 동시에 MAX가 될 때까지 반복 중...</div>
+          <div class="atrack"><div class="afill" id="autoFill"></div></div>
+          <button class="astop" id="autoStop">중단하기</button>
+        </div>
+        <button class="reset-link" id="rerollReset">기록 초기화</button>
+        <div class="stat-row" id="rerollSummary"></div>
+      </div>
+
+      <div class="card" id="rerollEmptyCard">
+        <div class="empty-hint"><div class="glyph">🔍</div>위에서 아이템을 검색해 선택하면<br>재감정 시뮬레이션을 시작할 수 있어요.</div>
+      </div>
+    </div>
+
+  </div>
+  <footer>쟈쟈서버 편의기능 made by 야채부락리 애호박</footer>
+</div>
+
+<script src="nav.js"></script>
+<script>
+/* ===== 사이드바 / 다크모드 (공통) ===== */
+function byId(id){ return document.getElementById(id); }
+var sidebar=byId('sidebar'), main=byId('main'), toggleBtn=byId('toggleBtn'), backdrop=byId('sbBackdrop');
+function setSidebar(open){
+  sidebar.classList.toggle('open', open);
+  main.classList.toggle('shifted', open);
+  toggleBtn.classList.toggle('sb-open', open);
+  toggleBtn.textContent = open ? '✕' : '☰';
+  if(window.innerWidth<=820) backdrop.classList.toggle('show', open);
+  try{ localStorage.setItem('sa2-sb', open?'1':'0'); }catch(e){}
+}
+toggleBtn.addEventListener('click', function(){ setSidebar(!sidebar.classList.contains('open')); });
+backdrop.addEventListener('click', function(){ setSidebar(false); });
+(function(){ try{ var s=localStorage.getItem('sa2-sb'); if(s==='1'&&window.innerWidth>820) setSidebar(true); }catch(e){} })();
+
+function toggleDark(){
+  var h=document.documentElement;
+  var n=h.getAttribute('data-theme')==='dark'?'light':'dark';
+  h.setAttribute('data-theme', n);
+  try{ localStorage.setItem('sa2-theme', n); }catch(e){}
+}
+try{ var sv=localStorage.getItem('sa2-theme'); if(sv) document.documentElement.setAttribute('data-theme', sv); }catch(e){}
+
+/* ===== 탭 전환 ===== */
+document.querySelectorAll('.tabbar button').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    document.querySelectorAll('.tabbar button').forEach(function(b){ b.classList.remove('active'); });
+    document.querySelectorAll('.panel').forEach(function(p){ p.classList.remove('active'); });
+    btn.classList.add('active');
+    byId('panel-'+btn.dataset.tab).classList.add('active');
+  });
+});
+
+function itemImgUrl(gfx){ return 'https://sa000001.com/sa2/info/img/item/'+gfx+'.png'; }
+function fmtCoin(n){ return Math.round(n).toLocaleString(); }
+</script>
+
+<script>
+/* ===================================================================
+   공통 데이터
+   =================================================================== */
+var ALL_ITEMS = [{"name": "바람의 창", "id": "89500", "gfx": "50017", "cat": "무기", "minAtk": -30, "maxAtk": -30, "minDef": 0, "maxDef": 0, "minDex": 30, "maxDex": 30, "minHP": 0, "maxHP": 0, "minCrit": 5, "maxCrit": 5, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "바람의 갑옷", "id": "89501", "gfx": "50018", "cat": "방어구", "minAtk": -30, "maxAtk": -30, "minDef": 10, "maxDef": 10, "minDex": 30, "maxDex": 30, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "바람의 투구", "id": "89502", "gfx": "50019", "cat": "방어구", "minAtk": -20, "maxAtk": -20, "minDef": 10, "maxDef": 10, "minDex": 20, "maxDex": 20, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "헤티아의 암흑 창", "id": "88430", "gfx": "36096", "cat": "무기", "minAtk": 52, "maxAtk": 60, "minDef": 0, "maxDef": 0, "minDex": -12, "maxDex": -9, "minHP": 0, "maxHP": 0, "minCrit": 5, "maxCrit": 5, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "카루의 투구", "id": "89130", "gfx": "36080", "cat": "방어구", "minAtk": 0, "maxAtk": 0, "minDef": 20, "maxDef": 35, "minDex": -19, "maxDex": -12, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "카루의 갑옷", "id": "89131", "gfx": "36081", "cat": "방어구", "minAtk": 0, "maxAtk": 0, "minDef": 32, "maxDef": 40, "minDex": -22, "maxDex": -18, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "요루의 투구", "id": "89132", "gfx": "36082", "cat": "방어구", "minAtk": 0, "maxAtk": 0, "minDef": 20, "maxDef": 35, "minDex": -21, "maxDex": -18, "minHP": 6, "maxHP": 18, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "요루의 갑옷", "id": "89133", "gfx": "36083", "cat": "방어구", "minAtk": 0, "maxAtk": 0, "minDef": 29, "maxDef": 33, "minDex": -22, "maxDex": -20, "minHP": 9, "maxHP": 27, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "이루의 투구", "id": "89134", "gfx": "36084", "cat": "방어구", "minAtk": 5, "maxAtk": 8, "minDef": 25, "maxDef": 38, "minDex": -29, "maxDex": -23, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "이루의 갑옷", "id": "89135", "gfx": "36085", "cat": "방어구", "minAtk": 8, "maxAtk": 10, "minDef": 30, "maxDef": 37, "minDex": -28, "maxDex": -25, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "그루의 투구", "id": "89136", "gfx": "36086", "cat": "방어구", "minAtk": -35, "maxAtk": -30, "minDef": 22, "maxDef": 36, "minDex": 14, "maxDex": 17, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "그루의 갑옷", "id": "89137", "gfx": "36087", "cat": "방어구", "minAtk": -35, "maxAtk": -30, "minDef": 29, "maxDef": 34, "minDex": 16, "maxDex": 18, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "테라시온의 곤봉", "id": "89138", "gfx": "36088", "cat": "무기", "minAtk": 32, "maxAtk": 50, "minDef": 3, "maxDef": 5, "minDex": 0, "maxDex": 0, "minHP": 0, "maxHP": 0, "minCrit": 3, "maxCrit": 3, "minEva": 2, "maxEva": 2, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "실프리온의 곤봉", "id": "89139", "gfx": "36089", "cat": "무기", "minAtk": 32, "maxAtk": 50, "minDef": 0, "maxDef": 0, "minDex": 3, "maxDex": 5, "minHP": 0, "maxHP": 0, "minCrit": 3, "maxCrit": 3, "minEva": 2, "maxEva": 2, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "테라시온의 도끼", "id": "89140", "gfx": "36090", "cat": "무기", "minAtk": 77, "maxAtk": 93, "minDef": -14, "maxDef": -12, "minDex": -28, "maxDex": -26, "minHP": 0, "maxHP": 0, "minCrit": 3, "maxCrit": 3, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 2}, {"name": "이그니온의 도끼", "id": "89141", "gfx": "36091", "cat": "무기", "minAtk": 87, "maxAtk": 103, "minDef": -22, "maxDef": -20, "minDex": -30, "maxDex": -28, "minHP": 0, "maxHP": 0, "minCrit": 3, "maxCrit": 3, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 2}, {"name": "포세이온의 활", "id": "89142", "gfx": "36092", "cat": "무기", "minAtk": 18, "maxAtk": 21, "minDef": -14, "maxDef": -13, "minDex": 0, "maxDex": 0, "minHP": 9, "maxHP": 12, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 3}, {"name": "이그니온의 활", "id": "89143", "gfx": "36093", "cat": "무기", "minAtk": 23, "maxAtk": 26, "minDef": -16, "maxDef": -14, "minDex": 0, "maxDex": 0, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 2}, {"name": "실프리온의 창", "id": "89144", "gfx": "36094", "cat": "무기", "minAtk": 50, "maxAtk": 62, "minDef": 0, "maxDef": 0, "minDex": -15, "maxDex": -7, "minHP": 0, "maxHP": 0, "minCrit": 5, "maxCrit": 5, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "포세이온의 창", "id": "89145", "gfx": "36095", "cat": "무기", "minAtk": 50, "maxAtk": 62, "minDef": 0, "maxDef": 0, "minDex": -25, "maxDex": -19, "minHP": 30, "maxHP": 36, "minCrit": 5, "maxCrit": 5, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "신목의 창", "id": "70053", "gfx": "51475", "cat": "무기", "minAtk": 50, "maxAtk": 56, "minDef": 5, "maxDef": 7, "minDex": -20, "maxDex": -18, "minHP": 0, "maxHP": 0, "minCrit": 5, "maxCrit": 5, "minEva": 0, "maxEva": 0, "minCharm": 3, "maxCharm": 5, "hit": 0}, {"name": "신목의 갑옷", "id": "70054", "gfx": "51473", "cat": "방어구", "minAtk": 0, "maxAtk": 0, "minDef": 35, "maxDef": 40, "minDex": -25, "maxDex": -20, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "신목의 목걸이", "id": "70055", "gfx": "51474", "cat": "장신구", "minAtk": 2, "maxAtk": 4, "minDef": 8, "maxDef": 12, "minDex": -5, "maxDex": -1, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "정령왕의 활", "id": "2775", "gfx": "20325", "cat": "무기", "minAtk": 18, "maxAtk": 29, "minDef": -16, "maxDef": -9, "minDex": 0, "maxDex": 0, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 2}, {"name": "바람의 쇠사슬 [바람]", "id": "2735", "gfx": "22016", "cat": "장신구", "minAtk": 0, "maxAtk": 0, "minDef": 0, "maxDef": 0, "minDex": 0, "maxDex": 0, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 3, "maxCharm": 3, "hit": 0}, {"name": "불의 깃털장식[불]", "id": "2707", "gfx": "22011", "cat": "장신구", "minAtk": 2, "maxAtk": 2, "minDef": -7, "maxDef": -7, "minDex": 5, "maxDex": 5, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 3, "maxCharm": 3, "hit": 0}, {"name": "대지의 인연[땅]", "id": "2701", "gfx": "22026", "cat": "장신구", "minAtk": -4, "maxAtk": -4, "minDef": 5, "maxDef": 5, "minDex": 0, "maxDex": 0, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 3, "maxCharm": 3, "hit": 0}, {"name": "물의 반지[물]", "id": "2770", "gfx": "22124", "cat": "장신구", "minAtk": 0, "maxAtk": 0, "minDef": 0, "maxDef": 0, "minDex": 0, "maxDex": 0, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 3, "maxCharm": 3, "hit": 0}, {"name": "마쥬의 도끼", "id": "2688", "gfx": "20042", "cat": "무기", "minAtk": 50, "maxAtk": 50, "minDef": -20, "maxDef": -20, "minDex": -20, "maxDex": -20, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "마쥬의 창", "id": "2689", "gfx": "20452", "cat": "무기", "minAtk": 45, "maxAtk": 45, "minDef": 0, "maxDef": 0, "minDex": -10, "maxDex": -10, "minHP": 0, "maxHP": 0, "minCrit": 5, "maxCrit": 5, "minEva": 0, "maxEva": 0, "minCharm": 4, "maxCharm": 4, "hit": 0}, {"name": "마쥬의 곤봉", "id": "2690", "gfx": "20116", "cat": "무기", "minAtk": 35, "maxAtk": 35, "minDef": 0, "maxDef": 0, "minDex": 0, "maxDex": 0, "minHP": 0, "maxHP": 0, "minCrit": 2, "maxCrit": 2, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "카이의 도끼", "id": "2438", "gfx": "20003", "cat": "무기", "minAtk": 20, "maxAtk": 35, "minDef": -12, "maxDef": -8, "minDex": -12, "maxDex": -8, "minHP": 0, "maxHP": 0, "minCrit": 5, "maxCrit": 5, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "툰가의 곤봉", "id": "2439", "gfx": "20100", "cat": "무기", "minAtk": 10, "maxAtk": 25, "minDef": -8, "maxDef": -6, "minDex": 0, "maxDex": 0, "minHP": 0, "maxHP": 0, "minCrit": 5, "maxCrit": 5, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "우리의 반지", "id": "88221", "gfx": "24703", "cat": "장신구", "minAtk": 0, "maxAtk": 0, "minDef": 0, "maxDef": 0, "minDex": 0, "maxDex": 0, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "우리의 반지2", "id": "88228", "gfx": "24703", "cat": "장신구", "minAtk": 0, "maxAtk": 0, "minDef": 0, "maxDef": 0, "minDex": 0, "maxDex": 0, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "얼음 손톱", "id": "88125", "gfx": "51270", "cat": "무기", "minAtk": 20, "maxAtk": 20, "minDef": 0, "maxDef": 0, "minDex": 0, "maxDex": 0, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "대지의 심장", "id": "88130", "gfx": "51261", "cat": "토템", "minAtk": 0, "maxAtk": 0, "minDef": 10, "maxDef": 15, "minDex": 0, "maxDex": 0, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "풍신의 주머니", "id": "88131", "gfx": "51108", "cat": "토템", "minAtk": 0, "maxAtk": 0, "minDef": 0, "maxDef": 0, "minDex": 10, "maxDex": 15, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "불사조의 정신", "id": "88132", "gfx": "51112", "cat": "토템", "minAtk": 10, "maxAtk": 15, "minDef": 0, "maxDef": 0, "minDex": 0, "maxDex": 0, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "헤티아의 눈물", "id": "88133", "gfx": "55089", "cat": "토템", "minAtk": 0, "maxAtk": 0, "minDef": 0, "maxDef": 0, "minDex": 0, "maxDex": 0, "minHP": 30, "maxHP": 45, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "검은불꽃 장궁", "id": "88141", "gfx": "51258", "cat": "무기", "minAtk": 21, "maxAtk": 32, "minDef": 0, "maxDef": 0, "minDex": -17, "maxDex": -12, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 2}, {"name": "달의 도끼", "id": "13305", "gfx": "56168", "cat": "무기", "minAtk": 42, "maxAtk": 42, "minDef": -11, "maxDef": -11, "minDex": -11, "maxDex": -11, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "공간의 목걸이", "id": "13372", "gfx": "22040", "cat": "장신구", "minAtk": 3, "maxAtk": 3, "minDef": -6, "maxDef": -6, "minDex": 3, "maxDex": 3, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "얼음 옷", "id": "88204", "gfx": "51271", "cat": "방어구", "minAtk": 2, "maxAtk": 5, "minDef": 20, "maxDef": 30, "minDex": 2, "maxDex": 5, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "헤메라의 소울 팬던트", "id": "88587", "gfx": "56369", "cat": "장신구", "minAtk": -5, "maxAtk": -1, "minDef": 0, "maxDef": 0, "minDex": 1, "maxDex": 5, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 5, "maxEva": 5, "minCharm": 10, "maxCharm": 10, "hit": 0}, {"name": "타니토스 소울 팬던트", "id": "88581", "gfx": "56375", "cat": "장신구", "minAtk": 1, "maxAtk": 5, "minDef": 0, "maxDef": 0, "minDex": -5, "maxDex": -1, "minHP": 0, "maxHP": 0, "minCrit": 5, "maxCrit": 5, "minEva": 0, "maxEva": 0, "minCharm": 10, "maxCharm": 10, "hit": 0}, {"name": "의식의 투구", "id": "2405", "gfx": "21542", "cat": "방어구", "minAtk": 0, "maxAtk": 0, "minDef": 18, "maxDef": 18, "minDex": -5, "maxDex": -5, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "의식의 갑옷", "id": "2406", "gfx": "51456", "cat": "방어구", "minAtk": 0, "maxAtk": 0, "minDef": 34, "maxDef": 34, "minDex": -12, "maxDex": -12, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "의식의 곤봉", "id": "2407", "gfx": "51457", "cat": "무기", "minAtk": 20, "maxAtk": 20, "minDef": 8, "maxDef": 8, "minDex": 0, "maxDex": 0, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "보급 창", "id": "29010", "gfx": "20402", "cat": "무기", "minAtk": 30, "maxAtk": 30, "minDef": 0, "maxDef": 0, "minDex": 0, "maxDex": 0, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "보급 갑옷", "id": "29011", "gfx": "21011", "cat": "방어구", "minAtk": 0, "maxAtk": 0, "minDef": 20, "maxDef": 20, "minDex": 0, "maxDex": 0, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "보급 투구", "id": "29012", "gfx": "21514", "cat": "방어구", "minAtk": 0, "maxAtk": 0, "minDef": 10, "maxDef": 10, "minDex": 0, "maxDex": 0, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "운명의 팔찌", "id": "13453", "gfx": "22073", "cat": "장신구", "minAtk": 3, "maxAtk": 3, "minDef": 3, "maxDef": 3, "minDex": -3, "maxDex": -3, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 10, "maxCharm": 10, "hit": 0}, {"name": "용맹의 귀걸이", "id": "13454", "gfx": "22090", "cat": "장신구", "minAtk": 6, "maxAtk": 6, "minDef": 0, "maxDef": 0, "minDex": -3, "maxDex": -3, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 5, "maxEva": 5, "minCharm": 10, "maxCharm": 10, "hit": 0}, {"name": "강인함의 반지", "id": "13455", "gfx": "22118", "cat": "장신구", "minAtk": -3, "maxAtk": -3, "minDef": 6, "maxDef": 6, "minDex": 0, "maxDex": 0, "minHP": 0, "maxHP": 0, "minCrit": 5, "maxCrit": 5, "minEva": 0, "maxEva": 0, "minCharm": 10, "maxCharm": 10, "hit": 0}, {"name": "순발력의 목걸이", "id": "13456", "gfx": "22118", "cat": "장신구", "minAtk": 0, "maxAtk": 0, "minDef": -3, "maxDef": -3, "minDex": 6, "maxDex": 6, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 10, "maxCharm": 10, "hit": 0}, {"name": "얼음 투구", "id": "88124", "gfx": "51272", "cat": "방어구", "minAtk": 0, "maxAtk": 0, "minDef": 20, "maxDef": 20, "minDex": 0, "maxDex": 0, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "얼음 부메랑", "id": "88126", "gfx": "51269", "cat": "무기", "minAtk": 20, "maxAtk": 20, "minDef": 0, "maxDef": 0, "minDex": 10, "maxDex": 10, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "머슬 링귀걸이", "id": "88127", "gfx": "51265", "cat": "장신구", "minAtk": 3, "maxAtk": 5, "minDef": 0, "maxDef": 0, "minDex": 0, "maxDex": 0, "minHP": 8, "maxHP": 12, "minCrit": 0, "maxCrit": 0, "minEva": 4, "maxEva": 6, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "번개의 반지", "id": "88128", "gfx": "51266", "cat": "장신구", "minAtk": 0, "maxAtk": 0, "minDef": 0, "maxDef": 0, "minDex": 6, "maxDex": 8, "minHP": 8, "maxHP": 12, "minCrit": 6, "maxCrit": 8, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "삼위일체", "id": "88129", "gfx": "51097", "cat": "토템", "minAtk": 3, "maxAtk": 3, "minDef": 3, "maxDef": 3, "minDex": 3, "maxDex": 3, "minHP": 9, "maxHP": 9, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "미라쥬", "id": "88134", "gfx": "51113", "cat": "장신구", "minAtk": 5, "maxAtk": 5, "minDef": 0, "maxDef": 0, "minDex": 0, "maxDex": 0, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "미라쥬", "id": "88135", "gfx": "51113", "cat": "장신구", "minAtk": 5, "maxAtk": 5, "minDef": 0, "maxDef": 0, "minDex": 0, "maxDex": 0, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "흑룡의 발톱", "id": "88137", "gfx": "51264", "cat": "무기", "minAtk": 41, "maxAtk": 41, "minDef": 0, "maxDef": 0, "minDex": 10, "maxDex": 10, "minHP": 0, "maxHP": 0, "minCrit": 5, "maxCrit": 5, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "냉동 참다랑어", "id": "88138", "gfx": "51259", "cat": "무기", "minAtk": 51, "maxAtk": 51, "minDef": 0, "maxDef": 0, "minDex": 0, "maxDex": 0, "minHP": 0, "maxHP": 0, "minCrit": 5, "maxCrit": 5, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "열공의 도끼", "id": "88139", "gfx": "51273", "cat": "무기", "minAtk": 71, "maxAtk": 71, "minDef": -10, "maxDef": -10, "minDex": -10, "maxDex": -10, "minHP": 0, "maxHP": 0, "minCrit": 5, "maxCrit": 5, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "냉동 황새치", "id": "88142", "gfx": "51260", "cat": "무기", "minAtk": 61, "maxAtk": 61, "minDef": 0, "maxDef": 0, "minDex": -10, "maxDex": -10, "minHP": 0, "maxHP": 0, "minCrit": 5, "maxCrit": 5, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "미리네아의 거울", "id": "88143", "gfx": "51114", "cat": "장신구", "minAtk": 7, "maxAtk": 7, "minDef": 0, "maxDef": 0, "minDex": 0, "maxDex": 0, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "초신성의 갑옷", "id": "88144", "gfx": "51274", "cat": "방어구", "minAtk": 7, "maxAtk": 10, "minDef": 41, "maxDef": 49, "minDex": -10, "maxDex": -7, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "헤티아의 창", "id": "88145", "gfx": "51263", "cat": "무기", "minAtk": 56, "maxAtk": 60, "minDef": 16, "maxDef": 20, "minDex": -30, "maxDex": -26, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "헤티아의 머리 장식", "id": "88146", "gfx": "51275", "cat": "방어구", "minAtk": 3, "maxAtk": 5, "minDef": 20, "maxDef": 24, "minDex": 0, "maxDex": 0, "minHP": 6, "maxHP": 12, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "헤티아의 빛나는 창", "id": "88147", "gfx": "51262", "cat": "무기", "minAtk": 57, "maxAtk": 65, "minDef": 0, "maxDef": 0, "minDex": -12, "maxDex": -9, "minHP": 6, "maxHP": 12, "minCrit": 5, "maxCrit": 5, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "삼위일체(改)", "id": "88148", "gfx": "51098", "cat": "토템", "minAtk": 5, "maxAtk": 7, "minDef": 5, "maxDef": 7, "minDex": 5, "maxDex": 7, "minHP": 15, "maxHP": 21, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "삼위일체(眞)", "id": "88149", "gfx": "51099", "cat": "토템", "minAtk": 8, "maxAtk": 10, "minDef": 8, "maxDef": 10, "minDex": 8, "maxDex": 10, "minHP": 24, "maxHP": 30, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "영웅 샴기르의 활", "id": "88794", "gfx": "36033", "cat": "무기", "minAtk": 21, "maxAtk": 34, "minDef": -10, "maxDef": -7, "minDex": -10, "maxDex": -7, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 2}, {"name": "영웅 샴기르의 도끼", "id": "88233", "gfx": "36027", "cat": "무기", "minAtk": 70, "maxAtk": 76, "minDef": -12, "maxDef": -10, "minDex": -12, "maxDex": -10, "minHP": 6, "maxHP": 12, "minCrit": 3, "maxCrit": 3, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 2}, {"name": "영웅 샴기르의 곤봉", "id": "88234", "gfx": "36026", "cat": "무기", "minAtk": 44, "maxAtk": 56, "minDef": 0, "maxDef": 0, "minDex": 0, "maxDex": 0, "minHP": 6, "maxHP": 12, "minCrit": 3, "maxCrit": 3, "minEva": 2, "maxEva": 2, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "영웅 샴기르의 머리장식", "id": "88235", "gfx": "36025", "cat": "방어구", "minAtk": 0, "maxAtk": 0, "minDef": 15, "maxDef": 20, "minDex": 7, "maxDex": 9, "minHP": 6, "maxHP": 12, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "영웅 샴기르의 옷", "id": "88236", "gfx": "36024", "cat": "방어구", "minAtk": 0, "maxAtk": 0, "minDef": 30, "maxDef": 40, "minDex": 9, "maxDex": 12, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "트위스터 창", "id": "88312", "gfx": "55929", "cat": "무기", "minAtk": 60, "maxAtk": 60, "minDef": 0, "maxDef": 0, "minDex": -12, "maxDex": -12, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 5, "maxCharm": 5, "hit": 0}, {"name": "루나의 곤봉", "id": "88337", "gfx": "51717", "cat": "무기", "minAtk": 30, "maxAtk": 30, "minDef": 0, "maxDef": 0, "minDex": 0, "maxDex": 0, "minHP": 9, "maxHP": 9, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "루나의 머리장식", "id": "88338", "gfx": "51744", "cat": "방어구", "minAtk": -5, "maxAtk": -5, "minDef": 12, "maxDef": 12, "minDex": 15, "maxDex": 15, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "루나의 옷", "id": "88339", "gfx": "51741", "cat": "방어구", "minAtk": -10, "maxAtk": -10, "minDef": 10, "maxDef": 10, "minDex": 18, "maxDex": 18, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "영험한 힘을 가진 갑옷", "id": "88432", "gfx": "24345", "cat": "방어구", "minAtk": 0, "maxAtk": 0, "minDef": 48, "maxDef": 48, "minDex": -12, "maxDex": -12, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "타니토스의 창", "id": "88576", "gfx": "56376", "cat": "무기", "minAtk": 47, "maxAtk": 58, "minDef": 0, "maxDef": 0, "minDex": -12, "maxDex": -10, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "타니토스의 도끼", "id": "88577", "gfx": "56374", "cat": "무기", "minAtk": 57, "maxAtk": 68, "minDef": -13, "maxDef": -11, "minDex": -13, "maxDex": -11, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "타니토스의 곤봉", "id": "88578", "gfx": "56373", "cat": "무기", "minAtk": 35, "maxAtk": 48, "minDef": 0, "maxDef": 0, "minDex": 0, "maxDex": 0, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "타니토스의 갑옷", "id": "88579", "gfx": "56372", "cat": "방어구", "minAtk": 2, "maxAtk": 2, "minDef": 30, "maxDef": 40, "minDex": -11, "maxDex": -9, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "타니토스의 투구", "id": "88580", "gfx": "56377", "cat": "방어구", "minAtk": 2, "maxAtk": 2, "minDef": 15, "maxDef": 20, "minDex": -11, "maxDex": -9, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "헤메라의 창", "id": "88582", "gfx": "56370", "cat": "무기", "minAtk": 45, "maxAtk": 56, "minDef": 0, "maxDef": 0, "minDex": -10, "maxDex": -8, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "헤메라의 도끼", "id": "88583", "gfx": "56368", "cat": "무기", "minAtk": 55, "maxAtk": 66, "minDef": -12, "maxDef": -10, "minDex": -12, "maxDex": -10, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "헤메라의 곤봉", "id": "88584", "gfx": "56367", "cat": "무기", "minAtk": 33, "maxAtk": 46, "minDef": 0, "maxDef": 0, "minDex": 0, "maxDex": 0, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "헤메라의 갑옷", "id": "88585", "gfx": "56366", "cat": "방어구", "minAtk": 0, "maxAtk": 0, "minDef": 30, "maxDef": 40, "minDex": -9, "maxDex": -7, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "헤메라의 투구", "id": "88586", "gfx": "56371", "cat": "방어구", "minAtk": 0, "maxAtk": 0, "minDef": 15, "maxDef": 20, "minDex": -9, "maxDex": -7, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "늑대쓰개", "id": "88825", "gfx": "51337", "cat": "방어구", "minAtk": 1, "maxAtk": 9, "minDef": 10, "maxDef": 20, "minDex": 0, "maxDex": 0, "minHP": 6, "maxHP": 12, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "지옥견 털옷", "id": "88826", "gfx": "51344", "cat": "방어구", "minAtk": 1, "maxAtk": 12, "minDef": 25, "maxDef": 40, "minDex": 0, "maxDex": 0, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "삼수정 곤봉", "id": "88827", "gfx": "51341", "cat": "무기", "minAtk": 32, "maxAtk": 58, "minDef": 0, "maxDef": 0, "minDex": 0, "maxDex": 0, "minHP": 6, "maxHP": 12, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "지옥의 투구", "id": "88828", "gfx": "51338", "cat": "방어구", "minAtk": 1, "maxAtk": 5, "minDef": 18, "maxDef": 24, "minDex": 0, "maxDex": 0, "minHP": 6, "maxHP": 12, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "지옥의 창", "id": "88829", "gfx": "51342", "cat": "무기", "minAtk": 46, "maxAtk": 65, "minDef": 5, "maxDef": 10, "minDex": -34, "maxDex": -28, "minHP": 6, "maxHP": 12, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "지옥의 갑옷", "id": "88830", "gfx": "51343", "cat": "방어구", "minAtk": 1, "maxAtk": 10, "minDef": 35, "maxDef": 49, "minDex": -10, "maxDex": -7, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "용암 부메랑", "id": "88831", "gfx": "51340", "cat": "무기", "minAtk": 20, "maxAtk": 20, "minDef": 0, "maxDef": 0, "minDex": 0, "maxDex": 0, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "심해 갑옷", "id": "88919", "gfx": "36064", "cat": "방어구", "minAtk": 5, "maxAtk": 5, "minDef": 30, "maxDef": 30, "minDex": -10, "maxDex": -10, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "옥토의 옷", "id": "88920", "gfx": "36071", "cat": "방어구", "minAtk": 0, "maxAtk": 0, "minDef": 25, "maxDef": 35, "minDex": 7, "maxDex": 10, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "메가죠의 도끼", "id": "88921", "gfx": "36066", "cat": "무기", "minAtk": 30, "maxAtk": 80, "minDef": -20, "maxDef": -10, "minDex": -20, "maxDex": -10, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 5}, {"name": "악몽의 모자", "id": "88923", "gfx": "36069", "cat": "방어구", "minAtk": 7, "maxAtk": 9, "minDef": 15, "maxDef": 20, "minDex": 0, "maxDex": 0, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "심해의 활", "id": "88924", "gfx": "36070", "cat": "무기", "minAtk": 21, "maxAtk": 32, "minDef": -17, "maxDef": -12, "minDex": 0, "maxDex": 0, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 2}, {"name": "삼위일체(神)", "id": "88992", "gfx": "51099", "cat": "토템", "minAtk": 7, "maxAtk": 14, "minDef": 7, "maxDef": 14, "minDex": 7, "maxDex": 14, "minHP": 21, "maxHP": 42, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "드래곤 뼈갑옷", "id": "88993", "gfx": "52143", "cat": "방어구", "minAtk": 7, "maxAtk": 10, "minDef": 45, "maxDef": 54, "minDex": -15, "maxDex": -12, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "카오닉스의 창", "id": "88994", "gfx": "52148", "cat": "무기", "minAtk": 56, "maxAtk": 60, "minDef": 21, "maxDef": 25, "minDex": -35, "maxDex": -31, "minHP": 0, "maxHP": 0, "minCrit": 5, "maxCrit": 5, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "불타는 카오닉스의 창", "id": "88995", "gfx": "51342", "cat": "무기", "minAtk": 62, "maxAtk": 70, "minDef": 0, "maxDef": 0, "minDex": -17, "maxDex": -14, "minHP": 6, "maxHP": 12, "minCrit": 5, "maxCrit": 5, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "카오닉스의 투구", "id": "88996", "gfx": "52146", "cat": "방어구", "minAtk": 3, "maxAtk": 5, "minDef": 25, "maxDef": 29, "minDex": -5, "maxDex": -5, "minHP": 6, "maxHP": 12, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "어둠의 비늘", "id": "88999", "gfx": "52137", "cat": "토템", "minAtk": 0, "maxAtk": 0, "minDef": 0, "maxDef": 0, "minDex": -100, "maxDex": -100, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "뿅뿅 목걸이", "id": "89000", "gfx": "52142", "cat": "장신구", "minAtk": 1, "maxAtk": 5, "minDef": -10, "maxDef": -10, "minDex": 1, "maxDex": 5, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 3}, {"name": "뼈 결정 반지", "id": "89001", "gfx": "52140", "cat": "장신구", "minAtk": 6, "maxAtk": 8, "minDef": 8, "maxDef": 12, "minDex": 0, "maxDex": 0, "minHP": 0, "maxHP": 0, "minCrit": 6, "maxCrit": 8, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}, {"name": "늑대발톱 도끼", "id": "89002", "gfx": "52138", "cat": "무기", "minAtk": 60, "maxAtk": 70, "minDef": -20, "maxDef": -20, "minDex": -20, "maxDex": -20, "minHP": 0, "maxHP": 0, "minCrit": 5, "maxCrit": 5, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0, "hit": 0}];
+var REROLL_ITEMS = [{"name": "헤티아의 암흑 창", "id": "88430", "gfx": "36096", "cat": "무기", "minAtk": 52, "maxAtk": 60, "minDef": 0, "maxDef": 0, "minDex": -12, "maxDex": -9, "minHP": 0, "maxHP": 0, "minCrit": 5, "maxCrit": 5, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0}, {"name": "카루의 투구", "id": "89130", "gfx": "36080", "cat": "방어구", "minAtk": 0, "maxAtk": 0, "minDef": 20, "maxDef": 35, "minDex": -19, "maxDex": -12, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0}, {"name": "카루의 갑옷", "id": "89131", "gfx": "36081", "cat": "방어구", "minAtk": 0, "maxAtk": 0, "minDef": 32, "maxDef": 40, "minDex": -22, "maxDex": -18, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0}, {"name": "요루의 투구", "id": "89132", "gfx": "36082", "cat": "방어구", "minAtk": 0, "maxAtk": 0, "minDef": 20, "maxDef": 35, "minDex": -21, "maxDex": -18, "minHP": 6, "maxHP": 18, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0}, {"name": "요루의 갑옷", "id": "89133", "gfx": "36083", "cat": "방어구", "minAtk": 0, "maxAtk": 0, "minDef": 29, "maxDef": 33, "minDex": -22, "maxDex": -20, "minHP": 9, "maxHP": 27, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0}, {"name": "이루의 투구", "id": "89134", "gfx": "36084", "cat": "방어구", "minAtk": 5, "maxAtk": 8, "minDef": 25, "maxDef": 38, "minDex": -29, "maxDex": -23, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0}, {"name": "이루의 갑옷", "id": "89135", "gfx": "36085", "cat": "방어구", "minAtk": 8, "maxAtk": 10, "minDef": 30, "maxDef": 37, "minDex": -28, "maxDex": -25, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0}, {"name": "그루의 투구", "id": "89136", "gfx": "36086", "cat": "방어구", "minAtk": -35, "maxAtk": -30, "minDef": 22, "maxDef": 36, "minDex": 14, "maxDex": 17, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0}, {"name": "그루의 갑옷", "id": "89137", "gfx": "36087", "cat": "방어구", "minAtk": -35, "maxAtk": -30, "minDef": 29, "maxDef": 34, "minDex": 16, "maxDex": 18, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0}, {"name": "테라시온의 곤봉", "id": "89138", "gfx": "36088", "cat": "무기", "minAtk": 32, "maxAtk": 50, "minDef": 3, "maxDef": 5, "minDex": 0, "maxDex": 0, "minHP": 0, "maxHP": 0, "minCrit": 3, "maxCrit": 3, "minEva": 2, "maxEva": 2, "minCharm": 0, "maxCharm": 0}, {"name": "실프리온의 곤봉", "id": "89139", "gfx": "36089", "cat": "무기", "minAtk": 32, "maxAtk": 50, "minDef": 0, "maxDef": 0, "minDex": 3, "maxDex": 5, "minHP": 0, "maxHP": 0, "minCrit": 3, "maxCrit": 3, "minEva": 2, "maxEva": 2, "minCharm": 0, "maxCharm": 0}, {"name": "테라시온의 도끼", "id": "89140", "gfx": "36090", "cat": "무기", "minAtk": 77, "maxAtk": 93, "minDef": -14, "maxDef": -12, "minDex": -28, "maxDex": -26, "minHP": 0, "maxHP": 0, "minCrit": 3, "maxCrit": 3, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0}, {"name": "이그니온의 도끼", "id": "89141", "gfx": "36091", "cat": "무기", "minAtk": 87, "maxAtk": 103, "minDef": -22, "maxDef": -20, "minDex": -30, "maxDex": -28, "minHP": 0, "maxHP": 0, "minCrit": 3, "maxCrit": 3, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0}, {"name": "포세이온의 활", "id": "89142", "gfx": "36092", "cat": "무기", "minAtk": 18, "maxAtk": 21, "minDef": -14, "maxDef": -13, "minDex": 0, "maxDex": 0, "minHP": 9, "maxHP": 12, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0}, {"name": "이그니온의 활", "id": "89143", "gfx": "36093", "cat": "무기", "minAtk": 23, "maxAtk": 26, "minDef": -16, "maxDef": -14, "minDex": 0, "maxDex": 0, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0}, {"name": "실프리온의 창", "id": "89144", "gfx": "36094", "cat": "무기", "minAtk": 50, "maxAtk": 62, "minDef": 0, "maxDef": 0, "minDex": -15, "maxDex": -7, "minHP": 0, "maxHP": 0, "minCrit": 5, "maxCrit": 5, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0}, {"name": "포세이온의 창", "id": "89145", "gfx": "36095", "cat": "무기", "minAtk": 50, "maxAtk": 62, "minDef": 0, "maxDef": 0, "minDex": -25, "maxDex": -19, "minHP": 30, "maxHP": 36, "minCrit": 5, "maxCrit": 5, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0}, {"name": "신목의 창", "id": "70053", "gfx": "51475", "cat": "무기", "minAtk": 50, "maxAtk": 56, "minDef": 5, "maxDef": 7, "minDex": -20, "maxDex": -18, "minHP": 0, "maxHP": 0, "minCrit": 5, "maxCrit": 5, "minEva": 0, "maxEva": 0, "minCharm": 3, "maxCharm": 5}, {"name": "신목의 갑옷", "id": "70054", "gfx": "51473", "cat": "방어구", "minAtk": 0, "maxAtk": 0, "minDef": 35, "maxDef": 40, "minDex": -25, "maxDex": -20, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0}, {"name": "신목의 목걸이", "id": "70055", "gfx": "51474", "cat": "장신구", "minAtk": 2, "maxAtk": 4, "minDef": 8, "maxDef": 12, "minDex": -5, "maxDex": -1, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0}, {"name": "정령왕의 활", "id": "2775", "gfx": "20325", "cat": "무기", "minAtk": 18, "maxAtk": 29, "minDef": -16, "maxDef": -9, "minDex": 0, "maxDex": 0, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0}, {"name": "카이의 도끼", "id": "2438", "gfx": "20003", "cat": "무기", "minAtk": 20, "maxAtk": 35, "minDef": -12, "maxDef": -8, "minDex": -12, "maxDex": -8, "minHP": 0, "maxHP": 0, "minCrit": 5, "maxCrit": 5, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0}, {"name": "툰가의 곤봉", "id": "2439", "gfx": "20100", "cat": "무기", "minAtk": 10, "maxAtk": 25, "minDef": -8, "maxDef": -6, "minDex": 0, "maxDex": 0, "minHP": 0, "maxHP": 0, "minCrit": 5, "maxCrit": 5, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0}, {"name": "대지의 심장", "id": "88130", "gfx": "51261", "cat": "토템", "minAtk": 0, "maxAtk": 0, "minDef": 10, "maxDef": 15, "minDex": 0, "maxDex": 0, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0}, {"name": "풍신의 주머니", "id": "88131", "gfx": "51108", "cat": "토템", "minAtk": 0, "maxAtk": 0, "minDef": 0, "maxDef": 0, "minDex": 10, "maxDex": 15, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0}, {"name": "불사조의 정신", "id": "88132", "gfx": "51112", "cat": "토템", "minAtk": 10, "maxAtk": 15, "minDef": 0, "maxDef": 0, "minDex": 0, "maxDex": 0, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0}, {"name": "헤티아의 눈물", "id": "88133", "gfx": "55089", "cat": "토템", "minAtk": 0, "maxAtk": 0, "minDef": 0, "maxDef": 0, "minDex": 0, "maxDex": 0, "minHP": 30, "maxHP": 45, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0}, {"name": "검은불꽃 장궁", "id": "88141", "gfx": "51258", "cat": "무기", "minAtk": 21, "maxAtk": 32, "minDef": 0, "maxDef": 0, "minDex": -17, "maxDex": -12, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0}, {"name": "얼음 옷", "id": "88204", "gfx": "51271", "cat": "방어구", "minAtk": 2, "maxAtk": 5, "minDef": 20, "maxDef": 30, "minDex": 2, "maxDex": 5, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0}, {"name": "헤메라의 소울 팬던트", "id": "88587", "gfx": "56369", "cat": "장신구", "minAtk": -5, "maxAtk": -1, "minDef": 0, "maxDef": 0, "minDex": 1, "maxDex": 5, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 5, "maxEva": 5, "minCharm": 10, "maxCharm": 10}, {"name": "타니토스 소울 팬던트", "id": "88581", "gfx": "56375", "cat": "장신구", "minAtk": 1, "maxAtk": 5, "minDef": 0, "maxDef": 0, "minDex": -5, "maxDex": -1, "minHP": 0, "maxHP": 0, "minCrit": 5, "maxCrit": 5, "minEva": 0, "maxEva": 0, "minCharm": 10, "maxCharm": 10}, {"name": "머슬 링귀걸이", "id": "88127", "gfx": "51265", "cat": "장신구", "minAtk": 3, "maxAtk": 5, "minDef": 0, "maxDef": 0, "minDex": 0, "maxDex": 0, "minHP": 8, "maxHP": 12, "minCrit": 0, "maxCrit": 0, "minEva": 4, "maxEva": 6, "minCharm": 0, "maxCharm": 0}, {"name": "번개의 반지", "id": "88128", "gfx": "51266", "cat": "장신구", "minAtk": 0, "maxAtk": 0, "minDef": 0, "maxDef": 0, "minDex": 6, "maxDex": 8, "minHP": 8, "maxHP": 12, "minCrit": 6, "maxCrit": 8, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0}, {"name": "초신성의 갑옷", "id": "88144", "gfx": "51274", "cat": "방어구", "minAtk": 7, "maxAtk": 10, "minDef": 41, "maxDef": 49, "minDex": -10, "maxDex": -7, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0}, {"name": "헤티아의 창", "id": "88145", "gfx": "51263", "cat": "무기", "minAtk": 56, "maxAtk": 60, "minDef": 16, "maxDef": 20, "minDex": -30, "maxDex": -26, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0}, {"name": "헤티아의 머리 장식", "id": "88146", "gfx": "51275", "cat": "방어구", "minAtk": 3, "maxAtk": 5, "minDef": 20, "maxDef": 24, "minDex": 0, "maxDex": 0, "minHP": 6, "maxHP": 12, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0}, {"name": "헤티아의 빛나는 창", "id": "88147", "gfx": "51262", "cat": "무기", "minAtk": 57, "maxAtk": 65, "minDef": 0, "maxDef": 0, "minDex": -12, "maxDex": -9, "minHP": 6, "maxHP": 12, "minCrit": 5, "maxCrit": 5, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0}, {"name": "삼위일체(改)", "id": "88148", "gfx": "51098", "cat": "토템", "minAtk": 5, "maxAtk": 7, "minDef": 5, "maxDef": 7, "minDex": 5, "maxDex": 7, "minHP": 15, "maxHP": 21, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0}, {"name": "삼위일체(眞)", "id": "88149", "gfx": "51099", "cat": "토템", "minAtk": 8, "maxAtk": 10, "minDef": 8, "maxDef": 10, "minDex": 8, "maxDex": 10, "minHP": 24, "maxHP": 30, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0}, {"name": "영웅 샴기르의 활", "id": "88794", "gfx": "36033", "cat": "무기", "minAtk": 21, "maxAtk": 34, "minDef": -10, "maxDef": -7, "minDex": -10, "maxDex": -7, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0}, {"name": "영웅 샴기르의 도끼", "id": "88233", "gfx": "36027", "cat": "무기", "minAtk": 70, "maxAtk": 76, "minDef": -12, "maxDef": -10, "minDex": -12, "maxDex": -10, "minHP": 6, "maxHP": 12, "minCrit": 3, "maxCrit": 3, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0}, {"name": "영웅 샴기르의 곤봉", "id": "88234", "gfx": "36026", "cat": "무기", "minAtk": 44, "maxAtk": 56, "minDef": 0, "maxDef": 0, "minDex": 0, "maxDex": 0, "minHP": 6, "maxHP": 12, "minCrit": 3, "maxCrit": 3, "minEva": 2, "maxEva": 2, "minCharm": 0, "maxCharm": 0}, {"name": "영웅 샴기르의 머리장식", "id": "88235", "gfx": "36025", "cat": "방어구", "minAtk": 0, "maxAtk": 0, "minDef": 15, "maxDef": 20, "minDex": 7, "maxDex": 9, "minHP": 6, "maxHP": 12, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0}, {"name": "영웅 샴기르의 옷", "id": "88236", "gfx": "36024", "cat": "방어구", "minAtk": 0, "maxAtk": 0, "minDef": 30, "maxDef": 40, "minDex": 9, "maxDex": 12, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0}, {"name": "타니토스의 창", "id": "88576", "gfx": "56376", "cat": "무기", "minAtk": 47, "maxAtk": 58, "minDef": 0, "maxDef": 0, "minDex": -12, "maxDex": -10, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0}, {"name": "타니토스의 도끼", "id": "88577", "gfx": "56374", "cat": "무기", "minAtk": 57, "maxAtk": 68, "minDef": -13, "maxDef": -11, "minDex": -13, "maxDex": -11, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0}, {"name": "타니토스의 곤봉", "id": "88578", "gfx": "56373", "cat": "무기", "minAtk": 35, "maxAtk": 48, "minDef": 0, "maxDef": 0, "minDex": 0, "maxDex": 0, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0}, {"name": "타니토스의 갑옷", "id": "88579", "gfx": "56372", "cat": "방어구", "minAtk": 2, "maxAtk": 2, "minDef": 30, "maxDef": 40, "minDex": -11, "maxDex": -9, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0}, {"name": "타니토스의 투구", "id": "88580", "gfx": "56377", "cat": "방어구", "minAtk": 2, "maxAtk": 2, "minDef": 15, "maxDef": 20, "minDex": -11, "maxDex": -9, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0}, {"name": "헤메라의 창", "id": "88582", "gfx": "56370", "cat": "무기", "minAtk": 45, "maxAtk": 56, "minDef": 0, "maxDef": 0, "minDex": -10, "maxDex": -8, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0}, {"name": "헤메라의 도끼", "id": "88583", "gfx": "56368", "cat": "무기", "minAtk": 55, "maxAtk": 66, "minDef": -12, "maxDef": -10, "minDex": -12, "maxDex": -10, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0}, {"name": "헤메라의 곤봉", "id": "88584", "gfx": "56367", "cat": "무기", "minAtk": 33, "maxAtk": 46, "minDef": 0, "maxDef": 0, "minDex": 0, "maxDex": 0, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0}, {"name": "헤메라의 갑옷", "id": "88585", "gfx": "56366", "cat": "방어구", "minAtk": 0, "maxAtk": 0, "minDef": 30, "maxDef": 40, "minDex": -9, "maxDex": -7, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0}, {"name": "헤메라의 투구", "id": "88586", "gfx": "56371", "cat": "방어구", "minAtk": 0, "maxAtk": 0, "minDef": 15, "maxDef": 20, "minDex": -9, "maxDex": -7, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0}, {"name": "늑대쓰개", "id": "88825", "gfx": "51337", "cat": "방어구", "minAtk": 1, "maxAtk": 9, "minDef": 10, "maxDef": 20, "minDex": 0, "maxDex": 0, "minHP": 6, "maxHP": 12, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0}, {"name": "지옥견 털옷", "id": "88826", "gfx": "51344", "cat": "방어구", "minAtk": 1, "maxAtk": 12, "minDef": 25, "maxDef": 40, "minDex": 0, "maxDex": 0, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0}, {"name": "삼수정 곤봉", "id": "88827", "gfx": "51341", "cat": "무기", "minAtk": 32, "maxAtk": 58, "minDef": 0, "maxDef": 0, "minDex": 0, "maxDex": 0, "minHP": 6, "maxHP": 12, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0}, {"name": "지옥의 투구", "id": "88828", "gfx": "51338", "cat": "방어구", "minAtk": 1, "maxAtk": 5, "minDef": 18, "maxDef": 24, "minDex": 0, "maxDex": 0, "minHP": 6, "maxHP": 12, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0}, {"name": "지옥의 창", "id": "88829", "gfx": "51342", "cat": "무기", "minAtk": 46, "maxAtk": 65, "minDef": 5, "maxDef": 10, "minDex": -34, "maxDex": -28, "minHP": 6, "maxHP": 12, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0}, {"name": "지옥의 갑옷", "id": "88830", "gfx": "51343", "cat": "방어구", "minAtk": 1, "maxAtk": 10, "minDef": 35, "maxDef": 49, "minDex": -10, "maxDex": -7, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0}, {"name": "옥토의 옷", "id": "88920", "gfx": "36071", "cat": "방어구", "minAtk": 0, "maxAtk": 0, "minDef": 25, "maxDef": 35, "minDex": 7, "maxDex": 10, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0}, {"name": "메가죠의 도끼", "id": "88921", "gfx": "36066", "cat": "무기", "minAtk": 30, "maxAtk": 80, "minDef": -20, "maxDef": -10, "minDex": -20, "maxDex": -10, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0}, {"name": "악몽의 모자", "id": "88923", "gfx": "36069", "cat": "방어구", "minAtk": 7, "maxAtk": 9, "minDef": 15, "maxDef": 20, "minDex": 0, "maxDex": 0, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0}, {"name": "심해의 활", "id": "88924", "gfx": "36070", "cat": "무기", "minAtk": 21, "maxAtk": 32, "minDef": -17, "maxDef": -12, "minDex": 0, "maxDex": 0, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0}, {"name": "삼위일체(神)", "id": "88992", "gfx": "51099", "cat": "토템", "minAtk": 7, "maxAtk": 14, "minDef": 7, "maxDef": 14, "minDex": 7, "maxDex": 14, "minHP": 21, "maxHP": 42, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0}, {"name": "드래곤 뼈갑옷", "id": "88993", "gfx": "52143", "cat": "방어구", "minAtk": 7, "maxAtk": 10, "minDef": 45, "maxDef": 54, "minDex": -15, "maxDex": -12, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0}, {"name": "카오닉스의 창", "id": "88994", "gfx": "52148", "cat": "무기", "minAtk": 56, "maxAtk": 60, "minDef": 21, "maxDef": 25, "minDex": -35, "maxDex": -31, "minHP": 0, "maxHP": 0, "minCrit": 5, "maxCrit": 5, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0}, {"name": "불타는 카오닉스의 창", "id": "88995", "gfx": "51342", "cat": "무기", "minAtk": 62, "maxAtk": 70, "minDef": 0, "maxDef": 0, "minDex": -17, "maxDex": -14, "minHP": 6, "maxHP": 12, "minCrit": 5, "maxCrit": 5, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0}, {"name": "카오닉스의 투구", "id": "88996", "gfx": "52146", "cat": "방어구", "minAtk": 3, "maxAtk": 5, "minDef": 25, "maxDef": 29, "minDex": -5, "maxDex": -5, "minHP": 6, "maxHP": 12, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0}, {"name": "뿅뿅 목걸이", "id": "89000", "gfx": "52142", "cat": "장신구", "minAtk": 1, "maxAtk": 5, "minDef": -10, "maxDef": -10, "minDex": 1, "maxDex": 5, "minHP": 0, "maxHP": 0, "minCrit": 0, "maxCrit": 0, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0}, {"name": "뼈 결정 반지", "id": "89001", "gfx": "52140", "cat": "장신구", "minAtk": 6, "maxAtk": 8, "minDef": 8, "maxDef": 12, "minDex": 0, "maxDex": 0, "minHP": 0, "maxHP": 0, "minCrit": 6, "maxCrit": 8, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0}, {"name": "늑대발톱 도끼", "id": "89002", "gfx": "52138", "cat": "무기", "minAtk": 60, "maxAtk": 70, "minDef": -20, "maxDef": -20, "minDex": -20, "maxDex": -20, "minHP": 0, "maxHP": 0, "minCrit": 5, "maxCrit": 5, "minEva": 0, "maxEva": 0, "minCharm": 0, "maxCharm": 0}];
+var CAT_TO_SLOT = {'무기':'무기','방어구':'방어구','토템':'토템','장신구':'악세서리'};
+
+/* ===================================================================
+   레어리티 시뮬레이터
+   =================================================================== */
+var RARITY_ORDER = ['고급','희귀','영웅','전설','신화'];
+var RARITY_PROB  = {'고급':63.22,'희귀':27.00,'영웅':8.00,'전설':1.75,'신화':0.03};
+var RARITY_COLOR = {'고급':'#3d9e6e','희귀':'#2f7fd6','영웅':'#9b6fd6','전설':'#f5a623','신화':'#e05a5a'};
+var RARITY_BG    = {'고급':'rgba(61,158,110,.14)','희귀':'rgba(47,127,214,.14)','영웅':'rgba(155,111,214,.14)',
+                     '전설':'rgba(245,166,35,.16)','신화':'rgba(224,90,90,.18)'};
+var RARITY_GLOW  = {'고급':'rgba(61,158,110,.32)','희귀':'rgba(47,127,214,.32)','영웅':'rgba(155,111,214,.36)',
+                     '전설':'rgba(245,166,35,.4)','신화':'rgba(224,90,90,.45)'};
+
+var RARITY_TABLE = {
+  '무기': {'고급':{'공격력':3,'관통':3,'명중':1,'크리':2},'희귀':{'공격력':4,'관통':4,'명중':2,'크리':3},
+           '영웅':{'공격력':5,'관통':5,'명중':3,'크리':4},'전설':{'공격력':8,'관통':8,'명중':4,'크리':6},
+           '신화':{'공격력':14,'관통':14,'명중':6,'크리':8}},
+  '방어구':{'고급':{'방어력':3,'쉴드':3,'내구력':1,'회피도':2},'희귀':{'방어력':4,'쉴드':4,'내구력':2,'회피도':3},
+           '영웅':{'방어력':5,'쉴드':5,'내구력':3,'회피도':4},'전설':{'방어력':8,'쉴드':8,'내구력':4,'회피도':6},
+           '신화':{'방어력':14,'쉴드':14,'내구력':6,'회피도':8}},
+  '토템': {'고급':{'PvE뎀증':.3,'뎀감':.1,'펫판매금액':1},'희귀':{'PvE뎀증':.6,'뎀감':.2,'펫판매금액':3},
+           '영웅':{'PvE뎀증':.9,'뎀감':.4,'펫판매금액':6},'전설':{'PvE뎀증':1.5,'뎀감':.6,'펫판매금액':10},
+           '신화':{'PvE뎀증':3.0,'뎀감':1.5,'펫판매금액':20}},
+  '악세서리':{'고급':{'뎀증':.3,'뎀감':.1,'은혜회복':.5},'희귀':{'뎀증':.6,'뎀감':.2,'은혜회복':1.0},
+           '영웅':{'뎀증':.9,'뎀감':.4,'은혜회복':2.0},'전설':{'뎀증':1.5,'뎀감':.6,'은혜회복':3.0},
+           '신화':{'뎀증':3.0,'뎀감':1.5,'은혜회복':5.0}}
+};
+var PCT_KEYS = ['PvE뎀증','뎀감','펫판매금액','뎀증','은혜회복'];
+
+/* 레어리티 옵션명 -> 아이템 원본 스탯 필드 매핑 (겹치는 것만 합산, 나머지는 신규 옵션으로 표시) */
+var STAT_COMBINE = {
+  '무기':  {'공격력':'Atk','크리':'Crit','명중':'hit'},
+  '방어구':{'방어력':'Def','내구력':'HP','회피도':'Eva'},
+  '토템': {},
+  '악세서리': {}
+};
+
+var raritySelected = null;
+var rarityCounts = {'고급':0,'희귀':0,'영웅':0,'전설':0,'신화':0};
+var rarityTotal = 0;
+var rarityAutoRunning = false;
+
+function fmtStatLine(slot, grade){
+  var t = RARITY_TABLE[slot][grade];
+  return Object.keys(t).map(function(k){
+    var v = t[k];
+    var vs = (v % 1 === 0) ? v : v.toFixed(1);
+    return '<span>'+k+' +'+vs+(PCT_KEYS.indexOf(k)>=0?'%':'')+'</span>';
+  }).join('');
+}
+
+function renderCombinedStats(slot, grade, item){
+  var table = RARITY_TABLE[slot][grade];
+  var map = STAT_COMBINE[slot] || {};
+  var html = Object.keys(table).map(function(optKey){
+    var bonus = table[optKey];
+    var bonusStr = (bonus%1===0?bonus:bonus.toFixed(1)) + (PCT_KEYS.indexOf(optKey)>=0?'%':'');
+    var baseKey = map[optKey];
+    if(baseKey === 'hit'){
+      var hv = item.hit || 0;
+      if(hv){
+        return '<div class="combined-line"><span>'+optKey+'</span><span class="res">'+hv+' + '+bonusStr+' = '+(hv+bonus)+'</span></div>';
+      }
+      return '<div class="combined-line"><span>'+optKey+' <span class="tag">(기본 없음)</span></span><span class="res">+'+bonusStr+'</span></div>';
+    }
+    if(baseKey){
+      var lo = item['min'+baseKey], hi = item['max'+baseKey];
+      if((lo||hi)){
+        if(lo === hi){
+          return '<div class="combined-line"><span>'+optKey+'</span><span class="res">'+lo+' + '+bonusStr+' = '+(lo+bonus)+'</span></div>';
+        }
+        return '<div class="combined-line"><span>'+optKey+'</span><span class="res">'+lo+'~'+hi+' + '+bonusStr+' = '+(lo+bonus)+'~'+(hi+bonus)+'</span></div>';
+      }
+      return '<div class="combined-line"><span>'+optKey+' <span class="tag">(기본 없음)</span></span><span class="res">+'+bonusStr+'</span></div>';
+    }
+    return '<div class="combined-line"><span>'+optKey+' <span class="tag">(신규 옵션)</span></span><span class="res">+'+bonusStr+'</span></div>';
+  }).join('');
+  byId('rarityCombined').innerHTML = html;
+  byId('rarityCombinedWrap').style.display = 'block';
+}
+
+function renderItemResults(wrapId, list, onPick){
+  var wrap = byId(wrapId);
+  if(!list.length){ wrap.innerHTML = ''; return; }
+  wrap.innerHTML = list.slice(0,30).map(function(it){
+    return '<div class="item-row" data-id="'+it.id+'">'+
+      '<img src="'+itemImgUrl(it.gfx)+'" onerror="this.style.opacity=0.15" loading="lazy">'+
+      '<span class="nm">'+it.name+'</span><span class="ct">'+it.cat+'</span></div>';
+  }).join('');
+  wrap.querySelectorAll('.item-row').forEach(function(row){
+    row.addEventListener('click', function(){ onPick(row.dataset.id); });
+  });
+}
+
+byId('raritySearch').addEventListener('input', function(){
+  var q = this.value.trim().toLowerCase();
+  if(!q){ byId('rarityResults').innerHTML=''; return; }
+  var filtered = ALL_ITEMS.filter(function(it){ return it.name.toLowerCase().indexOf(q) >= 0; });
+  renderItemResults('rarityResults', filtered, selectRarityItem);
+});
+
+function selectRarityItem(id){
+  var it = ALL_ITEMS.find(function(x){ return x.id === id; });
+  if(!it) return;
+  raritySelected = it;
+  byId('rarityStageCard').style.display = 'block';
+  byId('rarityStatsCard').style.display = 'block';
+  byId('rarityEmptyCard').style.display = 'none';
+  byId('rarityResults').innerHTML = '';
+  byId('raritySearch').value = '';
+  byId('rarityImg').src = itemImgUrl(it.gfx);
+  byId('rarityName').textContent = it.name;
+  byId('rarityCat').textContent = it.cat + ' · ' + CAT_TO_SLOT[it.cat];
+  byId('rarityBadge').innerHTML = '';
+  byId('rarityCombinedWrap').style.display = 'none';
+  byId('rarityGlow').style.setProperty('--gc','rgba(47,127,214,.28)');
+  byId('pullGrid').innerHTML = '';
+  byId('rarityAutoProgress').classList.remove('show');
+  rarityAutoRunning = false;
+  rarityCounts = {'고급':0,'희귀':0,'영웅':0,'전설':0,'신화':0};
+  rarityTotal = 0;
+  renderProbTable();
+}
+
+byId('raritySwap').addEventListener('click', function(){
+  rarityAutoRunning = false;
+  byId('rarityStageCard').style.display = 'none';
+  byId('rarityStatsCard').style.display = 'none';
+  byId('rarityEmptyCard').style.display = 'block';
+  byId('raritySearch').focus();
+});
+
+function rollRarityOnce(){
+  var r = Math.random()*100, cum=0;
+  for(var i=0;i<RARITY_ORDER.length;i++){
+    var g = RARITY_ORDER[i];
+    cum += RARITY_PROB[g];
+    if(r < cum) return g;
+  }
+  return RARITY_ORDER[0];
+}
+
+function spawnConfetti(container, grade){
+  var colors = grade==='신화' ? ['#e05a5a','#f5a623','#fff2c2'] : ['#f5a623','#ffd27a','#fff'];
+  var wrap = document.createElement('div');
+  wrap.className = 'confetti';
+  var n = grade==='신화' ? 26 : 14;
+  var html = '';
+  for(var i=0;i<n;i++){
+    var left = Math.random()*100;
+    var delay = Math.random()*0.25;
+    var color = colors[i % colors.length];
+    html += '<span style="left:'+left+'%;background:'+color+';animation-delay:'+delay+'s;"></span>';
+  }
+  wrap.innerHTML = html;
+  container.appendChild(wrap);
+  setTimeout(function(){ wrap.remove(); }, 1400);
+}
+
+function playGachaFx(grade){
+  var imgWrap = byId('rarityImgWrap');
+  var shine = byId('rarityShine');
+  var card = byId('rarityGachaCard');
+  var glow = byId('rarityGlow');
+  imgWrap.classList.remove('spin'); void imgWrap.offsetWidth; imgWrap.classList.add('spin');
+  shine.classList.remove('run'); void shine.offsetWidth; shine.classList.add('run');
+  glow.style.setProperty('--gc', RARITY_GLOW[grade]);
+  RARITY_ORDER.forEach(function(g){ card.classList.remove('flash-'+g); });
+  void card.offsetWidth;
+  card.classList.add('flash-'+grade);
+  if(grade==='전설' || grade==='신화') spawnConfetti(card, grade);
+  if(grade==='신화'){
+    card.classList.remove('shake-myth'); void card.offsetWidth; card.classList.add('shake-myth');
+  }
+}
+
+function renderRarityBadge(grade){
+  byId('rarityBadge').innerHTML =
+    '<div class="result-grade" style="color:'+RARITY_COLOR[grade]+';background:'+RARITY_BG[grade]+';">'+grade+'</div>'+
+    '<div class="result-prob">확률 '+RARITY_PROB[grade]+'%</div>'+
+    '<div class="result-stats">'+fmtStatLine(CAT_TO_SLOT[raritySelected.cat], grade)+'</div>';
+  renderCombinedStats(CAT_TO_SLOT[raritySelected.cat], grade, raritySelected);
+}
+
+function renderProbTable(){
+  var tag = byId('rarityTotalTag');
+  tag.textContent = '('+rarityTotal.toLocaleString()+'회 시도)';
+  var html = RARITY_ORDER.map(function(g){
+    var actual = rarityTotal ? (rarityCounts[g]/rarityTotal*100) : 0;
+    return '<div class="prob-row">'+
+      '<b style="color:'+RARITY_COLOR[g]+';">'+g+'</b>'+
+      '<div class="prob-bar-track"><div class="prob-bar-fill" style="width:'+Math.min(100,actual)+'%;background:'+RARITY_COLOR[g]+';"></div></div>'+
+      '<span class="pct">'+(rarityTotal? actual.toFixed(2):'0.00')+'%<br><small style="color:var(--t4);">/'+RARITY_PROB[g]+'%</small></span>'+
+      '<span class="cnt">'+rarityCounts[g].toLocaleString()+'</span>'+
+      '</div>';
+  }).join('');
+  byId('probTable').innerHTML = html;
+  var cost = parseFloat(byId('rarityCost').value) || 0;
+  byId('raritySummary').innerHTML =
+    '<div class="stat-pill"><div class="l">총 시도</div><b>'+rarityTotal.toLocaleString()+'</b></div>'+
+    '<div class="stat-pill"><div class="l">총 소모 코인</div><b>'+fmtCoin(rarityTotal*cost)+'</b></div>';
+}
+
+function applyRarityResult(grade){
+  rarityCounts[grade]++; rarityTotal++;
+  playGachaFx(grade);
+  renderRarityBadge(grade);
+  renderProbTable();
+}
+
+byId('rollOne').addEventListener('click', function(){
+  if(rarityAutoRunning) return;
+  byId('pullGrid').innerHTML = '';
+  applyRarityResult(rollRarityOnce());
+});
+
+function renderPullGrid(results){
+  var grid = byId('pullGrid');
+  grid.innerHTML = results.map(function(g, i){
+    return '<div class="pull-chip'+((g==='전설'||g==='신화')?' rare-pop':'')+
+      '" style="background:'+RARITY_COLOR[g]+';animation-delay:'+(i*35)+'ms;">'+g+'</div>';
+  }).join('');
+}
+
+byId('rollTen').addEventListener('click', function(){
+  if(rarityAutoRunning) return;
+  var results = [], bestGrade = RARITY_ORDER[0], bestRank = 0;
+  for(var i=0;i<10;i++){
+    var g = rollRarityOnce();
+    rarityCounts[g]++; rarityTotal++;
+    results.push(g);
+    var rank = RARITY_ORDER.indexOf(g);
+    if(rank > bestRank){ bestRank = rank; bestGrade = g; }
+  }
+  playGachaFx(bestGrade);
+  renderRarityBadge(bestGrade);
+  renderPullGrid(results);
+  renderProbTable();
+});
+
+byId('rarityCost').addEventListener('input', renderProbTable);
+
+byId('rarityReset').addEventListener('click', function(){
+  rarityAutoRunning = false;
+  byId('rarityAutoProgress').classList.remove('show');
+  rarityCounts = {'고급':0,'희귀':0,'영웅':0,'전설':0,'신화':0};
+  rarityTotal = 0;
+  byId('rarityBadge').innerHTML = '';
+  byId('rarityCombinedWrap').style.display = 'none';
+  byId('pullGrid').innerHTML = '';
+  renderProbTable();
+});
+
+/* ----- 전설까지 / 신화까지 자동돌리기 ----- */
+var RARITY_AUTO_CAP = { legendary: 200000, mythic: 5000000 };
+var RARITY_AUTO_CHUNK = 20000;
+
+function isTargetGrade(grade, target){
+  if(target === 'legendary') return grade === '전설' || grade === '신화';
+  return grade === '신화';
+}
+
+function runRarityAuto(target, label){
+  if(rarityAutoRunning || !raritySelected) return;
+  rarityAutoRunning = true;
+  byId('pullGrid').innerHTML = '';
+  var cap = RARITY_AUTO_CAP[target];
+  var startCount = rarityTotal;
+  byId('rarityAutoProgress').classList.add('show');
+  byId('rarityAutoMsg').textContent = label+' 뜰 때까지 레어리티 문서를 자동으로 계속 사용합니다...';
+  byId('rarityAutoFill').style.width = '0%';
+
+  function step(){
+    if(!rarityAutoRunning) return;
+    var thisChunk = Math.min(RARITY_AUTO_CHUNK, cap - (rarityTotal - startCount));
+    var found = null;
+    for(var i=0;i<thisChunk;i++){
+      var g = rollRarityOnce();
+      rarityCounts[g]++; rarityTotal++;
+      if(isTargetGrade(g, target)){ found = g; break; }
+    }
+    var used = rarityTotal - startCount;
+    byId('rarityAutoPct').textContent = used.toLocaleString()+'회 시도 중...';
+    byId('rarityAutoFill').style.width = Math.min(100, used/cap*100)+'%';
+    renderProbTable();
+    if(found){
+      rarityAutoRunning = false;
+      byId('rarityAutoPct').textContent = used.toLocaleString()+'회 만에 '+found+' 획득!';
+      byId('rarityAutoFill').style.width = '100%';
+      applyRarityResultFx(found);
+      setTimeout(function(){ byId('rarityAutoProgress').classList.remove('show'); }, 2200);
+      return;
+    }
+    if(used >= cap){
+      rarityAutoRunning = false;
+      byId('rarityAutoMsg').textContent = cap.toLocaleString()+'회를 시도했지만 '+label+' 등급이 안 떴어요.';
+      return;
+    }
+    requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+function applyRarityResultFx(grade){
+  playGachaFx(grade);
+  renderRarityBadge(grade);
+}
+
+byId('autoLegendary').addEventListener('click', function(){ runRarityAuto('legendary', '전설'); });
+byId('autoMythic').addEventListener('click', function(){ runRarityAuto('mythic', '신화'); });
+byId('rarityAutoStop').addEventListener('click', function(){
+  rarityAutoRunning = false;
+  byId('rarityAutoMsg').textContent = '중단됨. '+rarityTotal.toLocaleString()+'회 시도.';
+});
+
+/* ===================================================================
+   재감정 시뮬레이터
+   =================================================================== */
+var STAT_DEFS = [
+  {k:'Atk', label:'공격', min:'minAtk', max:'maxAtk'},
+  {k:'Def', label:'방어', min:'minDef', max:'maxDef'},
+  {k:'Dex', label:'순발', min:'minDex', max:'maxDex'},
+  {k:'HP',  label:'내구', min:'minHP',  max:'maxHP'},
+  {k:'Crit',label:'크리', min:'minCrit',max:'maxCrit'},
+  {k:'Eva', label:'회피', min:'minEva', max:'maxEva'},
+  {k:'Charm',label:'매력',min:'minCharm',max:'maxCharm'}
+];
+
+function rerollableStats(item){
+  return STAT_DEFS.filter(function(s){
+    var a = item[s.min], b = item[s.max];
+    return (typeof a === 'number') && (typeof b === 'number') && a !== b;
+  });
+}
+
+var selectedItem = null;
+var curRoll = {};
+var bestRoll = {};
+var rerollCount = 0;
+var autoRunning = false;
+
+byId('itemSearch').addEventListener('input', function(){
+  var q = this.value.trim().toLowerCase();
+  if(!q){ byId('itemResults').innerHTML=''; return; }
+  var filtered = REROLL_ITEMS.filter(function(it){ return it.name.toLowerCase().indexOf(q) >= 0; });
+  renderItemResults('itemResults', filtered, selectRerollItem);
+});
+
+function initRollFor(item){
+  curRoll = {}; bestRoll = {}; rerollCount = 0;
+  rerollableStats(item).forEach(function(s){
+    var lo = item[s.min], hi = item[s.max];
+    var v = lo + Math.floor(Math.random()*(hi-lo+1));
+    curRoll[s.k] = v;
+    bestRoll[s.k] = v;
+  });
+}
+
+function comboOdds(item){
+  var stats = rerollableStats(item), p = 1;
+  stats.forEach(function(s){ var lo=item[s.min], hi=item[s.max]; p *= 1/(hi-lo+1); });
+  return p;
+}
+
+function selectRerollItem(id){
+  var it = REROLL_ITEMS.find(function(x){ return x.id === id; });
+  if(!it) return;
+  selectedItem = it;
+  initRollFor(it);
+  byId('rerollCard').style.display = 'block';
+  byId('rerollEmptyCard').style.display = 'none';
+  byId('itemResults').innerHTML = '';
+  byId('itemSearch').value = '';
+  byId('rerollImg').src = itemImgUrl(it.gfx);
+  byId('rerollName').textContent = it.name;
+  byId('rerollCat').textContent = it.cat + ' · 재감정 가능 능력치 ' + rerollableStats(it).length + '개';
+  byId('autoProgress').classList.remove('show');
+  renderRerollStats(null);
+  renderRerollSummary();
+}
+
+byId('rerollSwap').addEventListener('click', function(){
+  autoRunning = false;
+  byId('rerollCard').style.display = 'none';
+  byId('rerollEmptyCard').style.display = 'block';
+  byId('itemSearch').focus();
+});
+
+function playRerollFx(anyUp){
+  var imgWrap = byId('rerollImgWrap');
+  var shine = byId('rerollShine');
+  imgWrap.classList.remove('spin'); void imgWrap.offsetWidth; imgWrap.classList.add('spin');
+  shine.classList.remove('run'); void shine.offsetWidth; shine.classList.add('run');
+}
+
+function renderRerollStats(prevRoll){
+  var stats = rerollableStats(selectedItem);
+  byId('rerollStats').innerHTML = stats.map(function(s){
+    var lo = selectedItem[s.min], hi = selectedItem[s.max];
+    var range = hi - lo;
+    var v = curRoll[s.k];
+    var pct = range ? ((v-lo)/range*100) : 100;
+    var dir = '';
+    if(prevRoll && prevRoll[s.k] !== undefined){
+      if(v > prevRoll[s.k]) dir = 'up'; else if(v < prevRoll[s.k]) dir = 'down';
+    }
+    var isMaxed = (v === hi);
+    return '<div class="rstat">'+
+      '<div class="lbl">'+s.label+'</div>'+
+      '<div class="track"><div class="fill'+(isMaxed?' maxed':'')+'" style="width:'+Math.max(4,pct)+'%;"></div></div>'+
+      '<div class="valwrap"><span class="val '+dir+'">'+(v>0?'+':'')+v+'</span>'+(isMaxed?'<span class="best">MAX</span>':'')+
+      '<div class="rng">'+lo+'~'+hi+'</div></div>'+
+      '</div>';
+  }).join('');
+}
+
+function renderRerollSummary(){
+  var cost = parseFloat(byId('rerollCost').value) || 0;
+  byId('rerollSummary').innerHTML =
+    '<div class="stat-pill"><div class="l">재감정 횟수</div><b>'+rerollCount.toLocaleString()+'</b></div>'+
+    '<div class="stat-pill"><div class="l">총 소모 코인</div><b>'+fmtCoin(rerollCount*cost)+'</b></div>';
+}
+
+function doReroll(times){
+  var stats = rerollableStats(selectedItem);
+  var prev = Object.assign({}, curRoll);
+  for(var t=0;t<times;t++){
+    stats.forEach(function(s){
+      var lo = selectedItem[s.min], hi = selectedItem[s.max];
+      var v = lo + Math.floor(Math.random()*(hi-lo+1));
+      curRoll[s.k] = v;
+      if(v > bestRoll[s.k]) bestRoll[s.k] = v;
+    });
+    rerollCount++;
+  }
+  playRerollFx();
+  renderRerollStats(prev);
+  renderRerollSummary();
+}
+
+byId('rerollOne').addEventListener('click', function(){ doReroll(1); });
+document.querySelectorAll('#panel-reroll .multi-row button[data-n]').forEach(function(btn){
+  btn.addEventListener('click', function(){ doReroll(parseInt(btn.dataset.n,10)); });
+});
+byId('rerollCost').addEventListener('input', renderRerollSummary);
+
+byId('rerollReset').addEventListener('click', function(){
+  if(!selectedItem) return;
+  autoRunning = false;
+  byId('autoProgress').classList.remove('show');
+  initRollFor(selectedItem);
+  renderRerollStats(null);
+  renderRerollSummary();
+});
+
+/* ----- MAX옵까지 자동돌리기 ----- */
+var AUTO_CAP = 3000000;
+var CHUNK = 15000;
+
+byId('autoMaxBtn').addEventListener('click', function(){
+  if(!selectedItem || autoRunning) return;
+  var stats = rerollableStats(selectedItem);
+  if(!stats.length) return;
+  autoRunning = true;
+  var tries = 0;
+  var odds = comboOdds(selectedItem);
+  var oddsX = Math.round(1/odds);
+  byId('autoProgress').classList.add('show');
+  byId('autoMsg').textContent = '이 아이템 MAX 확률: 1 / '+oddsX.toLocaleString()+' · 전체 스탯 동시 MAX까지 반복 중...';
+  byId('autoFill').style.width = '0%';
+
+  function step(){
+    if(!autoRunning) return;
+    var found = false;
+    var thisChunk = Math.min(CHUNK, AUTO_CAP - tries);
+    for(var i=0;i<thisChunk;i++){
+      tries++;
+      var allMax = true;
+      var rollVals = {};
+      for(var j=0;j<stats.length;j++){
+        var s = stats[j];
+        var lo = selectedItem[s.min], hi = selectedItem[s.max];
+        var v = lo + Math.floor(Math.random()*(hi-lo+1));
+        rollVals[s.k] = v;
+        if(v !== hi) allMax = false;
+      }
+      if(allMax){
+        curRoll = rollVals;
+        stats.forEach(function(s){ bestRoll[s.k] = selectedItem[s.max]; });
+        found = true;
+        break;
+      }
+    }
+    if(found){
+      rerollCount = tries; // 실제로 이만큼 재감정을 시도한 것으로 카운트
+      autoRunning = false;
+      byId('autoPct').textContent = tries.toLocaleString()+'회 만에 성공!';
+      byId('autoFill').style.width = '100%';
+      renderRerollStats(null);
+      renderRerollSummary();
+      playRerollFx();
+      var card = byId('rerollGachaCard');
+      card.classList.remove('flash-신화'); void card.offsetWidth; card.classList.add('flash-신화');
+      spawnConfetti(card, '신화');
+      setTimeout(function(){ byId('autoProgress').classList.remove('show'); }, 2200);
+      return;
+    }
+    byId('autoPct').textContent = tries.toLocaleString()+'회 시도 중...';
+    byId('autoFill').style.width = Math.min(100, tries/AUTO_CAP*100)+'%';
+    rerollCount = tries;
+    if(tries >= AUTO_CAP){
+      autoRunning = false;
+      byId('autoMsg').textContent = AUTO_CAP.toLocaleString()+'회를 시도했지만 찾지 못했어요. 확률이 매우 낮은 조합이에요 (1/'+oddsX.toLocaleString()+').';
+      renderRerollSummary();
+      return;
+    }
+    requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+});
+
+byId('autoStop').addEventListener('click', function(){
+  autoRunning = false;
+  byId('autoMsg').textContent = '중단됨. '+rerollCount.toLocaleString()+'회 시도.';
+  renderRerollSummary();
+});
+</script>
+
+</body>
+</html>
