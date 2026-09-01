@@ -43,6 +43,36 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--t1);
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(2)}}
 .sb-sub{font-size:10.5px;color:var(--t3);font-family:'Nunito',sans-serif;font-weight:700;letter-spacing:.5px;}
 .sb-nav{padding:11px 14px;border-bottom:1px solid var(--border);}
+.sb-nav-toggle{width:100%;display:flex;align-items:center;gap:10px;padding:11px 13px;border-radius:12px;
+  font-size:13px;font-weight:800;color:var(--t1);background:var(--s1);border:none;
+  cursor:pointer;font-family:inherit;transition:background .18s;}
+.sb-nav-toggle:hover{background:var(--s2);}
+.sb-nav-toggle-label{flex:1;text-align:left;}
+.sb-nav-toggle-chevron{color:var(--t3);font-size:11px;transition:transform .3s cubic-bezier(.4,0,.2,1);}
+.sb-nav-toggle.open .sb-nav-toggle-chevron{transform:rotate(180deg);}
+.sb-nav-list{max-height:0;overflow:hidden;transition:max-height .4s cubic-bezier(.33,1,.68,1);
+  display:flex;flex-direction:column;gap:2px;perspective:700px;}
+.sb-nav-list.open{max-height:520px;margin-top:5px;padding-top:2px;}
+.sb-nav-list a{display:flex;align-items:center;gap:10px;text-decoration:none;padding:10px 13px;border-radius:10px;
+  font-size:12.5px;font-weight:700;color:var(--t2);background:transparent;border:none;
+  opacity:0;transform:rotateX(-82deg);transform-origin:center top;
+  transition:opacity .26s ease,transform .5s cubic-bezier(.34,1.32,.5,1),background .16s ease,color .16s ease;}
+.sb-nav-list.open a{opacity:1;transform:rotateX(0);}
+.sb-nav-list.open a:nth-child(1){transition-delay:.02s;}
+.sb-nav-list.open a:nth-child(2){transition-delay:.07s;}
+.sb-nav-list.open a:nth-child(3){transition-delay:.12s;}
+.sb-nav-list.open a:nth-child(4){transition-delay:.17s;}
+.sb-nav-list.open a:nth-child(5){transition-delay:.22s;}
+.sb-nav-list.open a:nth-child(6){transition-delay:.27s;}
+.sb-nav-list.open a:nth-child(7){transition-delay:.32s;}
+.sb-nav-list.open a:nth-child(8){transition-delay:.37s;}
+.sb-nav-list a:hover{background:var(--s1);color:var(--a1);}
+.sb-nav-list a.on{background:rgba(47,127,214,.12);color:var(--a1);font-weight:800;}
+[data-theme="dark"] .sb-nav-list a.on{background:rgba(90,168,234,.16);}
+@media(prefers-reduced-motion:reduce){
+  .sb-nav-list a{transition:background .16s ease,color .16s ease;transform:none;opacity:1;}
+  .sb-nav-list.open a{transition-delay:0s;}
+}
 .sb-body{padding:16px 16px 16px;flex:1;overflow-y:auto;min-height:0;}
 .sb-body::-webkit-scrollbar{width:4px;} .sb-body::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px;}
 .f-group{margin-bottom:18px;}
@@ -228,6 +258,7 @@ footer{text-align:center;padding:30px 0 10px;font-size:11px;color:var(--t3);}
 .rstat .val.up{color:var(--ok);} .rstat .val.down{color:var(--neg);}
 .rstat .rng{font-size:9.5px;color:var(--t3);font-weight:700;}
 .rstat .best{display:inline-block;margin-left:4px;font-size:9px;background:var(--a4);color:#fff;padding:1px 5px;border-radius:6px;font-weight:800;}
+.rstat .deficit{display:inline-block;margin-left:5px;font-size:9.5px;color:var(--neg);font-weight:800;}
 .auto-progress{display:none;margin-top:10px;background:var(--s1);border-radius:12px;padding:12px 14px;text-align:center;}
 .auto-progress.show{display:block;}
 .auto-progress .apct{font-family:'Nunito',sans-serif;font-weight:900;font-size:15px;color:var(--a1);}
@@ -366,11 +397,6 @@ footer{text-align:center;padding:30px 0 10px;font-size:11px;color:var(--t3);}
         </div>
 
         <button class="roll-btn" id="rerollOne">🔍 재감정 돋보기 사용 (1회)</button>
-        <div class="multi-row">
-          <button data-n="10">×10</button>
-          <button data-n="100">×100</button>
-          <button data-n="1000">×1000</button>
-        </div>
         <button class="roll-btn ghost" id="autoMaxBtn">✨ MAX옵까지 자동돌리기</button>
         <div class="auto-progress" id="autoProgress">
           <div class="apct" id="autoPct">0회</div>
@@ -546,6 +572,7 @@ function selectRarityItem(id){
   byId('rarityEmptyCard').style.display = 'none';
   byId('rarityResults').innerHTML = '';
   byId('raritySearch').value = '';
+  byId('rarityImg').style.opacity = '1';
   byId('rarityImg').src = itemImgUrl(it.gfx);
   byId('rarityName').textContent = it.name;
   byId('rarityCat').textContent = it.cat + ' · ' + CAT_TO_SLOT[it.cat];
@@ -809,6 +836,7 @@ function selectRerollItem(id){
   byId('rerollEmptyCard').style.display = 'none';
   byId('itemResults').innerHTML = '';
   byId('itemSearch').value = '';
+  byId('rerollImg').style.opacity = '1';
   byId('rerollImg').src = itemImgUrl(it.gfx);
   byId('rerollName').textContent = it.name;
   byId('rerollCat').textContent = it.cat + ' · 재감정 가능 능력치 ' + rerollableStats(it).length + '개';
@@ -843,10 +871,12 @@ function renderRerollStats(prevRoll){
       if(v > prevRoll[s.k]) dir = 'up'; else if(v < prevRoll[s.k]) dir = 'down';
     }
     var isMaxed = (v === hi);
+    var deficit = hi - v;
     return '<div class="rstat">'+
       '<div class="lbl">'+s.label+'</div>'+
       '<div class="track"><div class="fill'+(isMaxed?' maxed':'')+'" style="width:'+Math.max(4,pct)+'%;"></div></div>'+
-      '<div class="valwrap"><span class="val '+dir+'">'+(v>0?'+':'')+v+'</span>'+(isMaxed?'<span class="best">MAX</span>':'')+
+      '<div class="valwrap"><span class="val '+dir+'">'+(v>0?'+':'')+v+'</span>'+
+      (isMaxed?'<span class="best">MAX</span>':'<span class="deficit">-'+deficit+'옵</span>')+
       '<div class="rng">'+lo+'~'+hi+'</div></div>'+
       '</div>';
   }).join('');
@@ -877,9 +907,6 @@ function doReroll(times){
 }
 
 byId('rerollOne').addEventListener('click', function(){ doReroll(1); });
-document.querySelectorAll('#panel-reroll .multi-row button[data-n]').forEach(function(btn){
-  btn.addEventListener('click', function(){ doReroll(parseInt(btn.dataset.n,10)); });
-});
 byId('rerollCost').addEventListener('input', renderRerollSummary);
 
 byId('rerollReset').addEventListener('click', function(){
