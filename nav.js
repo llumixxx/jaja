@@ -18,6 +18,7 @@ const SA_NAV_ITEMS = [
   { href: "expcalc.html", icon: "📈", label: "경험치 계산기" },
   { href: "sellcalc.html", icon: "💰", label: "판매 계산기" },
   { href: "worldcup.html", icon: "🐾", label: "펫 이상형 월드컵" },
+  { href: "itemsim.html", icon: "📜", label: "아이템 시뮬레이터" },
   // match: 이 페이지들에 있을 때도 메뉴에서 '미니게임'이 선택된 것으로 표시됩니다.
   { href: "minigame.html", icon: "🎮", label: "미니게임",
     match: ["jajarogue.html", "petsurvival.html"] },
