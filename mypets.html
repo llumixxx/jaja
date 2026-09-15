@@ -187,16 +187,18 @@ font-family:'Nunito',sans-serif;transition:transform .15s,background .15s,border
 .pic-attr-row{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px;}
 .pic-attr-chip{font-size:10.5px;font-weight:800;padding:3px 9px;border-radius:8px;color:#fff;}
 .pic-divider{border-top:1.5px solid var(--border);margin:2px 0 12px;}
-.pic-stat-list{display:flex;flex-direction:column;gap:7px;margin-bottom:12px;}
-.pic-stat-row{display:flex;align-items:center;gap:10px;background:var(--s1);border-radius:13px;padding:8px 10px 8px 12px;}
-.psr-label-wrap{display:flex;flex-direction:column;flex:1;min-width:0;gap:1px;}
-.psr-label{font-size:12.5px;font-weight:800;color:var(--t1);}
-.psr-growth{font-size:10.5px;font-weight:700;}
-.stat-atk .psr-label, .stat-atk .psr-growth{color:var(--a2);}
-.stat-def .psr-label, .stat-def .psr-growth{color:var(--a1);}
-.stat-agi .psr-label, .stat-agi .psr-growth{color:var(--a5);}
-.stat-hp .psr-label, .stat-hp .psr-growth{color:var(--a4);}
-.psr-controls{display:flex;align-items:center;gap:5px;flex-shrink:0;}
+.pic-stat-list{display:flex;flex-direction:column;gap:8px;margin-bottom:12px;}
+.pic-stat-row{background:var(--s1);border-radius:13px;padding:9px 12px;}
+.psr-growth-line{display:flex;align-items:baseline;gap:5px;margin-bottom:6px;flex-wrap:wrap;}
+.psr-glabel{font-size:11.5px;font-weight:800;flex-shrink:0;}
+.psr-gval{font-size:12.5px;font-weight:900;font-family:'Nunito',sans-serif;}
+.psr-gdelta{font-size:10.5px;font-weight:800;}
+.psr-base{font-size:10px;font-weight:700;color:var(--t3);margin-left:auto;font-family:'Nunito',sans-serif;}
+.stat-atk .psr-glabel, .stat-atk .psr-gval{color:var(--a2);}
+.stat-def .psr-glabel, .stat-def .psr-gval{color:var(--a1);}
+.stat-agi .psr-glabel, .stat-agi .psr-gval{color:var(--a5);}
+.stat-hp .psr-glabel, .stat-hp .psr-gval{color:var(--a4);}
+.psr-controls{display:flex;align-items:center;gap:5px;}
 .pic-stat-btn{flex-shrink:0;width:26px;height:26px;border-radius:8px;background:var(--white);border:1.5px solid var(--border);
 color:var(--t2);font-size:14px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;
 font-family:'Nunito',sans-serif;transition:transform .15s,border-color .15s,color .15s;}
@@ -205,6 +207,7 @@ font-family:'Nunito',sans-serif;transition:transform .15s,border-color .15s,colo
 .pic-stat-input{width:64px;text-align:center;padding:5px 2px;background:var(--white);border:1.5px solid var(--border2);
 border-radius:8px;font-family:'Nunito',sans-serif;font-weight:900;font-size:15px;outline:none;color:var(--t1);}
 .pic-stat-input:focus{border-color:var(--a1);}
+.psr-vdelta{font-size:11px;font-weight:800;color:var(--t3);}
 .pic-badge-row{display:flex;gap:6px;margin-top:2px;justify-content:space-between;align-items:center;flex-wrap:wrap;}
 .pic-badge{font-size:10px;padding:3px 9px;border-radius:20px;font-weight:800;}
 .pb-mount{background:#e3fbef;color:#3aa876;} .pb-nomount{background:var(--s1);color:var(--t4);}
@@ -320,7 +323,7 @@ footer{text-align:center;padding:30px;color:var(--t3);font-size:11px;font-family
 <label>레벨</label>
 <div class="lv-stepper">
 <button type="button" class="lv-btn" id="addLvMinus">−</button>
-<input type="number" id="addLv" min="1" max="200" value="1" />
+<input type="number" id="addLv" min="1" max="140" value="140" />
 <button type="button" class="lv-btn" id="addLvPlus">+</button>
 </div>
 </div>
@@ -359,6 +362,16 @@ let myPets = [];
 function num(v){ const n = Number(v); return isFinite(n) ? n : 0; }
 function cut2(n){ n=Number(n); if(!isFinite(n)) return "-"; return (Math.floor(n*1000)/1000).toFixed(3); }
 function int0(n){ n=Number(n); if(!isFinite(n)) return "-"; return Math.floor(n).toString(); }
+function intDeltaStr(delta){
+  delta = Math.round(delta);
+  if(delta === 0) return "";
+  return ` (${delta>0?'+':''}${delta})`;
+}
+function growthDeltaStr(delta){
+  if(Math.abs(delta) < 0.0005) return "";
+  const sign = delta > 0 ? "+" : "-";
+  return ` (${sign}${(Math.round(Math.abs(delta)*1000)/1000).toFixed(3)})`;
+}
 function rankInfoB(sum){ if(sum>=100)return 475; if(sum>=95)return 495; if(sum>=90)return 515; if(sum>=85)return 535; if(sum>=80)return 555; return 575; }
 function disp(h,a,d,s){ return { h:h*4+a+d+s, a:h*0.1+a+d*0.1+s*0.05, d:h*0.1+a*0.1+d+s*0.05, s:s }; }
 /* 원래 계산식(=인게임 "일반등급"과 일치) 그대로 사용. 롤/등급 보정 없음. */
@@ -395,7 +408,7 @@ function calcDisplay(p, entry){
     h: st.growth.h * (calc.h ? cur.h/calc.h : 1)
   };
   const totalGrowth = growth.a + growth.d + growth.s;
-  return { cur, growth, calc, totalGrowth };
+  return { cur, growth, calc, baseGrowth: st.growth, totalGrowth };
 }
 function howType(s){
   s=String(s||"");
@@ -541,20 +554,20 @@ document.addEventListener("click", e=>{
 });
 document.getElementById("addLvMinus").addEventListener("click", ()=>{
   const el = document.getElementById("addLv");
-  el.value = Math.max(1, (parseInt(el.value)||1) - 1);
+  el.value = Math.max(1, (parseInt(el.value)||140) - 1);
 });
 document.getElementById("addLvPlus").addEventListener("click", ()=>{
   const el = document.getElementById("addLv");
-  el.value = Math.min(200, (parseInt(el.value)||1) + 1);
+  el.value = Math.min(140, (parseInt(el.value)||140) + 1);
 });
 addBtn.addEventListener("click", ()=>{
   if(!selectedPetId) return;
-  const lv = Math.max(1, Math.min(200, parseInt(document.getElementById("addLv").value) || 1));
+  const lv = Math.max(1, Math.min(140, parseInt(document.getElementById("addLv").value) || 140));
   myPets.push({ id: selectedPetId, level: lv, addedAt: Date.now(), ov: {} });
   saveMyPets();
   acInput.value = ""; selectedPetId = null; addBtn.disabled = true;
   addSelected.classList.remove("show");
-  document.getElementById("addLv").value = 1;
+  document.getElementById("addLv").value = 140;
   render();
 });
 
@@ -631,25 +644,33 @@ function getFilteredList(){
 
 /* ===== 카드 렌더 ===== */
 const STAT_DEFS = [
-  {key:'a', label:'⚔ 공격', cls:'stat-atk'},
-  {key:'d', label:'🛡 방어', cls:'stat-def'},
-  {key:'s', label:'💨 순발', cls:'stat-agi'},
-  {key:'h', label:'❤ 내구', cls:'stat-hp'}
+  {key:'a', label:'⚔ 공격 성장률', cls:'stat-atk'},
+  {key:'d', label:'🛡 방어 성장률', cls:'stat-def'},
+  {key:'s', label:'💨 순발 성장률', cls:'stat-agi'},
+  {key:'h', label:'❤ 내구 성장률', cls:'stat-hp'}
 ];
 function cardHTML(entry, idx, p, disp){
   const name = normalizedName(p);
-  const statsHTML = STAT_DEFS.map(sd => `
+  const statsHTML = STAT_DEFS.map(sd => {
+    const curInt = Math.floor(disp.cur[sd.key]);
+    const baseInt = Math.floor(disp.calc[sd.key]);
+    const gCur = disp.growth[sd.key];
+    const gBase = disp.baseGrowth[sd.key];
+    return `
       <div class="pic-stat-row ${sd.cls}">
-        <div class="psr-label-wrap">
-          <span class="psr-label">${sd.label}</span>
-          <span class="psr-growth">레벨당 +${cut2(disp.growth[sd.key])}</span>
+        <div class="psr-growth-line">
+          <span class="psr-glabel">${sd.label}</span>
+          <span class="psr-gval">${cut2(gCur)}<span class="psr-gdelta">${growthDeltaStr(gCur-gBase)}</span></span>
+          <span class="psr-base">S ${cut2(gBase)}</span>
         </div>
         <div class="psr-controls">
           <button type="button" class="pic-stat-btn pic-stat-minus" data-idx="${idx}" data-key="${sd.key}">−</button>
-          <input type="number" class="pic-stat-input" data-idx="${idx}" data-key="${sd.key}" value="${int0(disp.cur[sd.key])}" />
+          <input type="number" class="pic-stat-input" data-idx="${idx}" data-key="${sd.key}" value="${curInt}" />
           <button type="button" class="pic-stat-btn pic-stat-plus" data-idx="${idx}" data-key="${sd.key}">+</button>
+          <span class="psr-vdelta">${intDeltaStr(curInt-baseInt)}</span>
         </div>
-      </div>`).join("");
+      </div>`;
+  }).join("");
   return `
   <div class="pet-info-card" data-idx="${idx}">
     <div class="pic-top">
@@ -660,7 +681,7 @@ function cardHTML(entry, idx, p, disp){
         <div class="pic-lv-row">
           <span class="pic-lv-label">Lv.</span>
           <button type="button" class="pic-lv-btn pic-lv-minus" data-idx="${idx}">−</button>
-          <input type="number" class="pic-lv-input" min="1" max="200" value="${entry.level}" data-idx="${idx}" />
+          <input type="number" class="pic-lv-input" min="1" max="140" value="${entry.level}" data-idx="${idx}" />
           <button type="button" class="pic-lv-btn pic-lv-plus" data-idx="${idx}">+</button>
         </div>
       </div>
@@ -730,7 +751,7 @@ document.getElementById("grid").addEventListener("click", e=>{
   if(minusBtn || plusBtn){
     const idx = parseInt((minusBtn||plusBtn).dataset.idx);
     const cur = myPets[idx].level;
-    myPets[idx].level = minusBtn ? Math.max(1, cur - 1) : Math.min(200, cur + 1);
+    myPets[idx].level = minusBtn ? Math.max(1, cur - 1) : Math.min(140, cur + 1);
     saveMyPets();
     render();
   }
@@ -739,7 +760,7 @@ document.getElementById("grid").addEventListener("change", e=>{
   const lvInput = e.target.closest(".pic-lv-input");
   if(lvInput){
     const idx = parseInt(lvInput.dataset.idx);
-    const lv = Math.max(1, Math.min(200, parseInt(lvInput.value) || 1));
+    const lv = Math.max(1, Math.min(140, parseInt(lvInput.value) || 140));
     myPets[idx].level = lv;
     saveMyPets();
     render();
