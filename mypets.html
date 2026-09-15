@@ -194,6 +194,7 @@ font-family:'Nunito',sans-serif;transition:transform .15s,background .15s,border
 .psr-gval{font-size:12.5px;font-weight:900;font-family:'Nunito',sans-serif;}
 .psr-gdelta{font-size:10.5px;font-weight:800;}
 .psr-base{font-size:10px;font-weight:700;color:var(--t3);margin-left:auto;font-family:'Nunito',sans-serif;}
+.d-pos{color:#2f7fd6 !important;} .d-neg{color:#e0453a !important;}
 .stat-atk .psr-glabel, .stat-atk .psr-gval{color:var(--a2);}
 .stat-def .psr-glabel, .stat-def .psr-gval{color:var(--a1);}
 .stat-agi .psr-glabel, .stat-agi .psr-gval{color:var(--a5);}
@@ -362,15 +363,17 @@ let myPets = [];
 function num(v){ const n = Number(v); return isFinite(n) ? n : 0; }
 function cut2(n){ n=Number(n); if(!isFinite(n)) return "-"; return (Math.floor(n*1000)/1000).toFixed(3); }
 function int0(n){ n=Number(n); if(!isFinite(n)) return "-"; return Math.floor(n).toString(); }
-function intDeltaStr(delta){
+function intDeltaHTML(delta){
   delta = Math.round(delta);
   if(delta === 0) return "";
-  return ` (${delta>0?'+':''}${delta})`;
+  const cls = delta > 0 ? "d-pos" : "d-neg";
+  return ` <span class="psr-vdelta ${cls}">(${delta>0?'+':''}${delta})</span>`;
 }
-function growthDeltaStr(delta){
+function growthDeltaHTML(delta){
   if(Math.abs(delta) < 0.0005) return "";
   const sign = delta > 0 ? "+" : "-";
-  return ` (${sign}${(Math.round(Math.abs(delta)*1000)/1000).toFixed(3)})`;
+  const cls = delta > 0 ? "d-pos" : "d-neg";
+  return ` <span class="psr-gdelta ${cls}">(${sign}${(Math.round(Math.abs(delta)*1000)/1000).toFixed(3)})</span>`;
 }
 function rankInfoB(sum){ if(sum>=100)return 475; if(sum>=95)return 495; if(sum>=90)return 515; if(sum>=85)return 535; if(sum>=80)return 555; return 575; }
 function disp(h,a,d,s){ return { h:h*4+a+d+s, a:h*0.1+a+d*0.1+s*0.05, d:h*0.1+a*0.1+d+s*0.05, s:s }; }
@@ -660,14 +663,14 @@ function cardHTML(entry, idx, p, disp){
       <div class="pic-stat-row ${sd.cls}">
         <div class="psr-growth-line">
           <span class="psr-glabel">${sd.label}</span>
-          <span class="psr-gval">${cut2(gCur)}<span class="psr-gdelta">${growthDeltaStr(gCur-gBase)}</span></span>
+          <span class="psr-gval">${cut2(gCur)}${growthDeltaHTML(gCur-gBase)}</span>
           <span class="psr-base">S ${cut2(gBase)}</span>
         </div>
         <div class="psr-controls">
           <button type="button" class="pic-stat-btn pic-stat-minus" data-idx="${idx}" data-key="${sd.key}">−</button>
           <input type="number" class="pic-stat-input" data-idx="${idx}" data-key="${sd.key}" value="${curInt}" />
           <button type="button" class="pic-stat-btn pic-stat-plus" data-idx="${idx}" data-key="${sd.key}">+</button>
-          <span class="psr-vdelta">${intDeltaStr(curInt-baseInt)}</span>
+          ${intDeltaHTML(curInt-baseInt)}
         </div>
       </div>`;
   }).join("");
