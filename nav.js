@@ -10,6 +10,7 @@
 const SA_NAV_ITEMS = [
   { href: "index.html",   icon: "🎲", label: "계산기" },
   { href: "pokedex.html", icon: "🐾", label: "도감" },
+  { href: "mypets.html", icon: "📋", label: "내 펫 관리" },
   { href: "item.html", icon: "🗡️", label: "아이템도감" },
   { href: "statcalc.html", icon: "⚔️", label: "능력치 계산기" },
   { href: "simulator.html", icon: "🎰", label: "시뮬레이터" },
