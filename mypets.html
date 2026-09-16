@@ -68,6 +68,13 @@ font-family:inherit;font-size:14px;color:var(--t1);outline:none;}
 .f-select{width:100%;background:var(--s1);border:1.5px solid var(--border);color:var(--t1);padding:9px 12px;
 border-radius:12px;font-size:14px;outline:none;font-family:inherit;}
 .f-chip-wrap{display:flex;flex-wrap:wrap;gap:6px;}
+.f-seg{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;}
+.f-seg button{background:var(--s1);border:1.5px solid var(--border);color:var(--t3);padding:8px 4px;
+border-radius:12px;font-size:11.5px;cursor:pointer;font-weight:700;
+transition:transform .18s cubic-bezier(.34,1.56,.64,1),background .18s ease,color .18s ease;}
+.f-seg button:hover{transform:translateY(-2px) scale(1.05);}
+.f-seg button:active{transform:scale(.93);}
+.f-seg button.active{background:linear-gradient(135deg,var(--a1),var(--a2));color:#fff;border-color:transparent;}
 .f-chip{background:var(--s1);border:1.5px solid var(--border);color:var(--t3);padding:6px 12px;
 border-radius:20px;font-size:11.5px;cursor:pointer;font-weight:700;
 transition:transform .18s cubic-bezier(.34,1.56,.64,1),background .18s ease,color .18s ease;}
@@ -221,6 +228,36 @@ padding:8px 14px;font-size:12px;font-weight:800;cursor:pointer;align-self:flex-s
 .rank-add-all:hover{border-color:var(--a1);color:var(--a1);}
 /* ===== 펫 카드 (가독성 위주 재설계) ===== */
 #grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:16px;}
+/* ── 표형 보기 ── */
+#grid.table-view{display:block;}
+.pet-table-wrap{width:100%;border-collapse:separate;border-spacing:0;background:var(--white);
+border:1.5px solid var(--border);border-radius:16px;box-shadow:0 4px 16px rgba(47,127,214,0.06);}
+.pet-table-wrap thead tr{background:var(--s1);}
+.pet-table-wrap thead tr th:first-child{border-top-left-radius:16px;}
+.pet-table-wrap thead tr th:last-child{border-top-right-radius:16px;}
+.pet-table-wrap tbody tr:last-child td:first-child{border-bottom-left-radius:16px;}
+.pet-table-wrap tbody tr:last-child td:last-child{border-bottom-right-radius:16px;}
+.pet-table-wrap th{padding:10px 12px;text-align:left;font-size:12px;font-weight:800;color:var(--t2);
+border-bottom:1.5px solid var(--border);white-space:nowrap;position:sticky;top:0;background:var(--s1);z-index:2;}
+.pet-table-wrap td{padding:10px 12px;font-size:13.5px;border-bottom:1px solid var(--border);vertical-align:middle;white-space:nowrap;}
+.pet-table-wrap tbody tr:hover{background:var(--s1);}
+.pet-table-wrap tbody tr:last-child td{border-bottom:none;}
+.pt-name-cell{display:flex;align-items:center;gap:8px;}
+.pt-name-cell img{width:30px;height:30px;object-fit:contain;image-rendering:pixelated;flex-shrink:0;}
+.pt-name{font-size:13.5px;font-weight:800;color:var(--t1);}
+.pt-lv{font-size:11px;color:var(--t3);}
+.pt-attr-cell{display:flex;gap:3px;flex-wrap:wrap;}
+.pt-attr-chip{font-size:10px;font-weight:800;padding:2px 7px;border-radius:7px;color:#fff;white-space:nowrap;}
+.pt-stat{font-family:'Nunito',sans-serif;font-weight:900;font-size:13.5px;text-align:right;}
+.pt-stat-sub{font-size:9.5px;color:var(--t3);font-weight:700;margin-left:4px;}
+.pt-stat-hp{color:var(--a4);} .pt-stat-atk{color:var(--a2);} .pt-stat-def{color:var(--a1);} .pt-stat-agi{color:var(--a5);}
+.pt-total{font-family:'Nunito',sans-serif;font-weight:900;font-size:13.5px;color:var(--t1);text-align:right;}
+.pt-mount{font-size:10.5px;font-weight:800;padding:3px 9px;border-radius:20px;white-space:nowrap;}
+.pt-mount-y{background:#e3fbef;color:#3aa876;} .pt-mount-n{background:var(--s1);color:var(--t4);}
+.pt-del{background:none;border:1.5px solid var(--border);color:var(--t3);cursor:pointer;font-size:11px;
+padding:5px 9px;border-radius:10px;transition:color .15s,border-color .15s;}
+.pt-del:hover{color:var(--err);border-color:var(--err);}
+@media(max-width:900px){ .pet-table-wrap{display:block;overflow-x:auto;} }
 .pet-info-card{background:var(--white);border:1.5px solid var(--border);border-radius:22px;padding:18px;
 box-shadow:0 4px 16px rgba(47,127,214,0.06);}
 .pic-top{display:flex;gap:14px;margin-bottom:12px;}
@@ -310,16 +347,16 @@ footer{text-align:center;padding:30px;color:var(--t3);font-size:11px;font-family
 </div>
 <div id="attrSliders" class="asl-wrap"></div>
 
-<div class="f-section">성장치 필터 <span class="hint">공방순내 각각 범위</span></div>
-<div class="filter-row"><span class="filter-label">⚔공격</span><input type="number" id="fAtkMin" class="f-input num-sm" placeholder="최소" step="0.01" /><span class="filter-unit">~</span><input type="number" id="fAtkMax" class="f-input num-sm" placeholder="최대" step="0.01" /></div>
-<div class="filter-row"><span class="filter-label">🛡방어</span><input type="number" id="fDefMin" class="f-input num-sm" placeholder="최소" step="0.01" /><span class="filter-unit">~</span><input type="number" id="fDefMax" class="f-input num-sm" placeholder="최대" step="0.01" /></div>
-<div class="filter-row"><span class="filter-label">💨순발</span><input type="number" id="fAgiMin" class="f-input num-sm" placeholder="최소" step="0.01" /><span class="filter-unit">~</span><input type="number" id="fAgiMax" class="f-input num-sm" placeholder="최대" step="0.01" /></div>
-<div class="filter-row"><span class="filter-label">❤내구</span><input type="number" id="fHpMin" class="f-input num-sm" placeholder="최소" step="0.01" /><span class="filter-unit">~</span><input type="number" id="fHpMax" class="f-input num-sm" placeholder="최대" step="0.01" /></div>
-
-<div class="f-section">순성장 필터 <span class="hint">공+방+순 성장치 합</span></div>
-<div class="filter-row"><input type="number" id="fGrowthMin" class="f-input num-sm" placeholder="최소" step="0.01" /><span class="filter-unit">~</span><input type="number" id="fGrowthMax" class="f-input num-sm" placeholder="최대" step="0.01" /></div>
+<div class="f-section">성장치 필터 <span class="asl-total-label">보유펫 최고치 기준 · 드래그</span></div>
+<div id="growthSliders" class="asl-wrap"></div>
 
 <button class="filter-reset" id="filterResetBtn">필터 초기화</button>
+
+<div class="f-section">보기 방식</div>
+<div class="f-seg" id="viewSeg" style="grid-template-columns:1fr 1fr;">
+<button data-v="card" class="active">🖼 카드형</button>
+<button data-v="table">📝 표형</button>
+</div>
 
 <div class="f-section">정렬</div>
 <select id="sortSel" class="f-select">
@@ -752,12 +789,10 @@ document.getElementById("rankSearchBtn").addEventListener("click", runRankSearch
 document.getElementById("rankNick").addEventListener("keydown", e => { if(e.key === "Enter") runRankSearch(); });
 
 /* ===== 필터/정렬 상태 ===== */
-let state = { q:"", how:"ALL", sort:"default",
+let state = { q:"", how:"ALL", sort:"default", view:"card",
   attrVal:{earth:0,water:0,fire:0,wind:0}, attrMatchMode:"exact",
-  growthRange:{a:{min:null,max:null}, d:{min:null,max:null}, s:{min:null,max:null}, h:{min:null,max:null}},
-  totalGrowthRange:{min:null,max:null}
+  growthThreshold:{a:0,d:0,s:0,h:0,total:0}
 };
-function numOrNull(v){ v=String(v).trim(); if(v==="") return null; const n=Number(v); return isFinite(n)?n:null; }
 document.getElementById("search").addEventListener("input", e=>{ state.q=e.target.value.trim(); render(); });
 document.getElementById("sortSel").addEventListener("change", e=>{ state.sort=e.target.value; render(); });
 
@@ -853,23 +888,71 @@ function renderAttrSliders(){
   });
 }
 
-/* ── 성장치/순성장 범위 필터 ── */
-function bindRange(minId, maxId, target){
-  document.getElementById(minId).addEventListener("input", e=>{ target.min = numOrNull(e.target.value); render(); });
-  document.getElementById(maxId).addEventListener("input", e=>{ target.max = numOrNull(e.target.value); render(); });
+/* ── 성장치 필터 슬라이더 (보유펫 최고치 기준, 독립 드래그) ── */
+const GROWTH_SLIDER_DEFS = [
+  {key:'a', label:'공격', emoji:'⚔'},
+  {key:'d', label:'방어', emoji:'🛡'},
+  {key:'s', label:'순발', emoji:'💨'},
+  {key:'h', label:'내구', emoji:'❤'},
+  {key:'total', label:'순성장', emoji:'📊'}
+];
+function getGrowthMax(key){
+  let max = 0;
+  myPets.forEach(entry=>{
+    const p = findPetById(entry.id); if(!p) return;
+    const d = calcDisplay(p, entry);
+    const v = key==='total' ? d.totalGrowth : d.growth[key];
+    if(v > max) max = v;
+  });
+  return max > 0 ? max : 1;
 }
-bindRange("fAtkMin","fAtkMax", state.growthRange.a);
-bindRange("fDefMin","fDefMax", state.growthRange.d);
-bindRange("fAgiMin","fAgiMax", state.growthRange.s);
-bindRange("fHpMin","fHpMax", state.growthRange.h);
-bindRange("fGrowthMin","fGrowthMax", state.totalGrowthRange);
+function renderGrowthSliders(){
+  const box = document.getElementById("growthSliders");
+  box.innerHTML = GROWTH_SLIDER_DEFS.map(gd=>{
+    const max = getGrowthMax(gd.key);
+    const v = Math.min(state.growthThreshold[gd.key], max);
+    const pct = max>0 ? (v/max*100) : 0;
+    return `<div class="asl-item" id="gsl-item-${gd.key}">
+      <div class="asl-header">
+        <span class="asl-emoji">${gd.emoji}</span>
+        <span class="asl-name">${gd.label} 이상</span>
+        <span class="asl-val ${v>0.001?'on':''}" id="gsl-v-${gd.key}">${v>0.001? v.toFixed(2):'0'}</span>
+      </div>
+      <div class="asl-track" id="gsl-t-${gd.key}" data-key="${gd.key}" data-max="${max}">
+        <div class="asl-fill-bar asl-fill-water" id="gsl-f-${gd.key}" style="width:${pct}%"></div>
+      </div>
+      <span class="asl-total-label">보유펫 최고 ${max.toFixed(2)}</span>
+    </div>`;
+  }).join("") + `<button class="attr-filter-reset" id="growthResetBtn">성장치 필터 초기화</button>`;
+  GROWTH_SLIDER_DEFS.forEach(gd=>{
+    const track = document.getElementById("gsl-t-"+gd.key);
+    let dragging = false;
+    const setFromEvent = (clientX)=>{
+      const rect = track.getBoundingClientRect();
+      const ratio = Math.max(0, Math.min(1, (clientX-rect.left)/rect.width));
+      const max = parseFloat(track.dataset.max) || 1;
+      const v = ratio*max;
+      state.growthThreshold[gd.key] = v;
+      document.getElementById("gsl-v-"+gd.key).textContent = v>0.001 ? v.toFixed(2) : "0";
+      document.getElementById("gsl-v-"+gd.key).classList.toggle("on", v>0.001);
+      document.getElementById("gsl-f-"+gd.key).style.width = (ratio*100)+"%";
+      renderList();
+    };
+    track.addEventListener("mousedown", e=>{ dragging=true; setFromEvent(e.clientX); e.preventDefault(); });
+    track.addEventListener("touchstart", e=>{ dragging=true; setFromEvent(e.touches[0].clientX); }, {passive:true});
+    document.addEventListener("mousemove", e=>{ if(dragging) setFromEvent(e.clientX); });
+    document.addEventListener("touchmove", e=>{ if(dragging) setFromEvent(e.touches[0].clientX); });
+    document.addEventListener("mouseup", ()=>{ dragging=false; });
+    document.addEventListener("touchend", ()=>{ dragging=false; });
+  });
+  document.getElementById("growthResetBtn").addEventListener("click", ()=>{
+    state.growthThreshold = {a:0,d:0,s:0,h:0,total:0};
+    render();
+  });
+}
 
 document.getElementById("filterResetBtn").addEventListener("click", ()=>{
-  state.growthRange = {a:{min:null,max:null}, d:{min:null,max:null}, s:{min:null,max:null}, h:{min:null,max:null}};
-  state.totalGrowthRange = {min:null,max:null};
-  ["fAtkMin","fAtkMax","fDefMin","fDefMax","fAgiMin","fAgiMax","fHpMin","fHpMax","fGrowthMin","fGrowthMax"].forEach(id=>{
-    document.getElementById(id).value = "";
-  });
+  state.growthThreshold = {a:0,d:0,s:0,h:0,total:0};
   render();
 });
 document.getElementById("howFilter").addEventListener("click", e=>{
@@ -877,12 +960,12 @@ document.getElementById("howFilter").addEventListener("click", e=>{
   [...chip.parentElement.children].forEach(c=>c.classList.remove("is-on"));
   chip.classList.add("is-on"); state.how=chip.dataset.v; render();
 });
+document.getElementById("viewSeg").addEventListener("click", e=>{
+  const btn=e.target.closest("button"); if(!btn) return;
+  [...btn.parentElement.children].forEach(b=>b.classList.remove("active"));
+  btn.classList.add("active"); state.view=btn.dataset.v; renderList();
+});
 
-function inRange(val, range){
-  if(range.min!=null && val < range.min) return false;
-  if(range.max!=null && val > range.max) return false;
-  return true;
-}
 function matchesFilter(entry, p, disp){
   const name = normalizedName(p);
   if(state.q && !name.includes(state.q)) return false;
@@ -896,11 +979,11 @@ function matchesFilter(entry, p, disp){
   else if(state.how === "신펫" && isOldPet(p)) return false;
   else if(state.how === "탑승가능" && mountText(p.mount) !== "가능") return false;
   else if(state.how !== "ALL" && state.how !== "돈펫" && state.how !== "구펫" && state.how !== "신펫" && state.how !== "탑승가능" && howType(p.how) !== state.how) return false;
-  if(!inRange(disp.growth.a, state.growthRange.a)) return false;
-  if(!inRange(disp.growth.d, state.growthRange.d)) return false;
-  if(!inRange(disp.growth.s, state.growthRange.s)) return false;
-  if(!inRange(disp.growth.h, state.growthRange.h)) return false;
-  if(!inRange(disp.totalGrowth, state.totalGrowthRange)) return false;
+  if(disp.growth.a < state.growthThreshold.a) return false;
+  if(disp.growth.d < state.growthThreshold.d) return false;
+  if(disp.growth.s < state.growthThreshold.s) return false;
+  if(disp.growth.h < state.growthThreshold.h) return false;
+  if(disp.totalGrowth < state.growthThreshold.total) return false;
   return true;
 }
 function getFilteredList(){
@@ -982,7 +1065,36 @@ function cardHTML(entry, idx, p, disp){
 }
 
 let currentList = [];
-function render(){
+function tableRowHTML(entry, idx, p, disp){
+  const name = normalizedName(p);
+  const gradeOv = entry.gradeOv || {};
+  const gradeCell = (key)=>{
+    const pct = disp.calc[key] ? (disp.cur[key]/disp.calc[key]*100) : 100;
+    const g = gradeOv[key] || estimateGrade(key, pct);
+    return `<span class="grade-badge grade-${g.replace('+','p')}" style="cursor:default;">${g}</span>`;
+  };
+  return `
+  <tr data-idx="${idx}">
+    <td><div class="pt-name-cell">${imgTag(p.imageCode)}<div><div class="pt-name">${name}</div><div class="pt-lv">Lv.${entry.level}</div></div></div></td>
+    <td><div class="pt-attr-cell">${attrChipsHTML(p)}</div></td>
+    <td class="pt-stat pt-stat-atk">${int0(disp.cur.a)} ${gradeCell('a')}</td>
+    <td class="pt-stat pt-stat-def">${int0(disp.cur.d)} ${gradeCell('d')}</td>
+    <td class="pt-stat pt-stat-agi">${int0(disp.cur.s)} ${gradeCell('s')}</td>
+    <td class="pt-stat pt-stat-hp">${int0(disp.cur.h)} ${gradeCell('h')}</td>
+    <td class="pt-total">${cut2(disp.totalGrowth)}</td>
+    <td><span class="pt-mount ${mountText(p.mount)==='가능'?'pt-mount-y':'pt-mount-n'}">${mountText(p.mount)==='가능'?'탑승가능':'탑승불가'}</span></td>
+    <td><button class="pt-del" data-idx="${idx}">🗑</button></td>
+  </tr>`;
+}
+function tableHTML(list){
+  return `<table class="pet-table-wrap">
+    <thead><tr>
+      <th>이름</th><th>속성</th><th>⚔공격</th><th>🛡방어</th><th>💨순발</th><th>❤내구</th><th>순성장</th><th>탑승</th><th></th>
+    </tr></thead>
+    <tbody>${list.map(x=>tableRowHTML(x.entry, x.idx, x.p, x.disp)).join("")}</tbody>
+  </table>`;
+}
+function renderList(){
   currentList = getFilteredList();
   document.getElementById("statTotal").textContent = myPets.length;
   document.getElementById("statShown").textContent = currentList.length;
@@ -990,10 +1102,28 @@ function render(){
 
   const empty = document.getElementById("empty");
   const grid = document.getElementById("grid");
+  grid.classList.toggle("table-view", state.view==="table");
   if(currentList.length===0){ empty.style.display="block"; grid.innerHTML=""; return; }
   empty.style.display="none";
-  grid.innerHTML = currentList.map(x => cardHTML(x.entry, x.idx, x.p, x.disp)).join("");
+  if(state.view==="table"){
+    grid.innerHTML = tableHTML(currentList);
+  } else {
+    grid.innerHTML = currentList.map(x => cardHTML(x.entry, x.idx, x.p, x.disp)).join("");
+  }
 }
+function render(){
+  renderGrowthSliders();
+  renderList();
+}
+document.getElementById("grid").addEventListener("click", e=>{
+  const delBtn = e.target.closest(".pt-del");
+  if(delBtn){
+    const idx = parseInt(delBtn.dataset.idx);
+    myPets.splice(idx, 1);
+    saveMyPets();
+    render();
+  }
+});
 
 function setOverride(idx, key, val){
   if(!myPets[idx].ov) myPets[idx].ov = {};
