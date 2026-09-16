@@ -92,6 +92,15 @@ padding:8px;border-radius:12px;font-size:11.5px;font-weight:700;cursor:pointer;
 transition:transform .2s cubic-bezier(.34,1.56,.64,1),border-color .2s ease,color .2s ease;}
 .filter-reset:hover{border-color:var(--a1);color:var(--a1);transform:translateY(-2px);}
 .filter-reset:active{transform:scale(.95);}
+/* ── 접이식 필터 아코디언 ── */
+.facc{margin-bottom:10px;border:1.5px solid var(--border);border-radius:14px;overflow:hidden;background:var(--s1);}
+.facc-head{width:100%;display:flex;align-items:center;justify-content:space-between;padding:11px 13px;
+background:var(--white);border:none;cursor:pointer;font-size:12.5px;font-weight:800;color:var(--t2);font-family:inherit;}
+.facc-head:hover{color:var(--a1);}
+.facc-chev{color:var(--t3);font-size:11px;transition:transform .25s;}
+.facc.open .facc-chev{transform:rotate(180deg);}
+.facc-body{max-height:0;overflow:hidden;transition:max-height .3s cubic-bezier(.4,0,.2,1);padding:0 10px;}
+.facc.open .facc-body{max-height:900px;padding:10px;}
 /* ── 속성 트랙 슬라이더 (pokedex.html에서 이식) ── */
 .asl-total-label{font-size:9px;color:var(--t4);text-transform:none;letter-spacing:0;font-weight:700;margin-left:4px;}
 .asl-wrap{display:flex;flex-direction:column;gap:8px;margin-bottom:4px;}
@@ -294,15 +303,29 @@ font-family:'Nunito',sans-serif;transition:transform .15s,background .15s,border
 .psr-glabel{font-size:11.5px;font-weight:800;flex-shrink:0;}
 .psr-gval{font-size:12.5px;font-weight:900;font-family:'Nunito',sans-serif;}
 .psr-gdelta{font-size:10.5px;font-weight:800;}
-.psr-base{font-size:10px;font-weight:700;color:var(--t3);margin-left:auto;font-family:'Nunito',sans-serif;}
+.psr-base{font-size:10px;font-weight:700;color:var(--t3);font-family:'Nunito',sans-serif;}
 .d-pos{color:#2f7fd6 !important;} .d-neg{color:#e0453a !important;}
-.grade-badge, .grade-badge-select{font-size:15px;font-weight:900;padding:3px 10px;border-radius:9px;font-family:'Nunito',sans-serif;
-color:#fff;flex-shrink:0;cursor:pointer;border:none;outline:none;-webkit-appearance:none;appearance:none;text-align:center;
-box-shadow:0 2px 6px rgba(0,0,0,.15);letter-spacing:.5px;}
-.grade-F{background:#8a8a8a;} .grade-D{background:#8a8a8a;} .grade-Dp{background:#9a8a6a;}
-.grade-C{background:#a97c50;} .grade-Cp{background:#b98a4a;} .grade-B{background:#c9942f;}
-.grade-Bp{background:#d6a020;} .grade-A{background:#4f9d5c;} .grade-Ap{background:#3fae5a;}
-.grade-S{background:#2f7fd6;} .grade-Sp{background:#7a4fd6;} .grade-RS{background:linear-gradient(135deg,#e0a020,#e05a3a);}
+/* ── 등급 뱃지 (버튼+팝업, 네이티브 select 안 씀 — 크로스브라우저 표시 문제 방지) ── */
+.grade-wrap{position:relative;margin-left:auto;display:flex;flex-direction:column;align-items:center;gap:2px;flex-shrink:0;}
+.grade-badge-btn{font-size:21px;font-weight:900;padding:4px 16px;border-radius:11px;border:none;color:#fff;
+cursor:pointer;box-shadow:0 3px 10px rgba(0,0,0,.22);font-family:'Nunito',sans-serif;letter-spacing:.5px;
+transition:transform .15s;min-width:56px;}
+.grade-badge-btn:hover{transform:scale(1.06);}
+.grade-badge-btn:active{transform:scale(.94);}
+.grade-sub{font-size:9px;color:var(--t3);font-weight:700;font-family:'Nunito',sans-serif;}
+.grade-popup{display:none;position:absolute;top:calc(100% + 6px);right:0;background:var(--white);
+border:1.5px solid var(--border2);border-radius:12px;box-shadow:0 10px 28px rgba(0,0,0,.22);
+padding:6px;z-index:80;grid-template-columns:repeat(4,1fr);gap:4px;width:190px;}
+.grade-wrap.open .grade-popup{display:grid;}
+.grade-opt{font-size:11.5px;font-weight:800;padding:7px 0;border-radius:8px;border:1.5px solid var(--border);
+background:var(--s1);color:var(--t2);cursor:pointer;font-family:'Nunito',sans-serif;}
+.grade-opt:hover{border-color:var(--a1);color:var(--a1);}
+.grade-opt.reset{grid-column:span 4;background:var(--s2);color:var(--t3);}
+.grade-badge{display:inline-block;font-size:11px;font-weight:900;padding:2px 8px;border-radius:8px;
+color:#fff;font-family:'Nunito',sans-serif;letter-spacing:.3px;}
+.grade-F, .grade-D, .grade-Dp, .grade-C, .grade-Cp, .grade-B, .grade-Bp{background:#98a2ad;}
+.grade-A{background:#f0c419;} .grade-Ap{background:#f5a623;}
+.grade-S{background:#ef5350;} .grade-Sp{background:#e0342c;} .grade-RS{background:linear-gradient(135deg,#c62828,#7a0000);}
 .stat-atk .psr-glabel, .stat-atk .psr-gval{color:var(--a2);}
 .stat-def .psr-glabel, .stat-def .psr-gval{color:var(--a1);}
 .stat-agi .psr-glabel, .stat-agi .psr-gval{color:var(--a5);}
@@ -346,7 +369,9 @@ footer{text-align:center;padding:30px;color:var(--t3);font-size:11px;font-family
 <div class="f-section">검색</div>
 <input type="text" id="search" class="f-input" placeholder="내 펫 이름 검색..." />
 
-<div class="f-section">속성값 필터 <span class="asl-total-label">최대 2속성 · 합계 10</span></div>
+<div class="facc" data-acc="attr">
+<button class="facc-head" data-acc-target="attrBody"><span>🎨 속성값 필터</span><span class="facc-chev">▾</span></button>
+<div class="facc-body" id="attrBody">
 <div class="attr-mode-row">
 <span class="attr-mode-label">선택값 이상 검색</span>
 <label class="attr-mode-switch" id="attrModeSwitchWrap">
@@ -355,15 +380,22 @@ footer{text-align:center;padding:30px;color:var(--t3);font-size:11px;font-family
 </label>
 </div>
 <div id="attrSliders" class="asl-wrap"></div>
+</div>
+</div>
 
-<div class="f-section">능력치 직접입력</div>
-<div class="filter-row"><span class="filter-label">⚔공격력</span><input type="number" id="fValAtk" class="f-input num-sm" placeholder="최소" /></div>
-<div class="filter-row"><span class="filter-label">🛡방어력</span><input type="number" id="fValDef" class="f-input num-sm" placeholder="최소" /></div>
-<div class="filter-row"><span class="filter-label">💨순발력</span><input type="number" id="fValAgi" class="f-input num-sm" placeholder="최소" /></div>
-<div class="filter-row"><span class="filter-label">❤내구력</span><input type="number" id="fValHp" class="f-input num-sm" placeholder="최소" /></div>
+<div class="facc" data-acc="val">
+<button class="facc-head" data-acc-target="valBody"><span>⚡ 능력치 필터</span><span class="facc-chev">▾</span></button>
+<div class="facc-body" id="valBody">
+<div id="valSliders" class="asl-wrap"></div>
+</div>
+</div>
 
-<div class="f-section">성장률 <span class="asl-total-label">보유펫 최고치 기준 · 양쪽 드래그</span></div>
+<div class="facc" data-acc="growth">
+<button class="facc-head" data-acc-target="growthBody"><span>📈 성장률 필터</span><span class="facc-chev">▾</span></button>
+<div class="facc-body" id="growthBody">
 <div id="growthSliders" class="asl-wrap"></div>
+</div>
+</div>
 
 <button class="filter-reset" id="filterResetBtn">필터 초기화</button>
 
@@ -806,7 +838,7 @@ document.getElementById("rankNick").addEventListener("keydown", e => { if(e.key 
 /* ===== 필터/정렬 상태 ===== */
 let state = { q:"", how:"ALL", sort:"default", view:"card",
   attrVal:{earth:0,water:0,fire:0,wind:0}, attrMatchMode:"exact",
-  valMin:{a:0,d:0,s:0,h:0},
+  valRange:{a:{min:0,max:null},d:{min:0,max:null},s:{min:0,max:null},h:{min:0,max:null}},
   growthRange:{a:{min:0,max:null},d:{min:0,max:null},s:{min:0,max:null},h:{min:0,max:null},total:{min:0,max:null}}
 };
 document.getElementById("search").addEventListener("input", e=>{ state.q=e.target.value.trim(); render(); });
@@ -904,13 +936,19 @@ function renderAttrSliders(){
   });
 }
 
-/* ── 성장률 범위 슬라이더 (보유펫 최고치 기준, 양쪽 끝 드래그) ── */
+/* ── 범위 슬라이더 공통 빌더 (성장률 / 능력치 둘 다 사용) ── */
 const GROWTH_SLIDER_DEFS = [
   {key:'a', label:'공격 성장률', emoji:'⚔'},
   {key:'d', label:'방어 성장률', emoji:'🛡'},
   {key:'s', label:'순발 성장률', emoji:'💨'},
   {key:'h', label:'내구 성장률', emoji:'❤'},
   {key:'total', label:'총합 성장률', emoji:'📊'}
+];
+const VAL_SLIDER_DEFS = [
+  {key:'a', label:'공격력', emoji:'⚔'},
+  {key:'d', label:'방어력', emoji:'🛡'},
+  {key:'s', label:'순발력', emoji:'💨'},
+  {key:'h', label:'내구력', emoji:'❤'}
 ];
 function getGrowthMax(key){
   let max = 0;
@@ -922,34 +960,44 @@ function getGrowthMax(key){
   });
   return max > 0 ? max : 1;
 }
+function getValMax(key){
+  let max = 0;
+  myPets.forEach(entry=>{
+    const p = findPetById(entry.id); if(!p) return;
+    const v = calcDisplay(p, entry).cur[key];
+    if(v > max) max = v;
+  });
+  return max > 0 ? max : 1;
+}
 function fmtG(v){ return v.toFixed(2); }
-function renderGrowthSliders(){
-  const box = document.getElementById("growthSliders");
-  box.innerHTML = GROWTH_SLIDER_DEFS.map(gd=>{
-    const max = getGrowthMax(gd.key);
-    const range = state.growthRange[gd.key];
+function buildRangeSliders(containerId, defs, rangeState, getMaxFn, idPrefix, resetBtnId, resetLabel, fmtFn){
+  const box = document.getElementById(containerId);
+  const fmt = fmtFn || fmtG;
+  box.innerHTML = defs.map(gd=>{
+    const max = getMaxFn(gd.key);
+    const range = rangeState[gd.key];
     const lo = Math.min(range.min, max), hi = Math.min(range.max===null? max : range.max, max);
     const loPct = max>0 ? (lo/max*100) : 0;
     const hiPct = max>0 ? (hi/max*100) : 100;
     const isFull = lo<=0.0001 && hi>=max-0.0001;
-    return `<div class="asl-item" id="gsl-item-${gd.key}">
+    return `<div class="asl-item">
       <div class="asl-header">
         <span class="asl-emoji">${gd.emoji}</span>
         <span class="asl-name">${gd.label}</span>
-        <span class="asl-val ${isFull?'':'on'}" id="gsl-v-${gd.key}">${isFull? '전체' : (fmtG(lo)+' ~ '+fmtG(hi))}</span>
+        <span class="asl-val ${isFull?'':'on'}" id="${idPrefix}-v-${gd.key}">${isFull? '전체' : (fmt(lo)+' ~ '+fmt(hi))}</span>
       </div>
-      <div class="asl-range-track" id="gsl-t-${gd.key}" data-key="${gd.key}" data-max="${max}">
-        <div class="asl-range-fill" id="gsl-f-${gd.key}" style="left:${loPct}%;width:${hiPct-loPct}%"></div>
-        <div class="asl-thumb" id="gsl-th-min-${gd.key}" data-handle="min" style="left:${loPct}%"></div>
-        <div class="asl-thumb" id="gsl-th-max-${gd.key}" data-handle="max" style="left:${hiPct}%"></div>
+      <div class="asl-range-track" id="${idPrefix}-t-${gd.key}" data-key="${gd.key}" data-max="${max}">
+        <div class="asl-range-fill" id="${idPrefix}-f-${gd.key}" style="left:${loPct}%;width:${hiPct-loPct}%"></div>
+        <div class="asl-thumb" id="${idPrefix}-th-min-${gd.key}" data-handle="min" style="left:${loPct}%"></div>
+        <div class="asl-thumb" id="${idPrefix}-th-max-${gd.key}" data-handle="max" style="left:${hiPct}%"></div>
       </div>
-      <span class="asl-total-label">보유펫 최고 ${fmtG(max)}</span>
+      <span class="asl-total-label">보유펫 최고 ${fmt(max)}</span>
     </div>`;
-  }).join("") + `<button class="attr-filter-reset" id="growthResetBtn">성장률 필터 초기화</button>`;
-  GROWTH_SLIDER_DEFS.forEach(gd=>{
-    const track = document.getElementById("gsl-t-"+gd.key);
-    const thumbMin = document.getElementById("gsl-th-min-"+gd.key);
-    const thumbMax = document.getElementById("gsl-th-max-"+gd.key);
+  }).join("") + `<button class="attr-filter-reset" id="${resetBtnId}">${resetLabel}</button>`;
+  defs.forEach(gd=>{
+    const track = document.getElementById(idPrefix+"-t-"+gd.key);
+    const thumbMin = document.getElementById(idPrefix+"-th-min-"+gd.key);
+    const thumbMax = document.getElementById(idPrefix+"-th-max-"+gd.key);
     let draggingHandle = null;
     const valFromClientX = (clientX)=>{
       const rect = track.getBoundingClientRect();
@@ -959,24 +1007,24 @@ function renderGrowthSliders(){
     };
     const applyVisual = ()=>{
       const max = parseFloat(track.dataset.max) || 1;
-      const range = state.growthRange[gd.key];
+      const range = rangeState[gd.key];
       const hiVal = range.max===null ? max : range.max;
       const loPct = Math.max(0, Math.min(100, range.min/max*100));
       const hiPct = Math.max(0, Math.min(100, hiVal/max*100));
-      document.getElementById("gsl-f-"+gd.key).style.left = loPct+"%";
-      document.getElementById("gsl-f-"+gd.key).style.width = Math.max(0,hiPct-loPct)+"%";
+      document.getElementById(idPrefix+"-f-"+gd.key).style.left = loPct+"%";
+      document.getElementById(idPrefix+"-f-"+gd.key).style.width = Math.max(0,hiPct-loPct)+"%";
       thumbMin.style.left = loPct+"%";
       thumbMax.style.left = hiPct+"%";
       const isFull = range.min<=0.0001 && (range.max===null || range.max>=max-0.0001);
-      const valEl = document.getElementById("gsl-v-"+gd.key);
-      valEl.textContent = isFull ? "전체" : (fmtG(range.min)+" ~ "+fmtG(hiVal));
+      const valEl = document.getElementById(idPrefix+"-v-"+gd.key);
+      valEl.textContent = isFull ? "전체" : (fmt(range.min)+" ~ "+fmt(hiVal));
       valEl.classList.toggle("on", !isFull);
     };
     const startDrag = (handle, clientX)=>{ draggingHandle = handle; moveDrag(clientX); };
     const moveDrag = (clientX)=>{
       if(!draggingHandle) return;
       const v = valFromClientX(clientX);
-      const range = state.growthRange[gd.key];
+      const range = rangeState[gd.key];
       const max = parseFloat(track.dataset.max) || 1;
       if(draggingHandle === "min"){
         const curMax = range.max===null ? max : range.max;
@@ -994,7 +1042,7 @@ function renderGrowthSliders(){
     track.addEventListener("mousedown", e=>{
       if(e.target===thumbMin || e.target===thumbMax) return;
       const v = valFromClientX(e.clientX);
-      const range = state.growthRange[gd.key];
+      const range = rangeState[gd.key];
       const curMax = range.max===null ? parseFloat(track.dataset.max) : range.max;
       const nearMin = Math.abs(v-range.min) <= Math.abs(v-curMax);
       startDrag(nearMin ? "min" : "max", e.clientX);
@@ -1004,22 +1052,27 @@ function renderGrowthSliders(){
     document.addEventListener("mouseup", ()=>{ draggingHandle=null; });
     document.addEventListener("touchend", ()=>{ draggingHandle=null; });
   });
+}
+function renderGrowthSliders(){
+  buildRangeSliders("growthSliders", GROWTH_SLIDER_DEFS, state.growthRange, getGrowthMax, "gsl", "growthResetBtn", "성장률 필터 초기화");
   document.getElementById("growthResetBtn").addEventListener("click", ()=>{
     state.growthRange = {a:{min:0,max:null},d:{min:0,max:null},s:{min:0,max:null},h:{min:0,max:null},total:{min:0,max:null}};
+    render();
+  });
+}
+function renderValSliders(){
+  buildRangeSliders("valSliders", VAL_SLIDER_DEFS, state.valRange, getValMax, "vsl", "valResetBtn", "능력치 필터 초기화", v=>Math.round(v).toString());
+  document.getElementById("valResetBtn").addEventListener("click", ()=>{
+    state.valRange = {a:{min:0,max:null},d:{min:0,max:null},s:{min:0,max:null},h:{min:0,max:null}};
     render();
   });
 }
 
 document.getElementById("filterResetBtn").addEventListener("click", ()=>{
   state.growthRange = {a:{min:0,max:null},d:{min:0,max:null},s:{min:0,max:null},h:{min:0,max:null},total:{min:0,max:null}};
-  state.valMin = {a:0,d:0,s:0,h:0};
-  ["fValAtk","fValDef","fValAgi","fValHp"].forEach(id=> document.getElementById(id).value = "");
+  state.valRange = {a:{min:0,max:null},d:{min:0,max:null},s:{min:0,max:null},h:{min:0,max:null}};
   render();
 });
-document.getElementById("fValAtk").addEventListener("input", e=>{ state.valMin.a = num(e.target.value); render(); });
-document.getElementById("fValDef").addEventListener("input", e=>{ state.valMin.d = num(e.target.value); render(); });
-document.getElementById("fValAgi").addEventListener("input", e=>{ state.valMin.s = num(e.target.value); render(); });
-document.getElementById("fValHp").addEventListener("input", e=>{ state.valMin.h = num(e.target.value); render(); });
 document.getElementById("howFilter").addEventListener("click", e=>{
   const chip=e.target.closest(".f-chip"); if(!chip) return;
   [...chip.parentElement.children].forEach(c=>c.classList.remove("is-on"));
@@ -1044,10 +1097,10 @@ function matchesFilter(entry, p, disp){
   else if(state.how === "신펫" && isOldPet(p)) return false;
   else if(state.how === "탑승가능" && mountText(p.mount) !== "가능") return false;
   else if(state.how !== "ALL" && state.how !== "돈펫" && state.how !== "구펫" && state.how !== "신펫" && state.how !== "탑승가능" && howType(p.how) !== state.how) return false;
-  if(disp.cur.a < state.valMin.a) return false;
-  if(disp.cur.d < state.valMin.d) return false;
-  if(disp.cur.s < state.valMin.s) return false;
-  if(disp.cur.h < state.valMin.h) return false;
+  if(!inGrowthRange(disp.cur.a, state.valRange.a)) return false;
+  if(!inGrowthRange(disp.cur.d, state.valRange.d)) return false;
+  if(!inGrowthRange(disp.cur.s, state.valRange.s)) return false;
+  if(!inGrowthRange(disp.cur.h, state.valRange.h)) return false;
   if(!inGrowthRange(disp.growth.a, state.growthRange.a)) return false;
   if(!inGrowthRange(disp.growth.d, state.growthRange.d)) return false;
   if(!inGrowthRange(disp.growth.s, state.growthRange.s)) return false;
@@ -1092,15 +1145,18 @@ function cardHTML(entry, idx, p, disp){
     const autoGrade = estimateGrade(sd.key, pct);
     const manual = gradeOv[sd.key] || "";
     const grade = manual || autoGrade;
-    const gradeOptions = `<option value="">—</option>` +
-      GRADE_ORDER.map(g=>`<option value="${g}" ${manual===g?'selected':''}>${g}</option>`).join('');
+    const gradeOptionsHTML = GRADE_ORDER.map(g=>`<button type="button" class="grade-opt" data-idx="${idx}" data-key="${sd.key}" data-val="${g}">${g}</button>`).join('') +
+      `<button type="button" class="grade-opt reset" data-idx="${idx}" data-key="${sd.key}" data-val="">— 자동으로</button>`;
     return `
       <div class="pic-stat-row ${sd.cls}">
         <div class="psr-growth-line">
-          <select class="grade-badge-select grade-${grade.replace('+','p')}" data-idx="${idx}" data-key="${sd.key}" title="계산상 ${pct.toFixed(2)}%${manual?' · 직접 수정됨':''} — 실제와 다르면 클릭해서 바꿔주세요">${gradeOptions}</select>
           <span class="psr-glabel">${sd.label}</span>
           <span class="psr-gval">${cut2(gCur)}${growthDeltaHTML(gCur-gBase)}</span>
-          <span class="psr-base">S ${cut2(gBase)}</span>
+          <div class="grade-wrap" data-idx="${idx}" data-key="${sd.key}">
+            <button type="button" class="grade-badge-btn grade-${grade.replace('+','p')}" title="계산상 ${pct.toFixed(2)}%${manual?' · 직접 수정됨':''} — 실제와 다르면 눌러서 바꿔주세요">${grade}</button>
+            <span class="grade-sub">S ${cut2(gBase)}</span>
+            <div class="grade-popup">${gradeOptionsHTML}</div>
+          </div>
         </div>
         <div class="psr-controls">
           <button type="button" class="pic-stat-btn pic-stat-minus" data-idx="${idx}" data-key="${sd.key}">−</button>
@@ -1187,6 +1243,7 @@ function renderList(){
 }
 function render(){
   renderGrowthSliders();
+  renderValSliders();
   renderList();
 }
 document.getElementById("grid").addEventListener("click", e=>{
@@ -1240,6 +1297,24 @@ document.getElementById("grid").addEventListener("click", e=>{
     myPets[idx].level = minusBtn ? Math.max(1, cur - 1) : Math.min(140, cur + 1);
     saveMyPets();
     render();
+    return;
+  }
+  const gradeBtn = e.target.closest(".grade-badge-btn");
+  if(gradeBtn){
+    const wrap = gradeBtn.closest(".grade-wrap");
+    const wasOpen = wrap.classList.contains("open");
+    document.querySelectorAll(".grade-wrap.open").forEach(w=> w.classList.remove("open"));
+    if(!wasOpen) wrap.classList.add("open");
+    return;
+  }
+  const gradeOpt = e.target.closest(".grade-opt");
+  if(gradeOpt){
+    const idx = parseInt(gradeOpt.dataset.idx), key = gradeOpt.dataset.key, val = gradeOpt.dataset.val;
+    if(!myPets[idx].gradeOv) myPets[idx].gradeOv = {};
+    if(val === ""){ delete myPets[idx].gradeOv[key]; }
+    else { myPets[idx].gradeOv[key] = val; }
+    saveMyPets();
+    render();
   }
 });
 document.getElementById("grid").addEventListener("change", e=>{
@@ -1257,16 +1332,11 @@ document.getElementById("grid").addEventListener("change", e=>{
     const idx = parseInt(statInput.dataset.idx), key = statInput.dataset.key;
     const v = parseFloat(statInput.value);
     setOverride(idx, key, isFinite(v) ? v : 0);
-    return;
   }
-  const gradeSelect = e.target.closest(".grade-badge-select");
-  if(gradeSelect){
-    const idx = parseInt(gradeSelect.dataset.idx), key = gradeSelect.dataset.key;
-    if(!myPets[idx].gradeOv) myPets[idx].gradeOv = {};
-    if(gradeSelect.value === ""){ delete myPets[idx].gradeOv[key]; }
-    else { myPets[idx].gradeOv[key] = gradeSelect.value; }
-    saveMyPets();
-    render();
+});
+document.addEventListener("click", e=>{
+  if(!e.target.closest(".grade-wrap")){
+    document.querySelectorAll(".grade-wrap.open").forEach(w=> w.classList.remove("open"));
   }
 });
 
@@ -1297,6 +1367,13 @@ function toggleDark(){
   try{ localStorage.setItem('sa2-theme', n); }catch(e){}
 }
 try{ const saved=localStorage.getItem('sa2-theme'); if(saved) document.documentElement.setAttribute('data-theme', saved); }catch(e){}
+
+/* ── 필터 아코디언 접기/펼치기 ── */
+document.querySelectorAll(".facc-head").forEach(head=>{
+  head.addEventListener("click", ()=>{
+    head.parentElement.classList.toggle("open");
+  });
+});
 
 loadMyPets();
 renderAttrSliders();
