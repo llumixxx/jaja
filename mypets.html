@@ -163,6 +163,21 @@ transition:border-color .15s,transform .15s,color .15s;}
 .io-btn:hover{border-color:var(--a1);color:var(--a1);transform:translateY(-2px);}
 .io-btn:active{transform:scale(.96);}
 .io-hint{font-size:11px;color:var(--t3);align-self:center;margin-left:auto;}
+.rank-row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;padding-top:14px;margin-top:14px;border-top:1.5px dashed var(--border);}
+.rank-status{font-size:11.5px;color:var(--t3);margin-top:8px;}
+.rank-results{display:flex;flex-direction:column;gap:8px;margin-top:10px;}
+.rank-item{display:flex;align-items:center;gap:10px;background:var(--s1);border:1.5px solid var(--border);
+border-radius:14px;padding:9px 12px;flex-wrap:wrap;}
+.rank-item img{width:32px;height:32px;object-fit:contain;image-rendering:pixelated;background:var(--white);border-radius:8px;flex-shrink:0;}
+.rank-item-name{font-size:13px;font-weight:800;color:var(--t1);flex-shrink:0;}
+.rank-item-stats{font-size:11px;color:var(--t3);font-family:'Nunito',sans-serif;font-weight:700;flex:1;min-width:180px;}
+.rank-item-add{background:linear-gradient(135deg,var(--a1),var(--a2));color:#fff;border:none;border-radius:10px;
+padding:7px 14px;font-size:12px;font-weight:800;cursor:pointer;flex-shrink:0;transition:filter .15s,transform .15s;}
+.rank-item-add:hover{filter:brightness(1.08);transform:translateY(-1px);}
+.rank-item-add:disabled{opacity:.4;cursor:not-allowed;}
+.rank-add-all{background:var(--s2);border:1.5px solid var(--border2);color:var(--t2);border-radius:12px;
+padding:8px 14px;font-size:12px;font-weight:800;cursor:pointer;align-self:flex-start;transition:border-color .15s,color .15s;}
+.rank-add-all:hover{border-color:var(--a1);color:var(--a1);}
 /* ===== 펫 카드 (가독성 위주 재설계) ===== */
 #grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:16px;}
 .pet-info-card{background:var(--white);border:1.5px solid var(--border);border-radius:22px;padding:18px;
@@ -338,6 +353,16 @@ footer{text-align:center;padding:30px;color:var(--t3);font-size:11px;font-family
 <input type="file" id="importFile" accept=".txt,.json" style="display:none" />
 <span class="io-hint">저장한 .txt 파일을 다른 기기에서도 불러올 수 있어요</span>
 </div>
+
+<div class="rank-row">
+<div class="add-field" style="flex:1;min-width:200px;">
+<label>🏆 내 랭킹으로 채우기 (닉네임)</label>
+<input type="text" id="rankNick" placeholder="인게임 닉네임을 입력하세요..." autocomplete="off" />
+</div>
+<button class="add-btn" id="rankSearchBtn">검색</button>
+</div>
+<div class="rank-status" id="rankStatus"></div>
+<div class="rank-results" id="rankResults"></div>
 </div>
 
 <div id="grid"></div>
@@ -582,6 +607,87 @@ document.getElementById("importFile").addEventListener("change", e=>{
   if(file) importFromTxt(file);
   e.target.value = "";
 });
+
+/* ===== 내 랭킹으로 채우기 (pet_ranking_data.json, update-pet-rank.yml이 주기적으로 갱신) ===== */
+let RANK_DATA = null;
+let rankLoadPromise = null;
+function loadRankingData(){
+  if(rankLoadPromise) return rankLoadPromise;
+  rankLoadPromise = fetch("./pet_ranking_data.json?ts=" + Date.now(), {cache:"no-store"})
+    .then(res => { if(!res.ok) throw new Error("http " + res.status); return res.json(); })
+    .then(data => { RANK_DATA = data; return data; });
+  return rankLoadPromise;
+}
+function searchRankingByNick(nick){
+  if(!RANK_DATA || !Array.isArray(RANK_DATA.pets)) return [];
+  const q = nick.trim();
+  const out = [];
+  RANK_DATA.pets.forEach(petEntry => {
+    (petEntry.rows || []).forEach(row => {
+      if(String(row.name||"").trim() === q){
+        out.push({ id: petEntry.id, name: petEntry.name, level: row.level, hp: row.hp, atk: row.atk, def: row.def, spd: row.spd });
+      }
+    });
+  });
+  return out;
+}
+function addRankMatchToMyPets(m){
+  const idx = myPets.findIndex(e => String(e.id) === String(m.id));
+  const entry = { id: m.id, level: m.level, addedAt: Date.now(), ov: { a: m.atk, d: m.def, s: m.spd, h: m.hp } };
+  if(idx >= 0) myPets[idx] = { ...myPets[idx], ...entry };
+  else myPets.push(entry);
+  saveMyPets();
+}
+function renderRankResults(matches){
+  const box = document.getElementById("rankResults");
+  if(!matches.length){ box.innerHTML = ""; return; }
+  const rowsHTML = matches.map((m, i) => {
+    const p = findPetById(m.id);
+    return `
+    <div class="rank-item" data-i="${i}">
+      ${p ? imgTag(p.imageCode) : ""}
+      <span class="rank-item-name">${m.name}</span>
+      <span class="rank-item-stats">Lv.${m.level} · 공${m.atk} 방${m.def} 순${m.spd} 내${m.hp}</span>
+      <button class="rank-item-add" data-i="${i}">+ 추가</button>
+    </div>`;
+  }).join("");
+  box.innerHTML = `<button class="rank-add-all" id="rankAddAll">전체 ${matches.length}마리 한번에 추가</button>${rowsHTML}`;
+  box.querySelectorAll(".rank-item-add").forEach(btn => {
+    btn.addEventListener("click", () => {
+      addRankMatchToMyPets(matches[parseInt(btn.dataset.i)]);
+      btn.disabled = true;
+      btn.textContent = "추가됨";
+      render();
+    });
+  });
+  document.getElementById("rankAddAll").addEventListener("click", () => {
+    matches.forEach(m => addRankMatchToMyPets(m));
+    box.querySelectorAll(".rank-item-add").forEach(b => { b.disabled = true; b.textContent = "추가됨"; });
+    render();
+  });
+}
+function runRankSearch(){
+  const nick = document.getElementById("rankNick").value.trim();
+  const status = document.getElementById("rankStatus");
+  const results = document.getElementById("rankResults");
+  if(!nick){ status.textContent = "닉네임을 입력해줘."; results.innerHTML = ""; return; }
+  status.textContent = "랭킹 데이터 불러오는 중...";
+  results.innerHTML = "";
+  loadRankingData().then(data => {
+    const matches = searchRankingByNick(nick);
+    if(!matches.length){
+      status.textContent = `"${nick}" 닉네임으로 TOP5에 든 펫이 없어. (펫별 상위 5등 안에 든 것만 잡혀)`;
+      return;
+    }
+    const upd = data.timestamp ? new Date(data.timestamp).toLocaleString("ko-KR") : "";
+    status.textContent = `${matches.length}마리 찾음 (랭킹 기준: ${upd})`;
+    renderRankResults(matches);
+  }).catch(err => {
+    status.textContent = "랭킹 데이터를 아직 못 불러왔어. (pet_ranking_data.json이 레포에 있는지 확인해줘)";
+  });
+}
+document.getElementById("rankSearchBtn").addEventListener("click", runRankSearch);
+document.getElementById("rankNick").addEventListener("keydown", e => { if(e.key === "Enter") runRankSearch(); });
 
 /* ===== 필터/정렬 상태 ===== */
 let state = { q:"", how:"ALL", sort:"default",
