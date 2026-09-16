@@ -305,27 +305,6 @@ font-family:'Nunito',sans-serif;transition:transform .15s,background .15s,border
 .psr-gdelta{font-size:10.5px;font-weight:800;}
 .psr-base{font-size:10px;font-weight:700;color:var(--t3);font-family:'Nunito',sans-serif;}
 .d-pos{color:#2f7fd6 !important;} .d-neg{color:#e0453a !important;}
-/* ── 등급 뱃지 (버튼+팝업, 네이티브 select 안 씀 — 크로스브라우저 표시 문제 방지) ── */
-.grade-wrap{position:relative;margin-left:auto;display:flex;flex-direction:column;align-items:center;gap:2px;flex-shrink:0;}
-.grade-badge-btn{font-size:21px;font-weight:900;padding:4px 16px;border-radius:11px;border:none;color:#fff;
-cursor:pointer;box-shadow:0 3px 10px rgba(0,0,0,.22);font-family:'Nunito',sans-serif;letter-spacing:.5px;
-transition:transform .15s;min-width:56px;}
-.grade-badge-btn:hover{transform:scale(1.06);}
-.grade-badge-btn:active{transform:scale(.94);}
-.grade-sub{font-size:9px;color:var(--t3);font-weight:700;font-family:'Nunito',sans-serif;}
-.grade-popup{display:none;position:absolute;top:calc(100% + 6px);right:0;background:var(--white);
-border:1.5px solid var(--border2);border-radius:12px;box-shadow:0 10px 28px rgba(0,0,0,.22);
-padding:6px;z-index:80;grid-template-columns:repeat(4,1fr);gap:4px;width:190px;}
-.grade-wrap.open .grade-popup{display:grid;}
-.grade-opt{font-size:11.5px;font-weight:800;padding:7px 0;border-radius:8px;border:1.5px solid var(--border);
-background:var(--s1);color:var(--t2);cursor:pointer;font-family:'Nunito',sans-serif;}
-.grade-opt:hover{border-color:var(--a1);color:var(--a1);}
-.grade-opt.reset{grid-column:span 4;background:var(--s2);color:var(--t3);}
-.grade-badge{display:inline-block;font-size:11px;font-weight:900;padding:2px 8px;border-radius:8px;
-color:#fff;font-family:'Nunito',sans-serif;letter-spacing:.3px;}
-.grade-F, .grade-D, .grade-Dp, .grade-C, .grade-Cp, .grade-B, .grade-Bp{background:#98a2ad;}
-.grade-A{background:#f0c419;} .grade-Ap{background:#f5a623;}
-.grade-S{background:#ef5350;} .grade-Sp{background:#e0342c;} .grade-RS{background:linear-gradient(135deg,#c62828,#7a0000);}
 .stat-atk .psr-glabel, .stat-atk .psr-gval{color:var(--a2);}
 .stat-def .psr-glabel, .stat-def .psr-gval{color:var(--a1);}
 .stat-agi .psr-glabel, .stat-agi .psr-gval{color:var(--a5);}
@@ -447,7 +426,6 @@ footer{text-align:center;padding:30px;color:var(--t3);font-size:11px;font-family
 <div class="wind-badge"><span class="wind-badge-dot"></span><span>SA JAJA SERVER</span></div>
 <div class="page-title">내 펫 관리</div>
 <div class="page-sub">보유 페트 &amp; 레벨별 능력치 트래커</div>
-<div class="page-sub" style="margin-top:4px;font-size:11px;color:var(--a1);font-weight:800;">⚠️ 등급 뱃지는 추정치라 실제 게임과 다를 수 있어요 — 다르면 뱃지를 클릭해서 직접 바꿔주세요</div>
 </div>
 
 <div class="stats-row">
@@ -566,23 +544,6 @@ function calcDisplay(p, entry){
   };
   const totalGrowth = growth.a + growth.d + growth.s;
   return { cur, growth, calc, baseGrowth: st.growth, totalGrowth };
-}
-/* ===== 추정 등급 (커뮤니티 실측 스샷 역산 기반, F~RS 12단계) =====
-   실제값/이론상 무보정 계산치 × 100 (%)을 스탯별 컷라인 표에 대조.
-   내구·공격·방어는 데이터가 탄탄함. 순발력은 레벨 100 미만 + 롤 보정된 개체에서
-   오차가 커질 수 있어 참고용으로만 볼 것. 중간 등급(C+~B+ 근방)은 샘플이 적어 보간값임. */
-const GRADE_ORDER = ['F','D','D+','C','C+','B','B+','A','A+','S','S+','RS'];
-const GRADE_THRESHOLDS = {
-  h: [94.12, 95.01, 95.90, 96.07, 96.66, 97.25, 97.84, 98.51, 99.26, 99.73, 100.13, 100.53],
-  a: [94.05, 94.88, 95.70, 96.53, 97.07, 97.61, 98.14, 98.68, 99.22, 99.77, 99.97, 100.32],
-  d: [92.13, 93.06, 93.99, 94.92, 95.85, 96.43, 97.00, 97.58, 98.93, 99.50, 99.92, 100.24],
-  s: [94.19, 94.79, 95.39, 95.99, 96.59, 97.26, 97.88, 98.49, 99.03, 99.44, 100.22, 100.76]
-};
-function estimateGrade(key, pct){
-  const th = GRADE_THRESHOLDS[key];
-  let idx = 0;
-  for(let i=0;i<th.length;i++){ if(pct >= th[i]) idx = i; }
-  return GRADE_ORDER[idx];
 }
 function howType(s){
   s=String(s||"");
@@ -1135,28 +1096,17 @@ const STAT_DEFS = [
 ];
 function cardHTML(entry, idx, p, disp){
   const name = normalizedName(p);
-  const gradeOv = entry.gradeOv || {};
   const statsHTML = STAT_DEFS.map(sd => {
     const curInt = Math.floor(disp.cur[sd.key]);
     const baseInt = Math.floor(disp.calc[sd.key]);
     const gCur = disp.growth[sd.key];
     const gBase = disp.baseGrowth[sd.key];
-    const pct = disp.calc[sd.key] ? (disp.cur[sd.key]/disp.calc[sd.key]*100) : 100;
-    const autoGrade = estimateGrade(sd.key, pct);
-    const manual = gradeOv[sd.key] || "";
-    const grade = manual || autoGrade;
-    const gradeOptionsHTML = GRADE_ORDER.map(g=>`<button type="button" class="grade-opt" data-idx="${idx}" data-key="${sd.key}" data-val="${g}">${g}</button>`).join('') +
-      `<button type="button" class="grade-opt reset" data-idx="${idx}" data-key="${sd.key}" data-val="">— 자동으로</button>`;
     return `
       <div class="pic-stat-row ${sd.cls}">
         <div class="psr-growth-line">
           <span class="psr-glabel">${sd.label}</span>
           <span class="psr-gval">${cut2(gCur)}${growthDeltaHTML(gCur-gBase)}</span>
-          <div class="grade-wrap" data-idx="${idx}" data-key="${sd.key}">
-            <button type="button" class="grade-badge-btn grade-${grade.replace('+','p')}" title="계산상 ${pct.toFixed(2)}%${manual?' · 직접 수정됨':''} — 실제와 다르면 눌러서 바꿔주세요">${grade}</button>
-            <span class="grade-sub">S ${cut2(gBase)}</span>
-            <div class="grade-popup">${gradeOptionsHTML}</div>
-          </div>
+          <span class="psr-base">S ${cut2(gBase)}</span>
         </div>
         <div class="psr-controls">
           <button type="button" class="pic-stat-btn pic-stat-minus" data-idx="${idx}" data-key="${sd.key}">−</button>
@@ -1197,20 +1147,14 @@ function cardHTML(entry, idx, p, disp){
 let currentList = [];
 function tableRowHTML(entry, idx, p, disp){
   const name = normalizedName(p);
-  const gradeOv = entry.gradeOv || {};
-  const gradeCell = (key)=>{
-    const pct = disp.calc[key] ? (disp.cur[key]/disp.calc[key]*100) : 100;
-    const g = gradeOv[key] || estimateGrade(key, pct);
-    return `<span class="grade-badge grade-${g.replace('+','p')}" style="cursor:default;">${g}</span>`;
-  };
   return `
   <tr data-idx="${idx}">
     <td><div class="pt-name-cell">${imgTag(p.imageCode)}<div><div class="pt-name">${name}</div><div class="pt-lv">Lv.${entry.level}</div></div></div></td>
     <td><div class="pt-attr-cell">${attrChipsHTML(p)}</div></td>
-    <td class="pt-stat pt-stat-atk">${int0(disp.cur.a)} ${gradeCell('a')}</td>
-    <td class="pt-stat pt-stat-def">${int0(disp.cur.d)} ${gradeCell('d')}</td>
-    <td class="pt-stat pt-stat-agi">${int0(disp.cur.s)} ${gradeCell('s')}</td>
-    <td class="pt-stat pt-stat-hp">${int0(disp.cur.h)} ${gradeCell('h')}</td>
+    <td class="pt-stat pt-stat-atk">${int0(disp.cur.a)}</td>
+    <td class="pt-stat pt-stat-def">${int0(disp.cur.d)}</td>
+    <td class="pt-stat pt-stat-agi">${int0(disp.cur.s)}</td>
+    <td class="pt-stat pt-stat-hp">${int0(disp.cur.h)}</td>
     <td class="pt-total">${cut2(disp.totalGrowth)}</td>
     <td><span class="pt-mount ${mountText(p.mount)==='가능'?'pt-mount-y':'pt-mount-n'}">${mountText(p.mount)==='가능'?'탑승가능':'탑승불가'}</span></td>
     <td><button class="pt-del" data-idx="${idx}">🗑</button></td>
@@ -1297,24 +1241,6 @@ document.getElementById("grid").addEventListener("click", e=>{
     myPets[idx].level = minusBtn ? Math.max(1, cur - 1) : Math.min(140, cur + 1);
     saveMyPets();
     render();
-    return;
-  }
-  const gradeBtn = e.target.closest(".grade-badge-btn");
-  if(gradeBtn){
-    const wrap = gradeBtn.closest(".grade-wrap");
-    const wasOpen = wrap.classList.contains("open");
-    document.querySelectorAll(".grade-wrap.open").forEach(w=> w.classList.remove("open"));
-    if(!wasOpen) wrap.classList.add("open");
-    return;
-  }
-  const gradeOpt = e.target.closest(".grade-opt");
-  if(gradeOpt){
-    const idx = parseInt(gradeOpt.dataset.idx), key = gradeOpt.dataset.key, val = gradeOpt.dataset.val;
-    if(!myPets[idx].gradeOv) myPets[idx].gradeOv = {};
-    if(val === ""){ delete myPets[idx].gradeOv[key]; }
-    else { myPets[idx].gradeOv[key] = val; }
-    saveMyPets();
-    render();
   }
 });
 document.getElementById("grid").addEventListener("change", e=>{
@@ -1332,11 +1258,6 @@ document.getElementById("grid").addEventListener("change", e=>{
     const idx = parseInt(statInput.dataset.idx), key = statInput.dataset.key;
     const v = parseFloat(statInput.value);
     setOverride(idx, key, isFinite(v) ? v : 0);
-  }
-});
-document.addEventListener("click", e=>{
-  if(!e.target.closest(".grade-wrap")){
-    document.querySelectorAll(".grade-wrap.open").forEach(w=> w.classList.remove("open"));
   }
 });
 
