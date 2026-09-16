@@ -77,14 +77,55 @@ transition:transform .18s cubic-bezier(.34,1.56,.64,1),background .18s ease,colo
 .filter-row{display:flex;align-items:center;gap:7px;margin-bottom:7px;}
 .filter-row:last-child{margin-bottom:0;}
 .filter-row .f-select{flex:1.2;}
-.filter-label{font-size:12px;font-weight:800;color:var(--t2);width:44px;flex-shrink:0;}
-.num-sm{width:64px;flex-shrink:0;padding:8px 6px;text-align:center;}
+.filter-label{font-size:12px;font-weight:800;color:var(--t2);width:40px;flex-shrink:0;}
+.num-sm{width:56px;flex-shrink:0;padding:8px 4px;text-align:center;}
 .filter-unit{font-size:10.5px;color:var(--t3);font-weight:700;flex-shrink:0;}
 .filter-reset{width:100%;margin-top:4px;background:var(--s2);border:1.5px solid var(--border2);color:var(--t3);
 padding:8px;border-radius:12px;font-size:11.5px;font-weight:700;cursor:pointer;
 transition:transform .2s cubic-bezier(.34,1.56,.64,1),border-color .2s ease,color .2s ease;}
 .filter-reset:hover{border-color:var(--a1);color:var(--a1);transform:translateY(-2px);}
 .filter-reset:active{transform:scale(.95);}
+/* ── 속성 트랙 슬라이더 (pokedex.html에서 이식) ── */
+.asl-total-label{font-size:9px;color:var(--t4);text-transform:none;letter-spacing:0;font-weight:700;margin-left:4px;}
+.asl-wrap{display:flex;flex-direction:column;gap:8px;margin-bottom:4px;}
+.asl-item{display:flex;flex-direction:column;gap:5px;background:var(--s1);border:1.5px solid var(--border);
+border-radius:12px;padding:8px 10px;transition:opacity .2s,border-color .15s;}
+.asl-item.asl-disabled{opacity:.35;pointer-events:none;filter:grayscale(.4);}
+.asl-item.active-earth{border-color:#7cc47f;background:rgba(124,196,127,.08);}
+.asl-item.active-water{border-color:var(--a1);background:rgba(47,127,214,.08);}
+.asl-item.active-fire{border-color:#e57373;background:rgba(229,115,115,.08);}
+.asl-item.active-wind{border-color:#f0c419;background:rgba(240,196,25,.08);}
+.asl-header{display:flex;align-items:center;gap:5px;}
+.asl-emoji{font-size:14px;}
+.asl-name{font-size:11.5px;font-weight:800;color:var(--t2);}
+.asl-val{font-size:14px;font-weight:900;font-family:'Nunito',sans-serif;margin-left:auto;color:var(--t3);min-width:16px;text-align:right;}
+.asl-val.on{color:var(--a1);}
+.asl-track{position:relative;height:16px;background:var(--white);border:1.5px solid var(--border2);
+border-radius:99px;cursor:pointer;user-select:none;overflow:hidden;}
+.asl-fill-bar{position:absolute;left:0;top:0;bottom:0;pointer-events:none;transition:width .1s ease;}
+.asl-fill-earth{background:linear-gradient(90deg,#66bb6a,#a5d6a7);}
+.asl-fill-water{background:linear-gradient(90deg,var(--a1),var(--a3));}
+.asl-fill-fire{background:linear-gradient(90deg,#e53935,#ef8a80);}
+.asl-fill-wind{background:linear-gradient(90deg,#f0c419,#fdd835);}
+.asl-dividers{position:absolute;inset:0;display:flex;pointer-events:none;}
+.asl-div{flex:1;border-right:1.5px solid rgba(255,255,255,0.5);} .asl-div:last-child{border-right:none;}
+.asl-footer{display:flex;align-items:center;justify-content:space-between;padding:2px 2px 0;}
+.asl-total-val{font-size:12px;font-weight:900;font-family:'Nunito',sans-serif;color:var(--a1);}
+.asl-total-val.full{color:var(--a4);}
+.attr-mode-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;}
+.attr-mode-label{font-size:12px;font-weight:700;color:var(--t2);}
+.attr-mode-switch{position:relative;display:inline-flex;align-items:center;cursor:pointer;}
+.attr-mode-switch input{display:none;}
+.attr-mode-track{width:40px;height:22px;background:var(--border2);border-radius:99px;position:relative;transition:background .2s;flex-shrink:0;}
+.attr-mode-thumb{position:absolute;top:2px;left:2px;width:18px;height:18px;background:#fff;border-radius:50%;
+box-shadow:0 1px 3px rgba(0,0,0,.3);transition:transform .2s cubic-bezier(.34,1.56,.64,1);}
+.attr-mode-switch input:checked + .attr-mode-track{background:linear-gradient(135deg,var(--a1),var(--a2));}
+.attr-mode-switch input:checked + .attr-mode-track .attr-mode-thumb{transform:translateX(18px);}
+.attr-filter-reset{width:100%;margin-top:2px;background:var(--s2);border:1.5px solid var(--border2);color:var(--t3);
+padding:8px;border-radius:12px;font-size:11.5px;font-weight:700;cursor:pointer;
+transition:transform .2s cubic-bezier(.34,1.56,.64,1),border-color .2s ease,color .2s ease;}
+.attr-filter-reset:hover{border-color:var(--a1);color:var(--a1);transform:translateY(-2px);}
+.attr-filter-reset:active{transform:scale(.95);}
 .sb-footer{padding:12px 16px;border-top:1.5px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
 .sb-footer-txt{font-size:10.5px;color:var(--t3);}
 .toggle-btn{position:fixed;top:16px;left:16px;z-index:300;width:42px;height:42px;background:var(--white);
@@ -210,6 +251,12 @@ font-family:'Nunito',sans-serif;transition:transform .15s,background .15s,border
 .psr-gdelta{font-size:10.5px;font-weight:800;}
 .psr-base{font-size:10px;font-weight:700;color:var(--t3);margin-left:auto;font-family:'Nunito',sans-serif;}
 .d-pos{color:#2f7fd6 !important;} .d-neg{color:#e0453a !important;}
+.grade-badge, .grade-badge-select{font-size:9.5px;font-weight:900;padding:1px 4px;border-radius:7px;font-family:'Nunito',sans-serif;
+color:#fff;flex-shrink:0;cursor:pointer;border:none;outline:none;-webkit-appearance:none;appearance:none;text-align:center;}
+.grade-F{background:#8a8a8a;} .grade-D{background:#8a8a8a;} .grade-Dp{background:#9a8a6a;}
+.grade-C{background:#a97c50;} .grade-Cp{background:#b98a4a;} .grade-B{background:#c9942f;}
+.grade-Bp{background:#d6a020;} .grade-A{background:#4f9d5c;} .grade-Ap{background:#3fae5a;}
+.grade-S{background:#2f7fd6;} .grade-Sp{background:#7a4fd6;} .grade-RS{background:linear-gradient(135deg,#e0a020,#e05a3a);}
 .stat-atk .psr-glabel, .stat-atk .psr-gval{color:var(--a2);}
 .stat-def .psr-glabel, .stat-def .psr-gval{color:var(--a1);}
 .stat-agi .psr-glabel, .stat-agi .psr-gval{color:var(--a5);}
@@ -253,27 +300,24 @@ footer{text-align:center;padding:30px;color:var(--t3);font-size:11px;font-family
 <div class="f-section">검색</div>
 <input type="text" id="search" class="f-input" placeholder="내 펫 이름 검색..." />
 
-<div class="f-section">속성 필터</div>
-<div class="filter-row">
-<select id="attrSelect" class="f-select">
-<option value="all">속성 무관</option>
-<option value="earth">지속성</option>
-<option value="water">수속성</option>
-<option value="fire">화속성</option>
-<option value="wind">풍속성</option>
-</select>
-<input type="number" id="attrMin" class="f-input num-sm" placeholder="0" min="0" max="10" />
-<span class="filter-unit">이상</span>
+<div class="f-section">속성값 필터 <span class="asl-total-label">최대 2속성 · 합계 10</span></div>
+<div class="attr-mode-row">
+<span class="attr-mode-label">선택값 이상 검색</span>
+<label class="attr-mode-switch" id="attrModeSwitchWrap">
+<input type="checkbox" id="attrModeSwitch">
+<span class="attr-mode-track"><span class="attr-mode-thumb"></span></span>
+</label>
 </div>
+<div id="attrSliders" class="asl-wrap"></div>
 
-<div class="f-section">능력치 필터 <span class="hint">공방순내 이상</span></div>
-<div class="filter-row"><span class="filter-label">⚔공격</span><input type="number" id="fAtk" class="f-input num-sm" placeholder="0" /><span class="filter-unit">이상</span></div>
-<div class="filter-row"><span class="filter-label">🛡방어</span><input type="number" id="fDef" class="f-input num-sm" placeholder="0" /><span class="filter-unit">이상</span></div>
-<div class="filter-row"><span class="filter-label">💨순발</span><input type="number" id="fAgi" class="f-input num-sm" placeholder="0" /><span class="filter-unit">이상</span></div>
-<div class="filter-row"><span class="filter-label">❤내구</span><input type="number" id="fHp" class="f-input num-sm" placeholder="0" /><span class="filter-unit">이상</span></div>
+<div class="f-section">성장치 필터 <span class="hint">공방순내 각각 범위</span></div>
+<div class="filter-row"><span class="filter-label">⚔공격</span><input type="number" id="fAtkMin" class="f-input num-sm" placeholder="최소" step="0.01" /><span class="filter-unit">~</span><input type="number" id="fAtkMax" class="f-input num-sm" placeholder="최대" step="0.01" /></div>
+<div class="filter-row"><span class="filter-label">🛡방어</span><input type="number" id="fDefMin" class="f-input num-sm" placeholder="최소" step="0.01" /><span class="filter-unit">~</span><input type="number" id="fDefMax" class="f-input num-sm" placeholder="최대" step="0.01" /></div>
+<div class="filter-row"><span class="filter-label">💨순발</span><input type="number" id="fAgiMin" class="f-input num-sm" placeholder="최소" step="0.01" /><span class="filter-unit">~</span><input type="number" id="fAgiMax" class="f-input num-sm" placeholder="최대" step="0.01" /></div>
+<div class="filter-row"><span class="filter-label">❤내구</span><input type="number" id="fHpMin" class="f-input num-sm" placeholder="최소" step="0.01" /><span class="filter-unit">~</span><input type="number" id="fHpMax" class="f-input num-sm" placeholder="최대" step="0.01" /></div>
 
 <div class="f-section">순성장 필터 <span class="hint">공+방+순 성장치 합</span></div>
-<div class="filter-row"><input type="number" id="fGrowth" class="f-input" placeholder="0" step="0.1" /><span class="filter-unit">이상</span></div>
+<div class="filter-row"><input type="number" id="fGrowthMin" class="f-input num-sm" placeholder="최소" step="0.01" /><span class="filter-unit">~</span><input type="number" id="fGrowthMax" class="f-input num-sm" placeholder="최대" step="0.01" /></div>
 
 <button class="filter-reset" id="filterResetBtn">필터 초기화</button>
 
@@ -319,6 +363,7 @@ footer{text-align:center;padding:30px;color:var(--t3);font-size:11px;font-family
 <div class="wind-badge"><span class="wind-badge-dot"></span><span>SA JAJA SERVER</span></div>
 <div class="page-title">내 펫 관리</div>
 <div class="page-sub">보유 페트 &amp; 레벨별 능력치 트래커</div>
+<div class="page-sub" style="margin-top:4px;font-size:10px;color:var(--t4);">등급 뱃지는 커뮤니티 실측 데이터 역산 기반 추정치예요 · 100% 정확하지 않을 수 있어요</div>
 </div>
 
 <div class="stats-row">
@@ -437,6 +482,23 @@ function calcDisplay(p, entry){
   };
   const totalGrowth = growth.a + growth.d + growth.s;
   return { cur, growth, calc, baseGrowth: st.growth, totalGrowth };
+}
+/* ===== 추정 등급 (커뮤니티 실측 스샷 역산 기반, F~RS 12단계) =====
+   실제값/이론상 무보정 계산치 × 100 (%)을 스탯별 컷라인 표에 대조.
+   내구·공격·방어는 데이터가 탄탄함. 순발력은 레벨 100 미만 + 롤 보정된 개체에서
+   오차가 커질 수 있어 참고용으로만 볼 것. 중간 등급(C+~B+ 근방)은 샘플이 적어 보간값임. */
+const GRADE_ORDER = ['F','D','D+','C','C+','B','B+','A','A+','S','S+','RS'];
+const GRADE_THRESHOLDS = {
+  h: [94.12, 95.01, 95.90, 96.07, 96.66, 97.25, 97.84, 98.51, 99.26, 99.73, 100.13, 100.53],
+  a: [94.05, 94.88, 95.70, 96.53, 97.07, 97.61, 98.14, 98.68, 99.22, 99.77, 99.97, 100.32],
+  d: [92.13, 93.06, 93.99, 94.92, 95.85, 96.43, 97.00, 97.58, 98.93, 99.50, 99.92, 100.24],
+  s: [94.19, 94.79, 95.39, 95.99, 96.59, 97.26, 97.88, 98.49, 99.03, 99.44, 100.22, 100.76]
+};
+function estimateGrade(key, pct){
+  const th = GRADE_THRESHOLDS[key];
+  let idx = 0;
+  for(let i=0;i<th.length;i++){ if(pct >= th[i]) idx = i; }
+  return GRADE_ORDER[idx];
 }
 function howType(s){
   s=String(s||"");
@@ -691,29 +753,123 @@ document.getElementById("rankNick").addEventListener("keydown", e => { if(e.key 
 
 /* ===== 필터/정렬 상태 ===== */
 let state = { q:"", how:"ALL", sort:"default",
-  attrKey:"all", attrMin:0,
-  statMin:{a:0,d:0,s:0,h:0},
-  growthMin:0
+  attrVal:{earth:0,water:0,fire:0,wind:0}, attrMatchMode:"exact",
+  growthRange:{a:{min:null,max:null}, d:{min:null,max:null}, s:{min:null,max:null}, h:{min:null,max:null}},
+  totalGrowthRange:{min:null,max:null}
 };
+function numOrNull(v){ v=String(v).trim(); if(v==="") return null; const n=Number(v); return isFinite(n)?n:null; }
 document.getElementById("search").addEventListener("input", e=>{ state.q=e.target.value.trim(); render(); });
 document.getElementById("sortSel").addEventListener("change", e=>{ state.sort=e.target.value; render(); });
-document.getElementById("attrSelect").addEventListener("change", e=>{ state.attrKey=e.target.value; render(); });
-document.getElementById("attrMin").addEventListener("input", e=>{ state.attrMin=num(e.target.value); render(); });
-document.getElementById("fAtk").addEventListener("input", e=>{ state.statMin.a=num(e.target.value); render(); });
-document.getElementById("fDef").addEventListener("input", e=>{ state.statMin.d=num(e.target.value); render(); });
-document.getElementById("fAgi").addEventListener("input", e=>{ state.statMin.s=num(e.target.value); render(); });
-document.getElementById("fHp").addEventListener("input", e=>{ state.statMin.h=num(e.target.value); render(); });
-document.getElementById("fGrowth").addEventListener("input", e=>{ state.growthMin=num(e.target.value); render(); });
+
+/* ── 속성값 필터 슬라이더 (pokedex.html 이식: 최대 2속성, 합계 10, 드래그) ── */
+const ATTR_KEYS = ["earth","water","fire","wind"];
+const attrEmoji = { earth:"🌿", water:"💧", fire:"🔥", wind:"💨" };
+document.getElementById("attrModeSwitch").addEventListener("change", e=>{
+  state.attrMatchMode = e.target.checked ? "atleast" : "exact";
+  render();
+});
+function getActiveAttrKeys(){ return ATTR_KEYS.filter(k => state.attrVal[k] > 0); }
+function updateAslUI(k){
+  const v = state.attrVal[k];
+  const valEl = document.getElementById("asl-v-"+k);
+  if(valEl){ valEl.textContent = v; valEl.classList.toggle("on", v>0); }
+  const fillBar = document.getElementById("asl-f-"+k);
+  if(fillBar) fillBar.style.width = (v/10*100)+"%";
+  const total = ATTR_KEYS.reduce((s,a)=>s+state.attrVal[a],0);
+  const totEl = document.getElementById("asl-total");
+  if(totEl){ totEl.textContent = total; totEl.classList.toggle("full", total>=10); }
+  const active = getActiveAttrKeys();
+  ATTR_KEYS.forEach(a=>{
+    const item = document.getElementById("asl-item-"+a);
+    if(!item) return;
+    const disabled = active.length>=2 && !active.includes(a);
+    item.classList.toggle("asl-disabled", disabled);
+    item.classList.toggle("active-"+a, state.attrVal[a]>0);
+  });
+}
+function setAttrVal(k, newVal){
+  newVal = Math.max(0, Math.min(10, Math.round(newVal)));
+  const active = getActiveAttrKeys();
+  if(state.attrVal[k]===0 && newVal>0 && active.length>=2) return;
+  const others = ATTR_KEYS.filter(a=>a!==k);
+  const otherSum = others.reduce((s,a)=>s+state.attrVal[a],0);
+  if(newVal + otherSum > 10){
+    let toReduce = newVal + otherSum - 10;
+    for(let i=others.length-1; i>=0 && toReduce>0; i--){
+      const a = others[i];
+      const reduce = Math.min(state.attrVal[a], toReduce);
+      state.attrVal[a] -= reduce;
+      toReduce -= reduce;
+      updateAslUI(a);
+    }
+  }
+  state.attrVal[k] = newVal;
+  updateAslUI(k);
+  render();
+}
+function getValFromEvent(track, clientX){
+  const rect = track.getBoundingClientRect();
+  const ratio = Math.max(0, Math.min(1, (clientX-rect.left)/rect.width));
+  return Math.round(ratio*10);
+}
+function renderAttrSliders(){
+  const box = document.getElementById("attrSliders");
+  box.innerHTML = ATTR_KEYS.map(k=>{
+    const v = state.attrVal[k];
+    const label = attrMeta[k].label;
+    const dividers = Array(9).fill('<div class="asl-div"></div>').join("");
+    return `<div class="asl-item" id="asl-item-${k}">
+      <div class="asl-header">
+        <span class="asl-emoji">${attrEmoji[k]}</span>
+        <span class="asl-name">${label}속성</span>
+        <span class="asl-val ${v>0?'on':''}" id="asl-v-${k}">${v}</span>
+      </div>
+      <div class="asl-track" id="asl-t-${k}" data-attr="${k}">
+        <div class="asl-fill-bar asl-fill-${k}" id="asl-f-${k}" style="width:${v/10*100}%"></div>
+        <div class="asl-dividers">${dividers}</div>
+      </div>
+    </div>`;
+  }).join("") + `
+    <div class="asl-footer">
+      <span class="asl-total-label">합계</span>
+      <span class="asl-total-val" id="asl-total">${ATTR_KEYS.reduce((s,a)=>s+state.attrVal[a],0)}</span>
+      <span class="asl-total-label">/ 10</span>
+    </div>
+    <button class="attr-filter-reset" id="attrResetBtn">속성 필터 초기화</button>`;
+  ATTR_KEYS.forEach(k=>{
+    const track = document.getElementById("asl-t-"+k);
+    let dragging = false;
+    track.addEventListener("mousedown", e=>{ dragging=true; setAttrVal(k, getValFromEvent(track, e.clientX)); e.preventDefault(); });
+    track.addEventListener("touchstart", e=>{ dragging=true; setAttrVal(k, getValFromEvent(track, e.touches[0].clientX)); e.preventDefault(); }, {passive:false});
+    document.addEventListener("mousemove", e=>{ if(!dragging) return; setAttrVal(k, getValFromEvent(track, e.clientX)); });
+    document.addEventListener("touchmove", e=>{ if(!dragging) return; setAttrVal(k, getValFromEvent(track, e.touches[0].clientX)); }, {passive:false});
+    document.addEventListener("mouseup", ()=>{ dragging=false; });
+    document.addEventListener("touchend", ()=>{ dragging=false; });
+  });
+  document.getElementById("attrResetBtn").addEventListener("click", ()=>{
+    state.attrVal = { earth:0, water:0, fire:0, wind:0 };
+    renderAttrSliders();
+    render();
+  });
+}
+
+/* ── 성장치/순성장 범위 필터 ── */
+function bindRange(minId, maxId, target){
+  document.getElementById(minId).addEventListener("input", e=>{ target.min = numOrNull(e.target.value); render(); });
+  document.getElementById(maxId).addEventListener("input", e=>{ target.max = numOrNull(e.target.value); render(); });
+}
+bindRange("fAtkMin","fAtkMax", state.growthRange.a);
+bindRange("fDefMin","fDefMax", state.growthRange.d);
+bindRange("fAgiMin","fAgiMax", state.growthRange.s);
+bindRange("fHpMin","fHpMax", state.growthRange.h);
+bindRange("fGrowthMin","fGrowthMax", state.totalGrowthRange);
+
 document.getElementById("filterResetBtn").addEventListener("click", ()=>{
-  state.attrKey="all"; state.attrMin=0;
-  state.statMin={a:0,d:0,s:0,h:0}; state.growthMin=0;
-  document.getElementById("attrSelect").value="all";
-  document.getElementById("attrMin").value="";
-  document.getElementById("fAtk").value="";
-  document.getElementById("fDef").value="";
-  document.getElementById("fAgi").value="";
-  document.getElementById("fHp").value="";
-  document.getElementById("fGrowth").value="";
+  state.growthRange = {a:{min:null,max:null}, d:{min:null,max:null}, s:{min:null,max:null}, h:{min:null,max:null}};
+  state.totalGrowthRange = {min:null,max:null};
+  ["fAtkMin","fAtkMax","fDefMin","fDefMax","fAgiMin","fAgiMax","fHpMin","fHpMax","fGrowthMin","fGrowthMax"].forEach(id=>{
+    document.getElementById(id).value = "";
+  });
   render();
 });
 document.getElementById("howFilter").addEventListener("click", e=>{
@@ -722,20 +878,29 @@ document.getElementById("howFilter").addEventListener("click", e=>{
   chip.classList.add("is-on"); state.how=chip.dataset.v; render();
 });
 
+function inRange(val, range){
+  if(range.min!=null && val < range.min) return false;
+  if(range.max!=null && val > range.max) return false;
+  return true;
+}
 function matchesFilter(entry, p, disp){
   const name = normalizedName(p);
   if(state.q && !name.includes(state.q)) return false;
-  if(state.attrKey !== "all" && attrPoint(p[state.attrKey]) < state.attrMin) return false;
+  for(const k of ["earth","water","fire","wind"]){
+    if(state.attrVal[k] === 0) continue;
+    const pv = attrPoint(p[k]);
+    if(state.attrMatchMode === 'atleast' ? (pv < state.attrVal[k]) : (pv !== state.attrVal[k])) return false;
+  }
   if(state.how === "돈펫" && !isMoneyPet(p)) return false;
   else if(state.how === "구펫" && !isOldPet(p)) return false;
   else if(state.how === "신펫" && isOldPet(p)) return false;
   else if(state.how === "탑승가능" && mountText(p.mount) !== "가능") return false;
   else if(state.how !== "ALL" && state.how !== "돈펫" && state.how !== "구펫" && state.how !== "신펫" && state.how !== "탑승가능" && howType(p.how) !== state.how) return false;
-  if(disp.cur.a < state.statMin.a) return false;
-  if(disp.cur.d < state.statMin.d) return false;
-  if(disp.cur.s < state.statMin.s) return false;
-  if(disp.cur.h < state.statMin.h) return false;
-  if(disp.totalGrowth < state.growthMin) return false;
+  if(!inRange(disp.growth.a, state.growthRange.a)) return false;
+  if(!inRange(disp.growth.d, state.growthRange.d)) return false;
+  if(!inRange(disp.growth.s, state.growthRange.s)) return false;
+  if(!inRange(disp.growth.h, state.growthRange.h)) return false;
+  if(!inRange(disp.totalGrowth, state.totalGrowthRange)) return false;
   return true;
 }
 function getFilteredList(){
@@ -760,16 +925,24 @@ const STAT_DEFS = [
 ];
 function cardHTML(entry, idx, p, disp){
   const name = normalizedName(p);
+  const gradeOv = entry.gradeOv || {};
   const statsHTML = STAT_DEFS.map(sd => {
     const curInt = Math.floor(disp.cur[sd.key]);
     const baseInt = Math.floor(disp.calc[sd.key]);
     const gCur = disp.growth[sd.key];
     const gBase = disp.baseGrowth[sd.key];
+    const pct = disp.calc[sd.key] ? (disp.cur[sd.key]/disp.calc[sd.key]*100) : 100;
+    const autoGrade = estimateGrade(sd.key, pct);
+    const manual = gradeOv[sd.key] || "";
+    const grade = manual || autoGrade;
+    const gradeOptions = `<option value="">자동(${autoGrade})</option>` +
+      GRADE_ORDER.map(g=>`<option value="${g}" ${manual===g?'selected':''}>${g}</option>`).join('');
     return `
       <div class="pic-stat-row ${sd.cls}">
         <div class="psr-growth-line">
           <span class="psr-glabel">${sd.label}</span>
           <span class="psr-gval">${cut2(gCur)}${growthDeltaHTML(gCur-gBase)}</span>
+          <select class="grade-badge-select grade-${grade.replace('+','p')}" data-idx="${idx}" data-key="${sd.key}" title="계산상 ${pct.toFixed(2)}%${manual?' · 직접 수정됨':''}">${gradeOptions}</select>
           <span class="psr-base">S ${cut2(gBase)}</span>
         </div>
         <div class="psr-controls">
@@ -880,6 +1053,16 @@ document.getElementById("grid").addEventListener("change", e=>{
     const idx = parseInt(statInput.dataset.idx), key = statInput.dataset.key;
     const v = parseFloat(statInput.value);
     setOverride(idx, key, isFinite(v) ? v : 0);
+    return;
+  }
+  const gradeSelect = e.target.closest(".grade-badge-select");
+  if(gradeSelect){
+    const idx = parseInt(gradeSelect.dataset.idx), key = gradeSelect.dataset.key;
+    if(!myPets[idx].gradeOv) myPets[idx].gradeOv = {};
+    if(gradeSelect.value === ""){ delete myPets[idx].gradeOv[key]; }
+    else { myPets[idx].gradeOv[key] = gradeSelect.value; }
+    saveMyPets();
+    render();
   }
 });
 
@@ -912,6 +1095,7 @@ function toggleDark(){
 try{ const saved=localStorage.getItem('sa2-theme'); if(saved) document.documentElement.setAttribute('data-theme', saved); }catch(e){}
 
 loadMyPets();
+renderAttrSliders();
 render();
 loadLive();
 </script>
