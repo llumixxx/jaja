@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-09-17T05:12:45.921759",
+  "timestamp": "2026-09-17T12:09:33.254802",
   "total_pets": 399,
   "pets": [
     {
@@ -130,6 +130,20 @@
           "stats_total": 1252
         },
         {
+          "name": "카리나",
+          "level": 125,
+          "hp": 1625,
+          "atk": 289,
+          "def": 183,
+          "spd": 112,
+          "growth_hp": 12.57,
+          "growth_atk": 2.24,
+          "growth_def": 1.42,
+          "growth_spd": 0.87,
+          "score": 1125.67,
+          "stats_total": 1125
+        },
+        {
           "name": "토마토",
           "level": 121,
           "hp": 1572,
@@ -142,20 +156,6 @@
           "growth_spd": 0.87,
           "score": 1092,
           "stats_total": 1092
-        },
-        {
-          "name": "카리나",
-          "level": 121,
-          "hp": 1575,
-          "atk": 280,
-          "def": 177,
-          "spd": 109,
-          "growth_hp": 12.58,
-          "growth_atk": 2.24,
-          "growth_def": 1.42,
-          "growth_spd": 0.88,
-          "score": 1091,
-          "stats_total": 1091
         }
       ]
     },
@@ -453,36 +453,7 @@
     {
       "id": 33,
       "name": "투투",
-      "rows": [
-        {
-          "name": "텐돌이",
-          "level": 132,
-          "hp": 1353,
-          "atk": 237,
-          "def": 145,
-          "spd": 252,
-          "growth_hp": 10.08,
-          "growth_atk": 1.77,
-          "growth_def": 1.08,
-          "growth_spd": 1.88,
-          "score": 1085,
-          "stats_total": 1085
-        },
-        {
-          "name": "카리나",
-          "level": 120,
-          "hp": 1250,
-          "atk": 218,
-          "def": 132,
-          "spd": 242,
-          "growth_hp": 10.23,
-          "growth_atk": 1.79,
-          "growth_def": 1.08,
-          "growth_spd": 1.98,
-          "score": 1008.67,
-          "stats_total": 1008
-        }
-      ]
+      "rows": []
     },
     {
       "id": 34,
@@ -579,47 +550,31 @@
     {
       "id": 44,
       "name": "베로포리",
-      "rows": [
-        {
-          "name": "훈민정음",
-          "level": 126,
-          "hp": 1434,
-          "atk": 227,
-          "def": 288,
-          "spd": 120,
-          "growth_hp": 11.1,
-          "growth_atk": 1.76,
-          "growth_def": 2.23,
-          "growth_spd": 0.94,
-          "score": 1113,
-          "stats_total": 1113
-        }
-      ]
+      "rows": []
     },
     {
       "id": 51,
       "name": "노북이",
-      "rows": [
-        {
-          "name": "마늘",
-          "level": 140,
-          "hp": 1364,
-          "atk": 257,
-          "def": 365,
-          "spd": 95,
-          "growth_hp": 9.54,
-          "growth_atk": 1.8,
-          "growth_def": 2.55,
-          "growth_spd": 0.67,
-          "score": 1171.67,
-          "stats_total": 1171
-        }
-      ]
+      "rows": []
     },
     {
       "id": 52,
       "name": "북이",
       "rows": [
+        {
+          "name": "바바리안",
+          "level": 136,
+          "hp": 1349,
+          "atk": 251,
+          "def": 374,
+          "spd": 64,
+          "growth_hp": 9.7,
+          "growth_atk": 1.81,
+          "growth_def": 2.7,
+          "growth_spd": 0.47,
+          "score": 1138.67,
+          "stats_total": 1138
+        },
         {
           "name": "마늘",
           "level": 136,
@@ -633,20 +588,6 @@
           "growth_spd": 0.47,
           "score": 1138.33,
           "stats_total": 1138
-        },
-        {
-          "name": "바바리안",
-          "level": 135,
-          "hp": 1340,
-          "atk": 249,
-          "def": 372,
-          "spd": 63,
-          "growth_hp": 9.71,
-          "growth_atk": 1.81,
-          "growth_def": 2.7,
-          "growth_spd": 0.46,
-          "score": 1130.67,
-          "stats_total": 1130
         },
         {
           "name": "밤고",
@@ -681,154 +622,12 @@
     {
       "id": 53,
       "name": "깡북이",
-      "rows": [
-        {
-          "name": "세종대왕",
-          "level": 140,
-          "hp": 1345,
-          "atk": 272,
-          "def": 373,
-          "spd": 80,
-          "growth_hp": 9.4,
-          "growth_atk": 1.91,
-          "growth_def": 2.61,
-          "growth_spd": 0.56,
-          "score": 1173.33,
-          "stats_total": 1173
-        },
-        {
-          "name": "골드부비",
-          "level": 140,
-          "hp": 1346,
-          "atk": 271,
-          "def": 374,
-          "spd": 79,
-          "growth_hp": 9.41,
-          "growth_atk": 1.9,
-          "growth_def": 2.62,
-          "growth_spd": 0.55,
-          "score": 1172.67,
-          "stats_total": 1172
-        },
-        {
-          "name": "흑우",
-          "level": 138,
-          "hp": 1319,
-          "atk": 266,
-          "def": 366,
-          "spd": 80,
-          "growth_hp": 9.35,
-          "growth_atk": 1.89,
-          "growth_def": 2.6,
-          "growth_spd": 0.57,
-          "score": 1151.67,
-          "stats_total": 1151
-        },
-        {
-          "name": "김쏘떡",
-          "level": 125,
-          "hp": 1179,
-          "atk": 242,
-          "def": 334,
-          "spd": 73,
-          "growth_hp": 9.2,
-          "growth_atk": 1.9,
-          "growth_def": 2.61,
-          "growth_spd": 0.57,
-          "score": 1042,
-          "stats_total": 1042
-        },
-        {
-          "name": "달래",
-          "level": 122,
-          "hp": 1171,
-          "atk": 236,
-          "def": 325,
-          "spd": 69,
-          "growth_hp": 9.36,
-          "growth_atk": 1.89,
-          "growth_def": 2.6,
-          "growth_spd": 0.55,
-          "score": 1020.33,
-          "stats_total": 1020
-        }
-      ]
+      "rows": []
     },
     {
       "id": 54,
       "name": "돌북이",
-      "rows": [
-        {
-          "name": "애호박",
-          "level": 140,
-          "hp": 1338,
-          "atk": 230,
-          "def": 408,
-          "spd": 70,
-          "growth_hp": 9.37,
-          "growth_atk": 1.61,
-          "growth_def": 2.86,
-          "growth_spd": 0.5,
-          "score": 1154,
-          "stats_total": 1154
-        },
-        {
-          "name": "호형짱",
-          "level": 140,
-          "hp": 1331,
-          "atk": 230,
-          "def": 412,
-          "spd": 68,
-          "growth_hp": 9.32,
-          "growth_atk": 1.61,
-          "growth_def": 2.88,
-          "growth_spd": 0.48,
-          "score": 1153.67,
-          "stats_total": 1153
-        },
-        {
-          "name": "크레토스",
-          "level": 140,
-          "hp": 1334,
-          "atk": 230,
-          "def": 410,
-          "spd": 68,
-          "growth_hp": 9.34,
-          "growth_atk": 1.61,
-          "growth_def": 2.87,
-          "growth_spd": 0.48,
-          "score": 1152.67,
-          "stats_total": 1152
-        },
-        {
-          "name": "자니",
-          "level": 140,
-          "hp": 1333,
-          "atk": 230,
-          "def": 408,
-          "spd": 69,
-          "growth_hp": 9.33,
-          "growth_atk": 1.61,
-          "growth_def": 2.86,
-          "growth_spd": 0.49,
-          "score": 1151.33,
-          "stats_total": 1151
-        },
-        {
-          "name": "란슬롯†",
-          "level": 140,
-          "hp": 1329,
-          "atk": 230,
-          "def": 409,
-          "spd": 69,
-          "growth_hp": 9.3,
-          "growth_atk": 1.61,
-          "growth_def": 2.86,
-          "growth_spd": 0.49,
-          "score": 1151,
-          "stats_total": 1151
-        }
-      ]
+      "rows": []
     },
     {
       "id": 61,
@@ -853,22 +652,7 @@
     {
       "id": 62,
       "name": "네고스",
-      "rows": [
-        {
-          "name": "란슬롯†",
-          "level": 140,
-          "hp": 1534,
-          "atk": 297,
-          "def": 238,
-          "spd": 193,
-          "growth_hp": 10.75,
-          "growth_atk": 2.09,
-          "growth_def": 1.67,
-          "growth_spd": 1.35,
-          "score": 1239.33,
-          "stats_total": 1239
-        }
-      ]
+      "rows": []
     },
     {
       "id": 63,
@@ -878,112 +662,12 @@
     {
       "id": 64,
       "name": "다고스",
-      "rows": [
-        {
-          "name": "투투키울거임",
-          "level": 124,
-          "hp": 1413,
-          "atk": 260,
-          "def": 200,
-          "spd": 171,
-          "growth_hp": 11.13,
-          "growth_atk": 2.05,
-          "growth_def": 1.58,
-          "growth_spd": 1.35,
-          "score": 1102,
-          "stats_total": 1102
-        },
-        {
-          "name": "환상물고기",
-          "level": 124,
-          "hp": 1412,
-          "atk": 259,
-          "def": 198,
-          "spd": 171,
-          "growth_hp": 11.12,
-          "growth_atk": 2.04,
-          "growth_def": 1.56,
-          "growth_spd": 1.35,
-          "score": 1098.67,
-          "stats_total": 1098
-        }
-      ]
+      "rows": []
     },
     {
       "id": 65,
       "name": "보크곤",
-      "rows": [
-        {
-          "name": "성심당",
-          "level": 140,
-          "hp": 1476,
-          "atk": 307,
-          "def": 210,
-          "spd": 206,
-          "growth_hp": 10.32,
-          "growth_atk": 2.15,
-          "growth_def": 1.47,
-          "growth_spd": 1.45,
-          "score": 1215,
-          "stats_total": 1215
-        },
-        {
-          "name": "양키",
-          "level": 140,
-          "hp": 1472,
-          "atk": 307,
-          "def": 209,
-          "spd": 206,
-          "growth_hp": 10.3,
-          "growth_atk": 2.15,
-          "growth_def": 1.47,
-          "growth_spd": 1.45,
-          "score": 1212.67,
-          "stats_total": 1212
-        },
-        {
-          "name": "김정호",
-          "level": 128,
-          "hp": 1352,
-          "atk": 283,
-          "def": 192,
-          "spd": 189,
-          "growth_hp": 10.32,
-          "growth_atk": 2.17,
-          "growth_def": 1.47,
-          "growth_spd": 1.45,
-          "score": 1114.67,
-          "stats_total": 1114
-        },
-        {
-          "name": "스우",
-          "level": 128,
-          "hp": 1347,
-          "atk": 281,
-          "def": 191,
-          "spd": 188,
-          "growth_hp": 10.28,
-          "growth_atk": 2.15,
-          "growth_def": 1.46,
-          "growth_spd": 1.44,
-          "score": 1109,
-          "stats_total": 1109
-        },
-        {
-          "name": "동궁",
-          "level": 126,
-          "hp": 1324,
-          "atk": 277,
-          "def": 189,
-          "spd": 186,
-          "growth_hp": 10.26,
-          "growth_atk": 2.15,
-          "growth_def": 1.47,
-          "growth_spd": 1.45,
-          "score": 1093.33,
-          "stats_total": 1093
-        }
-      ]
+      "rows": []
     },
     {
       "id": 71,
@@ -1069,70 +753,12 @@
     {
       "id": 73,
       "name": "토루루",
-      "rows": [
-        {
-          "name": "리센느",
-          "level": 130,
-          "hp": 1318,
-          "atk": 254,
-          "def": 193,
-          "spd": 217,
-          "growth_hp": 9.91,
-          "growth_atk": 1.91,
-          "growth_def": 1.46,
-          "growth_spd": 1.64,
-          "score": 1103.33,
-          "stats_total": 1103
-        }
-      ]
+      "rows": []
     },
     {
       "id": 74,
       "name": "루니",
-      "rows": [
-        {
-          "name": "리센느",
-          "level": 125,
-          "hp": 1285,
-          "atk": 246,
-          "def": 203,
-          "spd": 206,
-          "growth_hp": 10.01,
-          "growth_atk": 1.92,
-          "growth_def": 1.58,
-          "growth_spd": 1.6,
-          "score": 1083.33,
-          "stats_total": 1083
-        },
-        {
-          "name": "카리나",
-          "level": 125,
-          "hp": 1264,
-          "atk": 244,
-          "def": 204,
-          "spd": 208,
-          "growth_hp": 9.84,
-          "growth_atk": 1.9,
-          "growth_def": 1.59,
-          "growth_spd": 1.62,
-          "score": 1077.33,
-          "stats_total": 1077
-        },
-        {
-          "name": "문",
-          "level": 123,
-          "hp": 1263,
-          "atk": 239,
-          "def": 199,
-          "spd": 202,
-          "growth_hp": 9.99,
-          "growth_atk": 1.89,
-          "growth_def": 1.57,
-          "growth_spd": 1.6,
-          "score": 1061,
-          "stats_total": 1061
-        }
-      ]
+      "rows": []
     },
     {
       "id": 81,
@@ -1181,6 +807,20 @@
           "stats_total": 1200
         },
         {
+          "name": "엉덩이",
+          "level": 139,
+          "hp": 1468,
+          "atk": 261,
+          "def": 372,
+          "spd": 77,
+          "growth_hp": 10.32,
+          "growth_atk": 1.84,
+          "growth_def": 2.62,
+          "growth_spd": 0.54,
+          "score": 1199.33,
+          "stats_total": 1199
+        },
+        {
           "name": "오이시",
           "level": 140,
           "hp": 1470,
@@ -1193,20 +833,6 @@
           "growth_spd": 0.54,
           "score": 1199,
           "stats_total": 1199
-        },
-        {
-          "name": "StoneAge",
-          "level": 140,
-          "hp": 1472,
-          "atk": 259,
-          "def": 373,
-          "spd": 76,
-          "growth_hp": 10.27,
-          "growth_atk": 1.81,
-          "growth_def": 2.6,
-          "growth_spd": 0.53,
-          "score": 1198.67,
-          "stats_total": 1198
         }
       ]
     },
@@ -1243,78 +869,7 @@
     {
       "id": 85,
       "name": "램가스",
-      "rows": [
-        {
-          "name": "피카소",
-          "level": 140,
-          "hp": 1454,
-          "atk": 281,
-          "def": 378,
-          "spd": 97,
-          "growth_hp": 10.16,
-          "growth_atk": 1.96,
-          "growth_def": 2.64,
-          "growth_spd": 0.68,
-          "score": 1240.67,
-          "stats_total": 1240
-        },
-        {
-          "name": "사냥꾼",
-          "level": 137,
-          "hp": 1426,
-          "atk": 274,
-          "def": 376,
-          "spd": 95,
-          "growth_hp": 10.18,
-          "growth_atk": 1.96,
-          "growth_def": 2.68,
-          "growth_spd": 0.68,
-          "score": 1220.33,
-          "stats_total": 1220
-        },
-        {
-          "name": "두라빠",
-          "level": 137,
-          "hp": 1421,
-          "atk": 272,
-          "def": 376,
-          "spd": 89,
-          "growth_hp": 10.14,
-          "growth_atk": 1.94,
-          "growth_def": 2.68,
-          "growth_spd": 0.64,
-          "score": 1210.67,
-          "stats_total": 1210
-        },
-        {
-          "name": "구난",
-          "level": 135,
-          "hp": 1401,
-          "atk": 270,
-          "def": 372,
-          "spd": 87,
-          "growth_hp": 10.14,
-          "growth_atk": 1.96,
-          "growth_def": 2.69,
-          "growth_spd": 0.63,
-          "score": 1196,
-          "stats_total": 1196
-        },
-        {
-          "name": "가지",
-          "level": 125,
-          "hp": 1295,
-          "atk": 243,
-          "def": 342,
-          "spd": 89,
-          "growth_hp": 10.1,
-          "growth_atk": 1.9,
-          "growth_def": 2.67,
-          "growth_spd": 0.7,
-          "score": 1105.67,
-          "stats_total": 1105
-        }
-      ]
+      "rows": []
     },
     {
       "id": 86,
@@ -1349,382 +904,27 @@
     {
       "id": 91,
       "name": "리비노",
-      "rows": [
-        {
-          "name": "오드리햇반",
-          "level": 140,
-          "hp": 1443,
-          "atk": 332,
-          "def": 233,
-          "spd": 169,
-          "growth_hp": 9.98,
-          "growth_atk": 2.29,
-          "growth_def": 1.61,
-          "growth_spd": 1.17,
-          "score": 1215,
-          "stats_total": 1215
-        },
-        {
-          "name": "귀신",
-          "level": 140,
-          "hp": 1440,
-          "atk": 332,
-          "def": 232,
-          "spd": 169,
-          "growth_hp": 9.96,
-          "growth_atk": 2.29,
-          "growth_def": 1.6,
-          "growth_spd": 1.17,
-          "score": 1213,
-          "stats_total": 1213
-        },
-        {
-          "name": "미카엘",
-          "level": 140,
-          "hp": 1444,
-          "atk": 330,
-          "def": 231,
-          "spd": 170,
-          "growth_hp": 9.99,
-          "growth_atk": 2.28,
-          "growth_def": 1.6,
-          "growth_spd": 1.18,
-          "score": 1212.33,
-          "stats_total": 1212
-        },
-        {
-          "name": "로이",
-          "level": 140,
-          "hp": 1440,
-          "atk": 332,
-          "def": 232,
-          "spd": 168,
-          "growth_hp": 9.96,
-          "growth_atk": 2.29,
-          "growth_def": 1.6,
-          "growth_spd": 1.17,
-          "score": 1212,
-          "stats_total": 1212
-        },
-        {
-          "name": "애호박",
-          "level": 140,
-          "hp": 1436,
-          "atk": 333,
-          "def": 232,
-          "spd": 168,
-          "growth_hp": 9.93,
-          "growth_atk": 2.3,
-          "growth_def": 1.6,
-          "growth_spd": 1.17,
-          "score": 1211.67,
-          "stats_total": 1211
-        }
-      ]
+      "rows": []
     },
     {
       "id": 92,
       "name": "얀기로",
-      "rows": [
-        {
-          "name": "천사",
-          "level": 140,
-          "hp": 1491,
-          "atk": 330,
-          "def": 207,
-          "spd": 183,
-          "growth_hp": 10.31,
-          "growth_atk": 2.29,
-          "growth_def": 1.43,
-          "growth_spd": 1.27,
-          "score": 1217,
-          "stats_total": 1217
-        },
-        {
-          "name": "귀신",
-          "level": 140,
-          "hp": 1485,
-          "atk": 331,
-          "def": 207,
-          "spd": 181,
-          "growth_hp": 10.27,
-          "growth_atk": 2.29,
-          "growth_def": 1.43,
-          "growth_spd": 1.25,
-          "score": 1214,
-          "stats_total": 1214
-        },
-        {
-          "name": "양배추",
-          "level": 140,
-          "hp": 1478,
-          "atk": 331,
-          "def": 208,
-          "spd": 181,
-          "growth_hp": 10.22,
-          "growth_atk": 2.29,
-          "growth_def": 1.44,
-          "growth_spd": 1.25,
-          "score": 1212.67,
-          "stats_total": 1212
-        },
-        {
-          "name": "비빔밥",
-          "level": 140,
-          "hp": 1480,
-          "atk": 331,
-          "def": 206,
-          "spd": 182,
-          "growth_hp": 10.23,
-          "growth_atk": 2.29,
-          "growth_def": 1.42,
-          "growth_spd": 1.26,
-          "score": 1212.33,
-          "stats_total": 1212
-        },
-        {
-          "name": "란슬롯†",
-          "level": 140,
-          "hp": 1480,
-          "atk": 330,
-          "def": 207,
-          "spd": 181,
-          "growth_hp": 10.23,
-          "growth_atk": 2.29,
-          "growth_def": 1.43,
-          "growth_spd": 1.25,
-          "score": 1211.33,
-          "stats_total": 1211
-        }
-      ]
+      "rows": []
     },
     {
       "id": 93,
       "name": "반보로",
-      "rows": [
-        {
-          "name": "쌀",
-          "level": 140,
-          "hp": 1432,
-          "atk": 335,
-          "def": 200,
-          "spd": 190,
-          "growth_hp": 9.9,
-          "growth_atk": 2.32,
-          "growth_def": 1.39,
-          "growth_spd": 1.32,
-          "score": 1202.33,
-          "stats_total": 1202
-        },
-        {
-          "name": "용",
-          "level": 140,
-          "hp": 1432,
-          "atk": 335,
-          "def": 198,
-          "spd": 188,
-          "growth_hp": 9.9,
-          "growth_atk": 2.32,
-          "growth_def": 1.37,
-          "growth_spd": 1.3,
-          "score": 1198.33,
-          "stats_total": 1198
-        },
-        {
-          "name": "고두심",
-          "level": 140,
-          "hp": 1433,
-          "atk": 332,
-          "def": 199,
-          "spd": 189,
-          "growth_hp": 9.91,
-          "growth_atk": 2.29,
-          "growth_def": 1.38,
-          "growth_spd": 1.31,
-          "score": 1197.67,
-          "stats_total": 1197
-        },
-        {
-          "name": "나도서뚱",
-          "level": 140,
-          "hp": 1425,
-          "atk": 334,
-          "def": 199,
-          "spd": 187,
-          "growth_hp": 9.85,
-          "growth_atk": 2.31,
-          "growth_def": 1.38,
-          "growth_spd": 1.29,
-          "score": 1195,
-          "stats_total": 1195
-        },
-        {
-          "name": "EZ",
-          "level": 134,
-          "hp": 1374,
-          "atk": 322,
-          "def": 190,
-          "spd": 180,
-          "growth_hp": 9.91,
-          "growth_atk": 2.32,
-          "growth_def": 1.38,
-          "growth_spd": 1.3,
-          "score": 1150,
-          "stats_total": 1150
-        }
-      ]
+      "rows": []
     },
     {
       "id": 94,
       "name": "반기노",
-      "rows": [
-        {
-          "name": "콩나물",
-          "level": 140,
-          "hp": 1396,
-          "atk": 345,
-          "def": 220,
-          "spd": 175,
-          "growth_hp": 9.65,
-          "growth_atk": 2.39,
-          "growth_def": 1.53,
-          "growth_spd": 1.22,
-          "score": 1205.33,
-          "stats_total": 1205
-        },
-        {
-          "name": "토마토",
-          "level": 140,
-          "hp": 1397,
-          "atk": 343,
-          "def": 220,
-          "spd": 175,
-          "growth_hp": 9.66,
-          "growth_atk": 2.37,
-          "growth_def": 1.53,
-          "growth_spd": 1.22,
-          "score": 1203.67,
-          "stats_total": 1203
-        },
-        {
-          "name": "luka",
-          "level": 140,
-          "hp": 1396,
-          "atk": 343,
-          "def": 218,
-          "spd": 175,
-          "growth_hp": 9.65,
-          "growth_atk": 2.37,
-          "growth_def": 1.51,
-          "growth_spd": 1.22,
-          "score": 1201.33,
-          "stats_total": 1201
-        },
-        {
-          "name": "초코짱",
-          "level": 140,
-          "hp": 1395,
-          "atk": 343,
-          "def": 219,
-          "spd": 174,
-          "growth_hp": 9.65,
-          "growth_atk": 2.37,
-          "growth_def": 1.52,
-          "growth_spd": 1.21,
-          "score": 1201,
-          "stats_total": 1201
-        },
-        {
-          "name": "코카콜라",
-          "level": 140,
-          "hp": 1392,
-          "atk": 343,
-          "def": 219,
-          "spd": 175,
-          "growth_hp": 9.63,
-          "growth_atk": 2.37,
-          "growth_def": 1.52,
-          "growth_spd": 1.22,
-          "score": 1201,
-          "stats_total": 1201
-        }
-      ]
+      "rows": []
     },
     {
       "id": 95,
       "name": "부르돈",
-      "rows": [
-        {
-          "name": "멘헤라",
-          "level": 140,
-          "hp": 1428,
-          "atk": 331,
-          "def": 210,
-          "spd": 196,
-          "growth_hp": 9.88,
-          "growth_atk": 2.29,
-          "growth_def": 1.45,
-          "growth_spd": 1.36,
-          "score": 1213,
-          "stats_total": 1213
-        },
-        {
-          "name": "포이",
-          "level": 140,
-          "hp": 1424,
-          "atk": 331,
-          "def": 211,
-          "spd": 195,
-          "growth_hp": 9.85,
-          "growth_atk": 2.29,
-          "growth_def": 1.46,
-          "growth_spd": 1.35,
-          "score": 1211.67,
-          "stats_total": 1211
-        },
-        {
-          "name": "싸느",
-          "level": 140,
-          "hp": 1426,
-          "atk": 330,
-          "def": 211,
-          "spd": 195,
-          "growth_hp": 9.86,
-          "growth_atk": 2.29,
-          "growth_def": 1.46,
-          "growth_spd": 1.35,
-          "score": 1211.33,
-          "stats_total": 1211
-        },
-        {
-          "name": "나도서뚱",
-          "level": 140,
-          "hp": 1423,
-          "atk": 330,
-          "def": 211,
-          "spd": 195,
-          "growth_hp": 9.84,
-          "growth_atk": 2.29,
-          "growth_def": 1.46,
-          "growth_spd": 1.35,
-          "score": 1210.33,
-          "stats_total": 1210
-        },
-        {
-          "name": "검은창",
-          "level": 140,
-          "hp": 1420,
-          "atk": 329,
-          "def": 212,
-          "spd": 195,
-          "growth_hp": 9.82,
-          "growth_atk": 2.28,
-          "growth_def": 1.47,
-          "growth_spd": 1.35,
-          "score": 1209.33,
-          "stats_total": 1209
-        }
-      ]
+      "rows": []
     },
     {
       "id": 101,
@@ -1902,20 +1102,6 @@
           "growth_spd": 1.13,
           "score": 1045.33,
           "stats_total": 1045
-        },
-        {
-          "name": "물결",
-          "level": 120,
-          "hp": 1302,
-          "atk": 245,
-          "def": 225,
-          "spd": 137,
-          "growth_hp": 10.51,
-          "growth_atk": 1.98,
-          "growth_def": 1.82,
-          "growth_spd": 1.11,
-          "score": 1041,
-          "stats_total": 1041
         }
       ]
     },
@@ -1936,56 +1122,27 @@
           "growth_spd": 1.17,
           "score": 1069.67,
           "stats_total": 1069
+        },
+        {
+          "name": "토마토스",
+          "level": 120,
+          "hp": 1336,
+          "atk": 270,
+          "def": 201,
+          "spd": 143,
+          "growth_hp": 10.71,
+          "growth_atk": 2.17,
+          "growth_def": 1.61,
+          "growth_spd": 1.15,
+          "score": 1059.33,
+          "stats_total": 1059
         }
       ]
     },
     {
       "id": 144,
       "name": "고르고",
-      "rows": [
-        {
-          "name": "코카콜라",
-          "level": 140,
-          "hp": 1458,
-          "atk": 328,
-          "def": 224,
-          "spd": 168,
-          "growth_hp": 10.09,
-          "growth_atk": 2.27,
-          "growth_def": 1.55,
-          "growth_spd": 1.17,
-          "score": 1206,
-          "stats_total": 1206
-        },
-        {
-          "name": "카리나",
-          "level": 120,
-          "hp": 1254,
-          "atk": 281,
-          "def": 193,
-          "spd": 144,
-          "growth_hp": 10.08,
-          "growth_atk": 2.26,
-          "growth_def": 1.55,
-          "growth_spd": 1.16,
-          "score": 1036,
-          "stats_total": 1036
-        },
-        {
-          "name": "꾸물꽁냥",
-          "level": 120,
-          "hp": 1252,
-          "atk": 276,
-          "def": 193,
-          "spd": 144,
-          "growth_hp": 10.06,
-          "growth_atk": 2.22,
-          "growth_def": 1.55,
-          "growth_spd": 1.16,
-          "score": 1030.33,
-          "stats_total": 1030
-        }
-      ]
+      "rows": []
     },
     {
       "id": 171,
@@ -2475,17 +1632,17 @@
         },
         {
           "name": "산노미야츠바키",
-          "level": 132,
-          "hp": 1508,
-          "atk": 261,
-          "def": 337,
+          "level": 133,
+          "hp": 1519,
+          "atk": 263,
+          "def": 339,
           "spd": 84,
           "growth_hp": 11.26,
           "growth_atk": 1.95,
           "growth_def": 2.52,
           "growth_spd": 0.63,
-          "score": 1184.67,
-          "stats_total": 1184
+          "score": 1192.33,
+          "stats_total": 1192
         },
         {
           "name": "골드부비",
@@ -2641,6 +1798,20 @@
           "growth_spd": 0.93,
           "score": 1136,
           "stats_total": 1136
+        },
+        {
+          "name": "토랑이",
+          "level": 120,
+          "hp": 1369,
+          "atk": 258,
+          "def": 258,
+          "spd": 108,
+          "growth_hp": 10.96,
+          "growth_atk": 2.07,
+          "growth_def": 2.07,
+          "growth_spd": 0.87,
+          "score": 1080.33,
+          "stats_total": 1080
         }
       ]
     },
@@ -2869,18 +2040,18 @@
           "stats_total": 1243
         },
         {
-          "name": "천둥",
+          "name": "서아빠",
           "level": 134,
-          "hp": 1940,
+          "hp": 1937,
           "atk": 251,
-          "def": 238,
+          "def": 245,
           "spd": 94,
-          "growth_hp": 14.14,
+          "growth_hp": 14.12,
           "growth_atk": 1.83,
-          "growth_def": 1.74,
+          "growth_def": 1.79,
           "growth_spd": 0.69,
-          "score": 1229.67,
-          "stats_total": 1229
+          "score": 1235.67,
+          "stats_total": 1235
         }
       ]
     },
@@ -3022,12 +2193,126 @@
     {
       "id": 253,
       "name": "프라키토스",
-      "rows": []
+      "rows": [
+        {
+          "name": "토마토",
+          "level": 140,
+          "hp": 1682,
+          "atk": 337,
+          "def": 281,
+          "spd": 72,
+          "growth_hp": 11.68,
+          "growth_atk": 2.35,
+          "growth_def": 1.96,
+          "growth_spd": 0.5,
+          "score": 1250.67,
+          "stats_total": 1250
+        },
+        {
+          "name": "일리",
+          "level": 140,
+          "hp": 1681,
+          "atk": 336,
+          "def": 281,
+          "spd": 71,
+          "growth_hp": 11.67,
+          "growth_atk": 2.34,
+          "growth_def": 1.96,
+          "growth_spd": 0.5,
+          "score": 1248.33,
+          "stats_total": 1248
+        },
+        {
+          "name": "롸킨지와이",
+          "level": 140,
+          "hp": 1681,
+          "atk": 335,
+          "def": 281,
+          "spd": 72,
+          "growth_hp": 11.67,
+          "growth_atk": 2.33,
+          "growth_def": 1.96,
+          "growth_spd": 0.5,
+          "score": 1248.33,
+          "stats_total": 1248
+        },
+        {
+          "name": "Athena",
+          "level": 135,
+          "hp": 1626,
+          "atk": 324,
+          "def": 271,
+          "spd": 67,
+          "growth_hp": 11.69,
+          "growth_atk": 2.34,
+          "growth_def": 1.96,
+          "growth_spd": 0.49,
+          "score": 1204,
+          "stats_total": 1204
+        },
+        {
+          "name": "큐이",
+          "level": 135,
+          "hp": 1628,
+          "atk": 327,
+          "def": 273,
+          "spd": 60,
+          "growth_hp": 11.71,
+          "growth_atk": 2.36,
+          "growth_def": 1.97,
+          "growth_spd": 0.43,
+          "score": 1202.67,
+          "stats_total": 1202
+        }
+      ]
     },
     {
       "id": 254,
       "name": "스텐토스",
-      "rows": []
+      "rows": [
+        {
+          "name": "마늘",
+          "level": 140,
+          "hp": 1772,
+          "atk": 291,
+          "def": 329,
+          "spd": 64,
+          "growth_hp": 12.24,
+          "growth_atk": 2.01,
+          "growth_def": 2.27,
+          "growth_spd": 0.45,
+          "score": 1274.67,
+          "stats_total": 1274
+        },
+        {
+          "name": "응뎅",
+          "level": 126,
+          "hp": 1591,
+          "atk": 261,
+          "def": 294,
+          "spd": 58,
+          "growth_hp": 12.16,
+          "growth_atk": 2,
+          "growth_def": 2.25,
+          "growth_spd": 0.45,
+          "score": 1143.33,
+          "stats_total": 1143
+        },
+        {
+          "name": "문",
+          "level": 120,
+          "hp": 1512,
+          "atk": 249,
+          "def": 282,
+          "spd": 54,
+          "growth_hp": 12.11,
+          "growth_atk": 2,
+          "growth_def": 2.26,
+          "growth_spd": 0.44,
+          "score": 1089,
+          "stats_total": 1089
+        }
+      ]
     },
     {
       "id": 255,
@@ -3094,12 +2379,126 @@
     {
       "id": 261,
       "name": "만모",
-      "rows": []
+      "rows": [
+        {
+          "name": "양키",
+          "level": 140,
+          "hp": 1994,
+          "atk": 272,
+          "def": 265,
+          "spd": 85,
+          "growth_hp": 13.78,
+          "growth_atk": 1.88,
+          "growth_def": 1.83,
+          "growth_spd": 0.59,
+          "score": 1286.67,
+          "stats_total": 1286
+        },
+        {
+          "name": "빨간망사차차",
+          "level": 134,
+          "hp": 1905,
+          "atk": 258,
+          "def": 253,
+          "spd": 83,
+          "growth_hp": 13.74,
+          "growth_atk": 1.86,
+          "growth_def": 1.83,
+          "growth_spd": 0.6,
+          "score": 1229,
+          "stats_total": 1229
+        },
+        {
+          "name": "아부의신성한물",
+          "level": 124,
+          "hp": 1766,
+          "atk": 241,
+          "def": 234,
+          "spd": 76,
+          "growth_hp": 13.72,
+          "growth_atk": 1.88,
+          "growth_def": 1.82,
+          "growth_spd": 0.59,
+          "score": 1139.67,
+          "stats_total": 1139
+        },
+        {
+          "name": "카리나",
+          "level": 120,
+          "hp": 1718,
+          "atk": 234,
+          "def": 229,
+          "spd": 66,
+          "growth_hp": 13.78,
+          "growth_atk": 1.88,
+          "growth_def": 1.84,
+          "growth_spd": 0.53,
+          "score": 1101.67,
+          "stats_total": 1101
+        }
+      ]
     },
     {
       "id": 262,
       "name": "만모르",
-      "rows": []
+      "rows": [
+        {
+          "name": "스팸주먹",
+          "level": 140,
+          "hp": 1938,
+          "atk": 286,
+          "def": 243,
+          "spd": 98,
+          "growth_hp": 13.45,
+          "growth_atk": 1.99,
+          "growth_def": 1.69,
+          "growth_spd": 0.68,
+          "score": 1273,
+          "stats_total": 1273
+        },
+        {
+          "name": "골로프킨",
+          "level": 135,
+          "hp": 1874,
+          "atk": 277,
+          "def": 237,
+          "spd": 95,
+          "growth_hp": 13.48,
+          "growth_atk": 1.99,
+          "growth_def": 1.71,
+          "growth_spd": 0.69,
+          "score": 1233.67,
+          "stats_total": 1233
+        },
+        {
+          "name": "이잉",
+          "level": 123,
+          "hp": 1701,
+          "atk": 254,
+          "def": 213,
+          "spd": 80,
+          "growth_hp": 13.39,
+          "growth_atk": 2,
+          "growth_def": 1.68,
+          "growth_spd": 0.63,
+          "score": 1114,
+          "stats_total": 1114
+        },
+        {
+          "name": "이잉",
+          "level": 122,
+          "hp": 1683,
+          "atk": 245,
+          "def": 207,
+          "spd": 85,
+          "growth_hp": 13.35,
+          "growth_atk": 1.94,
+          "growth_def": 1.64,
+          "growth_spd": 0.68,
+          "score": 1098,
+          "stats_total": 1098
+        }
+      ]
     },
     {
       "id": 263,
@@ -3202,17 +2601,17 @@
         },
         {
           "name": "낙엽의비",
-          "level": 132,
-          "hp": 1311,
-          "atk": 284,
-          "def": 186,
-          "spd": 224,
+          "level": 133,
+          "hp": 1321,
+          "atk": 286,
+          "def": 187,
+          "spd": 225,
           "growth_hp": 9.6,
           "growth_atk": 2.08,
-          "growth_def": 1.37,
+          "growth_def": 1.36,
           "growth_spd": 1.64,
-          "score": 1131,
-          "stats_total": 1131
+          "score": 1138.33,
+          "stats_total": 1138
         }
       ]
     },
@@ -4128,31 +3527,31 @@
       "rows": [
         {
           "name": "성심당",
-          "level": 136,
-          "hp": 1380,
-          "atk": 297,
-          "def": 190,
-          "spd": 232,
-          "growth_hp": 9.87,
+          "level": 137,
+          "hp": 1390,
+          "atk": 299,
+          "def": 192,
+          "spd": 234,
+          "growth_hp": 9.88,
           "growth_atk": 2.13,
-          "growth_def": 1.36,
+          "growth_def": 1.37,
           "growth_spd": 1.66,
-          "score": 1179,
-          "stats_total": 1179
+          "score": 1188.33,
+          "stats_total": 1188
         },
         {
           "name": "달",
-          "level": 123,
-          "hp": 1250,
-          "atk": 267,
-          "def": 173,
-          "spd": 211,
+          "level": 124,
+          "hp": 1260,
+          "atk": 270,
+          "def": 174,
+          "spd": 213,
           "growth_hp": 9.86,
           "growth_atk": 2.11,
           "growth_def": 1.37,
-          "growth_spd": 1.66,
-          "score": 1067.67,
-          "stats_total": 1067
+          "growth_spd": 1.67,
+          "score": 1077,
+          "stats_total": 1077
         }
       ]
     },
@@ -4477,7 +3876,7 @@
       "name": "자라북",
       "rows": [
         {
-          "name": "김삿갓",
+          "name": "각설이",
           "level": 127,
           "hp": 1464,
           "atk": 237,
@@ -4512,17 +3911,17 @@
       "rows": [
         {
           "name": "양키",
-          "level": 124,
-          "hp": 1268,
-          "atk": 268,
-          "def": 212,
-          "spd": 166,
+          "level": 125,
+          "hp": 1278,
+          "atk": 270,
+          "def": 213,
+          "spd": 168,
           "growth_hp": 9.99,
           "growth_atk": 2.11,
           "growth_def": 1.67,
           "growth_spd": 1.31,
-          "score": 1068.67,
-          "stats_total": 1068
+          "score": 1077,
+          "stats_total": 1077
         }
       ]
     },
@@ -4821,22 +4220,7 @@
     {
       "id": 2049,
       "name": "푸쿠",
-      "rows": [
-        {
-          "name": "차태식",
-          "level": 120,
-          "hp": 1153,
-          "atk": 263,
-          "def": 182,
-          "spd": 194,
-          "growth_hp": 9.36,
-          "growth_atk": 2.13,
-          "growth_def": 1.48,
-          "growth_spd": 1.58,
-          "score": 1023.33,
-          "stats_total": 1023
-        }
-      ]
+      "rows": []
     },
     {
       "id": 2050,
@@ -4911,17 +4295,17 @@
       "rows": [
         {
           "name": "수양대군",
-          "level": 123,
-          "hp": 1445,
-          "atk": 261,
-          "def": 278,
+          "level": 124,
+          "hp": 1456,
+          "atk": 263,
+          "def": 280,
           "spd": 84,
-          "growth_hp": 11.47,
+          "growth_hp": 11.46,
           "growth_atk": 2.07,
           "growth_def": 2.21,
           "growth_spd": 0.67,
-          "score": 1104.67,
-          "stats_total": 1104
+          "score": 1112.33,
+          "stats_total": 1112
         }
       ]
     },
@@ -6038,17 +5422,17 @@
       "rows": [
         {
           "name": "바바리안",
-          "level": 135,
-          "hp": 1493,
-          "atk": 331,
-          "def": 213,
-          "spd": 141,
+          "level": 136,
+          "hp": 1504,
+          "atk": 333,
+          "def": 215,
+          "spd": 142,
           "growth_hp": 10.74,
           "growth_atk": 2.38,
           "growth_def": 1.54,
           "growth_spd": 1.01,
-          "score": 1182.67,
-          "stats_total": 1182
+          "score": 1191.33,
+          "stats_total": 1191
         },
         {
           "name": "숙주나물",
@@ -6267,7 +5651,36 @@
     {
       "id": 7034,
       "name": "언딘SD",
-      "rows": []
+      "rows": [
+        {
+          "name": "아몬드",
+          "level": 140,
+          "hp": 1489,
+          "atk": 350,
+          "def": 233,
+          "spd": 147,
+          "growth_hp": 10.31,
+          "growth_atk": 2.42,
+          "growth_def": 1.62,
+          "growth_spd": 1.02,
+          "score": 1226.33,
+          "stats_total": 1226
+        },
+        {
+          "name": "지미닝",
+          "level": 140,
+          "hp": 1465,
+          "atk": 351,
+          "def": 231,
+          "spd": 145,
+          "growth_hp": 10.14,
+          "growth_atk": 2.43,
+          "growth_def": 1.6,
+          "growth_spd": 1.01,
+          "score": 1215.33,
+          "stats_total": 1215
+        }
+      ]
     },
     {
       "id": 7035,
@@ -6429,17 +5842,17 @@
       "rows": [
         {
           "name": "청룡",
-          "level": 121,
-          "hp": 1360,
-          "atk": 260,
-          "def": 212,
-          "spd": 139,
+          "level": 122,
+          "hp": 1371,
+          "atk": 262,
+          "def": 214,
+          "spd": 140,
           "growth_hp": 10.9,
           "growth_atk": 2.08,
           "growth_def": 1.7,
           "growth_spd": 1.12,
-          "score": 1064.33,
-          "stats_total": 1064
+          "score": 1073,
+          "stats_total": 1073
         }
       ]
     },
@@ -6681,17 +6094,17 @@
         },
         {
           "name": "바쁘니까",
-          "level": 129,
-          "hp": 1393,
-          "atk": 280,
-          "def": 178,
-          "spd": 211,
+          "level": 131,
+          "hp": 1414,
+          "atk": 285,
+          "def": 181,
+          "spd": 214,
           "growth_hp": 10.44,
-          "growth_atk": 2.1,
+          "growth_atk": 2.11,
           "growth_def": 1.34,
-          "growth_spd": 1.59,
-          "score": 1133.33,
-          "stats_total": 1133
+          "growth_spd": 1.58,
+          "score": 1151.33,
+          "stats_total": 1151
         }
       ]
     },
@@ -6701,17 +6114,17 @@
       "rows": [
         {
           "name": "디디에",
-          "level": 130,
-          "hp": 1575,
-          "atk": 273,
-          "def": 286,
-          "spd": 90,
-          "growth_hp": 11.78,
-          "growth_atk": 2.05,
+          "level": 131,
+          "hp": 1586,
+          "atk": 274,
+          "def": 288,
+          "spd": 91,
+          "growth_hp": 11.77,
+          "growth_atk": 2.04,
           "growth_def": 2.14,
-          "growth_spd": 0.67,
-          "score": 1174,
-          "stats_total": 1174
+          "growth_spd": 0.68,
+          "score": 1181.67,
+          "stats_total": 1181
         },
         {
           "name": "피터",
@@ -6760,6 +6173,20 @@
           "growth_spd": 1.25,
           "score": 1127.33,
           "stats_total": 1127
+        },
+        {
+          "name": "모찌",
+          "level": 120,
+          "hp": 1269,
+          "atk": 266,
+          "def": 198,
+          "spd": 154,
+          "growth_hp": 10.24,
+          "growth_atk": 2.15,
+          "growth_def": 1.6,
+          "growth_spd": 1.24,
+          "score": 1041,
+          "stats_total": 1041
         }
       ]
     },
@@ -6789,17 +6216,17 @@
       "rows": [
         {
           "name": "흑우",
-          "level": 130,
-          "hp": 1459,
-          "atk": 272,
-          "def": 270,
+          "level": 131,
+          "hp": 1469,
+          "atk": 274,
+          "def": 272,
           "spd": 137,
-          "growth_hp": 10.87,
+          "growth_hp": 10.86,
           "growth_atk": 2.03,
           "growth_def": 2.02,
           "growth_spd": 1.02,
-          "score": 1165.33,
-          "stats_total": 1165
+          "score": 1172.67,
+          "stats_total": 1172
         }
       ]
     },
@@ -6853,20 +6280,6 @@
           "growth_spd": 1.16,
           "score": 1192.67,
           "stats_total": 1192
-        },
-        {
-          "name": "크앙",
-          "level": 121,
-          "hp": 1293,
-          "atk": 282,
-          "def": 182,
-          "spd": 144,
-          "growth_hp": 10.38,
-          "growth_atk": 2.27,
-          "growth_def": 1.47,
-          "growth_spd": 1.16,
-          "score": 1039,
-          "stats_total": 1039
         }
       ]
     },
@@ -7056,17 +6469,17 @@
         },
         {
           "name": "인간과윤리",
-          "level": 130,
-          "hp": 1350,
-          "atk": 321,
-          "def": 178,
-          "spd": 167,
+          "level": 131,
+          "hp": 1360,
+          "atk": 324,
+          "def": 179,
+          "spd": 168,
           "growth_hp": 10.05,
           "growth_atk": 2.4,
-          "growth_def": 1.33,
+          "growth_def": 1.32,
           "growth_spd": 1.25,
-          "score": 1116,
-          "stats_total": 1116
+          "score": 1124.33,
+          "stats_total": 1124
         },
         {
           "name": "싹싹김치야르",
@@ -7748,78 +7161,7 @@
     {
       "id": 7182,
       "name": "테라시온",
-      "rows": [
-        {
-          "name": "피카소",
-          "level": 140,
-          "hp": 1697,
-          "atk": 406,
-          "def": 233,
-          "spd": 154,
-          "growth_hp": 11.69,
-          "growth_atk": 2.82,
-          "growth_def": 1.6,
-          "growth_spd": 1.06,
-          "score": 1358.67,
-          "stats_total": 1358
-        },
-        {
-          "name": "성심당",
-          "level": 140,
-          "hp": 1725,
-          "atk": 340,
-          "def": 244,
-          "spd": 161,
-          "growth_hp": 11.89,
-          "growth_atk": 2.35,
-          "growth_def": 1.68,
-          "growth_spd": 1.12,
-          "score": 1320,
-          "stats_total": 1320
-        },
-        {
-          "name": "홍감자〃",
-          "level": 140,
-          "hp": 1716,
-          "atk": 340,
-          "def": 244,
-          "spd": 162,
-          "growth_hp": 11.83,
-          "growth_atk": 2.35,
-          "growth_def": 1.68,
-          "growth_spd": 1.12,
-          "score": 1318,
-          "stats_total": 1318
-        },
-        {
-          "name": "차태식",
-          "level": 140,
-          "hp": 1715,
-          "atk": 340,
-          "def": 246,
-          "spd": 160,
-          "growth_hp": 11.82,
-          "growth_atk": 2.35,
-          "growth_def": 1.7,
-          "growth_spd": 1.11,
-          "score": 1317.67,
-          "stats_total": 1317
-        },
-        {
-          "name": "규",
-          "level": 140,
-          "hp": 1705,
-          "atk": 340,
-          "def": 246,
-          "spd": 162,
-          "growth_hp": 11.75,
-          "growth_atk": 2.35,
-          "growth_def": 1.7,
-          "growth_spd": 1.12,
-          "score": 1316.33,
-          "stats_total": 1316
-        }
-      ]
+      "rows": []
     },
     {
       "id": 7189,
@@ -8032,22 +7374,7 @@
     {
       "id": 7199,
       "name": "코스타리카",
-      "rows": [
-        {
-          "name": "토마토",
-          "level": 120,
-          "hp": 1168,
-          "atk": 270,
-          "def": 174,
-          "spd": 191,
-          "growth_hp": 9.44,
-          "growth_atk": 2.18,
-          "growth_def": 1.41,
-          "growth_spd": 1.55,
-          "score": 1024.33,
-          "stats_total": 1024
-        }
-      ]
+      "rows": []
     },
     {
       "id": 7200,
@@ -8133,36 +7460,7 @@
     {
       "id": 7214,
       "name": "문타",
-      "rows": [
-        {
-          "name": "훈민정음",
-          "level": 120,
-          "hp": 1190,
-          "atk": 269,
-          "def": 163,
-          "spd": 197,
-          "growth_hp": 9.61,
-          "growth_atk": 2.18,
-          "growth_def": 1.32,
-          "growth_spd": 1.6,
-          "score": 1025.67,
-          "stats_total": 1025
-        },
-        {
-          "name": "당근",
-          "level": 120,
-          "hp": 1182,
-          "atk": 267,
-          "def": 163,
-          "spd": 196,
-          "growth_hp": 9.55,
-          "growth_atk": 2.16,
-          "growth_def": 1.32,
-          "growth_spd": 1.59,
-          "score": 1020,
-          "stats_total": 1020
-        }
-      ]
+      "rows": []
     },
     {
       "id": 7215,
@@ -8315,78 +7613,7 @@
     {
       "id": 7227,
       "name": "카루",
-      "rows": [
-        {
-          "name": "세종대왕",
-          "level": 140,
-          "hp": 1519,
-          "atk": 319,
-          "def": 220,
-          "spd": 189,
-          "growth_hp": 10.52,
-          "growth_atk": 2.21,
-          "growth_def": 1.53,
-          "growth_spd": 1.31,
-          "score": 1234.33,
-          "stats_total": 1234
-        },
-        {
-          "name": "아몬드",
-          "level": 140,
-          "hp": 1505,
-          "atk": 320,
-          "def": 220,
-          "spd": 188,
-          "growth_hp": 10.42,
-          "growth_atk": 2.22,
-          "growth_def": 1.53,
-          "growth_spd": 1.3,
-          "score": 1229.67,
-          "stats_total": 1229
-        },
-        {
-          "name": "카리나",
-          "level": 140,
-          "hp": 1505,
-          "atk": 316,
-          "def": 219,
-          "spd": 188,
-          "growth_hp": 10.42,
-          "growth_atk": 2.19,
-          "growth_def": 1.52,
-          "growth_spd": 1.3,
-          "score": 1224.67,
-          "stats_total": 1224
-        },
-        {
-          "name": "창공",
-          "level": 140,
-          "hp": 1505,
-          "atk": 318,
-          "def": 218,
-          "spd": 187,
-          "growth_hp": 10.42,
-          "growth_atk": 2.2,
-          "growth_def": 1.51,
-          "growth_spd": 1.29,
-          "score": 1224.67,
-          "stats_total": 1224
-        },
-        {
-          "name": "갈치",
-          "level": 130,
-          "hp": 1404,
-          "atk": 297,
-          "def": 203,
-          "spd": 168,
-          "growth_hp": 10.44,
-          "growth_atk": 2.21,
-          "growth_def": 1.51,
-          "growth_spd": 1.25,
-          "score": 1136,
-          "stats_total": 1136
-        }
-      ]
+      "rows": []
     },
     {
       "id": 7228,
@@ -8435,20 +7662,6 @@
           "stats_total": 1227
         },
         {
-          "name": "차태식",
-          "level": 140,
-          "hp": 1542,
-          "atk": 318,
-          "def": 207,
-          "spd": 188,
-          "growth_hp": 10.68,
-          "growth_atk": 2.2,
-          "growth_def": 1.44,
-          "growth_spd": 1.3,
-          "score": 1227,
-          "stats_total": 1227
-        },
-        {
           "name": "수양대군",
           "level": 140,
           "hp": 1546,
@@ -8461,6 +7674,20 @@
           "growth_spd": 1.29,
           "score": 1224.33,
           "stats_total": 1224
+        },
+        {
+          "name": "선포",
+          "level": 140,
+          "hp": 1526,
+          "atk": 317,
+          "def": 205,
+          "spd": 188,
+          "growth_hp": 10.56,
+          "growth_atk": 2.19,
+          "growth_def": 1.42,
+          "growth_spd": 1.3,
+          "score": 1218.67,
+          "stats_total": 1218
         }
       ]
     },
@@ -8546,17 +7773,17 @@
         },
         {
           "name": "연개소문",
-          "level": 137,
-          "hp": 1431,
-          "atk": 316,
-          "def": 195,
-          "spd": 204,
+          "level": 138,
+          "hp": 1442,
+          "atk": 318,
+          "def": 196,
+          "spd": 205,
           "growth_hp": 10.12,
-          "growth_atk": 2.24,
+          "growth_atk": 2.23,
           "growth_def": 1.38,
           "growth_spd": 1.45,
-          "score": 1192,
-          "stats_total": 1192
+          "score": 1199.67,
+          "stats_total": 1199
         },
         {
           "name": "아사히",
@@ -8635,6 +7862,20 @@
           "stats_total": 1229
         },
         {
+          "name": "욱도리",
+          "level": 140,
+          "hp": 1411,
+          "atk": 326,
+          "def": 246,
+          "spd": 186,
+          "growth_hp": 9.76,
+          "growth_atk": 2.26,
+          "growth_def": 1.71,
+          "growth_spd": 1.29,
+          "score": 1228.33,
+          "stats_total": 1228
+        },
+        {
           "name": "크리어드",
           "level": 140,
           "hp": 1411,
@@ -8661,20 +7902,6 @@
           "growth_spd": 1.31,
           "score": 1228,
           "stats_total": 1228
-        },
-        {
-          "name": "뽀카",
-          "level": 140,
-          "hp": 1409,
-          "atk": 324,
-          "def": 244,
-          "spd": 188,
-          "growth_hp": 9.74,
-          "growth_atk": 2.24,
-          "growth_def": 1.69,
-          "growth_spd": 1.3,
-          "score": 1225.67,
-          "stats_total": 1225
         }
       ]
     },
@@ -8780,17 +8007,17 @@
       "rows": [
         {
           "name": "연탄불후라이",
-          "level": 122,
-          "hp": 1152,
-          "atk": 251,
-          "def": 144,
-          "spd": 241,
-          "growth_hp": 9.24,
+          "level": 123,
+          "hp": 1162,
+          "atk": 253,
+          "def": 145,
+          "spd": 243,
+          "growth_hp": 9.25,
           "growth_atk": 2.02,
           "growth_def": 1.16,
           "growth_spd": 1.93,
-          "score": 1020,
-          "stats_total": 1020
+          "score": 1028.33,
+          "stats_total": 1028
         }
       ]
     },
@@ -8845,112 +8072,12 @@
     {
       "id": 7245,
       "name": "메카기로",
-      "rows": [
-        {
-          "name": "세종대왕",
-          "level": 126,
-          "hp": 1406,
-          "atk": 306,
-          "def": 177,
-          "spd": 163,
-          "growth_hp": 10.73,
-          "growth_atk": 2.34,
-          "growth_def": 1.35,
-          "growth_spd": 1.25,
-          "score": 1114.67,
-          "stats_total": 1114
-        },
-        {
-          "name": "야옹",
-          "level": 124,
-          "hp": 1377,
-          "atk": 300,
-          "def": 172,
-          "spd": 162,
-          "growth_hp": 10.67,
-          "growth_atk": 2.33,
-          "growth_def": 1.33,
-          "growth_spd": 1.26,
-          "score": 1093,
-          "stats_total": 1093
-        }
-      ]
+      "rows": []
     },
     {
       "id": 7565,
       "name": "청룡",
-      "rows": [
-        {
-          "name": "의병단",
-          "level": 139,
-          "hp": 1499,
-          "atk": 390,
-          "def": 192,
-          "spd": 188,
-          "growth_hp": 10.4,
-          "growth_atk": 2.72,
-          "growth_def": 1.33,
-          "growth_spd": 1.3,
-          "score": 1269.67,
-          "stats_total": 1269
-        },
-        {
-          "name": "인간과윤리",
-          "level": 140,
-          "hp": 1536,
-          "atk": 345,
-          "def": 197,
-          "spd": 205,
-          "growth_hp": 10.59,
-          "growth_atk": 2.38,
-          "growth_def": 1.36,
-          "growth_spd": 1.42,
-          "score": 1259,
-          "stats_total": 1259
-        },
-        {
-          "name": "코카콜라",
-          "level": 140,
-          "hp": 1536,
-          "atk": 346,
-          "def": 198,
-          "spd": 202,
-          "growth_hp": 10.59,
-          "growth_atk": 2.39,
-          "growth_def": 1.37,
-          "growth_spd": 1.4,
-          "score": 1258,
-          "stats_total": 1258
-        },
-        {
-          "name": "까만마음흑구",
-          "level": 140,
-          "hp": 1536,
-          "atk": 346,
-          "def": 197,
-          "spd": 203,
-          "growth_hp": 10.59,
-          "growth_atk": 2.39,
-          "growth_def": 1.36,
-          "growth_spd": 1.4,
-          "score": 1258,
-          "stats_total": 1258
-        },
-        {
-          "name": "사냥꾼",
-          "level": 140,
-          "hp": 1529,
-          "atk": 347,
-          "def": 198,
-          "spd": 203,
-          "growth_hp": 10.54,
-          "growth_atk": 2.4,
-          "growth_def": 1.37,
-          "growth_spd": 1.4,
-          "score": 1257.67,
-          "stats_total": 1257
-        }
-      ]
+      "rows": []
     },
     {
       "id": 7574,
@@ -9059,17 +8186,17 @@
       "rows": [
         {
           "name": "먹고보니두리",
-          "level": 139,
-          "hp": 1412,
-          "atk": 307,
-          "def": 203,
-          "spd": 226,
+          "level": 140,
+          "hp": 1422,
+          "atk": 309,
+          "def": 204,
+          "spd": 228,
           "growth_hp": 9.88,
           "growth_atk": 2.15,
           "growth_def": 1.42,
           "growth_spd": 1.58,
-          "score": 1206.67,
-          "stats_total": 1206
+          "score": 1215,
+          "stats_total": 1215
         },
         {
           "name": "세종대왕",
@@ -9146,6 +8273,20 @@
           "growth_spd": 1.39,
           "score": 1185,
           "stats_total": 1185
+        },
+        {
+          "name": "별이하늘",
+          "level": 121,
+          "hp": 1215,
+          "atk": 287,
+          "def": 166,
+          "spd": 174,
+          "growth_hp": 9.7,
+          "growth_atk": 2.29,
+          "growth_def": 1.33,
+          "growth_spd": 1.39,
+          "score": 1032,
+          "stats_total": 1032
         }
       ]
     },
@@ -9169,17 +8310,17 @@
         },
         {
           "name": "춘식이",
-          "level": 123,
-          "hp": 1352,
-          "atk": 274,
-          "def": 175,
-          "spd": 186,
+          "level": 125,
+          "hp": 1373,
+          "atk": 278,
+          "def": 178,
+          "spd": 188,
           "growth_hp": 10.63,
-          "growth_atk": 2.16,
+          "growth_atk": 2.15,
           "growth_def": 1.38,
-          "growth_spd": 1.47,
-          "score": 1085.67,
-          "stats_total": 1085
+          "growth_spd": 1.46,
+          "score": 1101.67,
+          "stats_total": 1101
         },
         {
           "name": "미녕",
@@ -9313,31 +8454,31 @@
         },
         {
           "name": "세종대왕",
-          "level": 133,
-          "hp": 1439,
-          "atk": 313,
-          "def": 177,
-          "spd": 191,
-          "growth_hp": 10.51,
+          "level": 134,
+          "hp": 1449,
+          "atk": 315,
+          "def": 178,
+          "spd": 193,
+          "growth_hp": 10.5,
           "growth_atk": 2.29,
-          "growth_def": 1.3,
-          "growth_spd": 1.39,
-          "score": 1160.67,
-          "stats_total": 1160
+          "growth_def": 1.29,
+          "growth_spd": 1.4,
+          "score": 1169,
+          "stats_total": 1169
         },
         {
           "name": "연탄불후라이",
-          "level": 121,
-          "hp": 1308,
-          "atk": 285,
-          "def": 163,
-          "spd": 175,
-          "growth_hp": 10.47,
-          "growth_atk": 2.28,
+          "level": 122,
+          "hp": 1318,
+          "atk": 288,
+          "def": 164,
+          "spd": 177,
+          "growth_hp": 10.46,
+          "growth_atk": 2.29,
           "growth_def": 1.31,
           "growth_spd": 1.4,
-          "score": 1059,
-          "stats_total": 1059
+          "score": 1068.33,
+          "stats_total": 1068
         },
         {
           "name": "태태",
@@ -9589,78 +8730,7 @@
     {
       "id": 7640,
       "name": "하라라",
-      "rows": [
-        {
-          "name": "애호박",
-          "level": 140,
-          "hp": 1473,
-          "atk": 296,
-          "def": 197,
-          "spd": 242,
-          "growth_hp": 10.24,
-          "growth_atk": 2.06,
-          "growth_def": 1.37,
-          "growth_spd": 1.68,
-          "score": 1226,
-          "stats_total": 1226
-        },
-        {
-          "name": "창",
-          "level": 140,
-          "hp": 1469,
-          "atk": 296,
-          "def": 199,
-          "spd": 241,
-          "growth_hp": 10.22,
-          "growth_atk": 2.06,
-          "growth_def": 1.39,
-          "growth_spd": 1.68,
-          "score": 1225.67,
-          "stats_total": 1225
-        },
-        {
-          "name": "구난",
-          "level": 140,
-          "hp": 1463,
-          "atk": 296,
-          "def": 196,
-          "spd": 244,
-          "growth_hp": 10.17,
-          "growth_atk": 2.06,
-          "growth_def": 1.37,
-          "growth_spd": 1.7,
-          "score": 1223.67,
-          "stats_total": 1223
-        },
-        {
-          "name": "고두심",
-          "level": 140,
-          "hp": 1463,
-          "atk": 295,
-          "def": 198,
-          "spd": 240,
-          "growth_hp": 10.17,
-          "growth_atk": 2.06,
-          "growth_def": 1.38,
-          "growth_spd": 1.67,
-          "score": 1220.67,
-          "stats_total": 1220
-        },
-        {
-          "name": "오빠따",
-          "level": 140,
-          "hp": 1462,
-          "atk": 296,
-          "def": 196,
-          "spd": 241,
-          "growth_hp": 10.17,
-          "growth_atk": 2.06,
-          "growth_def": 1.37,
-          "growth_spd": 1.68,
-          "score": 1220.33,
-          "stats_total": 1220
-        }
-      ]
+      "rows": []
     },
     {
       "id": 7644,
@@ -9839,97 +8909,12 @@
     {
       "id": 7662,
       "name": "플라티우스",
-      "rows": [
-        {
-          "name": "아몬드",
-          "level": 140,
-          "hp": 1620,
-          "atk": 332,
-          "def": 197,
-          "spd": 195,
-          "growth_hp": 11.22,
-          "growth_atk": 2.3,
-          "growth_def": 1.37,
-          "growth_spd": 1.35,
-          "score": 1264,
-          "stats_total": 1264
-        },
-        {
-          "name": "맑은하늘",
-          "level": 140,
-          "hp": 1614,
-          "atk": 331,
-          "def": 195,
-          "spd": 196,
-          "growth_hp": 11.17,
-          "growth_atk": 2.29,
-          "growth_def": 1.35,
-          "growth_spd": 1.36,
-          "score": 1260,
-          "stats_total": 1260
-        },
-        {
-          "name": "맹구",
-          "level": 124,
-          "hp": 1434,
-          "atk": 295,
-          "def": 174,
-          "spd": 173,
-          "growth_hp": 11.16,
-          "growth_atk": 2.3,
-          "growth_def": 1.36,
-          "growth_spd": 1.35,
-          "score": 1120,
-          "stats_total": 1120
-        },
-        {
-          "name": "카이",
-          "level": 120,
-          "hp": 1361,
-          "atk": 285,
-          "def": 168,
-          "spd": 168,
-          "growth_hp": 10.92,
-          "growth_atk": 2.29,
-          "growth_def": 1.35,
-          "growth_spd": 1.35,
-          "score": 1074.67,
-          "stats_total": 1074
-        },
-        {
-          "name": "카리나",
-          "level": 120,
-          "hp": 1357,
-          "atk": 283,
-          "def": 168,
-          "spd": 167,
-          "growth_hp": 10.89,
-          "growth_atk": 2.28,
-          "growth_def": 1.35,
-          "growth_spd": 1.34,
-          "score": 1070.33,
-          "stats_total": 1070
-        }
-      ]
+      "rows": []
     },
     {
       "id": 7696,
       "name": "판그라",
       "rows": [
-        {
-          "name": "차태식",
-          "level": 140,
-          "hp": 1535,
-          "atk": 349,
-          "def": 207,
-          "spd": 146,
-          "growth_hp": 10.71,
-          "growth_atk": 2.44,
-          "growth_def": 1.45,
-          "growth_spd": 1.02,
-          "score": 1213.67,
-          "stats_total": 1213
-        },
         {
           "name": "다찌마와리",
           "level": 140,
@@ -10124,17 +9109,17 @@
         },
         {
           "name": "카리나",
-          "level": 134,
-          "hp": 1329,
-          "atk": 311,
-          "def": 163,
-          "spd": 231,
+          "level": 135,
+          "hp": 1338,
+          "atk": 313,
+          "def": 165,
+          "spd": 233,
           "growth_hp": 9.66,
           "growth_atk": 2.26,
           "growth_def": 1.19,
-          "growth_spd": 1.68,
-          "score": 1148,
-          "stats_total": 1148
+          "growth_spd": 1.69,
+          "score": 1157,
+          "stats_total": 1157
         },
         {
           "name": "쿠쿠르",
@@ -10176,6 +9161,20 @@
       "name": "백구",
       "rows": [
         {
+          "name": "카리나",
+          "level": 126,
+          "hp": 1309,
+          "atk": 259,
+          "def": 177,
+          "spd": 213,
+          "growth_hp": 10.09,
+          "growth_atk": 2,
+          "growth_def": 1.37,
+          "growth_spd": 1.65,
+          "score": 1085.33,
+          "stats_total": 1085
+        },
+        {
           "name": "이브",
           "level": 123,
           "hp": 1284,
@@ -10188,20 +9187,6 @@
           "growth_spd": 1.65,
           "score": 1062,
           "stats_total": 1062
-        },
-        {
-          "name": "카리나",
-          "level": 123,
-          "hp": 1280,
-          "atk": 253,
-          "def": 173,
-          "spd": 208,
-          "growth_hp": 10.1,
-          "growth_atk": 2,
-          "growth_def": 1.37,
-          "growth_spd": 1.65,
-          "score": 1060.67,
-          "stats_total": 1060
         },
         {
           "name": "세종대왕",
@@ -10489,36 +9474,7 @@
     {
       "id": 7060,
       "name": "고로",
-      "rows": [
-        {
-          "name": "뽀카",
-          "level": 122,
-          "hp": 1240,
-          "atk": 280,
-          "def": 172,
-          "spd": 194,
-          "growth_hp": 9.84,
-          "growth_atk": 2.22,
-          "growth_def": 1.37,
-          "growth_spd": 1.55,
-          "score": 1059.33,
-          "stats_total": 1059
-        },
-        {
-          "name": "카리나",
-          "level": 120,
-          "hp": 1220,
-          "atk": 276,
-          "def": 164,
-          "spd": 191,
-          "growth_hp": 9.84,
-          "growth_atk": 2.23,
-          "growth_def": 1.33,
-          "growth_spd": 1.55,
-          "score": 1037.67,
-          "stats_total": 1037
-        }
-      ]
+      "rows": []
     },
     {
       "id": 7068,
@@ -10576,78 +9532,7 @@
     {
       "id": 7806,
       "name": "녹호",
-      "rows": [
-        {
-          "name": "달이",
-          "level": 140,
-          "hp": 1505,
-          "atk": 319,
-          "def": 227,
-          "spd": 194,
-          "growth_hp": 10.44,
-          "growth_atk": 2.22,
-          "growth_def": 1.58,
-          "growth_spd": 1.35,
-          "score": 1241.67,
-          "stats_total": 1241
-        },
-        {
-          "name": "훈민정음",
-          "level": 140,
-          "hp": 1497,
-          "atk": 318,
-          "def": 226,
-          "spd": 194,
-          "growth_hp": 10.38,
-          "growth_atk": 2.21,
-          "growth_def": 1.57,
-          "growth_spd": 1.35,
-          "score": 1237,
-          "stats_total": 1237
-        },
-        {
-          "name": "오이",
-          "level": 140,
-          "hp": 1497,
-          "atk": 318,
-          "def": 225,
-          "spd": 194,
-          "growth_hp": 10.38,
-          "growth_atk": 2.21,
-          "growth_def": 1.56,
-          "growth_spd": 1.35,
-          "score": 1236,
-          "stats_total": 1236
-        },
-        {
-          "name": "아련나래",
-          "level": 140,
-          "hp": 1488,
-          "atk": 318,
-          "def": 224,
-          "spd": 194,
-          "growth_hp": 10.32,
-          "growth_atk": 2.21,
-          "growth_def": 1.55,
-          "growth_spd": 1.35,
-          "score": 1232,
-          "stats_total": 1232
-        },
-        {
-          "name": "위대한파파",
-          "level": 140,
-          "hp": 1490,
-          "atk": 315,
-          "def": 224,
-          "spd": 195,
-          "growth_hp": 10.33,
-          "growth_atk": 2.19,
-          "growth_def": 1.55,
-          "growth_spd": 1.35,
-          "score": 1230.67,
-          "stats_total": 1230
-        }
-      ]
+      "rows": []
     },
     {
       "id": 7000,
@@ -10806,6 +9691,34 @@
       "name": "갈푸스",
       "rows": [
         {
+          "name": "엄흥도",
+          "level": 140,
+          "hp": 1398,
+          "atk": 386,
+          "def": 178,
+          "spd": 231,
+          "growth_hp": 9.67,
+          "growth_atk": 2.68,
+          "growth_def": 1.23,
+          "growth_spd": 1.6,
+          "score": 1261,
+          "stats_total": 1261
+        },
+        {
+          "name": "갈치",
+          "level": 140,
+          "hp": 1397,
+          "atk": 386,
+          "def": 179,
+          "spd": 230,
+          "growth_hp": 9.66,
+          "growth_atk": 2.68,
+          "growth_def": 1.24,
+          "growth_spd": 1.59,
+          "score": 1260.67,
+          "stats_total": 1260
+        },
+        {
           "name": "태태",
           "level": 140,
           "hp": 1408,
@@ -10846,34 +9759,6 @@
           "growth_spd": 1.6,
           "score": 1213,
           "stats_total": 1213
-        },
-        {
-          "name": "케이",
-          "level": 140,
-          "hp": 1399,
-          "atk": 335,
-          "def": 180,
-          "spd": 231,
-          "growth_hp": 9.68,
-          "growth_atk": 2.32,
-          "growth_def": 1.24,
-          "growth_spd": 1.6,
-          "score": 1212.33,
-          "stats_total": 1212
-        },
-        {
-          "name": "별이하늘",
-          "level": 140,
-          "hp": 1398,
-          "atk": 335,
-          "def": 181,
-          "spd": 229,
-          "growth_hp": 9.67,
-          "growth_atk": 2.32,
-          "growth_def": 1.25,
-          "growth_spd": 1.58,
-          "score": 1211,
-          "stats_total": 1211
         }
       ]
     },
@@ -10986,20 +9871,6 @@
           "stats_total": 1275
         },
         {
-          "name": "마",
-          "level": 140,
-          "hp": 1688,
-          "atk": 354,
-          "def": 300,
-          "spd": 57,
-          "growth_hp": 11.64,
-          "growth_atk": 2.45,
-          "growth_def": 2.07,
-          "growth_spd": 0.4,
-          "score": 1273.67,
-          "stats_total": 1273
-        },
-        {
           "name": "권율",
           "level": 140,
           "hp": 1688,
@@ -11009,6 +9880,20 @@
           "growth_hp": 11.64,
           "growth_atk": 2.46,
           "growth_def": 2.06,
+          "growth_spd": 0.4,
+          "score": 1273.67,
+          "stats_total": 1273
+        },
+        {
+          "name": "수컷",
+          "level": 140,
+          "hp": 1688,
+          "atk": 354,
+          "def": 300,
+          "spd": 57,
+          "growth_hp": 11.64,
+          "growth_atk": 2.45,
+          "growth_def": 2.07,
           "growth_spd": 0.4,
           "score": 1273.67,
           "stats_total": 1273
@@ -11346,17 +10231,17 @@
       "rows": [
         {
           "name": "눈비",
-          "level": 129,
-          "hp": 1401,
-          "atk": 278,
-          "def": 208,
-          "spd": 192,
+          "level": 130,
+          "hp": 1412,
+          "atk": 280,
+          "def": 209,
+          "spd": 194,
           "growth_hp": 10.52,
           "growth_atk": 2.09,
           "growth_def": 1.56,
           "growth_spd": 1.45,
-          "score": 1145,
-          "stats_total": 1145
+          "score": 1153.67,
+          "stats_total": 1153
         }
       ]
     },
@@ -11366,17 +10251,17 @@
       "rows": [
         {
           "name": "비",
-          "level": 133,
-          "hp": 1468,
-          "atk": 289,
-          "def": 289,
-          "spd": 120,
-          "growth_hp": 10.7,
+          "level": 134,
+          "hp": 1478,
+          "atk": 291,
+          "def": 291,
+          "spd": 121,
+          "growth_hp": 10.69,
           "growth_atk": 2.11,
           "growth_def": 2.11,
           "growth_spd": 0.88,
-          "score": 1187.33,
-          "stats_total": 1187
+          "score": 1195.67,
+          "stats_total": 1195
         },
         {
           "name": "카리나",
@@ -11484,17 +10369,17 @@
         },
         {
           "name": "키리빔",
-          "level": 131,
-          "hp": 1343,
-          "atk": 332,
-          "def": 230,
-          "spd": 79,
+          "level": 132,
+          "hp": 1353,
+          "atk": 335,
+          "def": 232,
+          "spd": 80,
           "growth_hp": 9.92,
-          "growth_atk": 2.45,
+          "growth_atk": 2.46,
           "growth_def": 1.7,
-          "growth_spd": 0.58,
-          "score": 1088.67,
-          "stats_total": 1088
+          "growth_spd": 0.59,
+          "score": 1098,
+          "stats_total": 1098
         }
       ]
     },
@@ -11773,7 +10658,7 @@
           "stats_total": 1315
         },
         {
-          "name": "세종대왕",
+          "name": "훈민정음",
           "level": 140,
           "hp": 1837,
           "atk": 332,
@@ -11850,17 +10735,17 @@
         },
         {
           "name": "티라노팔길이",
-          "level": 134,
-          "hp": 1365,
-          "atk": 322,
-          "def": 203,
-          "spd": 194,
-          "growth_hp": 9.83,
+          "level": 135,
+          "hp": 1374,
+          "atk": 324,
+          "def": 205,
+          "spd": 196,
+          "growth_hp": 9.82,
           "growth_atk": 2.32,
           "growth_def": 1.47,
           "growth_spd": 1.4,
-          "score": 1174,
-          "stats_total": 1174
+          "score": 1183,
+          "stats_total": 1183
         },
         {
           "name": "세종대왕",
@@ -12619,20 +11504,6 @@
           "stats_total": 1255
         },
         {
-          "name": "쿠링",
-          "level": 140,
-          "hp": 1649,
-          "atk": 295,
-          "def": 346,
-          "spd": 64,
-          "growth_hp": 11.4,
-          "growth_atk": 2.04,
-          "growth_def": 2.4,
-          "growth_spd": 0.45,
-          "score": 1254.67,
-          "stats_total": 1254
-        },
-        {
           "name": "쿠쿠르",
           "level": 140,
           "hp": 1652,
@@ -12643,6 +11514,20 @@
           "growth_atk": 2.04,
           "growth_def": 2.4,
           "growth_spd": 0.43,
+          "score": 1254.67,
+          "stats_total": 1254
+        },
+        {
+          "name": "쿠링",
+          "level": 140,
+          "hp": 1649,
+          "atk": 295,
+          "def": 346,
+          "spd": 64,
+          "growth_hp": 11.4,
+          "growth_atk": 2.04,
+          "growth_def": 2.4,
+          "growth_spd": 0.45,
           "score": 1254.67,
           "stats_total": 1254
         }
@@ -12709,18 +11594,18 @@
           "stats_total": 1047
         },
         {
-          "name": "미녕",
+          "name": "수수",
           "level": 120,
-          "hp": 1233,
-          "atk": 265,
-          "def": 179,
+          "hp": 1236,
+          "atk": 264,
+          "def": 181,
           "spd": 189,
-          "growth_hp": 9.97,
-          "growth_atk": 2.15,
-          "growth_def": 1.45,
+          "growth_hp": 10,
+          "growth_atk": 2.14,
+          "growth_def": 1.47,
           "growth_spd": 1.53,
-          "score": 1044,
-          "stats_total": 1044
+          "score": 1046,
+          "stats_total": 1046
         }
       ]
     },
@@ -12874,17 +11759,17 @@
         },
         {
           "name": "쿼디",
-          "level": 127,
-          "hp": 1234,
-          "atk": 232,
-          "def": 137,
-          "spd": 281,
+          "level": 128,
+          "hp": 1244,
+          "atk": 234,
+          "def": 138,
+          "spd": 283,
           "growth_hp": 9.54,
-          "growth_atk": 1.79,
+          "growth_atk": 1.8,
           "growth_def": 1.06,
           "growth_spd": 2.17,
-          "score": 1061.33,
-          "stats_total": 1061
+          "score": 1069.67,
+          "stats_total": 1069
         }
       ]
     },
@@ -13189,17 +12074,17 @@
         },
         {
           "name": "애호박",
-          "level": 123,
-          "hp": 1267,
-          "atk": 277,
-          "def": 174,
-          "spd": 190,
+          "level": 124,
+          "hp": 1277,
+          "atk": 280,
+          "def": 175,
+          "spd": 191,
           "growth_hp": 9.98,
-          "growth_atk": 2.18,
-          "growth_def": 1.38,
+          "growth_atk": 2.19,
+          "growth_def": 1.37,
           "growth_spd": 1.5,
-          "score": 1063.33,
-          "stats_total": 1063
+          "score": 1071.67,
+          "stats_total": 1071
         },
         {
           "name": "악마",
@@ -13303,6 +12188,20 @@
           "stats_total": 1197
         },
         {
+          "name": "크리스피베이컨",
+          "level": 129,
+          "hp": 1299,
+          "atk": 302,
+          "def": 189,
+          "spd": 192,
+          "growth_hp": 9.75,
+          "growth_atk": 2.27,
+          "growth_def": 1.42,
+          "growth_spd": 1.45,
+          "score": 1116,
+          "stats_total": 1116
+        },
+        {
           "name": "광해군",
           "level": 129,
           "hp": 1275,
@@ -13315,20 +12214,6 @@
           "growth_spd": 1.45,
           "score": 1108,
           "stats_total": 1108
-        },
-        {
-          "name": "크리스피베이컨",
-          "level": 128,
-          "hp": 1289,
-          "atk": 300,
-          "def": 187,
-          "spd": 191,
-          "growth_hp": 9.75,
-          "growth_atk": 2.27,
-          "growth_def": 1.42,
-          "growth_spd": 1.45,
-          "score": 1107.67,
-          "stats_total": 1107
         },
         {
           "name": "탱자",
@@ -13594,78 +12479,7 @@
     {
       "id": 7560,
       "name": "블랙드래곤",
-      "rows": [
-        {
-          "name": "빡뚜",
-          "level": 140,
-          "hp": 1503,
-          "atk": 331,
-          "def": 206,
-          "spd": 202,
-          "growth_hp": 10.41,
-          "growth_atk": 2.29,
-          "growth_def": 1.43,
-          "growth_spd": 1.4,
-          "score": 1240,
-          "stats_total": 1240
-        },
-        {
-          "name": "토마토",
-          "level": 140,
-          "hp": 1497,
-          "atk": 331,
-          "def": 209,
-          "spd": 201,
-          "growth_hp": 10.37,
-          "growth_atk": 2.29,
-          "growth_def": 1.45,
-          "growth_spd": 1.4,
-          "score": 1240,
-          "stats_total": 1240
-        },
-        {
-          "name": "갈릭",
-          "level": 140,
-          "hp": 1496,
-          "atk": 332,
-          "def": 206,
-          "spd": 202,
-          "growth_hp": 10.36,
-          "growth_atk": 2.3,
-          "growth_def": 1.43,
-          "growth_spd": 1.4,
-          "score": 1238.67,
-          "stats_total": 1238
-        },
-        {
-          "name": "에몽",
-          "level": 140,
-          "hp": 1498,
-          "atk": 330,
-          "def": 206,
-          "spd": 202,
-          "growth_hp": 10.37,
-          "growth_atk": 2.29,
-          "growth_def": 1.43,
-          "growth_spd": 1.4,
-          "score": 1237.33,
-          "stats_total": 1237
-        },
-        {
-          "name": "세종대왕",
-          "level": 140,
-          "hp": 1498,
-          "atk": 330,
-          "def": 206,
-          "spd": 202,
-          "growth_hp": 10.37,
-          "growth_atk": 2.29,
-          "growth_def": 1.43,
-          "growth_spd": 1.4,
-          "score": 1237.33,
-          "stats_total": 1237
-        }
-      ]
+      "rows": []
     },
     {
       "id": 7233,
@@ -13825,31 +12639,31 @@
         },
         {
           "name": "뚜쥬르",
-          "level": 136,
-          "hp": 1338,
-          "atk": 292,
-          "def": 182,
-          "spd": 235,
+          "level": 137,
+          "hp": 1347,
+          "atk": 294,
+          "def": 184,
+          "spd": 236,
           "growth_hp": 9.54,
           "growth_atk": 2.09,
-          "growth_def": 1.3,
+          "growth_def": 1.31,
           "growth_spd": 1.68,
-          "score": 1155,
-          "stats_total": 1155
+          "score": 1163,
+          "stats_total": 1163
         },
         {
           "name": "땅땅이",
-          "level": 131,
-          "hp": 1268,
-          "atk": 281,
-          "def": 176,
-          "spd": 227,
+          "level": 132,
+          "hp": 1278,
+          "atk": 283,
+          "def": 178,
+          "spd": 229,
           "growth_hp": 9.37,
           "growth_atk": 2.08,
           "growth_def": 1.31,
-          "growth_spd": 1.68,
-          "score": 1106.67,
-          "stats_total": 1106
+          "growth_spd": 1.69,
+          "score": 1116,
+          "stats_total": 1116
         }
       ]
     },
@@ -13876,22 +12690,7 @@
     {
       "id": 2036,
       "name": "블루카비트",
-      "rows": [
-        {
-          "name": "욱도리",
-          "level": 131,
-          "hp": 1381,
-          "atk": 235,
-          "def": 192,
-          "spd": 245,
-          "growth_hp": 10.31,
-          "growth_atk": 1.76,
-          "growth_def": 1.44,
-          "growth_spd": 1.83,
-          "score": 1132.33,
-          "stats_total": 1132
-        }
-      ]
+      "rows": []
     },
     {
       "id": 7075,
@@ -13901,50 +12700,7 @@
     {
       "id": 7076,
       "name": "라그노스",
-      "rows": [
-        {
-          "name": "피터",
-          "level": 124,
-          "hp": 1551,
-          "atk": 281,
-          "def": 274,
-          "spd": 63,
-          "growth_hp": 12.07,
-          "growth_atk": 2.2,
-          "growth_def": 2.14,
-          "growth_spd": 0.5,
-          "score": 1135,
-          "stats_total": 1135
-        },
-        {
-          "name": "크레파스",
-          "level": 123,
-          "hp": 1539,
-          "atk": 275,
-          "def": 271,
-          "spd": 64,
-          "growth_hp": 12.07,
-          "growth_atk": 2.16,
-          "growth_def": 2.13,
-          "growth_spd": 0.51,
-          "score": 1123,
-          "stats_total": 1123
-        },
-        {
-          "name": "이브",
-          "level": 120,
-          "hp": 1503,
-          "atk": 267,
-          "def": 265,
-          "spd": 61,
-          "growth_hp": 12.08,
-          "growth_atk": 2.15,
-          "growth_def": 2.13,
-          "growth_spd": 0.5,
-          "score": 1094,
-          "stats_total": 1094
-        }
-      ]
+      "rows": []
     },
     {
       "id": 7620,
@@ -13952,17 +12708,17 @@
       "rows": [
         {
           "name": "달이",
-          "level": 127,
-          "hp": 1700,
-          "atk": 302,
-          "def": 253,
-          "spd": 70,
-          "growth_hp": 12.93,
+          "level": 129,
+          "hp": 1728,
+          "atk": 307,
+          "def": 257,
+          "spd": 71,
+          "growth_hp": 12.95,
           "growth_atk": 2.3,
           "growth_def": 1.93,
           "growth_spd": 0.54,
-          "score": 1191.67,
-          "stats_total": 1191
+          "score": 1211,
+          "stats_total": 1211
         }
       ]
     },
@@ -14007,17 +12763,17 @@
       "rows": [
         {
           "name": "크리어드",
-          "level": 125,
-          "hp": 1241,
-          "atk": 307,
-          "def": 131,
-          "spd": 216,
+          "level": 127,
+          "hp": 1260,
+          "atk": 311,
+          "def": 133,
+          "spd": 219,
           "growth_hp": 9.65,
-          "growth_atk": 2.39,
+          "growth_atk": 2.38,
           "growth_def": 1.02,
-          "growth_spd": 1.69,
-          "score": 1067.67,
-          "stats_total": 1067
+          "growth_spd": 1.68,
+          "score": 1083,
+          "stats_total": 1083
         }
       ]
     },
@@ -14071,17 +12827,17 @@
       "rows": [
         {
           "name": "먹고보니두리",
-          "level": 137,
-          "hp": 1500,
-          "atk": 325,
-          "def": 203,
-          "spd": 198,
+          "level": 138,
+          "hp": 1511,
+          "atk": 327,
+          "def": 205,
+          "spd": 199,
           "growth_hp": 10.61,
           "growth_atk": 2.3,
-          "growth_def": 1.44,
+          "growth_def": 1.45,
           "growth_spd": 1.4,
-          "score": 1226,
-          "stats_total": 1226
+          "score": 1234.67,
+          "stats_total": 1234
         },
         {
           "name": "칼의노래",
@@ -14099,17 +12855,17 @@
         },
         {
           "name": "응뎅",
-          "level": 128,
-          "hp": 1397,
-          "atk": 303,
-          "def": 189,
-          "spd": 185,
+          "level": 129,
+          "hp": 1408,
+          "atk": 305,
+          "def": 190,
+          "spd": 186,
           "growth_hp": 10.55,
           "growth_atk": 2.29,
           "growth_def": 1.43,
           "growth_spd": 1.4,
-          "score": 1142.67,
-          "stats_total": 1142
+          "score": 1150.33,
+          "stats_total": 1150
         },
         {
           "name": "수컷",
@@ -14126,18 +12882,18 @@
           "stats_total": 1139
         },
         {
-          "name": "국민타자",
-          "level": 120,
-          "hp": 1321,
-          "atk": 285,
-          "def": 179,
-          "spd": 175,
-          "growth_hp": 10.62,
-          "growth_atk": 2.29,
+          "name": "수컷",
+          "level": 122,
+          "hp": 1341,
+          "atk": 291,
+          "def": 182,
+          "spd": 177,
+          "growth_hp": 10.61,
+          "growth_atk": 2.31,
           "growth_def": 1.45,
-          "growth_spd": 1.41,
-          "score": 1079.33,
-          "stats_total": 1079
+          "growth_spd": 1.4,
+          "score": 1097,
+          "stats_total": 1097
         }
       ]
     },
@@ -14147,59 +12903,59 @@
       "rows": [
         {
           "name": "백발깡패",
-          "level": 135,
-          "hp": 1433,
-          "atk": 322,
-          "def": 219,
-          "spd": 182,
-          "growth_hp": 10.25,
-          "growth_atk": 2.31,
+          "level": 136,
+          "hp": 1443,
+          "atk": 324,
+          "def": 221,
+          "spd": 184,
+          "growth_hp": 10.24,
+          "growth_atk": 2.3,
           "growth_def": 1.57,
           "growth_spd": 1.31,
-          "score": 1200.67,
-          "stats_total": 1200
+          "score": 1210,
+          "stats_total": 1210
         },
         {
           "name": "암행어사",
-          "level": 132,
-          "hp": 1401,
-          "atk": 313,
-          "def": 214,
-          "spd": 178,
-          "growth_hp": 10.24,
+          "level": 133,
+          "hp": 1411,
+          "atk": 315,
+          "def": 216,
+          "spd": 180,
+          "growth_hp": 10.23,
           "growth_atk": 2.29,
-          "growth_def": 1.56,
+          "growth_def": 1.57,
           "growth_spd": 1.31,
-          "score": 1172,
-          "stats_total": 1172
+          "score": 1181.33,
+          "stats_total": 1181
         },
         {
           "name": "주아링",
-          "level": 131,
-          "hp": 1366,
-          "atk": 310,
-          "def": 213,
-          "spd": 177,
+          "level": 132,
+          "hp": 1376,
+          "atk": 312,
+          "def": 214,
+          "spd": 179,
           "growth_hp": 10.05,
           "growth_atk": 2.28,
-          "growth_def": 1.57,
+          "growth_def": 1.56,
           "growth_spd": 1.31,
-          "score": 1155.33,
-          "stats_total": 1155
+          "score": 1163.67,
+          "stats_total": 1163
         },
         {
           "name": "김쏘떡2",
-          "level": 127,
-          "hp": 1346,
-          "atk": 302,
-          "def": 207,
-          "spd": 170,
-          "growth_hp": 10.21,
+          "level": 128,
+          "hp": 1356,
+          "atk": 304,
+          "def": 209,
+          "spd": 172,
+          "growth_hp": 10.2,
           "growth_atk": 2.29,
           "growth_def": 1.57,
-          "growth_spd": 1.29,
-          "score": 1127.67,
-          "stats_total": 1127
+          "growth_spd": 1.3,
+          "score": 1137,
+          "stats_total": 1137
         }
       ]
     },
@@ -14237,45 +12993,45 @@
         },
         {
           "name": "전우치",
-          "level": 127,
-          "hp": 1286,
-          "atk": 278,
-          "def": 164,
-          "spd": 220,
+          "level": 128,
+          "hp": 1296,
+          "atk": 280,
+          "def": 166,
+          "spd": 222,
           "growth_hp": 9.85,
           "growth_atk": 2.13,
-          "growth_def": 1.26,
+          "growth_def": 1.27,
           "growth_spd": 1.69,
-          "score": 1090.67,
-          "stats_total": 1090
+          "score": 1100,
+          "stats_total": 1100
         },
         {
           "name": "오이",
-          "level": 126,
-          "hp": 1273,
-          "atk": 274,
-          "def": 163,
-          "spd": 221,
-          "growth_hp": 9.82,
+          "level": 128,
+          "hp": 1291,
+          "atk": 278,
+          "def": 166,
+          "spd": 224,
+          "growth_hp": 9.81,
           "growth_atk": 2.12,
-          "growth_def": 1.26,
+          "growth_def": 1.27,
           "growth_spd": 1.71,
-          "score": 1082.33,
-          "stats_total": 1082
+          "score": 1098.33,
+          "stats_total": 1098
         },
         {
-          "name": "춘식이",
-          "level": 125,
-          "hp": 1257,
-          "atk": 271,
-          "def": 161,
-          "spd": 219,
-          "growth_hp": 9.77,
-          "growth_atk": 2.11,
-          "growth_def": 1.26,
+          "name": "이태곤",
+          "level": 127,
+          "hp": 1280,
+          "atk": 274,
+          "def": 163,
+          "spd": 222,
+          "growth_hp": 9.8,
+          "growth_atk": 2.1,
+          "growth_def": 1.25,
           "growth_spd": 1.71,
-          "score": 1070,
-          "stats_total": 1070
+          "score": 1085.67,
+          "stats_total": 1085
         }
       ]
     },
@@ -14319,17 +13075,17 @@
       "rows": [
         {
           "name": "권율",
-          "level": 134,
-          "hp": 1366,
-          "atk": 288,
-          "def": 139,
-          "spd": 286,
+          "level": 135,
+          "hp": 1376,
+          "atk": 290,
+          "def": 140,
+          "spd": 288,
           "growth_hp": 9.89,
           "growth_atk": 2.09,
           "growth_def": 1.01,
-          "growth_spd": 2.08,
-          "score": 1168.33,
-          "stats_total": 1168
+          "growth_spd": 2.07,
+          "score": 1176.67,
+          "stats_total": 1176
         },
         {
           "name": "규",
@@ -14381,17 +13137,17 @@
         },
         {
           "name": "훈민정음",
-          "level": 137,
-          "hp": 1497,
-          "atk": 313,
-          "def": 177,
-          "spd": 233,
+          "level": 138,
+          "hp": 1507,
+          "atk": 315,
+          "def": 179,
+          "spd": 235,
           "growth_hp": 10.52,
-          "growth_atk": 2.21,
-          "growth_def": 1.25,
+          "growth_atk": 2.2,
+          "growth_def": 1.26,
           "growth_spd": 1.64,
-          "score": 1222,
-          "stats_total": 1222
+          "score": 1231.33,
+          "stats_total": 1231
         },
         {
           "name": "뽀카",
@@ -14409,17 +13165,17 @@
         },
         {
           "name": "산노미야츠바키",
-          "level": 129,
-          "hp": 1415,
-          "atk": 295,
-          "def": 169,
-          "spd": 221,
-          "growth_hp": 10.54,
+          "level": 130,
+          "hp": 1425,
+          "atk": 297,
+          "def": 170,
+          "spd": 223,
+          "growth_hp": 10.53,
           "growth_atk": 2.2,
-          "growth_def": 1.27,
+          "growth_def": 1.26,
           "growth_spd": 1.65,
-          "score": 1156.67,
-          "stats_total": 1156
+          "score": 1165,
+          "stats_total": 1165
         },
         {
           "name": "노동자",
@@ -14443,73 +13199,73 @@
       "rows": [
         {
           "name": "김채원",
-          "level": 138,
-          "hp": 1456,
-          "atk": 323,
-          "def": 178,
-          "spd": 231,
+          "level": 140,
+          "hp": 1476,
+          "atk": 328,
+          "def": 180,
+          "spd": 235,
           "growth_hp": 10.24,
           "growth_atk": 2.27,
-          "growth_def": 1.26,
+          "growth_def": 1.25,
           "growth_spd": 1.63,
-          "score": 1217.33,
-          "stats_total": 1217
+          "score": 1235,
+          "stats_total": 1235
         },
         {
           "name": "뽀카",
-          "level": 136,
-          "hp": 1431,
-          "atk": 319,
-          "def": 177,
-          "spd": 227,
+          "level": 137,
+          "hp": 1441,
+          "atk": 321,
+          "def": 178,
+          "spd": 229,
           "growth_hp": 10.21,
           "growth_atk": 2.27,
-          "growth_def": 1.27,
-          "growth_spd": 1.62,
-          "score": 1200,
-          "stats_total": 1200
+          "growth_def": 1.26,
+          "growth_spd": 1.63,
+          "score": 1208.33,
+          "stats_total": 1208
         },
         {
           "name": "칼의노래",
-          "level": 135,
-          "hp": 1426,
-          "atk": 318,
-          "def": 175,
-          "spd": 228,
-          "growth_hp": 10.25,
+          "level": 136,
+          "hp": 1436,
+          "atk": 320,
+          "def": 176,
+          "spd": 230,
+          "growth_hp": 10.24,
           "growth_atk": 2.28,
           "growth_def": 1.26,
           "growth_spd": 1.64,
-          "score": 1196.33,
-          "stats_total": 1196
-        },
-        {
-          "name": "갈릭",
-          "level": 133,
-          "hp": 1411,
-          "atk": 313,
-          "def": 172,
-          "spd": 224,
-          "growth_hp": 10.29,
-          "growth_atk": 2.28,
-          "growth_def": 1.26,
-          "growth_spd": 1.64,
-          "score": 1179.33,
-          "stats_total": 1179
+          "score": 1204.67,
+          "stats_total": 1204
         },
         {
           "name": "별이",
-          "level": 134,
-          "hp": 1406,
-          "atk": 314,
-          "def": 171,
-          "spd": 225,
-          "growth_hp": 10.17,
+          "level": 136,
+          "hp": 1425,
+          "atk": 318,
+          "def": 174,
+          "spd": 228,
+          "growth_hp": 10.16,
           "growth_atk": 2.27,
           "growth_def": 1.24,
           "growth_spd": 1.63,
-          "score": 1178.67,
-          "stats_total": 1178
+          "score": 1195,
+          "stats_total": 1195
+        },
+        {
+          "name": "세종대왕",
+          "level": 134,
+          "hp": 1411,
+          "atk": 315,
+          "def": 173,
+          "spd": 226,
+          "growth_hp": 10.21,
+          "growth_atk": 2.28,
+          "growth_def": 1.26,
+          "growth_spd": 1.64,
+          "score": 1184.33,
+          "stats_total": 1184
         }
       ]
     },
@@ -14532,6 +13288,20 @@
           "stats_total": 1111
         },
         {
+          "name": "양배추",
+          "level": 127,
+          "hp": 1293,
+          "atk": 272,
+          "def": 185,
+          "spd": 217,
+          "growth_hp": 9.87,
+          "growth_atk": 2.08,
+          "growth_def": 1.41,
+          "growth_spd": 1.66,
+          "score": 1105,
+          "stats_total": 1105
+        },
+        {
           "name": "은빠",
           "level": 127,
           "hp": 1297,
@@ -14546,46 +13316,32 @@
           "stats_total": 1102
         },
         {
-          "name": "양배추",
-          "level": 125,
-          "hp": 1273,
-          "atk": 268,
-          "def": 182,
-          "spd": 213,
-          "growth_hp": 9.87,
-          "growth_atk": 2.08,
+          "name": "귀신",
+          "level": 124,
+          "hp": 1265,
+          "atk": 265,
+          "def": 181,
+          "spd": 211,
+          "growth_hp": 9.89,
+          "growth_atk": 2.07,
           "growth_def": 1.41,
           "growth_spd": 1.65,
-          "score": 1087.33,
-          "stats_total": 1087
+          "score": 1078.67,
+          "stats_total": 1078
         },
         {
           "name": "또란도르",
-          "level": 122,
-          "hp": 1247,
-          "atk": 260,
-          "def": 179,
-          "spd": 208,
-          "growth_hp": 9.9,
+          "level": 123,
+          "hp": 1256,
+          "atk": 263,
+          "def": 180,
+          "spd": 209,
+          "growth_hp": 9.89,
           "growth_atk": 2.07,
           "growth_def": 1.42,
           "growth_spd": 1.65,
-          "score": 1062.67,
-          "stats_total": 1062
-        },
-        {
-          "name": "귀신",
-          "level": 122,
-          "hp": 1244,
-          "atk": 261,
-          "def": 178,
-          "spd": 208,
-          "growth_hp": 9.88,
-          "growth_atk": 2.07,
-          "growth_def": 1.41,
-          "growth_spd": 1.65,
-          "score": 1061.67,
-          "stats_total": 1061
+          "score": 1070.67,
+          "stats_total": 1070
         }
       ]
     },
