@@ -8,8 +8,8 @@
    match : 이 페이지들에 있을 때도 해당 메뉴가 선택된 것으로 표시 (하위 페이지용)
 */
 const SA_NAV_ITEMS = [
-  { href: "index.html",   icon: "🎲", label: "계산기" },
-  { href: "pokedex.html", icon: "🐾", label: "도감" },
+  { href: "index.html",   icon: "🎲", label: "환각 계산기" },
+  { href: "pokedex.html", icon: "🐾", label: "펫 도감" },
   { href: "mypets.html", icon: "📋", label: "내 펫 관리" },
   { href: "item.html", icon: "🗡️", label: "아이템도감" },
   { href: "statcalc.html", icon: "⚔️", label: "능력치 계산기" },
@@ -33,7 +33,7 @@ const SA_NAV_CREDIT =
   `background:var(--s1,rgba(125,150,180,.10));border:1.5px solid var(--border,rgba(125,150,180,.22));` +
   `text-align:center;font-size:11px;font-weight:800;letter-spacing:.2px;` +
   `color:var(--t2,#4c6a8c);font-family:'Nunito',sans-serif;">` +
-  `🌱 만든이 : 야채부락리 족장 애호박</div>`;
+  `🐔 만든이 : 팔레트 족장 카키</div>`;
 
 /* ===== 메뉴 잘림 방지 =====
    사이드바는 height:100vh 플렉스 컬럼인데 .sb-nav 에 flex 지정이 없어서,
