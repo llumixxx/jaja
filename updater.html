@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>쟈쟈 데이터 갱신기</title>
+<style>
+ body{font-family:'Noto Sans KR',sans-serif;background:#14161f;color:#eee;max-width:720px;margin:40px auto;padding:0 18px;line-height:1.7}
+ h1{color:#ffc83c} a.bm{display:inline-block;padding:12px 20px;background:#ffc83c;color:#111;font-weight:800;border-radius:12px;text-decoration:none;font-size:17px}
+ code,textarea{background:#22252f;color:#ddd;border-radius:6px} code{padding:2px 6px} ol li{margin:6px 0}
+ .box{background:#1d2030;border:1px solid #333;border-radius:12px;padding:14px 18px;margin:18px 0}
+ textarea{width:100%;height:90px;border:0;padding:8px;font-size:12px} button{padding:8px 14px;border:0;border-radius:8px;cursor:pointer}
+</style></head><body>
+<h1>🔄 쟈쟈 데이터 갱신기</h1>
+<p>공홈이 프로그램 접근을 막아서, 공홈을 연 <b>브라우저</b>가 대신 데이터를 받아 깃허브에 올리는 방식이에요.
+사이트랑 디코 봇은 깃허브에 올라간 데이터를 알아서 가져가요.</p>
+
+<div class="box"><b>① 처음 한 번만 — 버튼 만들기</b>
+<ol>
+ <li>아래 노란 버튼을 <b>즐겨찾기 바로 드래그</b>해서 놓기 (즐겨찾기 바가 안 보이면 <code>Ctrl+Shift+B</code>)</li>
+ <li>깃허브 토큰 만들기: github.com → 프로필 → <b>Settings → Developer settings → Fine-grained tokens → Generate new token</b><br>
+   · Repository access: <b>Only select repositories → llumixxx/jaja</b><br>
+   · Permissions → Repository permissions → <b>Contents: Read and write</b><br>
+   · 만들어진 토큰(<code>github_pat_…</code>) 복사해두기</li>
+</ol>
+<p style="text-align:center"><a class="bm" id="bm" href="#">🔄 쟈쟈 갱신</a></p></div>
+
+<div class="box"><b>② 갱신할 때마다</b>
+<ol>
+ <li><a href="https://sa000001.com/sa2/info/" target="_blank" style="color:#ffc83c">공홈 정보 페이지</a> 열기</li>
+ <li>즐겨찾기의 <b>🔄 쟈쟈 갱신</b> 클릭 → 오른쪽 위에 창이 떠요</li>
+ <li>처음이면 토큰 붙여넣기 (그 브라우저에 저장돼서 다음부턴 안 물어봐요)</li>
+ <li>원하는 항목 체크 → <b>갱신 시작</b></li>
+</ol>
+<p>· 펫·아이템·새 펫 이미지는 몇 초면 끝나요 · 랭킹은 서버 부담 없게 천천히 받아서 3~5분<br>
+· 바뀐 게 있을 때만 깃허브에 저장해요</p></div>
+
+<div class="box"><b>혹시 버튼이 안 먹히면 (콘솔 방법)</b>
+<ol><li>공홈 페이지에서 <code>F12</code> → <b>Console</b> 탭</li><li>아래 코드 복사해서 붙여넣고 엔터 (처음엔 <code>allow pasting</code> 입력하라고 할 수 있어요)</li></ol>
+<textarea id="code" readonly></textarea>
+<button onclick="navigator.clipboard.writeText(document.getElementById('code').value);this.textContent='복사됨!'">코드 복사</button></div>
+
+<script>
+ const loader = "javascript:(function(){var s=document.createElement('script');s.src='https://llumixxx.github.io/jaja/updater.js?v='+Date.now();s.onerror=function(){alert('갱신기를 못 불러왔어요. 갱신기 페이지의 콘솔 방법으로 해주세요!')};document.body.appendChild(s)})();";
+ document.getElementById('bm').href = loader;
+ document.getElementById('bm').onclick = (e) => { e.preventDefault(); alert('클릭하지 말고 즐겨찾기 바로 끌어다 놓아주세요!'); };
+ fetch('updater.js?v=' + Date.now()).then(r => r.text()).then(t => document.getElementById('code').value = t);
+</script>
+</body></html>
