@@ -3,6 +3,7 @@
    - 공홈(sa000001.com) 페이지를 연 상태에서 북마크를 누르면 실행돼요
    - 브라우저가 공홈 데이터를 받아서 깃허브(llumixxx/jaja)에 커밋 1번으로 저장
    - 저장 대상: pet_data.json · pet_skin.csv · itemset6.txt · magic.txt · pet_ranking_data.json · sprites/*.gif(새 펫만)
+                maps/…(maps.html 에 적힌 공홈 지도 이미지 사본) · maps.html(사본 쓰게 한 줄 추가)
    ════════════════════════════════════════════════════════════════ */
 (async () => {
   const OWNER = "llumixxx", REPO = "jaja", BRANCH = "main";
@@ -28,6 +29,7 @@
     <label style="display:block"><input type="checkbox" id="juPet" checked> 펫 데이터</label>
     <label style="display:block"><input type="checkbox" id="juItem" checked> 아이템 데이터</label>
     <label style="display:block"><input type="checkbox" id="juImg" checked> 새 펫 이미지</label>
+    <label style="display:block"><input type="checkbox" id="juMap" checked> 🗺️ 지도 이미지 <span style="opacity:.6">(maps.html 에 있는 것)</span></label>
     <label style="display:block"><input type="checkbox" id="juRank"> 펫 랭킹 <span style="opacity:.6">(3~5분 걸림)</span></label>
     <button id="juGo" style="margin-top:10px;width:100%;padding:9px;border:0;border-radius:9px;background:#ffc83c;font-weight:700;cursor:pointer">갱신 시작</button>
     <div id="juBar" style="height:6px;background:#2a2d3a;border-radius:4px;margin-top:10px;overflow:hidden"><div id="juFill" style="height:100%;width:0;background:#4caf50"></div></div>
@@ -115,6 +117,37 @@
           n++; bar(n / missing.length * 0.3); await sleep(120);
         }
       }
+      // 4-2) 지도 이미지 (maps.html 에 적힌 공홈 이미지 → 레포 maps/ 로 복사)
+      if ($("juMap").checked) {
+        const mh = await gh(`/contents/maps.html?ref=${BRANCH}`);
+        const raw = Uint8Array.from(atob(mh.content.replace(/\n/g, "")), c => c.charCodeAt(0));
+        let html = new TextDecoder().decode(raw);
+        const PRE = "https://sa000001.com/data/editor/";
+        const urls = new Set();
+        for (const m of html.matchAll(/https:\/\/sa000001\.com\/data\/editor\/[^"'\s)]+/g)) {
+          urls.add(m[0]);
+          urls.add(m[0].replace("thumb-", "").replace(/_\d+x\d+(\.\w+)$/, "$1"));   // 썸네일 → 원본
+        }
+        const need = [...urls].filter(u => !shaOf["maps/" + u.slice(PRE.length)]);
+        log(`🗺️ 지도 이미지 ${urls.size}개 중 새로 받을 것 ${need.length}개`);
+        let n = 0;
+        for (const u of need) {
+          try { files["maps/" + u.slice(PRE.length)] = await getBytes(u); } catch (e) { }
+          n++; if (n % 20 === 0) log(`  ${n}/${need.length}…`);
+          await sleep(120);
+        }
+        if (!html.includes("MAP_MIRROR")) {                // 사이트가 사본을 쓰게 한 줄 넣기 (처음 한 번)
+          const i = html.indexOf("const MAPS"), j = html.indexOf("];", i);
+          if (i >= 0 && j >= 0) {
+            const snip = "\n/* MAP_MIRROR: 공홈 이미지가 막혀서 레포 maps 폴더 사본 사용 (갱신기가 넣음) */\n" +
+              "(function(){var F=\"" + PRE + "\",T=\"./maps/\";MAPS.forEach(function(m){if(m.thumb)m.thumb=m.thumb.split(F).join(T);" +
+              "if(m.images)m.images=m.images.map(function(u){return u.split(F).join(T);});});})();\n";
+            html = html.slice(0, j + 2) + snip + html.slice(j + 2);
+            files["maps.html"] = new TextEncoder().encode(html);
+            log("🗺️ maps.html 이 사본 이미지를 쓰도록 설정");
+          }
+        }
+      }
       // 5) 랭킹
       if ($("juRank").checked) {
         const list = []; const seen = new Set();
@@ -160,8 +193,9 @@
         message: `수동 데이터 갱신 ${stamp} (${changed.length}개)`, tree: newTree.sha, parents: [ref.object.sha] }) });
       await gh(`/git/refs/heads/${BRANCH}`, { method: "PATCH", body: JSON.stringify({ sha: commit.sha }) });
       bar(1);
-      log(`✅ 완료! ${changed.map(p => p.startsWith("sprites/") ? null : p).filter(Boolean).join(", ")}` +
-          (changed.some(p => p.startsWith("sprites/")) ? ` + 이미지 ${changed.filter(p => p.startsWith("sprites/")).length}개` : ""));
+      const nSpr = changed.filter(p => p.startsWith("sprites/")).length, nMap = changed.filter(p => p.startsWith("maps/")).length;
+      log(`✅ 완료! ${changed.filter(p => !p.startsWith("sprites/") && !p.startsWith("maps/")).join(", ")}` +
+          (nSpr ? ` + 펫 이미지 ${nSpr}개` : "") + (nMap ? ` + 지도 이미지 ${nMap}개` : ""));
       log("1~2분 뒤 사이트에 반영되고, 디코 봇은 30분 안에 알아서 새 데이터를 가져가요 🎉");
     } catch (e) {
       log("❌ " + e.message);
