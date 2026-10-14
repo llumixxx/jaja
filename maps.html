@@ -378,6 +378,9 @@ const MAPS = [
   { id:3, cat:"사이너스", title:"동쿠링 탄광", thumb:"https://sa000001.com/data/editor/2606/thumb-ce6ee534fb5232c72cfdaf4cf14503b0_1782238175_3903_202x150.png" },
   { id:2, cat:"사이너스", title:"도적의 아지트", thumb:"https://sa000001.com/data/editor/2606/thumb-ce6ee534fb5232c72cfdaf4cf14503b0_1782238185_51_202x150.png" },
 ];
+/* MAP_MIRROR: 공홈 이미지가 막혀서 레포 maps 폴더 사본 사용 (갱신기가 넣음) */
+(function(){var F="https://sa000001.com/data/editor/",T="./maps/";MAPS.forEach(function(m){if(m.thumb)m.thumb=m.thumb.split(F).join(T);if(m.images)m.images=m.images.map(function(u){return u.split(F).join(T);});});})();
+
 
 /* 썸네일 경로에서 원본(큰) 이미지 경로를 추정 (thumb- 접두어 + _WxH 접미어 제거) */
 function guessFullImage(thumbUrl){
