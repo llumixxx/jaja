@@ -1,0 +1,1353 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>쟈쟈체스 · 쟈쟈서버</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+/* 쟈쟈 다크 토큰 그대로 + 체스판용 색 몇 개 */
+:root{
+  --bg:#0a1420; --bg2:#0f1e30; --white:#132335; --s1:#16283c; --s2:#1c3149;
+  --border:#233c56; --border2:#2c4a68;
+  --t1:#e6f0fb; --t2:#a9c2dc; --t3:#7391b0; --t4:#4a637d;
+  --a1:#5aa8ea; --a2:#22b6c9; --gold:#f5b82e; --err:#f08a8a; --ok:#6fd0a0;
+  --t1c:#9aa7b5; --t2c:#3fbf7f; --t3c:#3f8fe0; --t4c:#b06be8; --t5c:#f5b82e;
+  --mine:#173444; --mine2:#1a3b4d; --foe:#2e2232; --foe2:#33263a;
+  --cell:60px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--t1);
+  overflow-x:hidden;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;
+  background-image:radial-gradient(ellipse at 50% 38%,#12304a 0%,transparent 60%);}
+#global-nav{background:var(--white)!important;border-bottom:1px solid var(--border)!important;}
+#global-nav a{background:var(--s1)!important;color:var(--t2)!important;}
+#global-nav a.nav-active{color:var(--a1)!important;border-color:rgba(90,168,234,.4)!important;}
+button{font-family:inherit;cursor:pointer;border:none;color:inherit;background:none;}
+button:focus-visible{outline:2px solid var(--a1);outline-offset:2px;}
+
+/* ===== HUD ===== */
+.hud{display:flex;align-items:center;gap:8px;padding:8px 12px;flex-wrap:wrap;
+  max-width:1100px;margin:0 auto;}
+.hud-stage{display:flex;flex-direction:column;line-height:1.05;margin-right:4px;}
+.hud-stage b{font-family:'Nunito',sans-serif;font-size:22px;font-weight:900;color:var(--t1);}
+.hud-stage span{font-size:11px;color:var(--t3);font-weight:700;}
+.pill{display:flex;align-items:center;gap:6px;padding:6px 11px;border-radius:999px;background:var(--s1);
+  border:1px solid var(--border);font-weight:800;font-size:14px;font-family:'Nunito','Noto Sans KR',sans-serif;}
+.pill small{font-size:11px;color:var(--t3);font-weight:700;}
+.pill.hp b{color:#ff8f8f;} .pill.gold b{color:var(--gold);}
+.xpbar{width:54px;height:6px;border-radius:4px;background:var(--bg);overflow:hidden;}
+.xpbar i{display:block;height:100%;background:var(--a1);width:0;transition:width .25s;}
+.hud-sp{flex:1;}
+.btn-fight{padding:10px 18px;border-radius:12px;font-weight:900;font-size:14px;
+  background:linear-gradient(180deg,#f7c64b,#e59a16);color:#2a1a00;box-shadow:0 3px 0 #9c6406;}
+.btn-fight:active{transform:translateY(2px);box-shadow:0 1px 0 #9c6406;}
+.btn-fight:disabled{filter:grayscale(1) brightness(.6);cursor:default;}
+.icon-btn{width:34px;height:34px;border-radius:10px;background:var(--s1);border:1px solid var(--border);font-size:15px;}
+.speed-btn{padding:7px 10px;border-radius:10px;background:var(--s1);border:1px solid var(--border);font-weight:800;font-size:12px;color:var(--t2);}
+
+/* ===== 레이아웃 ===== */
+.stagebox{display:grid;grid-template-columns:190px auto 200px;gap:14px;justify-content:center;
+  align-items:start;padding:4px 12px 0;max-width:1100px;margin:0 auto;}
+.side-title{font-size:11px;font-weight:800;color:var(--t3);margin:2px 2px 6px;}
+
+/* 시너지 */
+#traits{display:flex;flex-direction:column;gap:5px;}
+.trait{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:10px;background:var(--s1);
+  border:1px solid var(--border);cursor:pointer;text-align:left;width:100%;}
+.trait .ti{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;font-size:15px;
+  background:var(--bg);flex:0 0 auto;}
+.trait.on .ti{background:var(--tc);box-shadow:0 0 12px -2px var(--tc);}
+.trait .tn{font-size:12.5px;font-weight:800;line-height:1.15;}
+.trait .ts{font-size:11px;color:var(--t4);font-family:'Nunito',sans-serif;font-weight:800;letter-spacing:.3px;}
+.trait .ts i{font-style:normal;}
+.trait .ts i.hit{color:var(--t1);}
+.trait .tc{margin-left:auto;font-family:'Nunito',sans-serif;font-weight:900;font-size:15px;color:var(--t3);}
+.trait.on .tc{color:var(--t1);}
+.trait.off{opacity:.62;}
+.empty-note{font-size:12px;color:var(--t4);padding:8px 4px;line-height:1.5;}
+
+/* 로비 */
+#lobby{display:flex;flex-direction:column;gap:4px;}
+.lp{display:grid;grid-template-columns:1fr auto;gap:2px 8px;padding:6px 9px;border-radius:10px;
+  background:var(--s1);border:1px solid var(--border);font-size:12px;}
+.lp.me{border-color:var(--a1);background:#163049;}
+.lp.vs{box-shadow:inset 3px 0 0 var(--gold);}
+.lp.dead{opacity:.38;}
+.lp .nm{font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.lp .lv{color:var(--t3);font-weight:800;font-family:'Nunito',sans-serif;}
+.lp .bar{grid-column:1/3;height:5px;border-radius:3px;background:var(--bg);overflow:hidden;}
+.lp .bar i{display:block;height:100%;background:#ff7a7a;transition:width .5s;}
+.lp.me .bar i{background:var(--ok);}
+
+/* ===== 체스판 ===== */
+.arena-wrap{display:flex;flex-direction:column;align-items:center;gap:8px;}
+.board{position:relative;display:grid;grid-template-columns:repeat(7,var(--cell));grid-template-rows:repeat(8,var(--cell));
+  border-radius:16px;overflow:hidden;box-shadow:0 18px 40px -18px rgba(0,0,0,.8),0 0 0 1px var(--border2);}
+.cell{position:relative;}
+.cell.foe{background:var(--foe);} .cell.foe.alt{background:var(--foe2);}
+.cell.mine{background:var(--mine);} .cell.mine.alt{background:var(--mine2);}
+.cell.mine.r0{box-shadow:inset 0 2px 0 rgba(245,184,46,.35);}
+.cell.drop{background:#24506a!important;box-shadow:inset 0 0 0 2px var(--a1);}
+.board-label{position:absolute;left:0;right:0;top:calc(var(--cell)*2 - 10px);text-align:center;
+  font-size:12px;font-weight:800;color:rgba(230,240,251,.28);pointer-events:none;letter-spacing:.5px;}
+.fx{position:absolute;inset:0;pointer-events:none;}
+
+/* 대기석 */
+.bench{display:grid;grid-template-columns:repeat(9,1fr);gap:4px;width:calc(var(--cell)*7);}
+.bench .cell{aspect-ratio:1;border-radius:10px;background:var(--s1);border:1px dashed var(--border2);}
+
+/* ===== 유닛 토큰 ===== */
+.tok{position:absolute;inset:3px;border-radius:11px;cursor:grab;touch-action:none;
+  background:radial-gradient(circle at 50% 70%,rgba(255,255,255,.07),transparent 70%),var(--bg2);
+  border:2px solid var(--tierc);}
+.tok img{position:absolute;inset:4px 4px 8px;width:calc(100% - 8px);height:calc(100% - 12px);object-fit:contain;
+  pointer-events:none;filter:drop-shadow(0 2px 2px rgba(0,0,0,.5));}
+.tok .stars{position:absolute;top:-8px;left:0;right:0;text-align:center;font-size:10px;line-height:1;
+  color:var(--gold);text-shadow:0 1px 2px #000;letter-spacing:-1px;pointer-events:none;}
+.tok.s2 .stars{color:#cfe3f5;} .tok.s3 .stars{color:var(--gold);}
+.tok.s2{box-shadow:0 0 0 1px #cfe3f5,0 0 10px -2px #cfe3f5;}
+.tok.s3{box-shadow:0 0 0 1px var(--gold),0 0 14px -1px var(--gold);}
+.tok .el{position:absolute;right:-4px;bottom:-4px;font-size:11px;line-height:1;pointer-events:none;}
+.tok.sel{outline:2px solid #fff;outline-offset:1px;}
+.ghost{position:fixed;z-index:500;pointer-events:none;width:var(--cell);height:var(--cell);
+  transform:translate(-50%,-50%) scale(1.08);}
+.ghost .tok{cursor:grabbing;}
+
+/* 전투 유닛 */
+.cu{position:absolute;width:calc(100% / 7);height:calc(100% / 8);
+  transition:left .38s linear,top .38s linear;}
+.cu.leap{transition:left .32s cubic-bezier(.3,1.4,.6,1),top .32s cubic-bezier(.3,1.4,.6,1);}
+.cu .tok{cursor:default;inset:5px 5px 9px;}
+.cu.foe .tok{border-color:var(--tierc);}
+.cu .hb,.cu .mb{position:absolute;left:6px;right:6px;height:5px;border-radius:2px;background:rgba(0,0,0,.6);overflow:hidden;}
+.cu .hb{bottom:4px;} .cu .mb{bottom:0;height:3px;}
+.cu .hb i,.cu .mb i,.cu .hb s{display:block;height:100%;position:absolute;left:0;top:0;}
+.cu .hb i{background:var(--ok);} .cu.foe .hb i{background:#ff6b6b;}
+.cu .hb s{background:rgba(255,255,255,.75);}
+.cu .mb i{background:#5ab4ff;}
+.cu.dead{opacity:0;transform:scale(.6);transition:opacity .35s,transform .35s;}
+.cu.stun .tok{filter:grayscale(.7) brightness(.8);}
+.cu.hit .tok{animation:hit .18s;}
+@keyframes hit{50%{filter:brightness(2.2);}}
+.cu.atk .tok{animation:lunge .22s;}
+@keyframes lunge{50%{transform:translate(var(--dx),var(--dy));}}
+.cu.cast .tok{animation:castp .45s;}
+@keyframes castp{40%{transform:scale(1.18);box-shadow:0 0 22px 4px var(--castc);}}
+.dmg{position:absolute;font-family:'Nunito',sans-serif;font-weight:900;font-size:13px;color:#fff;
+  text-shadow:0 1px 3px #000,0 0 2px #000;pointer-events:none;animation:floatup .75s ease-out forwards;transform:translate(-50%,-50%);}
+.dmg.crit{color:var(--gold);font-size:16px;}
+.dmg.skill{color:#c9a7ff;font-size:15px;}
+.dmg.heal{color:var(--ok);}
+.dmg.miss{color:var(--t3);font-size:11px;}
+.dmg.shield{color:#cfe3f5;font-size:11px;}
+@keyframes floatup{0%{opacity:0;margin-top:4px}15%{opacity:1}100%{opacity:0;margin-top:-26px}}
+.proj{position:absolute;width:8px;height:8px;border-radius:50%;background:#fff;box-shadow:0 0 8px 2px var(--pc);
+  transform:translate(-50%,-50%);transition:left .16s linear,top .16s linear;}
+.burst{position:absolute;border-radius:50%;transform:translate(-50%,-50%);pointer-events:none;
+  border:3px solid var(--bc);animation:burst .45s ease-out forwards;}
+@keyframes burst{from{width:10px;height:10px;opacity:1}to{width:calc(var(--cell)*2.6);height:calc(var(--cell)*2.6);opacity:0}}
+.skilltag{position:absolute;transform:translate(-50%,-100%);font-size:11px;font-weight:900;white-space:nowrap;
+  padding:2px 7px;border-radius:999px;background:rgba(10,20,32,.85);border:1px solid var(--castc);color:#fff;
+  animation:floatup 1s ease-out forwards;pointer-events:none;}
+
+/* 결과 배너 */
+.banner{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:20;text-align:center;
+  padding:14px 26px;border-radius:16px;background:rgba(10,20,32,.92);border:1px solid var(--border2);
+  pointer-events:none;animation:pop .3s;}
+.banner b{display:block;font-family:'Nunito','Noto Sans KR',sans-serif;font-size:26px;font-weight:900;}
+.banner span{font-size:12.5px;color:var(--t2);font-weight:700;}
+.banner.win b{color:var(--gold);} .banner.lose b{color:#ff8f8f;}
+@keyframes pop{from{transform:translate(-50%,-50%) scale(.8);opacity:0}}
+
+/* ===== 상점 ===== */
+.shopbar{display:flex;gap:10px;align-items:stretch;max-width:860px;margin:10px auto 0;padding:10px 12px
+  calc(12px + env(safe-area-inset-bottom,0px));}
+.shop-actions{display:flex;flex-direction:column;gap:6px;width:112px;flex:0 0 auto;}
+.sa-btn{flex:1;display:flex;align-items:center;justify-content:space-between;gap:6px;padding:8px 10px;border-radius:11px;
+  background:var(--s1);border:1px solid var(--border);font-weight:800;font-size:12.5px;}
+.sa-btn small{font-family:'Nunito',sans-serif;color:var(--gold);font-weight:900;font-size:12px;}
+.sa-btn:hover{background:var(--s2);}
+.sa-btn:disabled{opacity:.45;cursor:default;}
+.sa-btn kbd{font-family:'Nunito',sans-serif;font-size:10px;color:var(--t4);}
+.sa-row{display:flex;gap:6px;}
+.sa-row .sa-btn{justify-content:center;}
+#btnLock.on{background:#3a2f12;border-color:var(--gold);}
+.shop{flex:1;display:grid;grid-template-columns:repeat(5,1fr);gap:8px;}
+.card{position:relative;border-radius:12px;overflow:hidden;background:var(--white);border:2px solid var(--tierc);
+  display:flex;flex-direction:column;min-height:112px;text-align:left;transition:transform .12s;}
+.card:hover{transform:translateY(-2px);}
+.card:disabled{cursor:default;}
+.card.poor{filter:saturate(.35) brightness(.7);}
+.card.pair{animation:glow 1.4s infinite;}
+@keyframes glow{50%{box-shadow:0 0 16px 2px var(--tierc);}}
+.card .art{flex:1;position:relative;background:radial-gradient(circle at 50% 80%,color-mix(in srgb,var(--tierc) 30%,transparent),transparent 70%);}
+.card .art img{position:absolute;inset:6px;width:calc(100% - 12px);height:calc(100% - 12px);object-fit:contain;}
+.card .meta{padding:5px 7px 6px;background:var(--bg2);}
+.card .cn{display:flex;justify-content:space-between;align-items:center;font-size:12.5px;font-weight:900;}
+.card .cn small{font-family:'Nunito',sans-serif;color:var(--gold);font-weight:900;font-size:13px;}
+.card .ct{font-size:10.5px;color:var(--t2);font-weight:700;margin-top:1px;white-space:nowrap;overflow:hidden;}
+.card.sold{visibility:hidden;}
+.shop.locked .card{box-shadow:inset 0 0 0 2px rgba(245,184,46,.35);}
+.shopbar.sell-zone{outline:2px dashed var(--err);outline-offset:-2px;border-radius:14px;background:rgba(240,138,138,.08);}
+.shopbar.sell-zone .shop{opacity:.35;}
+
+/* ===== 정보 패널 ===== */
+.info{position:fixed;right:14px;bottom:160px;z-index:300;width:250px;padding:12px;border-radius:14px;
+  background:var(--white);border:1px solid var(--border2);box-shadow:0 14px 34px -10px rgba(0,0,0,.7);display:none;}
+.info.show{display:block;}
+.info .ih{display:flex;gap:10px;align-items:center;}
+.info .iimg{width:54px;height:54px;border-radius:10px;border:2px solid var(--tierc);background:var(--bg2);position:relative;flex:0 0 auto;}
+.info .iimg img{position:absolute;inset:4px;width:calc(100% - 8px);height:calc(100% - 8px);object-fit:contain;}
+.info .in{font-weight:900;font-size:15px;}
+.info .it{font-size:11.5px;color:var(--t2);font-weight:700;margin-top:2px;}
+.info .ist{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin:10px 0 8px;}
+.info .ist div{background:var(--bg2);border-radius:8px;padding:5px 0;text-align:center;}
+.info .ist small{display:block;font-size:10px;color:var(--t3);font-weight:700;}
+.info .ist b{font-family:'Nunito',sans-serif;font-size:13px;}
+.info .isk{font-size:12px;line-height:1.5;color:var(--t2);background:var(--bg2);border-radius:9px;padding:7px 9px;}
+.info .isk b{color:var(--t1);}
+.info .ibtn{display:flex;gap:6px;margin-top:8px;}
+.info .ibtn button{flex:1;padding:8px;border-radius:10px;font-weight:800;font-size:12.5px;background:var(--s2);border:1px solid var(--border2);}
+.info .ibtn .sell{background:#3a1d24;border-color:#6b3240;color:#ffc2c2;}
+.info .x{position:absolute;right:8px;top:6px;font-size:16px;color:var(--t3);padding:2px 6px;}
+.info .tdesc{font-size:12px;line-height:1.6;color:var(--t2);margin-top:8px;}
+.info .tdesc div.hit{color:var(--t1);font-weight:800;}
+
+/* ===== 토스트 / 오버레이 ===== */
+.toast{position:fixed;left:50%;top:84px;transform:translateX(-50%);z-index:600;padding:9px 16px;border-radius:999px;
+  background:rgba(10,20,32,.95);border:1px solid var(--border2);font-size:13px;font-weight:800;
+  opacity:0;transition:opacity .2s;pointer-events:none;white-space:nowrap;}
+.toast.show{opacity:1;}
+.overlay{position:fixed;inset:0;z-index:700;display:none;align-items:center;justify-content:center;
+  background:rgba(5,12,20,.82);backdrop-filter:blur(3px);padding:16px;}
+.overlay.show{display:flex;}
+.ov-card{width:min(440px,100%);max-height:calc(100vh - 32px);overflow:auto;padding:24px 22px;border-radius:20px;
+  background:var(--white);border:1px solid var(--border2);text-align:center;}
+.ov-logo{display:flex;justify-content:center;gap:4px;margin-bottom:6px;}
+.ov-logo span{width:46px;height:46px;border-radius:10px;display:grid;place-items:center;
+  font-size:24px;font-weight:900;font-family:'Noto Sans KR',sans-serif;}
+.ov-logo span:nth-child(odd){background:var(--mine2);color:var(--a1);}
+.ov-logo span:nth-child(even){background:var(--foe2);color:#ffb0a0;}
+.ov-sub{font-size:13px;color:var(--t2);margin-bottom:16px;}
+.ov-pets{display:flex;justify-content:center;gap:2px;margin:4px 0 14px;}
+.ov-pets img{width:48px;height:48px;object-fit:contain;}
+.ov-input{width:100%;padding:11px 13px;border-radius:12px;border:1px solid var(--border2);background:var(--bg2);
+  color:var(--t1);font-family:inherit;font-size:14px;font-weight:700;text-align:center;margin-bottom:10px;}
+.ov-go{width:100%;padding:13px;border-radius:13px;font-size:15px;}
+.ov-rec{font-size:12.5px;color:var(--t2);margin-top:12px;line-height:1.6;}
+.ov-rules{text-align:left;font-size:12px;color:var(--t2);line-height:1.65;margin-top:14px;padding:11px 13px;
+  border-radius:12px;background:var(--bg2);}
+.ov-rules b{color:var(--t1);}
+.place{font-family:'Nunito','Noto Sans KR',sans-serif;font-size:58px;font-weight:900;line-height:1;margin:6px 0;}
+.place.p1{color:var(--gold);} .place.top4{color:var(--a1);}
+
+/* ===== 모바일 ===== */
+@media (max-width:900px){
+  .stagebox{grid-template-columns:1fr;gap:8px;}
+  #traitsBox{order:1;} .arena-wrap{order:2;} #lobbyBox{order:3;}
+  #traits{flex-direction:row;overflow-x:auto;padding-bottom:2px;}
+  .trait{width:auto;flex:0 0 auto;padding:4px 7px;}
+  .trait .ts{display:none;}
+  #lobby{display:grid;grid-template-columns:repeat(4,1fr);}
+  .lp{padding:4px 6px;font-size:10.5px;}
+  .side-title{display:none;}
+  .info{left:10px;right:10px;width:auto;bottom:auto;top:110px;}
+}
+@media (max-width:560px){
+  .hud{gap:5px;padding:6px 8px;}
+  .hud-stage b{font-size:18px;}
+  .pill{padding:5px 8px;font-size:12.5px;}
+  .xpbar{width:34px;}
+  .shopbar{gap:6px;padding:8px 8px calc(10px + env(safe-area-inset-bottom,0px));}
+  .shop-actions{width:74px;}
+  .sa-btn{font-size:11px;padding:6px 7px;}
+  .sa-btn kbd{display:none;}
+  .shop{gap:4px;}
+  .card{min-height:92px;border-radius:9px;}
+  .card .cn{font-size:11px;} .card .ct{font-size:9.5px;}
+  .card .meta{padding:3px 5px 4px;}
+}
+@media (prefers-reduced-motion:reduce){
+  .cu,.cu.leap{transition:none;} .dmg,.skilltag,.burst,.card.pair{animation:none;}
+}
+</style>
+</head>
+<body>
+<div class="hud">
+  <div class="hud-stage"><b id="stageLbl">1-1</b><span id="phaseLbl">준비</span></div>
+  <div class="pill hp">❤️ <b id="hpLbl">100</b></div>
+  <div class="pill gold">🪙 <b id="goldLbl">0</b><small>스톤</small></div>
+  <div class="pill">Lv <b id="lvLbl">1</b><div class="xpbar"><i id="xpBar"></i></div><small id="xpLbl">0/2</small></div>
+  <div class="pill">🐾 <b id="capLbl">0/1</b></div>
+  <div class="hud-sp"></div>
+  <button class="speed-btn" id="btnSpeed" title="전투 속도">×1</button>
+  <button class="speed-btn" id="btnSkip" title="전투 결과 바로 보기" style="display:none">건너뛰기</button>
+  <button class="icon-btn" id="btnMute" title="효과음">🔊</button>
+  <button class="btn-fight" id="btnFight">전투 시작</button>
+</div>
+
+<div class="stagebox">
+  <div id="traitsBox"><div class="side-title">시너지</div><div id="traits"></div></div>
+  <div class="arena-wrap">
+    <div class="board" id="board"><div class="board-label" id="foeLabel">상대 진영</div><div class="fx" id="fx"></div></div>
+    <div class="bench" id="bench"></div>
+  </div>
+  <div id="lobbyBox"><div class="side-title">로비</div><div id="lobby"></div></div>
+</div>
+
+<div class="shopbar" id="shopbar">
+  <div class="shop-actions">
+    <button class="sa-btn" id="btnXP">경험치 <small>4</small><kbd>F</kbd></button>
+    <button class="sa-btn" id="btnRoll">새로고침 <small>2</small><kbd>D</kbd></button>
+    <div class="sa-row"><button class="sa-btn" id="btnLock" title="상점 잠금">🔓</button></div>
+  </div>
+  <div class="shop" id="shop"></div>
+</div>
+
+<div class="info" id="info"></div>
+<div class="toast" id="toast"></div>
+
+<div class="overlay show" id="ovStart">
+  <div class="ov-card">
+    <div class="ov-logo"><span>쟈</span><span>쟈</span><span>체</span><span>스</span></div>
+    <div class="ov-sub">펫을 사서 배치하고, 자동으로 싸우는 8인 서바이벌</div>
+    <div class="ov-pets" id="ovPets"></div>
+    <input class="ov-input" id="nickIn" maxlength="10" placeholder="닉네임">
+    <button class="btn-fight ov-go" id="btnStart">게임 시작</button>
+    <div class="ov-rec" id="recLbl"></div>
+    <div class="ov-rules">
+      <b>상점</b>에서 펫을 사서 아래 판에 끌어다 놓으세요. 같은 펫 <b>3마리 → ★2</b>, ★2 3마리 → ★3.<br>
+      필드에 올릴 수 있는 수 = <b>레벨</b>. 경험치를 사면 레벨이 올라갑니다.<br>
+      같은 <b>속성</b>(지·수·화·풍)이나 <b>계열</b>(탱커·수호자·사냥꾼·질풍)이 2·4·6마리 모이면 시너지가 켜져요.<br>
+      속성 상성 <b>지 › 수 › 화 › 풍 › 지</b> (유리하면 피해 ×1.25).<br>
+      스톤 10개마다 이자 +1 (최대 5). 연승·연패 보너스도 있어요.<br>
+      판매는 펫을 상점 칸으로 끌어다 놓거나 선택 후 <b>E</b>.
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="ovEnd">
+  <div class="ov-card">
+    <div class="ov-sub" id="endSub">최종 순위</div>
+    <div class="place" id="endPlace">1등</div>
+    <div class="ov-sub" id="endDesc"></div>
+    <div class="ov-pets" id="endPets"></div>
+    <button class="btn-fight ov-go" id="btnAgain">다시 하기</button>
+    <div class="ov-rec" id="endRec"></div>
+  </div>
+</div>
+<script>
+/* =========================================================
+   쟈쟈체스 — 코어 (DOM 안 건드림: 데이터 · 상점 · 전투 · AI)
+   ========================================================= */
+
+/* ----- 시즌 1 펫 풀 (40종) -----
+   [이름, imageCode, 코스트, 속성, 계열, 내구, 공격, 방어, 순발]
+   능력치는 pet_data.json 기준 140렙 무보정 표시능력치(쟈쟈 정식 공식).
+   펫을 바꾸고 싶으면 이 배열만 고치면 됩니다. */
+const ROSTER = [
+ ["부비","100254",1,"지","탱커",1847,289,228,111],["꼬꼬비","100262",1,"풍","탱커",1394,275,177,267],
+ ["부이비","100257",1,"화","탱커",1836,326,204,112],["베론","100267",1,"수","수호자",1687,230,328,133],
+ ["노북이","100271",1,"풍","수호자",1370,258,366,96],["베로로크","100268",1,"지","수호자",1606,228,344,126],
+ ["우리","100250",1,"지","질풍",1372,200,237,239],["두리","100251",1,"화","질풍",1409,292,175,233],
+ ["꼬비오","100261",1,"풍","질풍",1398,270,184,268],["얀기로","100288",1,"수","사냥꾼",1481,331,207,182],
+ ["불그리","100253",1,"화","사냥꾼",1407,292,172,248],["베로보크","100269",1,"수","사냥꾼",1657,223,333,133],
+ ["만모","100355",2,"지","탱커",1996,272,265,86],["다고스","100278",2,"수","탱커",1593,292,225,194],
+ ["푸푸","100263",2,"풍","탱커",1336,253,174,289],["다이노","100351",2,"지","수호자",1737,289,326,72],
+ ["네고스","100276",2,"수","수호자",1529,298,237,193],["베로포리","100270",2,"화","수호자",1588,252,320,133],
+ ["꼬비","100260",2,"지","질풍",1401,258,203,263],["라고고","100279",2,"화","질풍",1415,294,200,240],
+ ["꼬미","100259",2,"화","사냥꾼",1428,272,182,264],["부르돈","100394",2,"풍","사냥꾼",1419,330,213,196],
+ ["골드부비","100255",3,"풍","탱커",1812,323,206,127],["투이","100350",3,"수","탱커",1919,300,239,92],
+ ["램가스","100389",3,"지","수호자",1459,280,384,99],["베로바드","100837",3,"화","수호자",1855,254,346,106],
+ ["시라곤","170051",3,"지","사냥꾼",1506,326,221,202],["푸라곤","170041",3,"수","사냥꾼",1575,326,209,202],
+ ["카라곤","170048",3,"화","사냥꾼",1506,338,208,202],["세라곤","170046",3,"풍","사냥꾼",1506,325,214,209],
+ ["카이거","210009",4,"지","탱커",1460,331,207,216],["타루쟈","100865",4,"화","수호자",1423,342,263,119],
+ ["푸테라","100898",4,"수","질풍",1497,318,207,216],["흑카키","100904",4,"지","질풍",1380,260,180,295],
+ ["쟈하드","100882",4,"풍","사냥꾼",1498,335,212,173],["블랙푸스","210024",4,"화","사냥꾼",1454,337,194,216],
+ ["포세이온","129815",5,"수","탱커",1761,339,221,176],["테라시온","129814",5,"지","수호자",1720,340,247,162],
+ ["실프리온","129816",5,"풍","질풍",1699,338,227,190],["이그니온","129813",5,"화","사냥꾼",1671,351,227,176],
+];
+const PETS = ROSTER.map((r,i)=>({id:i,name:r[0],ic:r[1],tier:r[2],el:r[3],cls:r[4],dur:r[5],a:r[6],d:r[7],s:r[8]}));
+const SPRITE = ic => `./sprites/${ic}.gif`;
+
+const TIER_COLOR = {1:"var(--t1c)",2:"var(--t2c)",3:"var(--t3c)",4:"var(--t4c)",5:"var(--t5c)"};
+const TIER_HEX = {1:"#9aa7b5",2:"#3fbf7f",3:"#3f8fe0",4:"#b06be8",5:"#f5b82e"};
+
+/* ----- 시너지 ----- */
+const TRAITS = {
+  "지":   {name:"대지", icon:"⛰️", color:"#b08a3e", steps:[2,4,6], vals:[.15,.30,.50],
+           fmt:v=>`대지 펫이 전투 시작 시 최대 체력의 ${v*100|0}% 보호막`},
+  "수":   {name:"물결", icon:"💧", color:"#2f86c9", steps:[2,4,6], vals:[.015,.03,.05],
+           fmt:v=>`물결 펫이 매초 최대 체력의 ${(v*100).toFixed(1)}% 회복`},
+  "화":   {name:"화염", icon:"🔥", color:"#c9452c", steps:[2,4,6], vals:[.12,.28,.50],
+           fmt:v=>`화염 펫이 주는 피해 +${v*100|0}%`},
+  "풍":   {name:"바람", icon:"🌪️", color:"#3aa86b", steps:[2,4,6], vals:[.15,.28,.45],
+           fmt:v=>`바람 펫이 일반 공격을 ${v*100|0}% 확률로 회피`},
+  "탱커": {name:"탱커", icon:"🧱", color:"#8a6a4a", steps:[2,4,6], vals:[.20,.45,.80],
+           fmt:v=>`탱커 펫 최대 체력 +${v*100|0}%`},
+  "수호자":{name:"수호자", icon:"🛡️", color:"#4a6f9a", steps:[2,4,6], vals:[12,28,50],
+           fmt:v=>`아군 전체 방어 +${v} (수호자 본인은 2배)`},
+  "사냥꾼":{name:"사냥꾼", icon:"🏹", color:"#9a4a6a", steps:[2,4,6], vals:[.18,.40,.70],
+           fmt:v=>`사냥꾼 펫 공격력 +${v*100|0}%`},
+  "질풍": {name:"질풍", icon:"⚡", color:"#7a5ac0", steps:[2,4,6], vals:[.20,.45,.80],
+           fmt:v=>`질풍 펫 공격 속도 +${v*100|0}%`},
+};
+const EL_ICON = {"지":"⛰️","수":"💧","화":"🔥","풍":"🌪️"};
+const CLS_ICON = {"탱커":"🧱","수호자":"🛡️","사냥꾼":"🏹","질풍":"⚡"};
+// 쟈쟈 속성 상성: 지 > 수 > 화 > 풍 > 지
+const BEATS = {"지":"수","수":"화","화":"풍","풍":"지"};
+
+const SKILLS = {
+  "지":{name:"바위 내려찍기", desc:a=>`대상에게 공격력 ${a}%의 피해 + 1.5초 기절`},
+  "수":{name:"물의 축복",     desc:a=>`체력이 가장 낮은 아군을 공격력 ${a}%만큼 회복`},
+  "화":{name:"불꽃 폭발",     desc:a=>`대상과 주변 적에게 공격력 ${a}%의 피해`},
+  "풍":{name:"회오리 연타",   desc:a=>`무작위 적 4번 공격 (회당 공격력 ${a}%)`},
+};
+const SKILL_PCT = {"지":220,"수":360,"화":170,"풍":75};
+
+/* ----- 경제 / 레벨 ----- */
+const MAX_LV = 9;
+const XP_NEED = [0,2,2,6,10,20,36,48,76,0];        // XP_NEED[L] = L → L+1
+const SHOP_ODDS = {                                 // 레벨별 코스트 확률(%)
+  1:[100,0,0,0,0], 2:[100,0,0,0,0], 3:[75,25,0,0,0], 4:[55,30,15,0,0],
+  5:[45,33,20,2,0], 6:[30,40,25,5,0], 7:[19,30,35,15,1], 8:[16,24,32,24,4], 9:[10,18,27,33,12],
+};
+const POOL_SIZE = {1:22,2:18,3:14,4:10,5:8};
+const TIER_MULT = [0,1,1.16,1.34,1.55,1.85];
+const STAR_MULT = [0,1,1.8,3.24];
+const BENCH = 9, COLS = 7, ROWS = 4;
+
+/* ----- 유틸 ----- */
+let RNG = Math.random;
+const rnd = n => Math.floor(RNG()*n);
+const pick = arr => arr[rnd(arr.length)];
+const shuffle = a => { for(let i=a.length-1;i>0;i--){const j=rnd(i+1);[a[i],a[j]]=[a[j],a[i]];} return a; };
+const clamp = (v,a,b) => Math.max(a,Math.min(b,v));
+
+/* =========================================================
+   게임 상태
+   ========================================================= */
+const AI_NAMES = ["우리조련사","부비마스터","만모사냥꾼","다이노킹","라고고러버","샴기르주민",
+  "마리너스어부","얼음성기사","티라노족장","카루타나토박이","쟈루상인","후르도부족","아름산나그네"];
+
+let G = null;
+let UID = 1;
+
+function newPlayer(name, isAI){
+  return { name, isAI, hp:100, gold:0, level:1, xp:0, board:{}, bench:Array(BENCH).fill(null),
+    shop:[], locked:false, streak:0, alive:true, place:0, lastOpp:null,
+    style: isAI ? pick(["fast","econ","normal","normal"]) : null };
+}
+function newUnit(pid, star=1){ return {uid:UID++, pid, star}; }
+
+function newGame(nick){
+  const pool = {}; PETS.forEach(p=>pool[p.id]=POOL_SIZE[p.tier]);
+  const names = shuffle(AI_NAMES.slice()).slice(0,7);
+  const human = newPlayer(nick||"나", false);
+  G = { players:[human, ...names.map(n=>newPlayer(n,true))], human, stage:1, round:1,
+        pool, phase:"plan", opp:null, history:[] };
+  G.players.forEach(p=>{
+    p.gold = 2;
+    // 시작 선물: 1코스트 펫 하나를 필드에
+    const pet = drawPet(1); takeFromPool(pet.id);
+    p.board["0,3"] = newUnit(pet.id);
+    rollShop(p, true);
+  });
+  return G;
+}
+
+const isPvE = () => G.stage===1 || G.round===6;
+const roundsIn = s => s===1 ? 3 : 6;
+const roundLabel = () => `${G.stage}-${G.round}`;
+
+/* ----- 풀 / 상점 ----- */
+function takeFromPool(pid){ G.pool[pid] = Math.max(0,G.pool[pid]-1); }
+function returnToPool(u){ G.pool[u.pid] += Math.pow(3,u.star-1); }
+function drawPet(tier){
+  for(let t=tier;t>=1;t--){
+    const cands = PETS.filter(p=>p.tier===t && G.pool[p.id]>0);
+    const total = cands.reduce((s,p)=>s+G.pool[p.id],0);
+    if(!total) continue;
+    let r = RNG()*total;
+    for(const p of cands){ r-=G.pool[p.id]; if(r<0) return p; }
+    return cands[cands.length-1];
+  }
+  return PETS[0];
+}
+function rollTier(level){
+  const odds = SHOP_ODDS[level]; let r = RNG()*100;
+  for(let i=0;i<5;i++){ r-=odds[i]; if(r<0) return i+1; }
+  return 1;
+}
+function rollShop(p, force){
+  if(p.locked && !force) return;
+  p.shop = Array.from({length:5},()=>drawPet(rollTier(p.level)).id);
+}
+
+/* ----- 유닛 관리 ----- */
+function allUnits(p){
+  const out=[];
+  for(const k in p.board) out.push({u:p.board[k], where:"b", key:k});
+  p.bench.forEach((u,i)=>{ if(u) out.push({u, where:"n", key:i}); });
+  return out;
+}
+const boardCount = p => Object.keys(p.board).length;
+const benchFree = p => p.bench.indexOf(null);
+function removeAt(p, where, key){ if(where==="b") delete p.board[key]; else p.bench[key]=null; }
+function getAt(p, where, key){ return where==="b" ? p.board[key]||null : p.bench[key]||null; }
+function setAt(p, where, key, u){ if(where==="b"){ if(u) p.board[key]=u; else delete p.board[key]; } else p.bench[key]=u||null; }
+function findUnit(p, uid){ return allUnits(p).find(x=>x.u.uid===uid)||null; }
+
+function copiesOf(p, pid, star){ return allUnits(p).filter(x=>x.u.pid===pid && x.u.star===star); }
+
+/* 같은 펫·같은 별 3개 → 한 단계 위로. 필드에 있는 쪽을 남깁니다. */
+function checkMerge(p){
+  const ups=[];
+  let changed=true;
+  while(changed){
+    changed=false;
+    for(const star of [1,2]){
+      const groups={};
+      allUnits(p).forEach(x=>{ if(x.u.star===star) (groups[x.u.pid]=groups[x.u.pid]||[]).push(x); });
+      for(const pid in groups){
+        const g=groups[pid];
+        if(g.length>=3){
+          g.sort((a,b)=>(a.where==="b"?0:1)-(b.where==="b"?0:1));
+          const keep=g[0];
+          g.slice(1,3).forEach(x=>removeAt(p,x.where,x.key));
+          keep.u.star++; ups.push(keep.u);
+          changed=true; break;
+        }
+      }
+      if(changed) break;
+    }
+  }
+  return ups;
+}
+
+function canBuy(p, slot){
+  const pid=p.shop[slot]; if(pid==null) return {ok:false};
+  const pet=PETS[pid];
+  if(p.gold<pet.tier) return {ok:false, why:"스톤이 부족해요"};
+  if(benchFree(p)<0 && copiesOf(p,pid,1).length<2) return {ok:false, why:"대기석이 꽉 찼어요"};
+  return {ok:true};
+}
+function buy(p, slot){
+  const c=canBuy(p,slot); if(!c.ok) return c;
+  const pid=p.shop[slot], pet=PETS[pid];
+  p.gold-=pet.tier; takeFromPool(pid); p.shop[slot]=null;
+  const u=newUnit(pid);
+  const free=benchFree(p);
+  if(free>=0){ p.bench[free]=u; }
+  else {
+    // 대기석이 꽉 찼어도 3번째 카피면 바로 합쳐줌
+    const two=copiesOf(p,pid,1).sort((a,b)=>(a.where==="b"?0:1)-(b.where==="b"?0:1));
+    removeAt(p,two[1].where,two[1].key); two[0].u.star=2;
+    return {ok:true, ups:[two[0].u].concat(checkMerge(p))};
+  }
+  return {ok:true, ups:checkMerge(p)};
+}
+const sellValue = u => { const t=PETS[u.pid].tier; return u.star===1 ? t : t*Math.pow(3,u.star-1) - (t>1?1:0); };
+function sell(p, uid){
+  const f=findUnit(p,uid); if(!f) return 0;
+  const v=sellValue(f.u); p.gold+=v; returnToPool(f.u); removeAt(p,f.where,f.key); return v;
+}
+function addXP(p, n){
+  p.xp+=n; let up=false;
+  while(p.level<MAX_LV && p.xp>=XP_NEED[p.level]){ p.xp-=XP_NEED[p.level]; p.level++; up=true; }
+  if(p.level>=MAX_LV) p.xp=0;
+  return up;
+}
+function buyXP(p){ if(p.gold<4||p.level>=MAX_LV) return false; p.gold-=4; return addXP(p,4)||true; }
+function reroll(p){ if(p.gold<2) return false; p.gold-=2; rollShop(p,true); return true; }
+
+/* 필드에 빈자리가 있으면 대기석에서 강한 순으로 채움 (TFT처럼) */
+function autoFill(p){
+  while(boardCount(p)<p.level){
+    const bench=p.bench.map((u,i)=>({u,i})).filter(x=>x.u);
+    if(!bench.length) break;
+    bench.sort((a,b)=>unitValue(b.u)-unitValue(a.u));
+    const u=bench[0].u, key=freeCellFor(p,u); if(!key) break;
+    p.bench[bench[0].i]=null; p.board[key]=u;
+  }
+}
+const COL_ORDER=[3,2,4,1,5,0,6];
+function preferRows(pet){ return pet.cls==="사냥꾼" ? [3,2,1,0] : pet.cls==="질풍" ? [3,2,1,0] : [0,1,2,3]; }
+function freeCellFor(p,u){
+  for(const r of preferRows(PETS[u.pid])) for(const c of COL_ORDER){ const k=r+","+c; if(!p.board[k]) return k; }
+  return null;
+}
+function unitValue(u){ const pet=PETS[u.pid]; return TIER_MULT[pet.tier]*STAR_MULT[u.star]*10 + pet.tier*.1; }
+
+/* ----- 시너지 계산 (같은 펫 중복은 1로) ----- */
+function traitCounts(units){
+  const seen=new Set(), cnt={};
+  units.forEach(u=>{ if(seen.has(u.pid)) return; seen.add(u.pid);
+    const pet=PETS[u.pid]; cnt[pet.el]=(cnt[pet.el]||0)+1; cnt[pet.cls]=(cnt[pet.cls]||0)+1; });
+  return cnt;
+}
+function traitLevel(key, n){ const st=TRAITS[key].steps; let l=-1; st.forEach((s,i)=>{ if(n>=s) l=i; }); return l; }
+
+/* =========================================================
+   전투 엔진 — 7×8 칸, 50ms 고정 스텝. 화면 없이도 돌아감(AI끼리 전투)
+   side 0 = 아래(홈), side 1 = 위(원정). 원정 쪽은 좌우·앞뒤 뒤집어서 배치
+   ========================================================= */
+const STEP = 0.05;
+function snapshot(p){ // 필드 → [{pid,star,r,c}]
+  return Object.entries(p.board).map(([k,u])=>{ const [r,c]=k.split(",").map(Number); return {pid:u.pid,star:u.star,r,c}; });
+}
+function makeUnit(id, side, s, opts){
+  const pet=PETS[s.pid], star=s.star, tm=TIER_MULT[pet.tier], sm=STAR_MULT[star];
+  const wild = opts && opts.wild || 1;
+  let hp = pet.dur*0.36*tm*sm*wild;
+  let atk = pet.a*0.3*tm*sm*wild;
+  let armor = pet.d*0.12 + 5*(star-1);
+  if(pet.cls==="탱커") hp*=1.15;
+  if(pet.cls==="수호자") armor+=10;
+  if(pet.cls==="사냥꾼") hp*=0.85;
+  if(pet.cls==="질풍") hp*=0.92;
+  const interval = clamp(0.95*Math.sqrt(196/pet.s),0.55,1.6);
+  const x = side===0 ? s.c : 6-s.c;
+  const y = side===0 ? 4+s.r : 3-s.r;
+  return { id, side, pid:s.pid, star, pet, x, y, hp, maxHp:hp, atk, armor, interval, as:0,
+    range: pet.cls==="사냥꾼" ? 3 : 1, mana: pet.tier===5?20:0, maxMana: pet.tier===5?80:100,
+    cd: 0.15+RNG()*0.25, moveCd:0, target:null, shield:0, stun:0, dodge:0, amp:0, regen:0,
+    alive:true, leapt: pet.cls!=="질풍", dmgDone:0 };
+}
+function applyTraits(units, side){
+  const cnt=traitCounts(units.filter(u=>u.side===side).map(u=>({pid:u.pid})));
+  const mine=units.filter(u=>u.side===side);
+  for(const key in cnt){
+    const l=traitLevel(key,cnt[key]); if(l<0) continue;
+    const v=TRAITS[key].vals[l];
+    mine.forEach(u=>{
+      const has = u.pet.el===key || u.pet.cls===key;
+      if(key==="지" && has) u.shield += u.maxHp*v;
+      if(key==="수" && has) u.regen = v;
+      if(key==="화" && has) u.amp += v;
+      if(key==="풍" && has) u.dodge = v;
+      if(key==="탱커" && has){ u.maxHp*=1+v; u.hp=u.maxHp; }
+      if(key==="수호자") u.armor += has ? v*2 : v;
+      if(key==="사냥꾼" && has) u.atk *= 1+v;
+      if(key==="질풍" && has) u.as += v;
+    });
+  }
+  // 대지 보호막은 탱커 체력 보정 뒤에 다시 계산
+  if(cnt["지"]!=null){ const l=traitLevel("지",cnt["지"]); if(l>=0) mine.forEach(u=>{ if(u.pet.el==="지") u.shield=u.maxHp*TRAITS["지"].vals[l]; }); }
+}
+function createCombat(home, away, opts={}){
+  const units=[]; let id=1;
+  home.forEach(s=>units.push(makeUnit(id++,0,s,opts.homeWild?{wild:opts.homeWild}:null)));
+  away.forEach(s=>units.push(makeUnit(id++,1,s,opts.awayWild?{wild:opts.awayWild}:null)));
+  if(!opts.homeWild) applyTraits(units,0);
+  if(!opts.awayWild) applyTraits(units,1);
+  const grid=new Map(); units.forEach(u=>grid.set(u.y*COLS+u.x,u));
+  return { units, grid, t:0, done:false, winner:null, events:[] };
+}
+const cheb=(a,b)=>Math.max(Math.abs(a.x-b.x),Math.abs(a.y-b.y));
+const eucl=(a,b)=>(a.x-b.x)**2+(a.y-b.y)**2;
+function enemiesOf(cb,u){ return cb.units.filter(e=>e.alive && e.side!==u.side); }
+function alliesOf(cb,u){ return cb.units.filter(e=>e.alive && e.side===u.side); }
+function nearest(u, list){
+  let best=null,bd=1e9;
+  list.forEach(e=>{ const d=cheb(u,e)*100+eucl(u,e); if(d<bd){bd=d;best=e;} }); return best;
+}
+function overtime(t){ return t>30?2.5 : t>20?1.5 : 1; }
+
+function dealDamage(cb, src, tgt, raw, kind){
+  if(!tgt.alive) return;
+  let mult = 1 + src.amp;
+  if(BEATS[src.pet.el]===tgt.pet.el) mult*=1.25;
+  else if(BEATS[tgt.pet.el]===src.pet.el) mult*=0.8;
+  let dmg = raw*mult*overtime(cb.t)*100/(100+tgt.armor);
+  let absorbed=0;
+  if(tgt.shield>0){ absorbed=Math.min(tgt.shield,dmg); tgt.shield-=absorbed; dmg-=absorbed; }
+  tgt.hp-=dmg; src.dmgDone+=dmg+absorbed;
+  tgt.mana=Math.min(tgt.maxMana, tgt.mana+3+ (dmg+absorbed)/tgt.maxHp*20);
+  cb.events.push({type:"dmg", src:src.id, tgt:tgt.id, v:Math.round(dmg+absorbed), kind});
+  if(tgt.hp<=0){
+    tgt.alive=false; tgt.hp=0; cb.grid.delete(tgt.y*COLS+tgt.x);
+    cb.events.push({type:"death", id:tgt.id});
+  }
+}
+function castSkill(cb, u){
+  const el=u.pet.el, lord=u.pet.tier===5?1.5:1, pct=SKILL_PCT[el]/100*lord;
+  cb.events.push({type:"cast", id:u.id, el});
+  if(el==="지"){
+    const t=u.target && u.target.alive ? u.target : nearest(u,enemiesOf(cb,u)); if(!t) return;
+    dealDamage(cb,u,t,u.atk*pct,"skill"); if(t.alive){ t.stun=Math.max(t.stun,1.5); cb.events.push({type:"stun",id:t.id}); }
+  } else if(el==="수"){
+    const al=alliesOf(cb,u); if(!al.length) return;
+    const t=al.reduce((a,b)=>a.hp/a.maxHp<=b.hp/b.maxHp?a:b);
+    const h=Math.min(t.maxHp-t.hp, u.atk*pct); t.hp+=h;
+    cb.events.push({type:"heal", tgt:t.id, v:Math.round(h)});
+  } else if(el==="화"){
+    const t=u.target && u.target.alive ? u.target : nearest(u,enemiesOf(cb,u)); if(!t) return;
+    cb.events.push({type:"boom", x:t.x, y:t.y});
+    enemiesOf(cb,u).filter(e=>cheb(e,t)<=1).forEach(e=>dealDamage(cb,u,e,u.atk*pct*(e===t?1.2:1),"skill"));
+  } else if(el==="풍"){
+    for(let i=0;i<4;i++){ const es=enemiesOf(cb,u); if(!es.length) break; dealDamage(cb,u,pick(es),u.atk*pct,"skill"); }
+  }
+}
+function tryLeap(cb,u){
+  // 질풍: 상대 후열 근처 빈칸으로 도약
+  u.leapt=true;
+  const es=enemiesOf(cb,u); if(!es.length) return;
+  const back = es.reduce((a,b)=> (u.side===0 ? (a.y<=b.y?a:b) : (a.y>=b.y?a:b)));
+  let best=null,bd=1e9;
+  for(let dy=-1;dy<=1;dy++) for(let dx=-1;dx<=1;dx++){
+    const x=back.x+dx,y=back.y+dy; if(x<0||x>=COLS||y<0||y>=8) continue;
+    if(cb.grid.has(y*COLS+x)) continue;
+    const d=eucl({x,y},u)*0.01 + (u.side===0? -y : y)*0; if(d<bd){bd=d;best={x,y};}
+  }
+  if(!best) return;
+  cb.grid.delete(u.y*COLS+u.x); u.x=best.x; u.y=best.y; cb.grid.set(u.y*COLS+u.x,u);
+  u.target=back; u.cd=Math.min(u.cd,0.3);
+  cb.events.push({type:"leap", id:u.id});
+}
+function stepToward(cb,u,t){
+  let best=null, bd=cheb(u,t)*100+eucl(u,t);
+  for(let dy=-1;dy<=1;dy++) for(let dx=-1;dx<=1;dx++){
+    if(!dx&&!dy) continue;
+    const x=u.x+dx,y=u.y+dy; if(x<0||x>=COLS||y<0||y>=8) continue;
+    if(cb.grid.has(y*COLS+x)) continue;
+    const p={x,y}, d=cheb(p,t)*100+eucl(p,t);
+    if(d<bd){bd=d;best=p;}
+  }
+  if(!best) return false;
+  cb.grid.delete(u.y*COLS+u.x); u.x=best.x; u.y=best.y; cb.grid.set(u.y*COLS+u.x,u);
+  cb.events.push({type:"move", id:u.id});
+  return true;
+}
+function combatStep(cb){
+  if(cb.done) return [];
+  cb.events=[]; cb.t+=STEP;
+  const order=cb.units.filter(u=>u.alive);
+  for(const u of order){
+    if(!u.alive) continue;
+    if(u.regen) { const h=Math.min(u.maxHp-u.hp,u.maxHp*u.regen*STEP); u.hp+=h; }
+    if(u.stun>0){ u.stun-=STEP; continue; }
+    u.cd-=STEP; u.moveCd-=STEP;
+    if(!u.leapt && cb.t>0.35){ tryLeap(cb,u); continue; }
+    const es=enemiesOf(cb,u); if(!es.length) break;
+    if(u.mana>=u.maxMana && u.cd<=0.2){ u.mana=0; castSkill(cb,u); u.cd=Math.max(u.cd,0.35); continue; }
+    if(!u.target || !u.target.alive) u.target=nearest(u,es);
+    if(cheb(u,u.target)>u.range){
+      const inr=es.filter(e=>cheb(u,e)<=u.range);
+      if(inr.length) u.target=nearest(u,inr);
+    }
+    const t=u.target;
+    if(cheb(u,t)<=u.range){
+      if(u.cd<=0){
+        u.cd=u.interval/(1+u.as);
+        u.mana=Math.min(u.maxMana,u.mana+10);
+        cb.events.push({type:"atk", id:u.id, tgt:t.id, ranged:u.range>1});
+        if(t.dodge && RNG()<t.dodge){ cb.events.push({type:"dmg",src:u.id,tgt:t.id,v:0,kind:"miss"}); }
+        else { const crit=RNG()<0.1; dealDamage(cb,u,t,u.atk*(crit?1.5:1),crit?"crit":"hit"); }
+      }
+    } else if(u.moveCd<=0){
+      if(stepToward(cb,u,t)) u.moveCd=0.4;
+      else { u.target=nearest(u,es); u.moveCd=0.15; }
+    }
+  }
+  const a0=cb.units.some(u=>u.alive&&u.side===0), a1=cb.units.some(u=>u.alive&&u.side===1);
+  if(!a0||!a1){ cb.done=true; cb.winner = a0?0 : a1?1 : -1; }
+  else if(cb.t>=45){ cb.done=true; cb.winner=-1; }
+  return cb.events;
+}
+function runToEnd(cb){ let n=0; while(!cb.done && n++<2000) combatStep(cb); return cb; }
+function survivors(cb, side){ return cb.units.filter(u=>u.alive&&u.side===side); }
+
+/* ----- PvE 크립 ----- */
+function creepArmy(){
+  const s=G.stage;
+  if(s===1){
+    const n=[2,3,4][G.round-1];
+    const ids=["우리","부비","두리","꼬꼬비"].map(nm=>PETS.find(p=>p.name===nm).id);
+    return {army:Array.from({length:n},(_,i)=>({pid:ids[i%ids.length],star:1,r:i%2,c:[2,4,3,1][i]})), wild:0.5};
+  }
+  const n=Math.min(3+s,8), tier=Math.min(s,5), star=s>=5?2:1;
+  const cand=PETS.filter(p=>p.tier===Math.max(1,tier-1)||p.tier===tier);
+  const army=[];
+  for(let i=0;i<n;i++){ const pet=pick(cand); army.push({pid:pet.id,star,r:pet.cls==="사냥꾼"?3:i%3,c:COL_ORDER[i%7]}); }
+  // 같은 칸 중복 제거
+  const used=new Set(); army.forEach(a=>{ while(used.has(a.r+","+a.c)){ a.c=(a.c+1)%7; if(a.c===0) a.r=(a.r+1)%4; } used.add(a.r+","+a.c); });
+  return {army, wild:0.62+0.07*s};
+}
+
+/* ----- 피해 / 수입 ----- */
+const STAGE_DMG=[0,0,2,5,8,10,12,15,18];
+function lossDamage(cb, winSide){ return (STAGE_DMG[Math.min(G.stage,8)]||18) + survivors(cb,winSide).reduce((s,u)=>s+u.star,0); }
+function streakBonus(st){ const a=Math.abs(st); return a>=5?3 : a>=4?2 : a>=2?1 : 0; }
+
+/* =========================================================
+   AI
+   ========================================================= */
+function aiTargetLevel(p){
+  const s=G.stage, base = s<=1?3 : s===2?5 : s===3?(G.round<=3?6:7) : s===4?8 : 9;
+  return clamp(base + (p.style==="fast"?1:0) - (p.style==="econ"&&s<=3?1:0), 1, MAX_LV);
+}
+function aiWant(p, pid){
+  const pet=PETS[pid], have=allUnits(p);
+  const copies=have.filter(x=>x.u.pid===pid&&x.u.star<3).length;
+  if(copies>=1) return 3+copies;
+  const bc=traitCounts(Object.values(p.board));
+  const syn=(bc[pet.el]||0)+(bc[pet.cls]||0);
+  if(have.length < p.level+2) return 1+syn*0.5+pet.tier*0.4;
+  return syn>=2 && pet.tier>=2 ? 1.5 : 0;
+}
+function aiBuyPass(p, reserve){
+  for(let i=0;i<5;i++){
+    const pid=p.shop[i]; if(pid==null) continue;
+    const w=aiWant(p,pid);
+    if(w<1 || p.gold<PETS[pid].tier) continue;
+    if(w<3 && p.gold-PETS[pid].tier < reserve*0.5) continue;   // 페어 아니면 이자용 스톤은 남김
+    {
+      if(benchFree(p)<0 && copiesOf(p,pid,1).length<2) aiSellWorst(p);
+      buy(p,i);
+    }
+  }
+}
+function aiSellWorst(p){
+  const b=p.bench.map((u,i)=>({u,i})).filter(x=>x.u);
+  if(!b.length) return;
+  b.sort((a,c)=>{ const pa=copiesOf(p,a.u.pid,a.u.star).length, pc=copiesOf(p,c.u.pid,c.u.star).length;
+    return (pa-pc) || (unitValue(a.u)-unitValue(c.u)); });
+  sell(p,b[0].u.uid);
+}
+function aiArrange(p){
+  const all=allUnits(p).map(x=>x.u);
+  p.board={}; p.bench=Array(BENCH).fill(null);
+  const chosen=[]; const pool=all.slice();
+  while(chosen.length<p.level && pool.length){
+    const cnt=traitCounts(chosen);
+    let best=null,bv=-1e9;
+    pool.forEach(u=>{
+      const pet=PETS[u.pid];
+      const dup=chosen.some(c=>c.pid===u.pid);
+      const syn=dup?0:((cnt[pet.el]||0)+(cnt[pet.cls]||0))*1.2;
+      const v=unitValue(u)+syn-(dup?4:0);
+      if(v>bv){bv=v;best=u;}
+    });
+    chosen.push(best); pool.splice(pool.indexOf(best),1);
+  }
+  chosen.forEach(u=>{ const k=freeCellFor(p,u); if(k) p.board[k]=u; });
+  pool.sort((a,b)=>unitValue(b)-unitValue(a));
+  pool.forEach(u=>{ const f=benchFree(p); if(f>=0) p.bench[f]=u; else { p.gold+=sellValue(u); returnToPool(u); } });
+}
+function aiPlan(p){
+  const s=G.stage;
+  const reserve = p.hp<35 || s===1 ? 0
+    : s===2 ? (p.style==="econ"?20:4)
+    : p.style==="econ" ? 50 : p.style==="fast" ? 20 : 30;
+  const tgt=aiTargetLevel(p);
+  while(p.level<tgt && p.gold>=4 && (p.gold-4>=reserve*0.6 || p.hp<45)) buyXP(p);
+  aiBuyPass(p,reserve);
+  let rolls=0;
+  while(p.gold>=reserve+3 && rolls<10 && (G.stage>=3 || p.hp<60)){ reroll(p); aiBuyPass(p,reserve); rolls++; }
+  aiArrange(p);
+}
+
+/* =========================================================
+   라운드 흐름
+   ========================================================= */
+function beginPlanning(){
+  G.phase="plan";
+  G.players.filter(p=>p.isAI&&p.alive).forEach(aiPlan);
+}
+function setupCombats(){
+  const alive=G.players.filter(p=>p.alive);
+  autoFill(G.human);
+  const fights=[];
+  if(isPvE()){
+    alive.forEach(p=>{ const {army,wild}=creepArmy();
+      fights.push({a:p,b:null,pve:true,cb:createCombat(snapshot(p),army,{awayWild:wild})}); });
+  } else {
+    let order;
+    for(let k=0;k<12;k++){
+      order=shuffle(alive.slice());
+      const hi=order.indexOf(G.human), mate=order[hi%2===0?hi+1:hi-1];
+      if(!mate || mate!==G.human.lastOpp || alive.length<=2) break;
+    }
+    for(let i=0;i+1<order.length;i+=2){
+      let a=order[i], b=order[i+1];
+      if(b===G.human){ [a,b]=[b,a]; }
+      fights.push({a,b,cb:createCombat(snapshot(a),snapshot(b))});
+    }
+    if(order.length%2===1){
+      const a=order[order.length-1], others=alive.filter(p=>p!==a), g=pick(others);
+      fights.push({a,b:g,ghost:true,cb:createCombat(snapshot(a),snapshot(g))});
+    }
+  }
+  fights.sort((x,y)=>(y.a===G.human)-(x.a===G.human));
+  G.phase="combat";
+  return fights;
+}
+function resolveRound(fights){
+  const me={}, lbl=roundLabel();
+  const win=p=>{ p.streak=p.streak>0?p.streak+1:1; p.gold+=1; };
+  const lose=(p,d)=>{ p.hp-=d; p.streak=p.streak<0?p.streak-1:-1; if(p===G.human) me.dmg=d; };
+  fights.forEach(f=>{
+    runToEnd(f.cb);
+    const w=f.cb.winner;
+    if(f.a===G.human){ me.result = w===0?"win" : w===1?"lose" : "draw"; me.pve=!!f.pve; me.opp=f.b; }
+    if(f.pve){
+      if(w===0){
+        const drop = G.stage===1 ? 1 : Math.min(G.stage-1,4);
+        f.a.gold += G.stage===1 ? 1 : 3;
+        const free=benchFree(f.a);
+        if(free>=0){ const pet=drawPet(drop); takeFromPool(pet.id); f.a.bench[free]=newUnit(pet.id); checkMerge(f.a);
+          if(f.a===G.human) me.drop=pet; }
+      } else { const d=G.stage===1?2:3+G.stage; f.a.hp-=d; if(f.a===G.human) me.dmg=d; }
+      return;
+    }
+    if(w===0){ win(f.a); if(!f.ghost) lose(f.b,lossDamage(f.cb,0)); }
+    else if(w===1){ lose(f.a,lossDamage(f.cb,1)); if(!f.ghost) win(f.b); }
+    else { lose(f.a,lossDamage(f.cb,1)); if(!f.ghost) lose(f.b,lossDamage(f.cb,0)); }
+    if(f.a===G.human) G.human.lastOpp=f.b;
+  });
+  // 탈락 처리
+  let aliveN=G.players.filter(p=>p.alive).length;
+  const dead=G.players.filter(p=>p.alive&&p.hp<=0).sort((a,b)=>a.hp-b.hp);
+  dead.forEach(p=>{ p.place=aliveN--; p.alive=false; p.outAt=lbl; p.finalUnits=allUnits(p).map(x=>x.u); allUnits(p).forEach(x=>returnToPool(x.u)); p.board={}; p.bench=Array(BENCH).fill(null); });
+  // 수입
+  G.players.filter(p=>p.alive).forEach(p=>{
+    const base = G.stage===1 ? 3 : 5, interest=Math.min(5,Math.floor(p.gold/10)), st=streakBonus(p.streak);
+    p.gold += base+interest+st;
+    if(p===G.human) me.income={base,interest,st};
+    addXP(p,2);
+  });
+  G.round++;
+  if(G.round>roundsIn(G.stage)){ G.stage++; G.round=1; }
+  G.players.filter(p=>p.alive).forEach(p=>rollShop(p));
+  const left=G.players.filter(p=>p.alive);
+  if(!G.human.alive) G.phase="over";
+  else if(left.length===1){ G.human.place=1; G.phase="over"; }
+  return me;
+}
+
+
+/* =========================================================
+   쟈쟈체스 — 화면 · 조작 · 연출
+   ========================================================= */
+const $ = id => document.getElementById(id);
+let speed = 1, muted = false, selected = null, CR = null, FIGHTS = null;
+const LS_NICK = "jajachess:nick", LS_REC = "jajachess:rec";
+
+/* ----- 효과음 (작게) ----- */
+let AC=null;
+function sfx(kind){
+  if(muted) return;
+  try{
+    AC = AC || new (window.AudioContext||window.webkitAudioContext)();
+    const notes = {buy:[660],roll:[440,550],sell:[330],lv:[523,659,784],star:[659,784,988,1319],
+      win:[523,659,784,1047],lose:[392,330,262],err:[200],cast:[880]}[kind]||[440];
+    notes.forEach((f,i)=>{
+      const o=AC.createOscillator(), g=AC.createGain(), t=AC.currentTime+i*0.07;
+      o.type="sine"; o.frequency.value=f;
+      g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.045,t+0.015);
+      g.gain.exponentialRampToValueAtTime(0.0001,t+0.16);
+      o.connect(g).connect(AC.destination); o.start(t); o.stop(t+0.18);
+    });
+  }catch(e){}
+}
+
+/* ----- 공통 ----- */
+let toastT=null;
+function toast(msg){ const t=$("toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove("show"),1600); }
+function tokHTML(u){
+  const pet=PETS[u.pid];
+  return `<div class="tok s${u.star}" style="--tierc:${TIER_HEX[pet.tier]}" data-uid="${u.uid}">`+
+    `<img src="${SPRITE(pet.ic)}" alt="${pet.name}" draggable="false" onerror="this.style.visibility='hidden'">`+
+    `<div class="stars">${"★".repeat(u.star)}</div><span class="el">${EL_ICON[pet.el]}</span></div>`;
+}
+function baseStats(pid, star){
+  const u=makeUnit(0,0,{pid,star,r:0,c:0});
+  return {hp:Math.round(u.maxHp), atk:Math.round(u.atk), def:Math.round(u.armor), spd:(1/u.interval).toFixed(2), range:u.range};
+}
+
+/* ----- 화면 크기 ----- */
+function layout(){
+  const w=window.innerWidth, h=window.innerHeight, wide=w>900;
+  const nav=($("global-nav")||{}).offsetHeight||0;
+  const hud=document.querySelector(".hud").offsetHeight, shop=$("shopbar").offsetHeight;
+  const extra= wide ? 0 : $("traitsBox").offsetHeight + $("lobbyBox").offsetHeight + 16;
+  const availW= wide ? Math.min(w,1100)-190-200-28-24 : w-24;
+  const availH= h-nav-hud-shop-extra-30;
+  const cell=clamp(Math.floor(Math.min(availW/7, availH/(8+7/9+0.25))),38,76);
+  document.documentElement.style.setProperty("--cell",cell+"px");
+}
+
+/* ----- 렌더 ----- */
+function render(){
+  if(!G) return;
+  const p=G.human;
+  $("stageLbl").textContent=roundLabel();
+  $("phaseLbl").textContent = G.phase==="combat" ? (isPvE()?"야생 전투":"전투 중") : (isPvE()?"준비 · 야생 라운드":"준비");
+  $("hpLbl").textContent=Math.max(0,p.hp);
+  $("goldLbl").textContent=p.gold;
+  $("lvLbl").textContent=p.level;
+  const need=XP_NEED[p.level]||0;
+  $("xpLbl").textContent= p.level>=MAX_LV ? "MAX" : `${p.xp}/${need}`;
+  $("xpBar").style.width= p.level>=MAX_LV ? "100%" : (need? p.xp/need*100 : 0)+"%";
+  $("capLbl").textContent=`${boardCount(p)}/${p.level}`;
+  $("capLbl").style.color = boardCount(p)<p.level && p.bench.some(Boolean) ? "var(--gold)" : "";
+  const plan=G.phase==="plan";
+  $("btnFight").disabled=!plan;
+  $("btnFight").textContent = plan ? "전투 시작" : "전투 중…";
+  $("btnSkip").style.display = G.phase==="combat" ? "" : "none";
+  $("btnXP").disabled=!plan||p.gold<4||p.level>=MAX_LV;
+  $("btnRoll").disabled=!plan||p.gold<2;
+  $("btnLock").textContent=p.locked?"🔒":"🔓";
+  $("btnLock").classList.toggle("on",p.locked);
+  renderBoard(); renderBench(); renderShop(); renderTraits(); renderLobby();
+}
+function renderBoard(){
+  const b=$("board"), plan=G.phase!=="combat";
+  b.querySelectorAll(".cell").forEach(c=>{
+    c.innerHTML="";
+    const slot=c.dataset.slot; if(!slot||!plan) return;
+    const u=G.human.board[slot.slice(2)]; if(u) c.innerHTML=tokHTML(u);
+  });
+  $("foeLabel").style.display = plan ? "" : "none";
+  markSel();
+}
+function renderBench(){
+  $("bench").querySelectorAll(".cell").forEach((c,i)=>{ const u=G.human.bench[i]; c.innerHTML=u?tokHTML(u):""; });
+  markSel();
+}
+function renderShop(){
+  const p=G.human, plan=G.phase==="plan";
+  $("shop").classList.toggle("locked",p.locked);
+  $("shop").innerHTML=p.shop.map((pid,i)=>{
+    if(pid==null) return `<button class="card sold" disabled></button>`;
+    const pet=PETS[pid], pair=copiesOf(p,pid,1).length>=2;
+    return `<button class="card${p.gold<pet.tier?" poor":""}${pair?" pair":""}" data-slot="${i}" style="--tierc:${TIER_HEX[pet.tier]}"${plan?"":" disabled"}>`+
+      `<div class="art"><img src="${SPRITE(pet.ic)}" alt="" draggable="false" onerror="this.style.visibility='hidden'"></div>`+
+      `<div class="meta"><div class="cn"><span>${pet.name}</span><small>${pet.tier}</small></div>`+
+      `<div class="ct">${EL_ICON[pet.el]} ${TRAITS[pet.el].name} · ${CLS_ICON[pet.cls]} ${pet.cls}</div></div></button>`;
+  }).join("");
+}
+function renderTraits(){
+  const cnt=traitCounts(Object.values(G.human.board));
+  const keys=Object.keys(cnt).sort((a,b)=>(traitLevel(b,cnt[b])-traitLevel(a,cnt[a]))||(cnt[b]-cnt[a]));
+  if(!keys.length){ $("traits").innerHTML=`<div class="empty-note">필드에 펫을 올리면 시너지가 표시돼요</div>`; return; }
+  $("traits").innerHTML=keys.map(k=>{
+    const T=TRAITS[k], n=cnt[k], l=traitLevel(k,n);
+    return `<button class="trait ${l>=0?"on":"off"}" data-trait="${k}" style="--tc:${T.color}">`+
+      `<span class="ti">${T.icon}</span><span><div class="tn">${T.name}</div>`+
+      `<div class="ts">${T.steps.map((s,i)=>`<i class="${i<=l?"hit":""}">${s}</i>`).join(" › ")}</div></span>`+
+      `<span class="tc">${n}</span></button>`;
+  }).join("");
+}
+function renderLobby(){
+  const opp = CR && CR.f ? CR.f.b : null;
+  const list=G.players.slice().sort((a,b)=> (b.alive-a.alive) || (a.alive ? b.hp-a.hp : a.place-b.place));
+  $("lobby").innerHTML=list.map(p=>
+    `<div class="lp${p===G.human?" me":""}${!p.alive?" dead":""}${p===opp?" vs":""}">`+
+    `<span class="nm">${p.alive?"":p.place+"등 · "}${esc(p.name)}</span><span class="lv">${p.alive?"♥"+p.hp:""} Lv${p.level}</span>`+
+    `<div class="bar"><i style="width:${Math.max(0,p.hp)}%"></i></div></div>`).join("");
+}
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+/* ----- 정보 패널 ----- */
+function markSel(){
+  document.querySelectorAll(".tok.sel").forEach(e=>e.classList.remove("sel"));
+  if(selected&&selected.type==="unit"){ const e=document.querySelector(`.board .cell .tok[data-uid="${selected.uid}"],.bench .tok[data-uid="${selected.uid}"]`); if(e) e.classList.add("sel"); }
+}
+function showUnitInfo(pid, star, uid){
+  const pet=PETS[pid], st=baseStats(pid,star), sk=SKILLS[pet.el];
+  const pct=Math.round(SKILL_PCT[pet.el]*(pet.tier===5?1.5:1));
+  const sellBtn = uid && G.phase==="plan" ? `<button class="sell" id="infoSell">판매 +${sellValue({pid,star})} 스톤</button>` : "";
+  $("info").innerHTML=`<button class="x" id="infoX">×</button>`+
+    `<div class="ih"><div class="iimg" style="--tierc:${TIER_HEX[pet.tier]}"><img src="${SPRITE(pet.ic)}" alt=""></div>`+
+    `<div><div class="in">${pet.name} <span style="color:var(--gold)">${"★".repeat(star)}</span></div>`+
+    `<div class="it">${pet.tier}코스트 · ${EL_ICON[pet.el]} ${TRAITS[pet.el].name} · ${CLS_ICON[pet.cls]} ${pet.cls}${st.range>1?" · 사거리 3":""}</div></div></div>`+
+    `<div class="ist"><div><small>체력</small><b>${st.hp}</b></div><div><small>공격</small><b>${st.atk}</b></div>`+
+    `<div><small>방어</small><b>${st.def}</b></div><div><small>공속</small><b>${st.spd}</b></div></div>`+
+    `<div class="isk"><b>${sk.name}</b> · 마나 ${pet.tier===5?80:100}<br>${sk.desc(pct)}${pet.tier===5?"<br><span style='color:var(--gold)'>정령왕: 스킬 위력 ×1.5</span>":""}</div>`+
+    `<div class="ibtn">${sellBtn}</div>`;
+  $("info").classList.add("show");
+  $("infoX").onclick=closeInfo;
+  if($("infoSell")) $("infoSell").onclick=()=>{ doSell(uid); };
+}
+function showTraitInfo(k){
+  const T=TRAITS[k], n=traitCounts(Object.values(G.human.board))[k]||0, l=traitLevel(k,n);
+  const members=PETS.filter(p=>p.el===k||p.cls===k);
+  $("info").innerHTML=`<button class="x" id="infoX">×</button>`+
+    `<div class="in">${T.icon} ${T.name} <span style="color:var(--t3);font-size:13px">${n}마리</span></div>`+
+    `<div class="tdesc">${T.steps.map((s,i)=>`<div class="${i<=l?"hit":""}">(${s}) ${T.fmt(T.vals[i])}</div>`).join("")}</div>`+
+    (TRAITS[k] && EL_ICON[k] ? `<div class="tdesc">상성: ${k} › ${BEATS[k]} (피해 ×1.25)</div>` : "")+
+    `<div class="tdesc" style="color:var(--t3)">${members.map(p=>`<span style="color:${TIER_HEX[p.tier]}">${p.name}</span>`).join(", ")}</div>`;
+  $("info").classList.add("show");
+  $("infoX").onclick=closeInfo;
+}
+function closeInfo(){ selected=null; $("info").classList.remove("show"); markSel(); }
+
+/* ----- 행동 ----- */
+function doBuy(slot){
+  if(G.phase!=="plan") return;
+  const r=buy(G.human,slot);
+  if(!r.ok){ if(r.why){ toast(r.why); sfx("err"); } return; }
+  if(r.ups&&r.ups.length){ sfx("star"); const u=r.ups[r.ups.length-1]; toast(`${PETS[u.pid].name} ${"★".repeat(u.star)} 달성!`); }
+  else sfx("buy");
+  render();
+}
+function doSell(uid){
+  if(G.phase!=="plan") return;
+  const v=sell(G.human,uid); if(!v) return;
+  sfx("sell"); toast(`+${v} 스톤`); closeInfo(); render();
+}
+function doXP(){ if(G.phase!=="plan") return; const lv=G.human.level; if(buyXP(G.human)){ if(G.human.level>lv){ sfx("lv"); toast(`레벨 ${G.human.level}! 필드 ${G.human.level}칸`);} else sfx("buy"); render(); } }
+function doRoll(){ if(G.phase!=="plan") return; if(reroll(G.human)){ sfx("roll"); render(); } }
+function doLock(){ G.human.locked=!G.human.locked; render(); }
+
+/* 칸 이동/교체 */
+function parseSlot(s){ return s[0]==="b" ? {where:"b",key:s.slice(2)} : {where:"n",key:+s.slice(2)}; }
+function moveUnit(fromSlot, toSlot){
+  const p=G.human, f=parseSlot(fromSlot), t=parseSlot(toSlot);
+  if(fromSlot===toSlot) return;
+  const a=getAt(p,f.where,f.key), b=getAt(p,t.where,t.key); if(!a) return;
+  if(t.where==="b" && f.where==="n" && !b && boardCount(p)>=p.level){ toast(`필드는 레벨만큼(${p.level}마리)만 올릴 수 있어요`); sfx("err"); return; }
+  setAt(p,f.where,f.key,b); setAt(p,t.where,t.key,a);
+  render();
+}
+
+/* ----- 드래그 (마우스·터치 공용) ----- */
+let drag=null;
+function onDown(e){
+  const tok=e.target.closest(".tok"); if(!tok || !e.target.closest(".cell")) return;
+  if(G.phase==="combat" && tok.closest(".board")) return;
+  const slot=tok.closest(".cell").dataset.slot, uid=+tok.dataset.uid;
+  drag={uid, slot, sx:e.clientX, sy:e.clientY, ghost:null, tok, can:G.phase==="plan"};
+  e.preventDefault();
+}
+function onMove(e){
+  if(!drag) return;
+  const dx=e.clientX-drag.sx, dy=e.clientY-drag.sy;
+  if(!drag.ghost && drag.can && dx*dx+dy*dy>36){
+    drag.ghost=document.createElement("div"); drag.ghost.className="ghost";
+    drag.ghost.innerHTML=drag.tok.outerHTML; document.body.appendChild(drag.ghost);
+    drag.tok.style.opacity=".3"; closeInfo();
+    $("shopbar").classList.add("sell-zone");
+  }
+  if(drag.ghost){
+    drag.ghost.style.left=e.clientX+"px"; drag.ghost.style.top=e.clientY+"px";
+    document.querySelectorAll(".cell.drop").forEach(c=>c.classList.remove("drop"));
+    const el=document.elementFromPoint(e.clientX,e.clientY), c=el&&el.closest(".cell[data-slot]");
+    if(c) c.classList.add("drop");
+  }
+}
+function onUp(e){
+  if(!drag) return;
+  const d=drag; drag=null;
+  document.querySelectorAll(".cell.drop").forEach(c=>c.classList.remove("drop"));
+  $("shopbar").classList.remove("sell-zone");
+  if(!d.ghost){ // 탭 = 선택
+    const f=findUnit(G.human,d.uid); if(!f) return;
+    selected={type:"unit",uid:d.uid}; markSel(); showUnitInfo(f.u.pid,f.u.star,d.uid); return;
+  }
+  d.ghost.remove(); d.tok.style.opacity="";
+  const el=document.elementFromPoint(e.clientX,e.clientY);
+  if(!el){ render(); return; }
+  if(el.closest("#shopbar")){ doSell(d.uid); return; }
+  const c=el.closest(".cell[data-slot]");
+  if(c) moveUnit(d.slot,c.dataset.slot); else render();
+}
+
+/* =========================================================
+   전투 연출
+   ========================================================= */
+const cpos=u=>({left:(u.x/7*100)+"%", top:(u.y/8*100)+"%"});
+const ccen=(x,y)=>({left:((x+.5)/7*100)+"%", top:((y+.5)/8*100)+"%"});
+const SKILL_COLOR={"지":"#d9a94a","수":"#4ab0ff","화":"#ff6a3d","풍":"#5fe09a"};
+
+function startCombat(){
+  if(G.phase!=="plan") return;
+  closeInfo();
+  FIGHTS=setupCombats();
+  const f=FIGHTS[0];
+  CR={f, cb:f.cb, els:new Map(), acc:0, last:performance.now(), endAt:0};
+  const fx=$("fx"); fx.innerHTML="";
+  f.cb.units.forEach(u=>{
+    const el=document.createElement("div");
+    el.className="cu"+(u.side===1?" foe":"");
+    el.innerHTML=tokHTML({pid:u.pid,star:u.star,uid:0})+`<div class="hb"><i></i><s></s></div><div class="mb"><i></i></div>`;
+    Object.assign(el.style,cpos(u));
+    fx.appendChild(el); CR.els.set(u.id,el);
+  });
+  render();
+  const oppName = f.pve ? (G.stage===1?"야생 펫":"야생 펫 무리") : esc(f.b.name)+(f.ghost?" (분신)":"");
+  banner(`vs ${oppName}`, f.pve?"야생 라운드":"", "");
+  CR.raf=requestAnimationFrame(frame);
+}
+function banner(title, sub, cls, ms=1100){
+  const b=document.createElement("div"); b.className="banner "+cls;
+  b.innerHTML=`<b>${title}</b>${sub?`<span>${sub}</span>`:""}`;
+  $("board").appendChild(b); setTimeout(()=>b.remove(),ms);
+}
+function fxAt(cls, x, y, html, extra){
+  const d=document.createElement("div"); d.className=cls; if(html!=null) d.innerHTML=html;
+  Object.assign(d.style,ccen(x,y)); if(extra) Object.assign(d.style,extra);
+  $("fx").appendChild(d); setTimeout(()=>d.remove(),1000); return d;
+}
+function flash(el,cls,ms){ el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); setTimeout(()=>el.classList.remove(cls),ms); }
+function handleEvents(evs){
+  const U=id=>CR.cb.units[id-1];
+  evs.forEach(ev=>{
+    if(ev.type==="move"||ev.type==="leap"){
+      const u=U(ev.id), el=CR.els.get(ev.id);
+      if(ev.type==="leap"){ el.classList.add("leap"); setTimeout(()=>el.classList.remove("leap"),360); }
+      Object.assign(el.style,cpos(u));
+    } else if(ev.type==="atk"){
+      const u=U(ev.id), t=U(ev.tgt), el=CR.els.get(ev.id);
+      if(ev.ranged){
+        const pr=fxAt("proj",u.x,u.y,null,{"--pc":SKILL_COLOR[u.pet.el]});
+        requestAnimationFrame(()=>requestAnimationFrame(()=>Object.assign(pr.style,ccen(t.x,t.y))));
+        setTimeout(()=>pr.remove(),200);
+      } else {
+        el.style.setProperty("--dx",Math.sign(t.x-u.x)*8+"px"); el.style.setProperty("--dy",Math.sign(t.y-u.y)*8+"px");
+        flash(el,"atk",230);
+      }
+    } else if(ev.type==="dmg"){
+      const t=U(ev.tgt), el=CR.els.get(ev.tgt);
+      if(ev.kind==="miss") fxAt("dmg miss",t.x,t.y+(Math.random()*.4-.2),"회피");
+      else { flash(el,"hit",180); if(speed<4) fxAt("dmg "+(ev.kind==="crit"?"crit":ev.kind==="skill"?"skill":""),t.x+(Math.random()*.5-.25),t.y,ev.v); }
+    } else if(ev.type==="heal"){
+      const t=U(ev.tgt); if(ev.v>0) fxAt("dmg heal",t.x,t.y,"+"+ev.v);
+    } else if(ev.type==="cast"){
+      const u=U(ev.id), el=CR.els.get(ev.id);
+      el.style.setProperty("--castc",SKILL_COLOR[ev.el]); flash(el,"cast",460);
+      fxAt("skilltag",u.x,u.y-.35,SKILLS[ev.el].name,{"--castc":SKILL_COLOR[ev.el]});
+    } else if(ev.type==="boom"){
+      fxAt("burst",ev.x,ev.y,null,{"--bc":SKILL_COLOR["화"]});
+    } else if(ev.type==="death"){
+      CR.els.get(ev.id).classList.add("dead");
+    }
+  });
+}
+function updateBars(){
+  CR.cb.units.forEach(u=>{
+    const el=CR.els.get(u.id); if(!u.alive) return;
+    const hp=u.hp/u.maxHp, sh=Math.min(u.shield/u.maxHp,1-hp);
+    const hb=el.querySelector(".hb");
+    hb.firstChild.style.width=(hp*100)+"%";
+    hb.lastChild.style.left=(hp*100)+"%"; hb.lastChild.style.width=(Math.max(0,sh)*100)+"%";
+    el.querySelector(".mb i").style.width=(u.mana/u.maxMana*100)+"%";
+    el.classList.toggle("stun",u.stun>0);
+  });
+}
+function frame(ts){
+  if(!CR) return;
+  const dt=Math.min(0.1,(ts-CR.last)/1000); CR.last=ts;
+  CR.acc+=dt*speed;
+  let guard=0;
+  while(CR.acc>=STEP && !CR.cb.done && guard++<40){ CR.acc-=STEP; handleEvents(combatStep(CR.cb)); }
+  updateBars();
+  if(CR.cb.done){
+    if(!CR.endAt) CR.endAt=ts;
+    if(ts-CR.endAt>800/Math.min(speed,2)){ finishCombat(); return; }
+  }
+  CR.raf=requestAnimationFrame(frame);
+}
+function skipCombat(){
+  if(!CR) return;
+  runToEnd(CR.cb);
+  CR.cb.units.forEach(u=>{ const el=CR.els.get(u.id); Object.assign(el.style,cpos(u)); if(!u.alive) el.classList.add("dead"); });
+  updateBars();
+  cancelAnimationFrame(CR.raf); finishCombat();
+}
+function finishCombat(){
+  if(!CR || CR.finishing) return; CR.finishing=true;
+  const me=resolveRound(FIGHTS);
+  if(me.result==="win"){ sfx("win"); banner(me.pve?"사냥 성공":"승리!", me.drop?`전리품: ${me.drop.name}`:"", "win",1500); }
+  else if(me.result==="lose"){ sfx("lose"); banner("패배", `체력 -${me.dmg||0}`, "lose",1500); }
+  else { sfx("lose"); banner("무승부", `체력 -${me.dmg||0}`, "lose",1500); }
+  renderLobby();
+  setTimeout(()=>{
+    $("fx").innerHTML=""; CR=null; FIGHTS=null;
+    if(G.phase==="over"){ render(); showEnd(); return; }
+    beginPlanning(); render(); layout();
+    if(me.income){ const i=me.income; toast(`수입 +${i.base+i.interest+i.st+(me.result==="win"&&!me.pve?1:0)} (기본 ${i.base} · 이자 ${i.interest}${i.st?` · 연속 ${i.st}`:""})`); }
+  }, 1500);
+}
+
+/* =========================================================
+   시작 / 종료
+   ========================================================= */
+function loadRec(){ try{ return JSON.parse(localStorage.getItem(LS_REC))||{}; }catch(e){ return {}; } }
+function recText(r){ return r.games ? `지금까지 ${r.games}판 · 1등 ${r.wins||0}번 · 4등 안 ${r.top4||0}번 · 최고 ${r.best}등` : "첫 판이에요. 행운을 빌어요!"; }
+function startGame(){
+  const nick=($("nickIn").value||"").trim()||"나";
+  try{ localStorage.setItem(LS_NICK,nick); }catch(e){}
+  newGame(nick);
+  $("ovStart").classList.remove("show"); $("ovEnd").classList.remove("show");
+  selected=null; closeInfo();
+  beginPlanning(); render(); layout();
+  toast("상점에서 펫을 사서 판에 올려보세요");
+}
+function showEnd(){
+  const p=G.human.place||1;
+  const r=loadRec(); r.games=(r.games||0)+1; if(p===1) r.wins=(r.wins||0)+1; if(p<=4) r.top4=(r.top4||0)+1;
+  r.best=r.best?Math.min(r.best,p):p;
+  try{ localStorage.setItem(LS_REC,JSON.stringify(r)); }catch(e){}
+  $("endPlace").textContent=p+"등"; $("endPlace").className="place"+(p===1?" p1":p<=4?" top4":"");
+  $("endSub").textContent = p===1 ? "최후의 1인!" : p<=4 ? "상위권 마무리" : "아쉽게 탈락";
+  $("endDesc").textContent=`${G.human.outAt||roundLabel()} 까지 · 레벨 ${G.human.level}`;
+  const units=(G.human.finalUnits||allUnits(G.human).map(x=>x.u)).slice().sort((a,b)=>unitValue(b)-unitValue(a)).slice(0,6);
+  $("endPets").innerHTML=units.map(u=>`<img src="${SPRITE(PETS[u.pid].ic)}" alt="">`).join("");
+  $("endRec").textContent=recText(r);
+  $("ovEnd").classList.add("show");
+}
+
+/* ----- 부팅 ----- */
+function buildBoard(){
+  const b=$("board");
+  for(let r=0;r<8;r++) for(let c=0;c<7;c++){
+    const d=document.createElement("div");
+    d.className="cell "+(r<4?"foe":"mine")+((r+c)%2?" alt":"")+(r===4?" r0":"");
+    if(r>=4) d.dataset.slot=`b:${r-4},${c}`;
+    b.insertBefore(d,$("foeLabel"));
+  }
+  for(let i=0;i<BENCH;i++){ const d=document.createElement("div"); d.className="cell"; d.dataset.slot="n:"+i; $("bench").appendChild(d); }
+}
+function boot(){
+  buildBoard();
+  try{ $("nickIn").value=localStorage.getItem(LS_NICK)||""; }catch(e){}
+  $("recLbl").textContent=recText(loadRec());
+  $("ovPets").innerHTML=["포세이온","테라시온","이그니온","실프리온"].map(n=>`<img src="${SPRITE(PETS.find(p=>p.name===n).ic)}" alt="${n}">`).join("");
+  $("btnStart").onclick=startGame; $("btnAgain").onclick=()=>{ $("ovEnd").classList.remove("show"); $("ovStart").classList.add("show"); $("recLbl").textContent=recText(loadRec()); };
+  $("nickIn").addEventListener("keydown",e=>{ if(e.key==="Enter") startGame(); });
+  $("btnFight").onclick=startCombat; $("btnSkip").onclick=skipCombat;
+  $("btnXP").onclick=doXP; $("btnRoll").onclick=doRoll; $("btnLock").onclick=doLock;
+  $("btnSpeed").onclick=()=>{ speed = speed===1?2 : speed===2?4 : 1; $("btnSpeed").textContent="×"+speed; };
+  $("btnMute").onclick=()=>{ muted=!muted; $("btnMute").textContent=muted?"🔇":"🔊"; };
+  $("shop").addEventListener("click",e=>{ const c=e.target.closest(".card[data-slot]"); if(c) doBuy(+c.dataset.slot); });
+  if(matchMedia("(hover:hover)").matches){
+    $("shop").addEventListener("mouseover",e=>{ const c=e.target.closest(".card[data-slot]"); if(c&&!drag){ const pid=G.human.shop[+c.dataset.slot]; if(pid!=null) showUnitInfo(pid,1); } });
+    $("shop").addEventListener("mouseleave",()=>{ if(!selected) $("info").classList.remove("show"); });
+  }
+  $("traits").addEventListener("click",e=>{ const t=e.target.closest(".trait"); if(t){ selected={type:"trait"}; showTraitInfo(t.dataset.trait); } });
+  document.addEventListener("pointerdown",onDown);
+  document.addEventListener("pointermove",onMove);
+  document.addEventListener("pointerup",onUp);
+  document.addEventListener("pointercancel",()=>{ if(drag){ if(drag.ghost) drag.ghost.remove(); drag.tok.style.opacity=""; drag=null; $("shopbar").classList.remove("sell-zone"); } });
+  document.addEventListener("keydown",e=>{
+    if(!G || e.target.tagName==="INPUT") return;
+    const k=e.key.toLowerCase();
+    if(k==="d"||k==="ㅇ") doRoll();
+    else if(k==="f"||k==="ㄹ") doXP();
+    else if((k==="e"||k==="ㄷ") && selected && selected.type==="unit") doSell(selected.uid);
+    else if(k===" " && G.phase==="plan"){ e.preventDefault(); startCombat(); }
+    else if(k==="escape") closeInfo();
+  });
+  window.addEventListener("resize",layout);
+  layout(); setTimeout(layout,300);
+}
+boot();
+</script>
+<script src="nav.js"></script>
+</body></html>
