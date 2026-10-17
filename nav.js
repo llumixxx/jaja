@@ -22,7 +22,7 @@ const SA_NAV_ITEMS = [
   { href: "itemsim.html", icon: "📜", label: "아이템 시뮬레이터" },
   // match: 이 페이지들에 있을 때도 메뉴에서 '미니게임'이 선택된 것으로 표시됩니다.
   { href: "minigame.html", icon: "🎮", label: "미니게임",
-    match: ["jajarogue.html", "petsurvival.html"] },
+    match: ["jyajyarogue.html", "jajarogue.html", "petsurvival.html", "jajachess.html"] },
   // 새 메뉴를 추가하려면 아래처럼 한 줄만 더 넣으면 됩니다:
   // { href: "새파일명.html", icon: "✨", label: "메뉴이름" },
 ];
