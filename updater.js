@@ -2,7 +2,7 @@
    쟈쟈 데이터 갱신기 (수동)
    - 공홈(sa000001.com) 페이지를 연 상태에서 북마크를 누르면 실행돼요
    - 브라우저가 공홈 데이터를 받아서 깃허브(llumixxx/jaja)에 커밋 1번으로 저장
-   - 저장 대상: pet_data.json · pet_skin.csv · itemset6.txt · magic.txt · pet_ranking_data.json · sprites/*.gif(새 펫만)
+   - 저장 대상: pet_data.json · pet_skin.csv · pet_trans_data.json(1환생) · itemset6.txt · magic.txt · pet_ranking_data.json · sprites/*.gif(새 펫만)
                 maps/…(maps.html 에 적힌 공홈 지도 이미지 사본) · maps.html(사본 쓰게 한 줄 추가)
    ════════════════════════════════════════════════════════════════ */
 (async () => {
@@ -97,6 +97,14 @@
         if ($("juPet").checked) {
           files["pet_data.json"] = pd;
           try { files["pet_skin.csv"] = await getBytes(`${SA}/sa2/info/data/SA_PET_IMAGE.csv`); } catch (e) { }
+          // 1환생 정보 (펫 id → 환생 시 늘어나는 계수 h/a/d/s)
+          for (const u of [`${SA}/sa2/info/api/pet_trans_data.php`, `${SA}/sa2/info/pet_trans_data.php`]) {
+            try {
+              const tb = await getBytes(u);
+              const tj = JSON.parse(new TextDecoder().decode(tb));
+              if (tj && tj.ok && tj.rows) { files["pet_trans_data.json"] = tb; log(`♻️ 1환생 정보 ${tj.count || Object.keys(tj.rows).length}마리`); break; }
+            } catch (e) { }
+          }
           log(`🐾 펫 데이터 ${pets.length}마리`);
         }
       }
