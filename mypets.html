@@ -323,6 +323,13 @@ border-radius:8px;font-family:'Nunito',sans-serif;font-weight:900;font-size:15px
 .pic-badge{font-size:10px;padding:3px 9px;border-radius:20px;font-weight:800;}
 .pb-mount{background:#e3fbef;color:#3aa876;} .pb-nomount{background:var(--s1);color:var(--t4);}
 .pic-badge-actions{display:flex;gap:4px;align-items:center;}
+/* ♻️ 1환생 */
+.pic-trans{font-size:10px;font-weight:800;padding:3px 8px;border-radius:20px;cursor:pointer;
+  background:#fff4dc;color:#c27a00;border:1.5px dashed #f3c86b;}
+.pic-trans.on{background:#ffb400;color:#fff;border:1.5px solid #e09a00;}
+.pt-trans-mark{font-size:10px;color:#c27a00;font-weight:800;margin-left:4px;}
+[data-theme=dark] .pic-trans{background:#3a2c10;color:#ffcf6b;border-color:#6b5320;}
+[data-theme=dark] .pic-trans.on{background:#c98a00;color:#fff;}
 .pic-reset,.pic-del{background:none;border:1.5px solid var(--border);color:var(--t3);cursor:pointer;font-size:11px;
 font-weight:700;padding:5px 9px;border-radius:10px;transition:color .15s,border-color .15s,background .15s;}
 .pic-reset:hover{color:var(--a1);border-color:var(--a1);}
@@ -518,10 +525,32 @@ function calcStats(r){
   const growth = disp(ph*B/10000, pa*B/10000, pd*B/10000, ps*B/10000);
   return { init, growth, totalGrowth: growth.a+growth.d+growth.s };
 }
+/* ♻️ 1환생: 계수에 환생치를 더하고 등급(B)은 원래 그대로 — 공홈 1환생정보와 동일 */
+let TRANS = {};
+async function loadTrans(){
+  try{
+    const r = await fetch("./pet_trans_data.json?ts=" + Date.now(), {cache:"no-store"});
+    if(!r.ok) return;
+    const d = await r.json();
+    TRANS = d.rows || {};
+    render();
+  }catch(e){}
+}
+function transOf(p){ return TRANS[String(p.id)] || null; }
+function calcStatsFor(p, entry){
+  const t = entry && entry.trans ? transOf(p) : null;
+  if(!t) return calcStats(p);
+  const B = rankInfoB(num(p.h0)+num(p.a0)+num(p.d0)+num(p.s0));
+  const lv = num(p.lvup), ip = num(p.initPct);
+  const ph=num(p.h0)+lv+num(t.h), pa=num(p.a0)+lv+num(t.a), pd=num(p.d0)+lv+num(t.d), ps=num(p.s0)+lv+num(t.s);
+  const init = disp(ip*ph/100, ip*pa/100, ip*pd/100, ip*ps/100);
+  const growth = disp(ph*B/10000, pa*B/10000, pd*B/10000, ps*B/10000);
+  return { init, growth, totalGrowth: growth.a+growth.d+growth.s };
+}
 /* 레벨별 계산치(공식대로) + 사용자가 직접입력(override)한 값이 있으면 그 값을 현재 능력치로 쓰고,
    성장치도 (직접입력값 / 계산치) 비율만큼 같이 스케일해서 보여줌 */
 function calcDisplay(p, entry){
-  const st = calcStats(p);
+  const st = calcStatsFor(p, entry);
   const lv = Math.max(1, num(entry.level)||1);
   const calc = {
     a: st.init.a + st.growth.a*(lv-1),
@@ -1136,6 +1165,7 @@ function cardHTML(entry, idx, p, disp){
     <div class="pic-stat-list">${statsHTML}</div>
     <div class="pic-badge-row">
       <span class="pic-badge ${mountText(p.mount)==='가능'?'pb-mount':'pb-nomount'}">${mountText(p.mount)==='가능'?'탑승가능':'탑승불가'}</span>
+      ${transOf(p) ? `<button type="button" class="pic-trans ${entry.trans?'on':''}" data-idx="${idx}" title="1환생 했으면 켜기">♻️ ${entry.trans?'1환생 완료':'1환생 가능'}</button>` : ""}
       <div class="pic-badge-actions">
         <button class="pic-reset" data-idx="${idx}" title="직접입력값 초기화">↺ 초기화</button>
         <button class="pic-del" data-idx="${idx}">🗑 삭제</button>
@@ -1149,7 +1179,7 @@ function tableRowHTML(entry, idx, p, disp){
   const name = normalizedName(p);
   return `
   <tr data-idx="${idx}">
-    <td><div class="pt-name-cell">${imgTag(p.imageCode)}<div><div class="pt-name">${name}</div><div class="pt-lv">Lv.${entry.level}</div></div></div></td>
+    <td><div class="pt-name-cell">${imgTag(p.imageCode)}<div><div class="pt-name">${name}${entry.trans && transOf(p) ? '<span class="pt-trans-mark">♻️1환생</span>' : ''}</div><div class="pt-lv">Lv.${entry.level}</div></div></div></td>
     <td><div class="pt-attr-cell">${attrChipsHTML(p)}</div></td>
     <td class="pt-stat pt-stat-atk">${int0(disp.cur.a)}</td>
     <td class="pt-stat pt-stat-def">${int0(disp.cur.d)}</td>
@@ -1190,6 +1220,16 @@ function render(){
   renderValSliders();
   renderList();
 }
+document.getElementById("grid").addEventListener("click", e=>{
+  const tb = e.target.closest(".pic-trans");
+  if(!tb) return;
+  const idx = parseInt(tb.dataset.idx);
+  if(!myPets[idx]) return;
+  myPets[idx].trans = !myPets[idx].trans;
+  myPets[idx].ov = {};                      // 계산이 바뀌니까 직접입력값은 초기화
+  saveMyPets();
+  render();
+});
 document.getElementById("grid").addEventListener("click", e=>{
   const delBtn = e.target.closest(".pt-del");
   if(delBtn){
@@ -1300,6 +1340,7 @@ loadMyPets();
 renderAttrSliders();
 render();
 loadLive();
+loadTrans();
 </script>
 </body>
 </html>
