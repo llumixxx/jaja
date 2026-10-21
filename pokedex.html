@@ -206,6 +206,16 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--t1);
 .pic-badge-row{display:flex;gap:4px;margin-top:7px;}
 .pic-badge{font-size:9px;padding:2px 7px;border-radius:20px;font-weight:800;}
 .pb-mount{background:#e3fbef;color:#3aa876;} .pb-nomount{background:var(--s1);color:var(--t4);}
+/* ♻️ 1환생 */
+.pb-trans{background:#fff4dc;color:#c27a00;border:1px solid #f3c86b;}
+.pic-trans-label{color:#c27a00!important;}
+.pic-stat-grid-trans .pic-stat-item{background:#fff8ea;}
+.tr-plus{font-size:8px;color:#d08a00;font-weight:800;margin-left:2px;}
+.pt-trans{font-size:10px;color:#c27a00;font-weight:800;}
+.modal-trans .modal-stat-box{background:#fff8ea;border-color:#f3d796;}
+.modal-trans .tr-plus{font-size:11px;}
+[data-theme=dark] .pb-trans{background:#3a2c10;color:#ffcf6b;border-color:#6b5320;}
+[data-theme=dark] .pic-stat-grid-trans .pic-stat-item,[data-theme=dark] .modal-trans .modal-stat-box{background:#2c2414;border-color:#5a4520;}
 
 /* ── 텍스트형 보기 (표) ── */
 #grid.text-view{display:block;}
@@ -431,6 +441,16 @@ footer{text-align:center;padding:30px;color:var(--t3);font-size:11px;font-family
         </div>
         <div class="modal-total"><span class="l">S급 총성장률</span><span class="v" id="mgTotal">—</span></div>
       </div>
+      <div class="modal-section modal-trans" id="transSection" style="display:none;">
+        <div class="modal-section-title">♻️ 1환생 성장률</div>
+        <div class="modal-stat-grid">
+          <div class="modal-stat-box stat-atk"><span class="modal-stat-label">ATK 공격</span><span class="modal-stat-val" id="mtAtk">—</span></div>
+          <div class="modal-stat-box stat-def"><span class="modal-stat-label">DEF 방어</span><span class="modal-stat-val" id="mtDef">—</span></div>
+          <div class="modal-stat-box stat-agi"><span class="modal-stat-label">AGI 순발</span><span class="modal-stat-val" id="mtAgi">—</span></div>
+          <div class="modal-stat-box stat-hp"><span class="modal-stat-label">HP 내구</span><span class="modal-stat-val" id="mtHp">—</span></div>
+        </div>
+        <div class="modal-total"><span class="l">1환생 총성장률</span><span class="v" id="mtTotal">—</span></div>
+      </div>
       <div class="modal-section">
         <div class="modal-section-title">초기치 <span style="font-size:10px;color:var(--t3);font-weight:400;">S급(8등급) 예시 Lv.1</span></div>
         <div class="modal-stat-grid">
@@ -473,6 +493,28 @@ function calcStats(r){
   const growth = disp(ph*B/10000, pa*B/10000, pd*B/10000, ps*B/10000);
   return { init, growth, totalGrowth: growth.a+growth.d+growth.s };
 }
+/* ♻️ 1환생: 계수에 환생치를 더하고 등급(B)은 원래 그대로 — 공홈 1환생정보와 동일 */
+let TRANS = {};
+async function loadTrans(){
+  try{
+    const r = await fetch("./pet_trans_data.json?ts=" + Date.now(), {cache:"no-store"});
+    if(!r.ok) return;
+    const d = await r.json();
+    TRANS = d.rows || {};
+    render();
+  }catch(e){}
+}
+function transOf(r){ return TRANS[String(r.id)] || null; }
+function calcTrans(r){
+  const t = transOf(r); if(!t) return null;
+  const B = rankInfoB(num(r.h0)+num(r.a0)+num(r.d0)+num(r.s0));
+  const lv = num(r.lvup);
+  const ph=num(r.h0)+lv+num(t.h), pa=num(r.a0)+lv+num(t.a), pd=num(r.d0)+lv+num(t.d), ps=num(r.s0)+lv+num(t.s);
+  const growth = disp(ph*B/10000, pa*B/10000, pd*B/10000, ps*B/10000);
+  return { growth, totalGrowth: growth.a+growth.d+growth.s };
+}
+function r3(n){ n=Number(n); return isFinite(n) ? n.toFixed(3) : "-"; }   /* 1환생 값은 공홈처럼 반올림 */
+function plusTag(after, before){ const d = after-before; return d > 0.0005 ? `<span class="tr-plus">+${r3(d)}</span>` : ""; }
 function dropDecimalInt(v){ v=Number(v); return isFinite(v)?Math.floor(v):0; }
 /* 실제 존재 가능한 8등급(환각) 초기치 예시 — 롤 전부 +2, 배분치 10포인트를 4스탯에 최대한 고르게 분배(3,3,2,2) */
 function sGradeInit(r){
@@ -765,6 +807,14 @@ function cardHTML(p, idx){
       <div class="pic-stat-item stat-def"><span>🛡방어</span><b>${cut2(st.growth.d)}</b></div>
       <div class="pic-stat-item stat-agi"><span>💨순발</span><b>${cut2(st.growth.s)}</b></div>
     </div>
+    ${(()=>{ const tr = calcTrans(p); if(!tr) return ""; const g=tr.growth, o=st.growth; return `
+    <div class="pic-stat-label pic-trans-label">♻️ 1환생</div>
+    <div class="pic-stat-grid pic-stat-grid-trans">
+      <div class="pic-stat-item stat-hp"><span>❤내구</span><b>${r3(g.h)}${plusTag(g.h,o.h)}</b></div>
+      <div class="pic-stat-item stat-atk"><span>⚔공격</span><b>${r3(g.a)}${plusTag(g.a,o.a)}</b></div>
+      <div class="pic-stat-item stat-def"><span>🛡방어</span><b>${r3(g.d)}${plusTag(g.d,o.d)}</b></div>
+      <div class="pic-stat-item stat-agi"><span>💨순발</span><b>${r3(g.s)}${plusTag(g.s,o.s)}</b></div>
+    </div>`; })()}
     <div class="pic-stat-label">S초기치 <span class="pic-stat-label-sub">Lv.1</span></div>
     <div class="pic-stat-grid pic-stat-grid-init">
       <div class="pic-stat-item stat-hp"><span>❤내구</span><b>${cut2(st.init.h)}</b></div>
@@ -772,9 +822,10 @@ function cardHTML(p, idx){
       <div class="pic-stat-item stat-def"><span>🛡방어</span><b>${cut2(st.init.d)}</b></div>
       <div class="pic-stat-item stat-agi"><span>💨순발</span><b>${cut2(st.init.s)}</b></div>
     </div>
-    <div class="pic-mini"><span>총성장 <b>${cut2(st.totalGrowth)}</b></span><span>${rarityText(p.rarity).replace("등급","").replace("(돈펫)","")}</span></div>
+    <div class="pic-mini"><span>총성장 <b>${cut2(st.totalGrowth)}</b>${calcTrans(p)?` → <b style="color:#c27a00">${r3(calcTrans(p).totalGrowth)}</b>`:""}</span><span>${rarityText(p.rarity).replace("등급","").replace("(돈펫)","")}</span></div>
     <div class="pic-badge-row">
       <span class="pic-badge ${mountText(p.mount)==='가능'?'pb-mount':'pb-nomount'}">${mountText(p.mount)==='가능'?'탑승가능':'탑승불가'}</span>
+      ${transOf(p)?'<span class="pic-badge pb-trans">♻️ 1환생 가능</span>':''}
     </div>
   </div>`;
 }
@@ -790,7 +841,7 @@ function tableRowHTML(p, idx){
     <td class="pt-stat pt-stat-atk">${cut2(st.growth.a)}</td>
     <td class="pt-stat pt-stat-def">${cut2(st.growth.d)}</td>
     <td class="pt-stat pt-stat-agi">${cut2(st.growth.s)}</td>
-    <td class="pt-total">${cut2(st.totalGrowth)}</td>
+    <td class="pt-total">${cut2(st.totalGrowth)}${calcTrans(p)?`<div class="pt-trans">♻️ ${r3(calcTrans(p).totalGrowth)}</div>`:""}</td>
     <td><span class="pt-mount ${mountText(p.mount)==='가능'?'pt-mount-y':'pt-mount-n'}">${mountText(p.mount)==='가능'?'탑승가능':'탑승불가'}</span></td>
   </tr>`;
 }
@@ -830,7 +881,8 @@ function openModal(idx){
   document.getElementById("modalName").textContent = name;
   document.getElementById("modalImgBox").innerHTML = imgTag(p.imageCode);
   document.getElementById("modalBadges").innerHTML =
-    `<span class="modal-badge">${rarityText(p.rarity)}</span><span class="modal-badge">${mountText(p.mount)==='가능'?'탑승가능':'탑승불가'}</span><span class="modal-badge">${isOldPet(p)?'구펫':'신펫'}</span>`;
+    `<span class="modal-badge">${rarityText(p.rarity)}</span><span class="modal-badge">${mountText(p.mount)==='가능'?'탑승가능':'탑승불가'}</span><span class="modal-badge">${isOldPet(p)?'구펫':'신펫'}</span>` +
+    (transOf(p) ? `<span class="modal-badge" style="color:#c27a00;border-color:#f3c86b">♻️ 1환생 가능</span>` : "");
   document.getElementById("modalAttrs").innerHTML = attrChipsHTML(p, false) || '<span style="color:var(--t3);font-size:12px;">속성 없음</span>';
   document.getElementById("modalObtain").textContent = p.how || "정보 없음";
   document.getElementById("mgAtk").textContent = cut2(st.growth.a);
@@ -838,6 +890,16 @@ function openModal(idx){
   document.getElementById("mgAgi").textContent = cut2(st.growth.s);
   document.getElementById("mgHp").textContent = cut2(st.growth.h);
   document.getElementById("mgTotal").textContent = cut2(st.totalGrowth);
+  const tr = calcTrans(p);
+  document.getElementById("transSection").style.display = tr ? "block" : "none";
+  if(tr){
+    const g = tr.growth, o = st.growth;
+    document.getElementById("mtAtk").innerHTML = r3(g.a) + plusTag(g.a, o.a);
+    document.getElementById("mtDef").innerHTML = r3(g.d) + plusTag(g.d, o.d);
+    document.getElementById("mtAgi").innerHTML = r3(g.s) + plusTag(g.s, o.s);
+    document.getElementById("mtHp").innerHTML  = r3(g.h) + plusTag(g.h, o.h);
+    document.getElementById("mtTotal").textContent = cut2(st.totalGrowth) + " → " + r3(tr.totalGrowth);
+  }
   document.getElementById("miAtk").textContent = cut2(st.init.a);
   document.getElementById("miDef").textContent = cut2(st.init.d);
   document.getElementById("miAgi").textContent = cut2(st.init.s);
@@ -942,6 +1004,7 @@ renderAttrSliders();
 render();
 loadLive();
 loadSkinData();
+loadTrans();
 </script>
 </body>
 </html>
