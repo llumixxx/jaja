@@ -208,6 +208,13 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--t1);
 .pb-mount{background:#e3fbef;color:#3aa876;} .pb-nomount{background:var(--s1);color:var(--t4);}
 /* ♻️ 1환생 */
 .pb-trans{background:#fff4dc;color:#c27a00;border:1px solid #f3c86b;}
+.trans-toggle{width:100%;margin-top:8px;padding:9px 12px;border-radius:12px;cursor:pointer;font-weight:800;font-size:13px;
+  background:var(--s1);color:#c27a00;border:1.5px dashed #f3c86b;font-family:inherit;}
+.trans-toggle.on{background:#ffb400;color:#fff;border:1.5px solid #e09a00;}
+.tr-mark{font-size:9px;font-weight:800;color:#c27a00;background:#fff4dc;border-radius:10px;padding:1px 6px;margin-left:5px;vertical-align:middle;}
+[data-theme=dark] .trans-toggle{color:#ffcf6b;border-color:#6b5320;}
+[data-theme=dark] .trans-toggle.on{background:#c98a00;color:#fff;}
+[data-theme=dark] .tr-mark{background:#3a2c10;color:#ffcf6b;}
 .pic-trans-label{color:#c27a00!important;}
 .pic-stat-grid-trans .pic-stat-item{background:#fff8ea;}
 .tr-plus{font-size:8px;color:#d08a00;font-weight:800;margin-left:2px;}
@@ -359,8 +366,10 @@ footer{text-align:center;padding:30px;color:var(--t3);font-size:11px;font-family
       <option value="def">방성장 높은순</option>
       <option value="dex">순성장 높은순</option>
       <option value="hp">피성장 높은순</option>
+      <option value="total">총성장 높은순</option>
       <option value="name">이름순</option>
     </select>
+    <button type="button" id="transBtn" class="trans-toggle">♻️ 1환생 수치로 보기</button>
 
     <div class="f-section">보기 방식</div>
     <div class="f-seg" id="viewSeg" style="grid-template-columns:1fr 1fr;">
@@ -513,6 +522,14 @@ function calcTrans(r){
   const growth = disp(ph*B/10000, pa*B/10000, pd*B/10000, ps*B/10000);
   return { growth, totalGrowth: growth.a+growth.d+growth.s };
 }
+/* ♻️ 1환생 보기 버튼이 켜져 있으면, 환생 가능한 펫은 1환생 수치로 */
+function statsOf(p){
+  const base = calcStats(p);
+  if(!state.trans) return base;
+  const tr = calcTrans(p);
+  return tr ? { init: base.init, growth: tr.growth, totalGrowth: tr.totalGrowth, trans: true } : base;
+}
+function gfmt(st, v){ return st.trans ? r3(v) : cut2(v); }
 function r3(n){ n=Number(n); return isFinite(n) ? n.toFixed(3) : "-"; }   /* 1환생 값은 공홈처럼 반올림 */
 function plusTag(after, before){ const d = after-before; return d > 0.0005 ? `<span class="tr-plus">+${r3(d)}</span>` : ""; }
 function dropDecimalInt(v){ v=Number(v); return isFinite(v)?Math.floor(v):0; }
@@ -646,7 +663,7 @@ function attrChipsHTML(p, small){
   ).join("");
 }
 
-let state = { q:"", attr:"all", how:"ALL", sort:"default", shown:60, view:"card", attrVal:{earth:0,water:0,fire:0,wind:0}, attrMatchMode:"exact" };
+let state = { trans:false, q:"", attr:"all", how:"ALL", sort:"default", shown:60, view:"card", attrVal:{earth:0,water:0,fire:0,wind:0}, attrMatchMode:"exact" };
 
 const sidebar = document.getElementById("sidebar");
 const toggleBtn = document.getElementById("toggleBtn");
@@ -687,8 +704,9 @@ function sortList(list){
   const s = state.sort;
   if(s === "default") return list;
   if(s === "name") return [...list].sort((a,b)=>normalizedName(a).localeCompare(normalizedName(b),'ko'));
+  if(s === "total") return [...list].sort((a,b)=> statsOf(b).totalGrowth - statsOf(a).totalGrowth);
   const key = s==="atk"?"a":s==="def"?"d":s==="dex"?"s":"h";
-  return [...list].sort((a,b)=> calcStats(b).growth[key] - calcStats(a).growth[key]);
+  return [...list].sort((a,b)=> statsOf(b).growth[key] - statsOf(a).growth[key]);
 }
 function getFiltered(){ return sortList(PETS.filter(matchesFilter)); }
 
@@ -791,30 +809,22 @@ function renderAttrSliders(){
 
 function cardHTML(p, idx){
   const name = normalizedName(p);
-  const st = calcStats(p);
+  const st = statsOf(p);
   return `
   <div class="pet-info-card" data-idx="${idx}">
     <div class="pic-img-wrap">${imgTag(p.imageCode)}</div>
     <div class="pic-name-wrap">
-      <div class="pic-name">${name}</div>
+      <div class="pic-name">${name}${st.trans?'<span class="tr-mark">♻️1환생</span>':''}</div>
       <div class="pic-how">${p.how||""}</div>
     </div>
     <div class="pic-attr-row">${attrChipsHTML(p, true)}</div>
     <div class="pic-stat-label">성장치</div>
     <div class="pic-stat-grid">
-      <div class="pic-stat-item stat-hp"><span>❤내구</span><b>${cut2(st.growth.h)}</b></div>
-      <div class="pic-stat-item stat-atk"><span>⚔공격</span><b>${cut2(st.growth.a)}</b></div>
-      <div class="pic-stat-item stat-def"><span>🛡방어</span><b>${cut2(st.growth.d)}</b></div>
-      <div class="pic-stat-item stat-agi"><span>💨순발</span><b>${cut2(st.growth.s)}</b></div>
+      <div class="pic-stat-item stat-hp"><span>❤내구</span><b>${gfmt(st, st.growth.h)}</b></div>
+      <div class="pic-stat-item stat-atk"><span>⚔공격</span><b>${gfmt(st, st.growth.a)}</b></div>
+      <div class="pic-stat-item stat-def"><span>🛡방어</span><b>${gfmt(st, st.growth.d)}</b></div>
+      <div class="pic-stat-item stat-agi"><span>💨순발</span><b>${gfmt(st, st.growth.s)}</b></div>
     </div>
-    ${(()=>{ const tr = calcTrans(p); if(!tr) return ""; const g=tr.growth, o=st.growth; return `
-    <div class="pic-stat-label pic-trans-label">♻️ 1환생</div>
-    <div class="pic-stat-grid pic-stat-grid-trans">
-      <div class="pic-stat-item stat-hp"><span>❤내구</span><b>${r3(g.h)}${plusTag(g.h,o.h)}</b></div>
-      <div class="pic-stat-item stat-atk"><span>⚔공격</span><b>${r3(g.a)}${plusTag(g.a,o.a)}</b></div>
-      <div class="pic-stat-item stat-def"><span>🛡방어</span><b>${r3(g.d)}${plusTag(g.d,o.d)}</b></div>
-      <div class="pic-stat-item stat-agi"><span>💨순발</span><b>${r3(g.s)}${plusTag(g.s,o.s)}</b></div>
-    </div>`; })()}
     <div class="pic-stat-label">S초기치 <span class="pic-stat-label-sub">Lv.1</span></div>
     <div class="pic-stat-grid pic-stat-grid-init">
       <div class="pic-stat-item stat-hp"><span>❤내구</span><b>${cut2(st.init.h)}</b></div>
@@ -822,26 +832,25 @@ function cardHTML(p, idx){
       <div class="pic-stat-item stat-def"><span>🛡방어</span><b>${cut2(st.init.d)}</b></div>
       <div class="pic-stat-item stat-agi"><span>💨순발</span><b>${cut2(st.init.s)}</b></div>
     </div>
-    <div class="pic-mini"><span>총성장 <b>${cut2(st.totalGrowth)}</b>${calcTrans(p)?` → <b style="color:#c27a00">${r3(calcTrans(p).totalGrowth)}</b>`:""}</span><span>${rarityText(p.rarity).replace("등급","").replace("(돈펫)","")}</span></div>
+    <div class="pic-mini"><span>총성장 <b>${gfmt(st, st.totalGrowth)}</b></span><span>${rarityText(p.rarity).replace("등급","").replace("(돈펫)","")}</span></div>
     <div class="pic-badge-row">
       <span class="pic-badge ${mountText(p.mount)==='가능'?'pb-mount':'pb-nomount'}">${mountText(p.mount)==='가능'?'탑승가능':'탑승불가'}</span>
-      ${transOf(p)?'<span class="pic-badge pb-trans">♻️ 1환생 가능</span>':''}
     </div>
   </div>`;
 }
 
 function tableRowHTML(p, idx){
   const name = normalizedName(p);
-  const st = calcStats(p);
+  const st = statsOf(p);
   return `
   <tr class="pet-info-card" data-idx="${idx}">
-    <td><div class="pt-name">${name}</div><div class="pt-how">${p.how||""}</div></td>
+    <td><div class="pt-name">${name}${st.trans?'<span class="tr-mark">♻️</span>':''}</div><div class="pt-how">${p.how||""}</div></td>
     <td><div class="pt-attr-cell">${attrChipsHTML(p, true).replace(/pic-attr-chip/g,"pt-attr-chip")}</div></td>
-    <td class="pt-stat pt-stat-hp">${cut2(st.growth.h)}</td>
-    <td class="pt-stat pt-stat-atk">${cut2(st.growth.a)}</td>
-    <td class="pt-stat pt-stat-def">${cut2(st.growth.d)}</td>
-    <td class="pt-stat pt-stat-agi">${cut2(st.growth.s)}</td>
-    <td class="pt-total">${cut2(st.totalGrowth)}${calcTrans(p)?`<div class="pt-trans">♻️ ${r3(calcTrans(p).totalGrowth)}</div>`:""}</td>
+    <td class="pt-stat pt-stat-hp">${gfmt(st, st.growth.h)}</td>
+    <td class="pt-stat pt-stat-atk">${gfmt(st, st.growth.a)}</td>
+    <td class="pt-stat pt-stat-def">${gfmt(st, st.growth.d)}</td>
+    <td class="pt-stat pt-stat-agi">${gfmt(st, st.growth.s)}</td>
+    <td class="pt-total">${gfmt(st, st.totalGrowth)}</td>
     <td><span class="pt-mount ${mountText(p.mount)==='가능'?'pt-mount-y':'pt-mount-n'}">${mountText(p.mount)==='가능'?'탑승가능':'탑승불가'}</span></td>
   </tr>`;
 }
@@ -938,6 +947,12 @@ function openModal(idx){
 
 document.getElementById("search").addEventListener("input", e=>{ state.q=e.target.value.trim(); state.shown=60; render(); });
 document.getElementById("sortSel").addEventListener("change", e=>{ state.sort=e.target.value; state.shown=60; render(); });
+document.getElementById("transBtn").addEventListener("click", e=>{
+  state.trans = !state.trans;
+  e.currentTarget.classList.toggle("on", state.trans);
+  e.currentTarget.textContent = state.trans ? "♻️ 1환생 수치로 보는 중 (끄기)" : "♻️ 1환생 수치로 보기";
+  render();
+});
 document.getElementById("attrModeSwitch").addEventListener("change", e=>{
   state.attrMatchMode = e.target.checked ? "atleast" : "exact";
   state.shown=60; render();
