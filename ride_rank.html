@@ -54,9 +54,11 @@ button{cursor:pointer}
 .sitemenu a.on{background:var(--acc);border-color:var(--acc);color:#fff}
 
 /* ===== 히어로 (쇼룸) ===== */
-.hero{position:relative;overflow:hidden;scroll-margin-top:56px;background:linear-gradient(180deg,var(--stage-top) 0%,var(--stage-bot) 100%);border-bottom:1px solid var(--line)}
-.ghost{position:absolute;right:max(2vw,calc(50% - 540px));top:50%;transform:translateY(-54%);font-family:var(--num);font-weight:700;font-size:clamp(220px,34vw,460px);line-height:.8;color:var(--ink);opacity:.055;pointer-events:none;user-select:none;letter-spacing:-.02em}
-.hero-in{position:relative;max-width:1120px;margin:0 auto;padding:44px 18px 30px;display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:20px;align-items:center}
+.hero{--bg:#0e1216;--panel:#161c22;--panel2:#1c242c;--ink:#eef2f6;--ink2:#a7b3bf;--ink3:#8995a2;--line:#2b3540;--acc:#6ea6f5;--atk:#ff8a5c;--def:#6cb0ff;--spd:#4fd1a0;
+  position:relative;overflow:hidden;scroll-margin-top:56px;color:var(--ink);
+  background:radial-gradient(ellipse 90% 80% at 50% -20%,#303c49 0%,#141b23 50%,#090c10 100%);border-bottom:1px solid #000}
+.ghost{position:absolute;right:max(2vw,calc(50% - 540px));top:50%;transform:translateY(-54%);font-family:var(--num);font-weight:700;font-size:clamp(220px,34vw,460px);line-height:.8;color:var(--ink);opacity:.05;pointer-events:none;user-select:none;letter-spacing:-.02em}
+.hero-in{position:relative;max-width:1120px;margin:0 auto;padding:44px 18px 26px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:20px;align-items:center}
 .hero-rank{font-size:15px;font-weight:700;color:var(--acc)}
 .hero-rank b{font-family:var(--num);font-size:30px;font-weight:700;color:var(--ink);margin:0 3px 0 6px}
 h1{font-size:clamp(40px,7vw,76px);font-weight:900;letter-spacing:-.04em;line-height:1.08;margin:6px 0 8px;word-break:keep-all}
@@ -64,29 +66,51 @@ h1{font-size:clamp(40px,7vw,76px);font-weight:900;letter-spacing:-.04em;line-hei
 .tag{display:inline-block;margin-left:8px;vertical-align:middle;font-size:12px;font-weight:700;color:#8a5a00;background:#ffe9b8;border-radius:5px;padding:2px 8px;letter-spacing:0}
 [data-theme="dark"] .tag{background:#4a3a12;color:#ffd98a}
 .ranks{display:grid;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:6px 8px;margin-top:22px;max-width:600px}
-.rk{background:rgba(255,255,255,.55);border:1px solid var(--line);border-radius:9px;padding:6px 10px;text-align:left;display:flex;justify-content:space-between;align-items:baseline;gap:8px;white-space:nowrap}
-[data-theme="dark"] .rk{background:rgba(255,255,255,.04)}
+.rk{background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:9px;padding:6px 10px;text-align:left;display:flex;justify-content:space-between;align-items:baseline;gap:8px;white-space:nowrap}
 .rk:hover{border-color:var(--ink3)}
-.rk.cur{border-color:var(--acc);background:var(--panel)}
+.rk.cur{border-color:var(--acc);background:rgba(110,166,245,.14)}
 .rk .l{font-size:12px;font-weight:700;color:var(--ink2);white-space:nowrap}
 .rk .n{font-family:var(--num);font-size:20px;font-weight:700;line-height:1;white-space:nowrap}
 .rk.cur .l{color:var(--acc)}
-.stage{position:relative;height:300px;display:flex;align-items:flex-end;justify-content:center}
-.stage .floor{position:absolute;bottom:18px;left:50%;width:62%;height:26px;transform:translateX(-50%);background:radial-gradient(ellipse at center,var(--floor) 0%,transparent 70%)}
-.stage img{position:relative;width:min(300px,78%);height:270px;object-fit:contain;image-rendering:pixelated;margin-bottom:18px}
+.hrst{margin-top:12px;font-size:13px}
 
-/* ===== 스펙 스트립 ===== */
-.specs{position:relative;max-width:1120px;margin:0 auto;padding:0 18px 36px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
-.sp{background:var(--panel);border:1px solid var(--line);border-top:3px solid var(--line);border-radius:4px 4px 10px 10px;padding:14px 18px 16px}
+/* 회전 전시대 */
+.stage{position:relative;height:340px;display:flex;align-items:flex-end;justify-content:center;touch-action:pan-y;cursor:grab;-webkit-user-select:none;user-select:none}
+.stage.grab{cursor:grabbing}
+.spot{position:absolute;inset:-60px 0 0;background:conic-gradient(from 180deg at 50% 0%,transparent 163deg,rgba(255,255,255,.13) 180deg,transparent 197deg);pointer-events:none}
+.plat{position:absolute;left:50%;bottom:8px;width:min(520px,98%);height:132px;transform:translateX(-50%);perspective:640px;pointer-events:none}
+.disc{position:absolute;left:0;top:50%;width:100%;aspect-ratio:1;border-radius:50%;transform:translateY(-50%) rotateX(76deg);background:radial-gradient(circle at 50% 50%,#3a4654 0%,#202831 38%,#12171d 72%,#0b0e12 100%);box-shadow:0 0 0 3px rgba(255,255,255,.07),0 0 90px 10px rgba(110,166,245,.2)}
+.disc::before{content:"";position:absolute;inset:8%;border-radius:50%;border:2px solid rgba(255,255,255,.14)}
+.disc::after{content:"";position:absolute;inset:0;border-radius:50%;background:repeating-conic-gradient(from calc(var(--ang,0)*1deg),rgba(255,255,255,.6) 0 .8deg,transparent .8deg 7.5deg);-webkit-mask:radial-gradient(circle,transparent 66%,#000 67%,#000 95%,transparent 96%);mask:radial-gradient(circle,transparent 66%,#000 67%,#000 95%,transparent 96%)}
+.pet{position:relative;z-index:2;margin-bottom:42px;transform-origin:50% 100%;pointer-events:none}
+.pet img{display:block;width:min(260px,70vw);height:240px;object-fit:contain;image-rendering:pixelated;filter:drop-shadow(0 16px 12px rgba(0,0,0,.55))}
+.hint{position:absolute;right:6px;top:8px;font-size:12px;color:var(--ink3);pointer-events:none}
+
+/* ===== 계기판 ===== */
+.specs{position:relative;max-width:1120px;margin:0 auto;padding:6px 18px 40px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.sp{position:relative;background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.1);border-top:3px solid rgba(255,255,255,.14);border-radius:6px 6px 16px 16px;padding:14px 16px 16px}
 .sp.hi.a{border-top-color:var(--atk)} .sp.hi.d{border-top-color:var(--def)} .sp.hi.s{border-top-color:var(--spd)}
-.sp .t{font-size:14px;font-weight:700;color:var(--ink2)}
-.sp .big{font-family:var(--num);font-weight:700;font-size:clamp(40px,6.4vw,66px);line-height:1;margin:4px 0 10px;font-variant-numeric:tabular-nums}
-.sp .big small{font-size:.5em;margin-right:2px;color:var(--ink3)}
-.sp.a .big{color:var(--atk)} .sp.d .big{color:var(--def)} .sp.s .big{color:var(--spd)}
-.track{height:5px;background:var(--line);border-radius:3px;overflow:hidden}
-.track i{display:block;height:100%;width:0;border-radius:3px;transition:width .7s cubic-bezier(.2,.7,.2,1)}
-.sp.a .track i{background:var(--atk)} .sp.d .track i{background:var(--def)} .sp.s .track i{background:var(--spd)}
-.sp .f{font-size:12.5px;color:var(--ink3);margin-top:9px;font-variant-numeric:tabular-nums}
+.gwrap{position:relative;width:min(230px,100%);aspect-ratio:1/1;margin:2px auto 0}
+.gsvg{display:block;width:100%;height:100%;overflow:visible}
+.gtrack,.gred,.gfill{fill:none;stroke-width:10;stroke-linecap:butt}
+.gtrack{stroke:rgba(255,255,255,.1)}
+.gred{stroke:#e5484d;stroke-opacity:.55;stroke-dasharray:0 85 15 100}
+.gfill{stroke-dasharray:0 100;transition:stroke-dasharray .9s cubic-bezier(.2,.9,.25,1)}
+.sp.a .gfill{stroke:var(--atk)} .sp.d .gfill{stroke:var(--def)} .sp.s .gfill{stroke:var(--spd)}
+.gtick{stroke:rgba(255,255,255,.35);stroke-width:1.5}
+.gtick.maj{stroke:rgba(255,255,255,.75);stroke-width:2.2}
+.gtxt{fill:rgba(255,255,255,.6);font:700 9.5px 'Barlow Condensed',sans-serif;text-anchor:middle;dominant-baseline:middle}
+.gneedle{transform-origin:100px 100px;transform:rotate(-135deg);transition:transform .9s cubic-bezier(.2,.9,.25,1.12)}
+.gneedle polygon{fill:#fff}
+.sp.a .gneedle polygon{fill:var(--atk)} .sp.d .gneedle polygon{fill:var(--def)} .sp.s .gneedle polygon{fill:var(--spd)}
+.ghub{fill:#0e1216;stroke:rgba(255,255,255,.85);stroke-width:3}
+.gnum{position:absolute;left:0;right:0;bottom:5%;text-align:center;font-family:var(--num);font-weight:700;font-size:clamp(36px,5.4vw,54px);line-height:1;font-variant-numeric:tabular-nums}
+.gnum small{font-size:.5em;margin-right:2px;color:var(--ink3)}
+.sp.a .gnum{color:var(--atk)} .sp.d .gnum{color:var(--def)} .sp.s .gnum{color:var(--spd)}
+.sp .t{font-size:14px;font-weight:700;color:var(--ink2);text-align:center;margin-top:4px}
+.sp .f{font-size:12.5px;color:var(--ink3);margin-top:8px;text-align:center;font-variant-numeric:tabular-nums}
+.sp .f2{font-size:12px;color:var(--ink3);margin-top:3px;text-align:center;font-variant-numeric:tabular-nums}
+.sp .ed{margin-top:10px;grid-template-columns:auto minmax(0,150px);justify-content:center}
 
 /* ===== 라인업 ===== */
 .lineup{max-width:1120px;margin:0 auto;padding:34px 18px 70px}
@@ -103,10 +127,8 @@ h1{font-size:clamp(40px,7vw,76px);font-weight:900;letter-spacing:-.04em;line-hei
 .lvbox{display:flex;align-items:center;gap:6px;font-size:14px;font-weight:700;color:var(--ink2)}
 .lvbox input{width:68px;border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:7px 9px;text-align:right;font-variant-numeric:tabular-nums;outline:none}
 .lvbox input:focus{border-color:var(--acc)}
-.sp .f2{font-size:12px;color:var(--ink3);margin-top:3px;font-variant-numeric:tabular-nums}
-.sp .gr{font-size:12px;font-weight:700;color:var(--ink3);margin:-4px 0 9px;font-variant-numeric:tabular-nums}
-.sc .ed{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 8px;align-items:center;margin-top:8px;cursor:default}
-.sc .el{font-size:11px;font-weight:700;color:var(--ink3);white-space:nowrap}
+.ed{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 8px;align-items:center;margin-top:8px;cursor:default}
+.el{font-size:11px;font-weight:700;color:var(--ink3);white-space:nowrap}
 .stp{display:flex;align-items:center;gap:3px;min-width:0}
 .sb{flex:0 0 auto;width:24px;height:24px;border:1px solid var(--line);background:var(--panel2);border-radius:6px;font-size:15px;font-weight:900;line-height:1;padding:0;color:var(--ink2);touch-action:manipulation;-webkit-user-select:none;user-select:none}
 .sb:hover{border-color:var(--acc);color:var(--acc)}
@@ -115,6 +137,8 @@ h1{font-size:clamp(40px,7vw,76px);font-weight:900;letter-spacing:-.04em;line-hei
 .si::-webkit-outer-spin-button,.si::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 .si:hover{border-color:var(--line)}
 .si:focus{outline:none;border-color:var(--acc);background:var(--panel)}
+.stp.m{opacity:.72}
+.el.m{opacity:.72}
 .rst{margin-top:4px;border:0;background:none;padding:0;font-size:11.5px;font-weight:700;color:var(--acc);text-decoration:underline}
 [hidden]{display:none!important}
 .chk{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:500;cursor:pointer;user-select:none}
@@ -159,8 +183,10 @@ details.ratio[open] summary{border-color:var(--acc);color:var(--ink)}
 
 @media (max-width:860px){
   .hero-in{grid-template-columns:1fr;padding-top:30px;gap:0}
-  .stage{height:230px;order:-1}
-  .stage img{height:210px}
+  .stage{height:290px;order:-1}
+  .pet{margin-bottom:36px}
+  .pet img{height:200px}
+  .plat{width:min(430px,98%);height:110px}
   .ghost{top:30%}
 }
 @media (max-width:980px){
@@ -179,13 +205,15 @@ details.ratio[open] summary{border-color:var(--acc);color:var(--ink)}
   .theme{margin-left:auto;align-self:center}
   .navtabs{order:3;flex:1 0 100%;height:44px;margin:0 -6px}
   .hero{scroll-margin-top:96px}
-  .sp .big{font-size:31px;margin:2px 0 8px}
   .ranks{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .specs{gap:8px;padding-bottom:26px}
-  .sp{padding:11px 11px 13px}
-  .sp .t{font-size:13px} .sp .f{font-size:11px}
-  .sc .ed{grid-template-columns:1fr;gap:2px}
-  .sc .el{margin-top:3px}
+  .specs{grid-template-columns:1fr;gap:10px;padding-bottom:26px}
+  .sp{display:grid;grid-template-columns:132px minmax(0,1fr);gap:0 12px;align-items:center;padding:10px 12px 12px}
+  .sp .gwrap{width:132px;margin:0}
+  .sp .gnum{font-size:32px}
+  .sp .t,.sp .f,.sp .f2{text-align:left}
+  .sp .ed{justify-content:stretch}
+  .ed{grid-template-columns:1fr;gap:2px}
+  .el{margin-top:3px}
 }
 @media (min-width:981px){ .scs{display:contents} }
 @media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
@@ -209,9 +237,15 @@ details.ratio[open] summary{border-color:var(--acc);color:var(--ink)}
       <p class="hero-rank" id="hRank"></p>
       <h1 id="hName">불러오는 중</h1>
       <p class="hero-how" id="hHow"></p>
+      <button type="button" class="rst hrst" id="hRst" hidden>내 펫 값 되돌리기</button>
       <div class="ranks" id="hRanks"></div>
     </div>
-    <div class="stage"><div class="floor"></div><span id="hImg" style="display:contents"></span></div>
+    <div class="stage" id="stage" title="좌우로 끌어서 돌려보세요">
+      <div class="spot" aria-hidden="true"></div>
+      <div class="plat" aria-hidden="true"><div class="disc"></div></div>
+      <div class="pet" id="pet"><span id="hImg" style="display:contents"></span></div>
+      <div class="hint">좌우로 끌어서 돌려보세요</div>
+    </div>
   </div>
   <div class="specs" id="hSpecs"></div>
 </section>
@@ -241,12 +275,12 @@ details.ratio[open] summary{border-color:var(--acc);color:var(--ink)}
   </div>
   <div class="lrows" id="rows"></div>
   <p class="foot">
-    실제 능력치 기준은 펫의 Lv.1 초기치에 레벨당 성장률을 (레벨-1)번 더한 값에 탑승 반영률을 곱해요. 예를 들어 펫 방어가 200이고 반영률이 50%면 +100이에요.
-    게임에서는 탑승 수치의 소수점이 반올림되지 않고 버려져요. 방어 187에 50%를 곱하면 93.5인데 실제로는 +93이 올라갔어요. 그래서 맨 위 카드의 큰 숫자는 버림한 값이고, 목록에는 소수점까지 남겨서 보여줘요.
-    기본값은 도감 기준 평균 성장률로 계산해요. 펫마다 성장률이 달라서, 목록에서 펫을 찾아 능력치와 성장률 옆의 − + 버튼으로 내 펫 값에 맞추면 그 펫 기준으로 바뀌어요. 버튼을 꾹 누르면 빠르게 바뀌고, 숫자를 눌러 직접 입력해도 돼요. 수정한 값은 이 브라우저에 저장돼요.
-    능력치를 직접 맞추면 그 레벨의 값을 기준으로 위쪽 Lv. 입력에 따라 앞뒤 레벨을 계산해요. 성장률은 게임에 소수 셋째 자리까지만 나와서 경계값(예: 83.99)은 1 정도 차이가 날 수 있어요.
+    실제 능력치 기준은 펫의 능력치(게임에 보이는 정수)에 탑승 반영률을 곱한 값이에요. 예를 들어 펫 방어가 200이고 반영률이 50%면 +100이에요. 기본값은 도감 기준 Lv.1 초기치에 레벨당 성장률을 (레벨-1)번 더해 정수로 만든 평균값이에요.
+    게임에서는 탑승 수치의 소수점이 반올림되지 않고 버려져요. 방어 241에 50%를 곱하면 120.5인데 실제로는 +120이 올라갔어요. 그래서 맨 위 계기판의 큰 숫자는 버림한 값이고, 목록에는 소수점까지 남겨서 보여줘요.
+    펫마다 성장률이 달라서, 계기판이나 목록에서 능력치 옆의 − + 버튼으로 내 펫의 능력치를 그대로 맞추면 그 펫 기준으로 바뀌어요. 버튼을 꾹 누르면 빠르게 바뀌고, 숫자를 눌러 직접 입력해도 돼요. 수정한 값은 이 브라우저에 저장돼요.
+    능력치를 직접 맞추면 그 레벨의 값을 기준으로 위쪽 Lv. 입력에 따라 앞뒤 레벨을 계산해요. 성장률은 140이 아닌 레벨을 볼 때만 쓰이고, 게임에 소수 셋째 자리까지만 나와서 경계값은 1 정도 차이가 날 수 있어요.
     1환생 수치 적용을 켜면 환생 가능한 펫은 환생 보너스가 더해진 성장률로 계산하고, 초기치는 그대로예요. 펫 최대 레벨은 140으로 두었어요.
-    막대 길이는 탑승 가능한 펫 중 가장 높은 값을 100으로 놓은 비율이에요.
+    막대 길이는 탑승 가능한 펫 중 가장 높은 값을 100으로 놓은 비율이에요. 맨 위 계기판 눈금도 그 최대값에 맞춰져 있어요.
     데이터는 접속할 때마다 새로 불러와서 새 펫이나 환생 정보가 올라오면 자동으로 반영돼요.
   </p>
 </main>
@@ -315,20 +349,21 @@ function buildList(rows, trans, opt){
     const my = (opt.my && opt.my[r.id]) || null;
     const mg = (my && my.g) || {}, ms = (my && my.st) || {};
     const L = opt.lv || 140;
-    const g = {}, act = {}, an = {}, ini = {};
+    const g = {}, act = {}, shown = {}, an = {}, ini = {};
     for(const k of ["a","d","s"]){
       g[k] = pickNum(mg[k], g0[k]);
       const a = (ms[k] && typeof ms[k].v === "number" && typeof ms[k].lv === "number") ? ms[k] : null;
       an[k] = a;
       ini[k] = i0[k];
       act[k] = Math.max(0, a ? a.v + g[k]*(L - a.lv) : i0[k] + g[k]*(L - 1));
+      shown[k] = Math.round(act[k]);   /* 게임에는 정수로만 보여요. 탑승 수치도 이 정수로 계산해요 */
     }
-    const base = opt.basis === "grow" ? g : act;
+    const base = opt.basis === "grow" ? g : shown;
     out.push({
       id:r.id, name:cleanName(r.name), how:String(r.how||""), code:r.imageCode, isTrans:!!t,
       mine:!!my, lvUsed:L,
       g, dg:{ a:g0.a, d:g0.d, s:g0.s },
-      init:ini, an, act,
+      init:ini, an, act, shown,
       up:{ a:base.a*opt.ra, d:base.d*opt.rd, s:base.s*opt.rs }
     });
   }
@@ -339,7 +374,7 @@ function nextInfo(p, ratios){
   const L = p.lvUsed;
   return ["a","d","s"].map(k=>{
     const r = ratios[k];
-    const stat = l => Math.max(0, p.an[k] ? p.an[k].v + p.g[k]*(l - p.an[k].lv) : p.init[k] + p.g[k]*(l - 1));
+    const stat = l => Math.round(Math.max(0, p.an[k] ? p.an[k].v + p.g[k]*(l - p.an[k].lv) : p.init[k] + p.g[k]*(l - 1)));
     const ap = applied(stat(L)*r);
     if(L >= 140) return { k, ap, atMax:true };
     const ap1 = applied(stat(L+1)*r);
@@ -452,17 +487,18 @@ function renderNav(){
 }
 
 let lastSpriteId = null, resortTimer = null, lastEditId = null, hold = null;
-const num2 = v => String(Math.round(v*100)/100);
 const num3 = v => (Math.round(v*1000)/1000).toFixed(3);
 
 function renderHero(){
   const p = selectedPet();
   if(!p){ return; }
+  ensureSpecs();
+  const changed = lastSpriteId !== p.id;
   renderChips(p);
-  if(lastSpriteId !== p.id){
+  if(changed){
     const holder = $("hImg"); holder.innerHTML = ""; holder.appendChild(spriteImg(p.code)); lastSpriteId = p.id;
   }
-  renderSpecs(p);
+  updateSpecs(p, changed);
 }
 
 function renderChips(p){
@@ -471,6 +507,7 @@ function renderChips(p){
   $("hRank").innerHTML = `${esc(tab.label)}<b>${rank}</b>위<span style="color:var(--ink3);font-weight:500;margin-left:8px">${C.list.length}마리 중</span>`;
   $("hName").innerHTML = esc(p.name) + (p.isTrans && state.trans ? '<span class="tag">1환생</span>' : "") + (p.mine ? '<span class="tag">내 펫 값</span>' : "");
   $("hHow").textContent = p.how;
+  $("hRst").hidden = !p.mine;
   $("ghost").textContent = rank;
   $("hRanks").innerHTML = TABS.map(t=>`<button type="button" class="rk${t.id===tab.id?" cur":""}" data-tab="${t.id}"><span class="l">${esc(t.label)}</span><span class="n">${C.rankOf[t.id].get(p.id)}위</span></button>`).join("");
   $("hRanks").querySelectorAll(".rk").forEach(b=>{
@@ -484,33 +521,124 @@ function nextText(ni, L){
   return `Lv.${L+1}에도 +${ni.ap1}로 그대로예요` + (ni.nextLv ? `, 다음 +1은 Lv.${ni.nextLv}` : "");
 }
 
-function renderSpecs(p){
-  const tab = curTab();
-  const ratioKey = { a:"ra", d:"rd", s:"rs" };
-  const grow = state.basis === "grow";
-  const nis = grow ? null : nextInfo(p, { a:state.ra, d:state.rd, s:state.rs });
-  $("hSpecs").innerHTML = KEYS.map(([k,label], idx)=>{
-    const upv = p.up[k], an = p.an[k], ni = nis && nis[idx];
-    return `
-    <div class="sp ${k}${tab.keys.includes(k)?" hi":""}">
-      <div class="t">${label} 상승${grow ? " (레벨당)" : ` (Lv.${p.lvUsed})`}</div>
-      <div class="big"><small>+</small>${grow ? f3(upv) : applied(upv)}</div>
-      ${grow ? "" : `<div class="gr">성장률 ${f3(p.g[k])}</div>`}
-      <div class="track"><i data-w="${Math.max(2, upv/C.max[k]*100).toFixed(1)}%"></i></div>
-      ${grow
-        ? `<div class="f">성장률 ${f3(p.g[k])} × 반영 ${pct(ratioKey[k])}%</div>`
-        : `<div class="f">소수점 포함 +${f2(upv)} (소수점은 적용되지 않고 버려져요)</div>
-           <div class="f2">펫 ${label} ${f2(p.act[k])} × 반영 ${pct(ratioKey[k])}%</div>
-           <div class="f2">${an ? `내 입력: Lv.${an.lv}에서 ${f2(an.v)}, 레벨당 +${f3(p.g[k])}` : `Lv.${p.lvUsed}: 초기치 ${f2(p.init[k])} + 성장률 ${f3(p.g[k])} × ${p.lvUsed-1}`}</div>
-           <div class="f2">${nextText(ni, p.lvUsed)}</div>`}
-    </div>`;
-  }).join("");
-  requestAnimationFrame(()=>requestAnimationFrame(()=>{
-    $("hSpecs").querySelectorAll(".track i").forEach(i=>{ i.style.width = i.dataset.w; });
-  }));
+/* ----- 계기판 (게이지) ----- */
+const GA0 = -135, GA1 = 135;
+function gpt(a, r){ const t = a*Math.PI/180; return [100 + r*Math.sin(t), 100 - r*Math.cos(t)]; }
+function garc(r){ const p0 = gpt(GA0, r), p1 = gpt(GA1, r); return `M${p0[0].toFixed(2)} ${p0[1].toFixed(2)}A${r} ${r} 0 1 1 ${p1[0].toFixed(2)} ${p1[1].toFixed(2)}`; }
+function niceMax(x){
+  if(!(x > 0)) return 1;
+  const e = Math.pow(10, Math.floor(Math.log10(x)));
+  for(const m of [1,1.25,1.5,2,2.5,3,4,5,6,7.5,8,10]){ if(m*e >= x*1.04) return m*e; }
+  return 10*e;
+}
+const tickTxt = (v, max) => max >= 10 ? String(Math.round(v)) : String(+v.toFixed(2));
+function gaugeTicks(max){
+  let s = "";
+  for(let i=0; i<=20; i++){
+    const a = GA0 + (GA1-GA0)*i/20, maj = i % 4 === 0;
+    const p0 = gpt(a, maj ? 84 : 87), p1 = gpt(a, 95);
+    s += `<line class="gtick${maj ? " maj" : ""}" x1="${p0[0].toFixed(1)}" y1="${p0[1].toFixed(1)}" x2="${p1[0].toFixed(1)}" y2="${p1[1].toFixed(1)}"/>`;
+    if(maj){ const tp = gpt(a, 63); s += `<text class="gtxt" x="${tp[0].toFixed(1)}" y="${tp[1].toFixed(1)}">${tickTxt(max*i/20, max)}</text>`; }
+  }
+  return s;
+}
+const GAUGE_SVG = `<svg class="gsvg" viewBox="0 0 200 200" aria-hidden="true"><path class="gtrack" d="${garc(78)}"/><path class="gred" d="${garc(78)}" pathLength="100"/><path class="gfill" d="${garc(78)}" pathLength="100"/><g class="gticks"></g><g class="gneedle"><polygon points="97.5,110 100,28 102.5,110"/></g><circle class="ghub" cx="100" cy="100" r="9"/></svg>`;
+
+function stpHTML(k, f, val, label, extra){
+  return `<span class="stp${extra ? " " + extra : ""}" data-k="${k}" data-f="${f}"><button type="button" class="sb" data-d="-1" aria-label="${label} 줄이기">−</button><input class="si" type="number" step="any" inputmode="decimal" value="${val}" aria-label="${label}"><button type="button" class="sb" data-d="1" aria-label="${label} 늘리기">+</button></span>`;
 }
 
-/* ----- 목록에서 바로 내 펫 값 맞추기 (− + 버튼) ----- */
+function ensureSpecs(){
+  const box = $("hSpecs");
+  if(box.firstElementChild) return;
+  box.innerHTML = KEYS.map(([k, label])=>`
+    <div class="sp ${k}" data-k="${k}">
+      <div class="gwrap">${GAUGE_SVG}<div class="gnum"><small>+</small><span class="gv" data-val="0">0</span></div></div>
+      <div class="gtext">
+        <div class="t"></div>
+        <div class="ed"><span class="el stline">능력치</span>${stpHTML(k, "st", "", label + " 능력치", "stline")}<span class="el m">성장률</span>${stpHTML(k, "g", "", label + " 성장률", "m")}</div>
+        <div class="f l1"></div><div class="f2 l2"></div><div class="f2 l3"></div>
+      </div>
+    </div>`).join("");
+  bindEditing(box);
+}
+
+const tweens = new WeakMap();
+function tweenNum(el, to, ms, fmt){
+  const from = Number(el.dataset.val || 0);
+  el.dataset.val = String(to);
+  const token = {}; tweens.set(el, token);
+  if(!smooth() || ms <= 0 || from === to){ el.textContent = fmt(to); return; }
+  const t0 = performance.now();
+  const step = now => {
+    if(tweens.get(el) !== token) return;
+    const q = Math.min(1, (now - t0)/ms), e = 1 - Math.pow(1 - q, 3);
+    el.textContent = fmt(from + (to - from)*e);
+    if(q < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+
+function updateSpecs(p, anim){
+  const tab = curTab(), grow = state.basis === "grow";
+  const ratioKey = { a:"ra", d:"rd", s:"rs" };
+  const nis = grow ? null : nextInfo(p, { a:state.ra, d:state.rd, s:state.rs });
+  KEYS.forEach(([k, label], idx)=>{
+    const card = $("hSpecs").querySelector(`.sp[data-k="${k}"]`);
+    if(!card) return;
+    card.dataset.pid = p.id;
+    card.classList.toggle("hi", tab.keys.includes(k));
+    const upv = p.up[k];
+    card.querySelector(".t").textContent = `${label} 상승${grow ? " (레벨당)" : ` (Lv.${p.lvUsed})`}`;
+    /* 게이지: 바늘과 색 띠는 탑승 가능한 펫 중 최대값에 맞춘 눈금 위를 움직여요 */
+    const max = niceMax(C.max[k]);
+    if(card.dataset.gmax !== String(max)){ card.dataset.gmax = String(max); card.querySelector(".gticks").innerHTML = gaugeTicks(max); }
+    const frac = Math.max(0, Math.min(1, upv/max));
+    card.querySelector(".gneedle").style.transform = `rotate(${GA0 + (GA1-GA0)*frac}deg)`;
+    card.querySelector(".gfill").style.strokeDasharray = `${(frac*100).toFixed(2)} 100`;
+    tweenNum(card.querySelector(".gv"), grow ? upv : applied(upv), anim ? 800 : 0, grow ? f3 : (v => String(Math.round(v))));
+    /* 숫자 입력 칸 (입력 중인 칸은 건드리지 않아요) */
+    const setIn = (f, val) => { const el = card.querySelector(`.stp[data-f="${f}"] .si`); if(el && el !== document.activeElement) el.value = val; };
+    setIn("st", String(p.shown[k])); setIn("g", num3(p.g[k]));
+    card.querySelectorAll(".stline").forEach(e => { e.hidden = grow; });
+    const l1 = card.querySelector(".l1"), l2 = card.querySelector(".l2"), l3 = card.querySelector(".l3");
+    if(grow){
+      l1.textContent = `성장률 ${f3(p.g[k])} × 반영 ${pct(ratioKey[k])}%`; l2.textContent = ""; l3.textContent = "";
+    } else {
+      l1.textContent = `펫 ${label} ${p.shown[k]} × 반영 ${pct(ratioKey[k])}% = ${f2(upv)} (소수점은 버려져요)`;
+      l2.textContent = p.an[k] ? `내 입력: Lv.${p.an[k].lv}에서 ${p.an[k].v}` : "도감 기준 평균값이에요. 내 펫 능력치로 맞춰보세요";
+      l3.textContent = nextText(nis[idx], p.lvUsed);
+    }
+    l2.hidden = !l2.textContent; l3.hidden = !l3.textContent;
+  });
+}
+
+/* ----- 회전 전시대: 좌우로 끌면 돌아가고, 놓으면 천천히 제자리로 와요 ----- */
+const fx = { spin:0, vel:0, drag:false, lastX:0 };
+function initStage(){
+  const st = $("stage"), pet = $("pet");
+  if(!st || !pet) return;
+  st.addEventListener("pointerdown", e => { fx.drag = true; fx.lastX = e.clientX; fx.vel = 0; try{ st.setPointerCapture(e.pointerId); }catch(_e){} st.classList.add("grab"); });
+  st.addEventListener("pointermove", e => { if(!fx.drag) return; const dx = e.clientX - fx.lastX; fx.lastX = e.clientX; fx.spin += dx*0.8; fx.vel = dx*0.8; });
+  const end = () => { fx.drag = false; st.classList.remove("grab"); };
+  st.addEventListener("pointerup", end); st.addEventListener("pointercancel", end);
+  if(!smooth()) return;
+  const t0 = performance.now();
+  const frame = now => {
+    const t = (now - t0)/1000;
+    if(!fx.drag){
+      if(Math.abs(fx.vel) > 0.05){ fx.spin += fx.vel; fx.vel *= 0.94; }
+      else { fx.vel = 0; fx.spin += (Math.round(fx.spin/360)*360 - fx.spin)*0.06; }
+    }
+    st.style.setProperty("--ang", (fx.spin + t*7).toFixed(1));
+    pet.style.transform = `perspective(900px) rotateY(${(fx.spin + Math.sin(t*0.8)*16).toFixed(1)}deg)`;
+    requestAnimationFrame(frame);
+  };
+  requestAnimationFrame(frame);
+}
+
+/* ----- 계기판과 목록에서 바로 내 펫 값 맞추기 (− + 버튼) ----- */
+function idOf(el){ const h = el.closest("[data-pid]"); return h ? Number(h.dataset.pid) : NaN; }
 function markSel(id){
   document.querySelectorAll(".lrow.sel").forEach(r=>r.classList.remove("sel"));
   const r = document.querySelector(`.lrow[data-id="${id}"]`);
@@ -531,7 +659,7 @@ function updateRow(p){
     cell.querySelector(".v").textContent = "+" + fv(p.up[k]);
     cell.querySelector(".b i").style.width = Math.min(100, p.up[k]/C.max[k]*100).toFixed(1) + "%";
     const setIn = (f, val) => { const el = cell.querySelector(`.stp[data-f="${f}"] .si`); if(el && el !== document.activeElement) el.value = val; };
-    setIn("st", num2(p.act[k])); setIn("g", num3(p.g[k]));
+    setIn("st", String(p.shown[k])); setIn("g", num3(p.g[k]));
   });
   row.querySelector(".tot").textContent = fv(scoreOf(p, curTab()));
   row.querySelector(".mytag").hidden = !p.mine;
@@ -559,43 +687,44 @@ function commitEdit(id){
   if(!p) return;
   const changedSel = state.sel !== id;
   state.sel = id;
-  if(changedSel){ renderHero(); markSel(id); } else { renderChips(p); renderSpecs(p); }
+  if(changedSel){ renderHero(); markSel(id); } else { renderChips(p); updateSpecs(p, false); }
   updateRow(p);
   scheduleResort(id);
 }
 
-/* f: "g"(성장률) 또는 "st"(능력치), mult: 방향 × 가속 배수 */
+/* f: "g"(성장률) 또는 "st"(능력치, 정수), mult: 방향 × 가속 배수 */
 function adjust(id, k, f, mult){
   const p = C.list.find(x=>x.id===id);
   if(!p) return;
   const m = state.my[id] || (state.my[id] = { g:{}, st:{} });
   m.g = m.g || {}; m.st = m.st || {};
   if(f === "g") m.g[k] = Math.max(0, Math.round((p.g[k] + mult*0.001)*1000)/1000);
-  else m.st[k] = { v:Math.max(0, Math.round((p.act[k] + mult)*100)/100), lv:p.lvUsed };
+  else m.st[k] = { v:Math.max(0, p.shown[k] + mult), lv:p.lvUsed };
   commitEdit(id);
 }
 function onTyped(inp){
-  const stp = inp.closest(".stp"), id = Number(inp.closest(".lrow").dataset.id);
+  const stp = inp.closest(".stp"), id = idOf(inp);
   const k = stp.dataset.k, f = stp.dataset.f;
   const p = C.list.find(x=>x.id===id);
   const v = parseFloat(inp.value);
-  if(!p || !isFinite(v) || v < 0){ if(p) updateRow(p); inp.value = f === "g" ? num3(p.g[k]) : num2(p.act[k]); return; }
+  if(!p) return;
+  if(!isFinite(v) || v < 0){ inp.value = f === "g" ? num3(p.g[k]) : String(p.shown[k]); return; }
   const m = state.my[id] || (state.my[id] = { g:{}, st:{} });
   m.g = m.g || {}; m.st = m.st || {};
   if(f === "g") m.g[k] = Math.round(v*1000)/1000;
-  else m.st[k] = { v:Math.round(v*100)/100, lv:p.lvUsed };
+  else m.st[k] = { v:Math.round(v), lv:p.lvUsed };
   commitEdit(id);
   const q = C.list.find(x=>x.id===id);
-  inp.value = f === "g" ? num3(q.g[k]) : num2(q.act[k]);
+  inp.value = f === "g" ? num3(q.g[k]) : String(q.shown[k]);
 }
 function resetPet(id){
   delete state.my[id];
   savePrefs(); compute();
   const p = C.list.find(x=>x.id===id);
   if(!p) return;
-  if(state.sel === id){ renderChips(p); renderSpecs(p); }
+  if(state.sel === id){ renderChips(p); updateSpecs(p, false); }
   updateRow(p);
-  document.querySelectorAll(`.lrow[data-id="${id}"] .si`).forEach(el=>{ el.blur(); });
+  document.querySelectorAll(`[data-pid="${id}"] .si`).forEach(el=>{ el.blur(); });
   scheduleResort(id);
 }
 
@@ -603,7 +732,7 @@ function resetPet(id){
 function startHold(b){
   stopHold(true);
   const stp = b.closest(".stp");
-  const id = Number(b.closest(".lrow").dataset.id), k = stp.dataset.k, f = stp.dataset.f, dir = Number(b.dataset.d);
+  const id = idOf(b), k = stp.dataset.k, f = stp.dataset.f, dir = Number(b.dataset.d);
   const t0 = Date.now();
   const tick = () => { const el = Date.now() - t0; adjust(id, k, f, dir * (el < 900 ? 1 : el < 1800 ? 5 : 20)); };
   tick();
@@ -617,26 +746,31 @@ function stopHold(silent){
   const id = hold.id; hold = null;
   if(!silent) scheduleResort(id);
 }
-function bindRows(){
-  const rows = $("rows");
-  rows.addEventListener("pointerdown", e => {
+function bindEditing(box){
+  box.addEventListener("pointerdown", e => {
     const b = e.target.closest(".sb");
     if(!b) return;
     e.preventDefault(); startHold(b);
   });
+  box.addEventListener("contextmenu", e => { if(e.target.closest(".sb")) e.preventDefault(); });
+  box.addEventListener("click", e => {
+    const b = e.target.closest(".sb");
+    if(b){ if(e.detail === 0){ const stp = b.closest(".stp"); adjust(idOf(b), stp.dataset.k, stp.dataset.f, Number(b.dataset.d)); } return; }
+    const r = e.target.closest(".rst");
+    if(r) resetPet(idOf(r));
+  });
+  box.addEventListener("change", e => { const inp = e.target.closest(".si"); if(inp) onTyped(inp); });
+}
+function bindRows(){
+  const rows = $("rows");
+  bindEditing(rows);
   window.addEventListener("pointerup", () => stopHold());
   window.addEventListener("pointercancel", () => stopHold());
-  rows.addEventListener("contextmenu", e => { if(e.target.closest(".sb")) e.preventDefault(); });
   rows.addEventListener("click", e => {
-    const b = e.target.closest(".sb");
-    if(b){ if(e.detail === 0){ const stp = b.closest(".stp"); adjust(Number(b.closest(".lrow").dataset.id), stp.dataset.k, stp.dataset.f, Number(b.dataset.d)); } return; }
-    const r = e.target.closest(".rst");
-    if(r){ resetPet(Number(r.closest(".lrow").dataset.id)); return; }
-    if(e.target.closest(".ed")) return;
+    if(e.target.closest(".sb, .rst, .ed")) return;
     const row = e.target.closest(".lrow");
     if(row) selectRow(row);
   });
-  rows.addEventListener("change", e => { const inp = e.target.closest(".si"); if(inp) onTyped(inp); });
   rows.addEventListener("keydown", e => { if(e.key === "Enter" && e.target.classList && e.target.classList.contains("lrow")) selectRow(e.target); });
 }
 
@@ -648,19 +782,18 @@ function renderList(){
   const transCnt = C.list.filter(p=>p.isTrans).length;
   const grow = state.basis === "grow";
   $("lead").textContent = `탑승 가능한 ${C.list.length}마리를 ${tab.desc} ${tab.keys.length>1 ? "상승치" : "가장 많이 올라가는"} 순서로 보여줘요. ${grow ? "레벨당 성장치 기준이에요." : `펫이 Lv.${state.lv}일 때 실제로 올라가는 수치 기준이고, 목록에는 소수점까지 보여줘요(게임에서는 소수점이 버려져요).`}` +
-    (state.trans ? ` 1환생 수치는 ${transCnt}마리에 적용됐어요.` : " 환생 전 수치 기준이에요.") + " 펫을 누르면 위에서 자세히 볼 수 있고, 능력치와 성장률 옆의 − + 버튼으로 내 펫 값에 맞출 수 있어요.";
+    (state.trans ? ` 1환생 수치는 ${transCnt}마리에 적용됐어요.` : " 환생 전 수치 기준이에요.") + " 펫을 누르면 위 계기판에서 자세히 볼 수 있고, 능력치 옆의 − + 버튼으로 내 펫 값에 맞출 수 있어요.";
   $("lhScore").textContent = tab.label;
 
   const box = $("rows");
   box.innerHTML = "";
   if(!view.length){ box.innerHTML = `<div class="state">${q ? "검색 결과가 없어요." : "표시할 펫이 없어요."}</div>`; return; }
-  const stp = (k, f, val, label) => `<span class="stp" data-k="${k}" data-f="${f}"><button type="button" class="sb" data-d="-1" aria-label="${label} 줄이기">−</button><input class="si" type="number" step="any" inputmode="decimal" value="${val}" aria-label="${label}"><button type="button" class="sb" data-d="1" aria-label="${label} 늘리기">+</button></span>`;
   const frag = document.createDocumentFragment();
   view.forEach(({p, score, rank})=>{
     const row = document.createElement("div");
-    row.tabIndex = 0; row.dataset.id = p.id;
+    row.tabIndex = 0; row.dataset.id = p.id; row.dataset.pid = p.id;
     row.className = "lrow" + (rank<=3 ? " t"+rank : "") + (sel && sel.id===p.id ? " sel" : "");
-    const sc = ([k,label]) => `<div class="sc ${k}${tab.keys.includes(k)?" hi":""}" data-k="${k}" data-l="${label}"><div class="v">+${fv(p.up[k])}</div><div class="b"><i style="width:${Math.min(100, p.up[k]/C.max[k]*100).toFixed(1)}%"></i></div><div class="ed">${grow ? "" : `<span class="el">능력치</span>${stp(k, "st", num2(p.act[k]), label + " 능력치")}`}<span class="el">성장률</span>${stp(k, "g", num3(p.g[k]), label + " 성장률")}</div></div>`;
+    const sc = ([k,label]) => `<div class="sc ${k}${tab.keys.includes(k)?" hi":""}" data-k="${k}" data-l="${label}"><div class="v">+${fv(p.up[k])}</div><div class="b"><i style="width:${Math.min(100, p.up[k]/C.max[k]*100).toFixed(1)}%"></i></div><div class="ed">${grow ? "" : `<span class="el">능력치</span>${stpHTML(k, "st", p.shown[k], label + " 능력치")}`}<span class="el m">성장률</span>${stpHTML(k, "g", num3(p.g[k]), label + " 성장률", "m")}</div></div>`;
     row.innerHTML = `
       <div class="rn">${rank}</div>
       <div class="thumb"></div>
@@ -686,6 +819,7 @@ function renderAll(scrollTop){
 function bind(){
   $("optTrans").checked = state.trans;
   bindRows();
+  $("hRst").onclick = () => { const q = selectedPet(); if(q) resetPet(q.id); };
   const syncBasis = () => {
     $("basisActual").setAttribute("aria-pressed", String(state.basis === "actual"));
     $("basisGrow").setAttribute("aria-pressed", String(state.basis === "grow"));
@@ -745,6 +879,7 @@ function renderSiteMenu(){
   loadPrefs();
   renderNav();
   bind();
+  initStage();
   $("rows").innerHTML = `<div class="state">펫 데이터 불러오는 중…</div>`;
   try{
     await loadData();
