@@ -95,6 +95,15 @@ h1{font-size:clamp(40px,7vw,76px);font-weight:900;letter-spacing:-.04em;line-hei
 .ctrl{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;margin-bottom:14px}
 .search{flex:1 1 200px;min-width:160px;max-width:320px;border:1px solid var(--line);background:var(--panel);border-radius:9px;padding:9px 13px;outline:none}
 .search:focus{border-color:var(--acc)}
+.seg{display:flex;border:1px solid var(--line);border-radius:9px;overflow:hidden;background:var(--panel)}
+.segb{border:0;background:none;padding:8px 13px;font-size:14px;font-weight:700;color:var(--ink2)}
+.segb+.segb{border-left:1px solid var(--line)}
+.segb:hover{color:var(--ink)}
+.segb[aria-pressed="true"]{background:var(--acc);color:#fff}
+.lvbox{display:flex;align-items:center;gap:6px;font-size:14px;font-weight:700;color:var(--ink2)}
+.lvbox input{width:68px;border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:7px 9px;text-align:right;font-variant-numeric:tabular-nums;outline:none}
+.lvbox input:focus{border-color:var(--acc)}
+.sp .f2{font-size:12px;color:var(--ink3);margin-top:3px;font-variant-numeric:tabular-nums}
 .chk{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:500;cursor:pointer;user-select:none}
 .chk input{width:17px;height:17px;accent-color:var(--acc);cursor:pointer}
 details.ratio{position:relative}
@@ -194,6 +203,11 @@ details.ratio[open] summary{border-color:var(--acc);color:var(--ink)}
   <p class="lead" id="lead"></p>
   <div class="ctrl">
     <input class="search" id="q" type="search" placeholder="펫 이름 검색" autocomplete="off" aria-label="펫 이름 검색">
+    <div class="seg" role="group" aria-label="수치 기준">
+      <button type="button" class="segb" id="basisActual">실제 능력치</button>
+      <button type="button" class="segb" id="basisGrow">성장치(레벨당)</button>
+    </div>
+    <label class="lvbox" id="lvBox">Lv.<input id="lvIn" type="number" min="1" max="140" step="1" aria-label="펫 레벨"></label>
     <label class="chk"><input type="checkbox" id="optTrans" checked> 1환생 수치 적용</label>
     <details class="ratio" id="ratioBox">
       <summary id="ratioSum">탑승 반영률</summary>
@@ -209,8 +223,9 @@ details.ratio[open] summary{border-color:var(--acc);color:var(--ink)}
   </div>
   <div class="lrows" id="rows"></div>
   <p class="foot">
-    탑승 시 상승치는 펫 성장치에 탑승 반영률을 곱한 값이에요. 성장치는 도감과 같은 방식(등급 보정 포함)으로 계산하고,
-    1환생 수치 적용을 켜면 환생 가능한 펫은 환생 보너스가 더해진 성장치로 계산해요.
+    실제 능력치 기준은 펫의 Lv.1 초기치에 레벨당 성장치를 (레벨-1)번 더한 값에 탑승 반영률을 곱해요. 예를 들어 펫 방어가 200이고 반영률이 50%면 +100이에요.
+    초기치와 성장치는 도감과 같은 방식(등급 보정 포함)으로 계산하고, 소수점은 그대로 보여줘서 게임 안에서는 버림 때문에 1 정도 차이가 날 수 있어요.
+    1환생 수치 적용을 켜면 환생 가능한 펫은 환생 보너스가 더해진 성장치로 계산하고, 초기치는 그대로예요. 펫 최대 레벨은 140으로 두었어요.
     막대 길이는 탑승 가능한 펫 중 가장 높은 값을 100으로 놓은 비율이에요.
     데이터는 접속할 때마다 새로 불러와서 새 펫이나 환생 정보가 올라오면 자동으로 반영돼요.
   </p>
@@ -243,6 +258,13 @@ function growthOf(r, t){
   return disp(ph*B/10000, pa*B/10000, pd*B/10000, ps*B/10000);
 }
 
+/* Lv.1 초기치 (도감의 초기치와 같은 계산) */
+function initOf(r){
+  const ph = num(r.h0)+num(r.lvup), pa = num(r.a0)+num(r.lvup), pd = num(r.d0)+num(r.lvup), ps = num(r.s0)+num(r.lvup);
+  const ip = num(r.initPct)/100;
+  return disp(ip*ph, ip*pa, ip*pd, ip*ps);
+}
+
 const TABS = [
   { id:"all", group:"eff", label:"전체효율", desc:"공격, 방어, 순발을 모두 더한", keys:["a","d","s"] },
   { id:"as",  group:"eff", label:"공순효율", desc:"공격과 순발을 더한",           keys:["a","s"] },
@@ -262,11 +284,16 @@ function buildList(rows, trans, opt){
     if(seen.has(r.id)) continue;
     seen.add(r.id);
     const t = opt.trans ? (trans[String(r.id)] || null) : null;
-    const g = growthOf(r, t);
+    const g = growthOf(r, t), ini = initOf(r);
+    const n = Math.max(0, (opt.lv || 140) - 1);
+    const act = { a:ini.a+g.a*n, d:ini.d+g.d*n, s:ini.s+g.s*n };
+    const base = opt.basis === "grow" ? g : act;
     out.push({
       id:r.id, name:cleanName(r.name), how:String(r.how||""), code:r.imageCode, isTrans:!!t,
       g:{ a:g.a, d:g.d, s:g.s },
-      up:{ a:g.a*opt.ra, d:g.d*opt.rd, s:g.s*opt.rs }
+      init:{ a:ini.a, d:ini.d, s:ini.s },
+      act,
+      up:{ a:base.a*opt.ra, d:base.d*opt.rd, s:base.s*opt.rs }
     });
   }
   return out;
@@ -285,8 +312,10 @@ const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">
 const STORE = "rideRankPrefs2";
 const KEYS = [["a","공격"],["d","방어"],["s","순발"]];
 let ROWS = [], TRANS = {}, C = null;
-const state = { tab:"all", trans:true, q:"", sel:null, ra:0.30, rd:0.50, rs:0.30 };
+const state = { tab:"all", trans:true, q:"", sel:null, ra:0.30, rd:0.50, rs:0.30, basis:"actual", lv:140 };
 const f3 = v => v.toFixed(3);
+const f1 = v => v.toFixed(1);
+const fv = v => state.basis === "grow" ? f3(v) : f1(v);
 const pct = k => Math.round(state[k]*100);
 const curTab = () => TABS.find(t=>t.id===state.tab);
 const smooth = () => !(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches);
@@ -296,13 +325,15 @@ function loadPrefs(){
     const p = JSON.parse(localStorage.getItem(STORE) || "{}");
     if(p.tab && TABS.some(t=>t.id===p.tab)) state.tab = p.tab;
     if(typeof p.trans==="boolean") state.trans = p.trans;
+    if(p.basis==="grow" || p.basis==="actual") state.basis = p.basis;
+    if(typeof p.lv==="number" && p.lv>=1 && p.lv<=140) state.lv = Math.round(p.lv);
     ["ra","rd","rs"].forEach(k=>{ if(typeof p[k]==="number" && p[k]>=0) state[k]=p[k]; });
     if(p.theme) document.documentElement.setAttribute("data-theme", p.theme);
     else if(window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches) document.documentElement.setAttribute("data-theme","dark");
   }catch(e){}
 }
 function savePrefs(){
-  try{ localStorage.setItem(STORE, JSON.stringify({ tab:state.tab, trans:state.trans, ra:state.ra, rd:state.rd, rs:state.rs, theme:document.documentElement.getAttribute("data-theme") })); }catch(e){}
+  try{ localStorage.setItem(STORE, JSON.stringify({ tab:state.tab, trans:state.trans, basis:state.basis, lv:state.lv, ra:state.ra, rd:state.rd, rs:state.rs, theme:document.documentElement.getAttribute("data-theme") })); }catch(e){}
 }
 
 async function fetchJson(url){
@@ -340,7 +371,7 @@ function spriteImg(code, cls){
 
 /* 현재 설정으로 전체 계산 (7개 랭킹을 한 번에) */
 function compute(){
-  const list = buildList(ROWS, TRANS, { trans:state.trans, ra:state.ra, rd:state.rd, rs:state.rs });
+  const list = buildList(ROWS, TRANS, { trans:state.trans, basis:state.basis, lv:state.lv, ra:state.ra, rd:state.rd, rs:state.rs });
   const ranked = {}, rankOf = {};
   TABS.forEach(t=>{
     ranked[t.id] = rankList(list, t);
@@ -387,10 +418,13 @@ function renderHero(){
   const ratioKey = { a:"ra", d:"rd", s:"rs" };
   $("hSpecs").innerHTML = KEYS.map(([k,label])=>`
     <div class="sp ${k}${tab.keys.includes(k)?" hi":""}">
-      <div class="t">${label} 상승</div>
-      <div class="big"><small>+</small>${f3(p.up[k])}</div>
+      <div class="t">${label} 상승${state.basis === "grow" ? " (레벨당)" : ` (Lv.${state.lv})`}</div>
+      <div class="big"><small>+</small>${fv(p.up[k])}</div>
       <div class="track"><i data-w="${Math.max(2, p.up[k]/C.max[k]*100).toFixed(1)}%"></i></div>
-      <div class="f">성장치 ${f3(p.g[k])} × 반영 ${pct(ratioKey[k])}%</div>
+      ${state.basis === "grow"
+        ? `<div class="f">성장치 ${f3(p.g[k])} × 반영 ${pct(ratioKey[k])}%</div>`
+        : `<div class="f">펫 ${label} ${f1(p.act[k])} × 반영 ${pct(ratioKey[k])}%</div>
+           <div class="f2">Lv.${state.lv}: 초기치 ${f1(p.init[k])} + 성장치 ${f3(p.g[k])} × ${state.lv-1}</div>`}
     </div>`).join("");
   requestAnimationFrame(()=>requestAnimationFrame(()=>{
     $("hSpecs").querySelectorAll(".track i").forEach(i=>{ i.style.width = i.dataset.w; });
@@ -403,7 +437,7 @@ function renderList(){
   const q = state.q.trim().replace(/\s+/g,"").toLowerCase();
   const view = q ? ranked.filter(x=>x.p.name.replace(/\s+/g,"").toLowerCase().includes(q)) : ranked;
   const transCnt = C.list.filter(p=>p.isTrans).length;
-  $("lead").textContent = `탑승 가능한 ${C.list.length}마리를 ${tab.desc} ${tab.keys.length>1 ? "상승치" : "가장 많이 올라가는"} 순서로 보여줘요.` +
+  $("lead").textContent = `탑승 가능한 ${C.list.length}마리를 ${tab.desc} ${tab.keys.length>1 ? "상승치" : "가장 많이 올라가는"} 순서로 보여줘요. ${state.basis === "grow" ? "레벨당 성장치 기준이에요." : `펫이 Lv.${state.lv}일 때 실제로 올라가는 수치 기준이에요.`}` +
     (state.trans ? ` 1환생 수치는 ${transCnt}마리에 적용됐어요.` : " 환생 전 수치 기준이에요.") + " 펫을 누르면 위에서 자세히 볼 수 있어요.";
   $("lhScore").textContent = tab.label;
 
@@ -415,13 +449,13 @@ function renderList(){
     const row = document.createElement("button");
     row.type = "button"; row.dataset.id = p.id;
     row.className = "lrow" + (rank<=3 ? " t"+rank : "") + (sel && sel.id===p.id ? " sel" : "");
-    const sc = ([k,label]) => `<div class="sc ${k}${tab.keys.includes(k)?" hi":""}" data-l="${label}"><div class="v">+${f3(p.up[k])}</div><div class="b"><i style="width:${(p.up[k]/C.max[k]*100).toFixed(1)}%"></i></div></div>`;
+    const sc = ([k,label]) => `<div class="sc ${k}${tab.keys.includes(k)?" hi":""}" data-l="${label}"><div class="v">+${fv(p.up[k])}</div><div class="b"><i style="width:${(p.up[k]/C.max[k]*100).toFixed(1)}%"></i></div></div>`;
     row.innerHTML = `
       <div class="rn">${rank}</div>
       <div class="thumb"></div>
       <div class="pinfo"><div class="nm">${esc(p.name)}${p.isTrans && state.trans ? '<span class="tag">1환생</span>' : ""}</div><div class="hw">${esc(p.how)}</div></div>
       <div class="scs">${KEYS.map(sc).join("")}</div>
-      <div class="tot">${f3(score)}</div>`;
+      <div class="tot">${fv(score)}</div>`;
     const img = spriteImg(p.code); img.loading = "lazy";
     row.querySelector(".thumb").appendChild(img);
     row.onclick = () => {
@@ -447,6 +481,19 @@ function renderAll(scrollTop){
 
 function bind(){
   $("optTrans").checked = state.trans;
+  const syncBasis = () => {
+    $("basisActual").setAttribute("aria-pressed", String(state.basis === "actual"));
+    $("basisGrow").setAttribute("aria-pressed", String(state.basis === "grow"));
+    $("lvBox").style.display = state.basis === "actual" ? "flex" : "none";
+  };
+  $("lvIn").value = state.lv;
+  $("basisActual").onclick = () => { state.basis = "actual"; syncBasis(); savePrefs(); renderAll(false); };
+  $("basisGrow").onclick = () => { state.basis = "grow"; syncBasis(); savePrefs(); renderAll(false); };
+  $("lvIn").oninput = e => {
+    const v = Math.round(parseFloat(e.target.value));
+    if(isFinite(v) && v >= 1 && v <= 140){ state.lv = v; savePrefs(); renderAll(false); }
+  };
+  syncBasis();
   $("rA").value = pct("ra"); $("rD").value = pct("rd"); $("rS").value = pct("rs");
   $("optTrans").onchange = e => { state.trans = e.target.checked; savePrefs(); renderAll(false); };
   $("q").oninput = e => { state.q = e.target.value; if(C) renderList(); };
