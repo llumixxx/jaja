@@ -76,7 +76,7 @@ h1{font-size:clamp(40px,7vw,76px);font-weight:900;letter-spacing:-.04em;line-hei
 .stage img{position:relative;width:min(300px,78%);height:270px;object-fit:contain;image-rendering:pixelated;margin-bottom:18px}
 
 /* ===== 스펙 스트립 ===== */
-.specs{position:relative;max-width:1120px;margin:0 auto;padding:0 18px 14px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.specs{position:relative;max-width:1120px;margin:0 auto;padding:0 18px 36px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
 .sp{background:var(--panel);border:1px solid var(--line);border-top:3px solid var(--line);border-radius:4px 4px 10px 10px;padding:14px 18px 16px}
 .sp.hi.a{border-top-color:var(--atk)} .sp.hi.d{border-top-color:var(--def)} .sp.hi.s{border-top-color:var(--spd)}
 .sp .t{font-size:14px;font-weight:700;color:var(--ink2)}
@@ -105,35 +105,18 @@ h1{font-size:clamp(40px,7vw,76px);font-weight:900;letter-spacing:-.04em;line-hei
 .lvbox input:focus{border-color:var(--acc)}
 .sp .f2{font-size:12px;color:var(--ink3);margin-top:3px;font-variant-numeric:tabular-nums}
 .sp .gr{font-size:12px;font-weight:700;color:var(--ink3);margin:-4px 0 9px;font-variant-numeric:tabular-nums}
-.sc .gr{font-size:11px;color:var(--ink3);margin-top:4px;font-variant-numeric:tabular-nums}
-.minewrap{position:relative;max-width:1120px;margin:0 auto;padding:0 18px 36px}
-details.mine{background:var(--panel);border:1px solid var(--line);border-radius:12px}
-details.mine summary{list-style:none;cursor:pointer;padding:13px 18px;font-weight:800;font-size:15px;display:flex;align-items:center;gap:10px}
-details.mine summary::-webkit-details-marker{display:none}
-details.mine summary::after{content:"\25BE";margin-left:auto;color:var(--ink3);transition:transform .2s}
-details.mine[open] summary::after{transform:rotate(180deg)}
-.mtag{font-size:11px;font-weight:700;color:#8a5a00;background:#ffe9b8;border-radius:5px;padding:1px 7px}
-[data-theme="dark"] .mtag{background:#4a3a12;color:#ffd98a}
-.mine-body{padding:2px 18px 18px;border-top:1px solid var(--line)}
-.mine-help{font-size:13px;color:var(--ink2);margin:12px 0;max-width:72ch;line-height:1.7}
-.mgrid{display:grid;grid-template-columns:64px repeat(2,minmax(0,140px));gap:8px 12px;align-items:center;margin-bottom:14px}
-.mgrid .mh{font-size:12px;font-weight:700;color:var(--ink3)}
-.mgrid .ml{font-weight:800;font-size:14px}
-.mgrid .ml.a{color:var(--atk)} .mgrid .ml.d{color:var(--def)} .mgrid .ml.s{color:var(--spd)}
-.mgrid input{width:100%;border:1px solid var(--line);background:var(--panel2);border-radius:8px;padding:7px 9px;text-align:right;font-variant-numeric:tabular-nums;outline:none}
-.mgrid input:focus{border-color:var(--acc)}
-.mres{overflow-x:auto}
-.mres table{border-collapse:collapse;width:100%;min-width:600px;font-variant-numeric:tabular-nums}
-.mres th{font-size:12px;font-weight:700;color:var(--ink3);text-align:right;padding:6px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
-.mres td{text-align:right;padding:9px 10px;border-bottom:1px solid var(--line);font-size:14px;white-space:nowrap}
-.mres th:first-child,.mres td:first-child{text-align:left;font-weight:800}
-.mres tr:last-child td{border-bottom:0}
-.mres td.ap{font-family:var(--num);font-weight:700;font-size:20px}
-.mres .rise{color:var(--spd);font-weight:800}
-.mres .nochg{color:var(--ink3)}
-.mreset{margin-top:12px;border:1px solid var(--line);background:var(--panel2);border-radius:8px;padding:7px 13px;font-size:13px;font-weight:700;color:var(--ink2)}
-.mreset:hover{color:var(--ink);border-color:var(--ink3)}
-.mnote{font-size:12.5px;color:var(--ink3);margin-top:10px;line-height:1.7;max-width:80ch}
+.sc .ed{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 8px;align-items:center;margin-top:8px;cursor:default}
+.sc .el{font-size:11px;font-weight:700;color:var(--ink3);white-space:nowrap}
+.stp{display:flex;align-items:center;gap:3px;min-width:0}
+.sb{flex:0 0 auto;width:24px;height:24px;border:1px solid var(--line);background:var(--panel2);border-radius:6px;font-size:15px;font-weight:900;line-height:1;padding:0;color:var(--ink2);touch-action:manipulation;-webkit-user-select:none;user-select:none}
+.sb:hover{border-color:var(--acc);color:var(--acc)}
+.sb:active{background:var(--acc);border-color:var(--acc);color:#fff}
+.si{flex:1 1 auto;min-width:0;width:100%;height:24px;border:1px solid transparent;background:transparent;border-radius:6px;text-align:center;font-size:12.5px;font-weight:700;color:var(--ink);padding:0 2px;font-variant-numeric:tabular-nums;-moz-appearance:textfield;appearance:textfield}
+.si::-webkit-outer-spin-button,.si::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.si:hover{border-color:var(--line)}
+.si:focus{outline:none;border-color:var(--acc);background:var(--panel)}
+.rst{margin-top:4px;border:0;background:none;padding:0;font-size:11.5px;font-weight:700;color:var(--acc);text-decoration:underline}
+[hidden]{display:none!important}
 .chk{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:500;cursor:pointer;user-select:none}
 .chk input{width:17px;height:17px;accent-color:var(--acc);cursor:pointer}
 details.ratio{position:relative}
@@ -145,11 +128,12 @@ details.ratio[open] summary{border-color:var(--acc);color:var(--ink)}
 .ratio-box input{width:70px;border:1px solid var(--line);background:var(--panel2);border-radius:8px;padding:6px 8px;text-align:right;font-variant-numeric:tabular-nums}
 .ratio-box .a{color:var(--atk)} .ratio-box .d{color:var(--def)} .ratio-box .s{color:var(--spd)}
 
-.lhead,.lrow{display:grid;grid-template-columns:54px 56px minmax(0,1.25fr) repeat(3,minmax(96px,1fr)) 86px;gap:14px;align-items:center}
+.lhead,.lrow{display:grid;grid-template-columns:54px 56px minmax(0,1.1fr) repeat(3,minmax(156px,1fr)) 86px;gap:14px;align-items:center}
 .lhead{padding:0 16px 8px;font-size:12.5px;font-weight:700;color:var(--ink3)}
 .lhead .r{text-align:right}
 .lrows{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden}
-.lrow{width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--line);padding:10px 16px;position:relative}
+.lrow{width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--line);padding:12px 16px;position:relative;cursor:pointer}
+.lrow:focus-visible{outline:2px solid var(--acc);outline-offset:-2px}
 .lrow:last-child{border-bottom:0}
 .lrow:hover{background:var(--panel2)}
 .lrow.sel{background:var(--panel2)}
@@ -179,6 +163,14 @@ details.ratio[open] summary{border-color:var(--acc);color:var(--ink)}
   .stage img{height:210px}
   .ghost{top:30%}
 }
+@media (max-width:980px){
+  .lhead{display:none}
+  .lrow{grid-template-columns:36px 48px minmax(0,1fr) 62px;grid-template-areas:"rn th in tot" "sc sc sc sc";gap:8px 10px;padding:12px 14px}
+  .rn{grid-area:rn;font-size:24px} .thumb{grid-area:th;width:48px;height:48px}
+  .pinfo{grid-area:in} .tot{grid-area:tot;font-size:22px}
+  .scs{grid-area:sc;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+  .sc::before{content:attr(data-l);display:block;font-size:11px;font-weight:700;color:var(--ink3)}
+}
 @media (max-width:720px){
   .nav-in{flex-wrap:wrap;height:auto;gap:0 10px}
   .brand{font-size:15px;height:48px}
@@ -189,19 +181,13 @@ details.ratio[open] summary{border-color:var(--acc);color:var(--ink)}
   .hero{scroll-margin-top:96px}
   .sp .big{font-size:31px;margin:2px 0 8px}
   .ranks{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .specs{gap:8px;padding-bottom:12px}
-  .minewrap{padding-bottom:26px}
-  .mgrid{grid-template-columns:56px repeat(2,minmax(0,1fr))}
+  .specs{gap:8px;padding-bottom:26px}
   .sp{padding:11px 11px 13px}
   .sp .t{font-size:13px} .sp .f{font-size:11px}
-  .lhead{display:none}
-  .lrow{grid-template-columns:36px 48px minmax(0,1fr) 62px;grid-template-areas:"rn th in tot" "sc sc sc sc";gap:8px 10px;padding:12px 14px}
-  .rn{grid-area:rn;font-size:24px} .thumb{grid-area:th;width:48px;height:48px}
-  .pinfo{grid-area:in} .tot{grid-area:tot;font-size:22px}
-  .scs{grid-area:sc;display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-  .sc::before{content:attr(data-l);display:block;font-size:11px;font-weight:700;color:var(--ink3)}
+  .sc .ed{grid-template-columns:1fr;gap:2px}
+  .sc .el{margin-top:3px}
 }
-@media (min-width:721px){ .scs{display:contents} }
+@media (min-width:981px){ .scs{display:contents} }
 @media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
 </style>
 </head>
@@ -228,7 +214,6 @@ details.ratio[open] summary{border-color:var(--acc);color:var(--ink)}
     <div class="stage"><div class="floor"></div><span id="hImg" style="display:contents"></span></div>
   </div>
   <div class="specs" id="hSpecs"></div>
-  <div class="minewrap" id="myPanel"></div>
 </section>
 
 <main class="lineup">
@@ -258,8 +243,8 @@ details.ratio[open] summary{border-color:var(--acc);color:var(--ink)}
   <p class="foot">
     실제 능력치 기준은 펫의 Lv.1 초기치에 레벨당 성장률을 (레벨-1)번 더한 값에 탑승 반영률을 곱해요. 예를 들어 펫 방어가 200이고 반영률이 50%면 +100이에요.
     게임에서는 탑승 수치의 소수점이 반올림되지 않고 버려져요. 방어 187에 50%를 곱하면 93.5인데 실제로는 +93이 올라갔어요. 그래서 맨 위 카드의 큰 숫자는 버림한 값이고, 목록에는 소수점까지 남겨서 보여줘요.
-    기본값은 도감 기준 평균 성장률로 계산해요. 펫마다 성장률이 달라서, 맨 위 카드 아래 "내 펫으로 계산하기"에 내 펫의 초기치와 성장률을 넣으면 그 펫 기준으로 바뀔어요.
-    성장률은 게임에 소수 셋째 자리까지만 나와서 경계값(예: 83.99)은 1 정도 차이가 날 수 있어요.
+    기본값은 도감 기준 평균 성장률로 계산해요. 펫마다 성장률이 달라서, 목록에서 펫을 찾아 능력치와 성장률 옆의 − + 버튼으로 내 펫 값에 맞추면 그 펫 기준으로 바뀜어요. 버튼을 꾹 누르면 빠르게 바뀔고, 숫자를 눌러 직접 입력해도 돼요. 수정한 값은 이 브라우저에 저장돼요.
+    능력치를 직접 맞추면 그 레벨의 값을 기준으로 위쪽 Lv. 입력에 따라 앞뒤 레벨을 계산해요. 성장률은 게임에 소수 셋째 자리까지만 나와서 경계값(예: 83.99)은 1 정도 차이가 날 수 있어요.
     1환생 수치 적용을 켜면 환생 가능한 펫은 환생 보너스가 더해진 성장률로 계산하고, 초기치는 그대로예요. 펫 최대 레벨은 140으로 두었어요.
     막대 길이는 탑승 가능한 펫 중 가장 높은 값을 100으로 놓은 비율이에요.
     데이터는 접속할 때마다 새로 불러와서 새 펫이나 환생 정보가 올라오면 자동으로 반영돼요.
@@ -316,7 +301,8 @@ const TABS = [
   { id:"s",   group:"one", label:"순발력",   desc:"순발력이",                     keys:["s"] }
 ];
 
-/* 탑승 가능 + 출시된 펫만 뽑아서 반영된 상승치까지 계산 */
+/* 탑승 가능 + 출시된 펫만 뽑아서 반영된 상승치까지 계산
+   내 펫 값(my): g = 성장률, st = {v, lv} 는 'Lv.lv 에서 능력치가 v' 라고 직접 맞춘 값이에요. */
 function buildList(rows, trans, opt){
   const seen = new Set(), out = [];
   for(const r of rows){
@@ -326,38 +312,40 @@ function buildList(rows, trans, opt){
     seen.add(r.id);
     const t = opt.trans ? (trans[String(r.id)] || null) : null;
     const g0 = growthOf(r, t), i0 = initOf(r);
-    const my = (opt.my && opt.my[r.id]) || null;   /* 내 펫 값 (비워둔 칸은 기본값) */
-    const mg = (my && my.g) || {}, mi = (my && my.i) || {};
-    const g = { a:pickNum(mg.a, g0.a), d:pickNum(mg.d, g0.d), s:pickNum(mg.s, g0.s) };
-    const ini = { a:pickNum(mi.a, i0.a), d:pickNum(mi.d, i0.d), s:pickNum(mi.s, i0.s) };
-    const L = (my && typeof my.lv === "number") ? my.lv : (opt.lv || 140);
-    const n = Math.max(0, L - 1);
-    const act = { a:ini.a+g.a*n, d:ini.d+g.d*n, s:ini.s+g.s*n };
+    const my = (opt.my && opt.my[r.id]) || null;
+    const mg = (my && my.g) || {}, ms = (my && my.st) || {};
+    const L = opt.lv || 140;
+    const g = {}, act = {}, an = {}, ini = {};
+    for(const k of ["a","d","s"]){
+      g[k] = pickNum(mg[k], g0[k]);
+      const a = (ms[k] && typeof ms[k].v === "number" && typeof ms[k].lv === "number") ? ms[k] : null;
+      an[k] = a;
+      ini[k] = i0[k];
+      act[k] = Math.max(0, a ? a.v + g[k]*(L - a.lv) : i0[k] + g[k]*(L - 1));
+    }
     const base = opt.basis === "grow" ? g : act;
     out.push({
       id:r.id, name:cleanName(r.name), how:String(r.how||""), code:r.imageCode, isTrans:!!t,
       mine:!!my, lvUsed:L,
       g, dg:{ a:g0.a, d:g0.d, s:g0.s },
-      init:ini, di:{ a:i0.a, d:i0.d, s:i0.s },
-      act,
+      init:ini, an, act,
       up:{ a:base.a*opt.ra, d:base.d*opt.rd, s:base.s*opt.rs }
     });
   }
   return out;
 }
-/* 레벨 L 과 L+1 의 펫 능력치/탑승 상승치, 다음에 +1 오르는 레벨 */
-function projectMine(p, ratios){
+/* 지금 레벨과 다음 레벨의 적용값, 다음에 +1 오르는 레벨 */
+function nextInfo(p, ratios){
   const L = p.lvUsed;
-  return [["a","공격"],["d","방어"],["s","순발"]].map(([k,label])=>{
+  return ["a","d","s"].map(k=>{
     const r = ratios[k];
-    const stat = l => p.init[k] + p.g[k]*(l-1);
-    const st = stat(L), up = st*r, ap = applied(up);
-    let st1 = null, up1 = null, ap1 = null, nextLv = null;
-    if(L < 140){
-      st1 = stat(L+1); up1 = st1*r; ap1 = applied(up1);
-      for(let l=L+1; l<=140; l++){ if(applied(stat(l)*r) > ap){ nextLv = l; break; } }
-    }
-    return { k, label, st, up, ap, st1, up1, ap1, nextLv, atMax:L>=140 };
+    const stat = l => Math.max(0, p.an[k] ? p.an[k].v + p.g[k]*(l - p.an[k].lv) : p.init[k] + p.g[k]*(l - 1));
+    const ap = applied(stat(L)*r);
+    if(L >= 140) return { k, ap, atMax:true };
+    const ap1 = applied(stat(L+1)*r);
+    let nextLv = null;
+    for(let l=L+1; l<=140; l++){ if(applied(stat(l)*r) > ap){ nextLv = l; break; } }
+    return { k, ap, ap1, nextLv, atMax:false };
   });
 }
 function scoreOf(p, tab){ return tab.keys.reduce((sum,k)=>sum+p.up[k], 0); }
@@ -390,14 +378,14 @@ function loadPrefs(){
     if(typeof p.trans==="boolean") state.trans = p.trans;
     if(p.basis==="grow" || p.basis==="actual") state.basis = p.basis;
     if(typeof p.lv==="number" && p.lv>=1 && p.lv<=140) state.lv = Math.round(p.lv);
-    if(p.my && typeof p.my === "object") state.my = p.my;
+    if(p.my2 && typeof p.my2 === "object") state.my = p.my2;
     ["ra","rd","rs"].forEach(k=>{ if(typeof p[k]==="number" && p[k]>=0) state[k]=p[k]; });
     if(p.theme) document.documentElement.setAttribute("data-theme", p.theme);
     else if(window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches) document.documentElement.setAttribute("data-theme","dark");
   }catch(e){}
 }
 function savePrefs(){
-  try{ localStorage.setItem(STORE, JSON.stringify({ tab:state.tab, trans:state.trans, basis:state.basis, lv:state.lv, my:state.my, ra:state.ra, rd:state.rd, rs:state.rs, theme:document.documentElement.getAttribute("data-theme") })); }catch(e){}
+  try{ localStorage.setItem(STORE, JSON.stringify({ tab:state.tab, trans:state.trans, basis:state.basis, lv:state.lv, my2:state.my, ra:state.ra, rd:state.rd, rs:state.rs, theme:document.documentElement.getAttribute("data-theme") })); }catch(e){}
 }
 
 async function fetchJson(url){
@@ -463,7 +451,9 @@ function renderNav(){
   });
 }
 
-let lastSpriteId = null, mineOpen = false, mineFor = null, listTimer = null;
+let lastSpriteId = null, resortTimer = null, lastEditId = null, hold = null;
+const num2 = v => String(Math.round(v*100)/100);
+const num3 = v => (Math.round(v*1000)/1000).toFixed(3);
 
 function renderHero(){
   const p = selectedPet();
@@ -473,8 +463,6 @@ function renderHero(){
     const holder = $("hImg"); holder.innerHTML = ""; holder.appendChild(spriteImg(p.code)); lastSpriteId = p.id;
   }
   renderSpecs(p);
-  if(mineFor !== p.id){ renderMine(p); mineFor = p.id; }
-  else { updateMineResult(p); }
 }
 
 function renderChips(p){
@@ -490,12 +478,19 @@ function renderChips(p){
   });
 }
 
+function nextText(ni, L){
+  if(ni.atMax) return "최대 레벨이라 더 오르지 않아요";
+  if(ni.ap1 > ni.ap) return `Lv.${L+1}에 +${ni.ap1} (+${ni.ap1 - ni.ap} 더 올라요)`;
+  return `Lv.${L+1}에도 +${ni.ap1}로 그대로예요` + (ni.nextLv ? `, 다음 +1은 Lv.${ni.nextLv}` : "");
+}
+
 function renderSpecs(p){
   const tab = curTab();
   const ratioKey = { a:"ra", d:"rd", s:"rs" };
   const grow = state.basis === "grow";
-  $("hSpecs").innerHTML = KEYS.map(([k,label])=>{
-    const upv = p.up[k];
+  const nis = grow ? null : nextInfo(p, { a:state.ra, d:state.rd, s:state.rs });
+  $("hSpecs").innerHTML = KEYS.map(([k,label], idx)=>{
+    const upv = p.up[k], an = p.an[k], ni = nis && nis[idx];
     return `
     <div class="sp ${k}${tab.keys.includes(k)?" hi":""}">
       <div class="t">${label} 상승${grow ? " (레벨당)" : ` (Lv.${p.lvUsed})`}</div>
@@ -506,7 +501,8 @@ function renderSpecs(p){
         ? `<div class="f">성장률 ${f3(p.g[k])} × 반영 ${pct(ratioKey[k])}%</div>`
         : `<div class="f">소수점 포함 +${f2(upv)} (소수점은 적용되지 않고 버려져요)</div>
            <div class="f2">펫 ${label} ${f2(p.act[k])} × 반영 ${pct(ratioKey[k])}%</div>
-           <div class="f2">Lv.${p.lvUsed}: 초기치 ${f2(p.init[k])} + 성장률 ${f3(p.g[k])} × ${p.lvUsed-1}</div>`}
+           <div class="f2">${an ? `내 입력: Lv.${an.lv}에서 ${f2(an.v)}, 레벨당 +${f3(p.g[k])}` : `Lv.${p.lvUsed}: 초기치 ${f2(p.init[k])} + 성장률 ${f3(p.g[k])} × ${p.lvUsed-1}`}</div>
+           <div class="f2">${nextText(ni, p.lvUsed)}</div>`}
     </div>`;
   }).join("");
   requestAnimationFrame(()=>requestAnimationFrame(()=>{
@@ -514,82 +510,134 @@ function renderSpecs(p){
   }));
 }
 
-/* ----- 내 펫으로 계산하기 ----- */
-function renderMine(p){
-  const box = $("myPanel");
-  box.innerHTML = `
-    <details class="mine" id="mineD"${mineOpen ? " open" : ""}>
-      <summary>내 펫으로 계산하기<span class="mtag" id="mineTag" hidden>내 펫 값 적용 중</span></summary>
-      <div class="mine-body">
-        <p class="mine-help">펫마다 성장률이 달라서, 게임 펫 정보창에 나온 초기치와 성장률을 그대로 넣으면 내 펫을 탔을 때 얼마나 올라가는지 계산해요. 칸을 비워두면 도감 기준 기본값을 써요. 펫 레벨을 바꿔서 다음 레벨에 수치가 더 오르는지도 확인할 수 있어요.</p>
-        <div class="mgrid">
-          <div class="mh"></div><div class="mh">초기치</div><div class="mh">성장률</div>
-          <div class="ml a">공격</div><input type="number" step="0.001" min="0" inputmode="decimal" data-f="i.a"><input type="number" step="0.001" min="0" inputmode="decimal" data-f="g.a">
-          <div class="ml d">방어</div><input type="number" step="0.001" min="0" inputmode="decimal" data-f="i.d"><input type="number" step="0.001" min="0" inputmode="decimal" data-f="g.d">
-          <div class="ml s">순발</div><input type="number" step="0.001" min="0" inputmode="decimal" data-f="i.s"><input type="number" step="0.001" min="0" inputmode="decimal" data-f="g.s">
-          <div class="ml">펫 레벨</div><input type="number" step="1" min="1" max="140" inputmode="numeric" data-f="lv"><div></div>
-        </div>
-        <div class="mres" id="mineRes"></div>
-        <p class="mnote">탑승 수치는 소수점이 버려져요. 성장률이 소수 셋째 자리까지만 보여서 경계값은 1 정도 차이가 날 수 있어요.</p>
-        <button type="button" class="mreset" id="mineReset">기본값으로 되돌리기</button>
-      </div>
-    </details>`;
-  const my = state.my[p.id] || {};
-  const setVal = (f, v) => { const el = box.querySelector(`[data-f="${f}"]`); el.value = (typeof v === "number" && isFinite(v)) ? v : ""; };
-  ["a","d","s"].forEach(k=>{ setVal("i."+k, my.i && my.i[k]); setVal("g."+k, my.g && my.g[k]); });
-  setVal("lv", my.lv);
-  box.querySelectorAll("input").forEach(el => { el.oninput = () => onMineInput(p.id); });
-  $("mineD").ontoggle = () => { mineOpen = $("mineD").open; };
-  $("mineReset").onclick = () => {
-    delete state.my[p.id]; savePrefs();
-    box.querySelectorAll("input").forEach(el => { el.value = ""; });
-    refreshAfterMine(p.id);
-  };
-  updateMineResult(p);
+/* ----- 목록에서 바로 내 펫 값 맞추기 (− + 버튼) ----- */
+function markSel(id){
+  document.querySelectorAll(".lrow.sel").forEach(r=>r.classList.remove("sel"));
+  const r = document.querySelector(`.lrow[data-id="${id}"]`);
+  if(r) r.classList.add("sel");
+}
+function selectRow(row){
+  state.sel = Number(row.dataset.id);
+  renderHero(); markSel(state.sel);
+  $("hero").scrollIntoView({ behavior: smooth() ? "smooth" : "auto", block:"start" });
 }
 
-function onMineInput(id){
-  const box = $("myPanel");
-  const get = f => { const v = parseFloat(box.querySelector(`[data-f="${f}"]`).value); return (isFinite(v) && v >= 0) ? v : null; };
-  const lvRaw = get("lv");
-  const m = {
-    lv: lvRaw == null ? null : Math.min(140, Math.max(1, Math.round(lvRaw))),
-    i: { a:get("i.a"), d:get("i.d"), s:get("i.s") },
-    g: { a:get("g.a"), d:get("g.d"), s:get("g.s") }
-  };
-  const empty = m.lv == null && Object.values(m.i).every(v=>v==null) && Object.values(m.g).every(v=>v==null);
-  if(empty) delete state.my[id]; else state.my[id] = m;
-  savePrefs();
-  refreshAfterMine(id);
-}
-
-function refreshAfterMine(id){
-  compute();
-  const p = C.list.find(x=>x.id===id) || selectedPet();
-  if(!p) return;
-  renderChips(p); renderSpecs(p); updateMineResult(p);
-  clearTimeout(listTimer); listTimer = setTimeout(renderList, 200);
-}
-
-function updateMineResult(p){
-  const box = $("myPanel");
-  if(!box.querySelector("#mineRes")) return;
-  const tag = $("mineTag"); if(tag) tag.hidden = !p.mine;
-  /* 칸이 비어 있으면 기본값을 흐린 글씨로 보여줘요 */
-  ["a","d","s"].forEach(k=>{
-    box.querySelector(`[data-f="i.${k}"]`).placeholder = f2(p.di[k]);
-    box.querySelector(`[data-f="g.${k}"]`).placeholder = f3(p.dg[k]);
+/* 화면의 숫자만 그 자리에서 바꿔요 (버튼을 누르고 있는 동안 줄이 사라지지 않게) */
+function updateRow(p){
+  const row = document.querySelector(`.lrow[data-id="${p.id}"]`);
+  if(!row) return;
+  row.querySelectorAll(".sc").forEach(cell=>{
+    const k = cell.dataset.k;
+    cell.querySelector(".v").textContent = "+" + fv(p.up[k]);
+    cell.querySelector(".b i").style.width = Math.min(100, p.up[k]/C.max[k]*100).toFixed(1) + "%";
+    const setIn = (f, val) => { const el = cell.querySelector(`.stp[data-f="${f}"] .si`); if(el && el !== document.activeElement) el.value = val; };
+    setIn("st", num2(p.act[k])); setIn("g", num3(p.g[k]));
   });
-  box.querySelector(`[data-f="lv"]`).placeholder = String(state.lv);
-  const L = p.lvUsed;
-  const rows = projectMine(p, { a:state.ra, d:state.rd, s:state.rs });
-  const next = r => r.atMax ? '<td class="nochg">최대 레벨</td><td class="nochg">-</td>'
-    : `<td>+${r.ap1}${r.ap1 > r.ap ? ` <span class="rise">(+${r.ap1 - r.ap})</span>` : ' <span class="nochg">(변화 없음)</span>'}</td>
-       <td>${r.nextLv ? `Lv.${r.nextLv}` : '<span class="nochg">Lv.140까지 없음</span>'}</td>`;
-  $("mineRes").innerHTML = `<table>
-    <thead><tr><th>항목</th><th>펫 능력치 (Lv.${L})</th><th>탑승 상승 (소수점 포함)</th><th>게임 적용 (버림)</th><th>${L < 140 ? `Lv.${L+1}에 적용` : "다음 레벨"}</th><th>다음 +1 오르는 레벨</th></tr></thead>
-    <tbody>${rows.map(r=>`<tr><td>${r.label}</td><td>${f2(r.st)}</td><td>+${f2(r.up)}</td><td class="ap">+${r.ap}</td>${next(r)}</tr>`).join("")}</tbody>
-  </table>`;
+  row.querySelector(".tot").textContent = fv(scoreOf(p, curTab()));
+  row.querySelector(".mytag").hidden = !p.mine;
+  row.querySelector(".rst").hidden = !p.mine;
+}
+
+/* 손을 떼고 잠깐 뒤에 순위를 다시 정렬하고, 보던 줄이 화면에서 움직이지 않게 맞춰요 */
+function scheduleResort(id){
+  lastEditId = id;
+  clearTimeout(resortTimer);
+  resortTimer = setTimeout(()=>{
+    const old = document.querySelector(`.lrow[data-id="${id}"]`);
+    const top0 = old ? old.getBoundingClientRect().top : null;
+    renderList();
+    if(top0 != null){
+      const nw = document.querySelector(`.lrow[data-id="${id}"]`);
+      if(nw) window.scrollBy(0, nw.getBoundingClientRect().top - top0);
+    }
+  }, 700);
+}
+
+function commitEdit(id){
+  savePrefs(); compute();
+  const p = C.list.find(x=>x.id===id);
+  if(!p) return;
+  const changedSel = state.sel !== id;
+  state.sel = id;
+  if(changedSel){ renderHero(); markSel(id); } else { renderChips(p); renderSpecs(p); }
+  updateRow(p);
+  scheduleResort(id);
+}
+
+/* f: "g"(성장률) 또는 "st"(능력치), mult: 방향 × 가속 배수 */
+function adjust(id, k, f, mult){
+  const p = C.list.find(x=>x.id===id);
+  if(!p) return;
+  const m = state.my[id] || (state.my[id] = { g:{}, st:{} });
+  m.g = m.g || {}; m.st = m.st || {};
+  if(f === "g") m.g[k] = Math.max(0, Math.round((p.g[k] + mult*0.001)*1000)/1000);
+  else m.st[k] = { v:Math.max(0, Math.round((p.act[k] + mult)*100)/100), lv:p.lvUsed };
+  commitEdit(id);
+}
+function onTyped(inp){
+  const stp = inp.closest(".stp"), id = Number(inp.closest(".lrow").dataset.id);
+  const k = stp.dataset.k, f = stp.dataset.f;
+  const p = C.list.find(x=>x.id===id);
+  const v = parseFloat(inp.value);
+  if(!p || !isFinite(v) || v < 0){ if(p) updateRow(p); inp.value = f === "g" ? num3(p.g[k]) : num2(p.act[k]); return; }
+  const m = state.my[id] || (state.my[id] = { g:{}, st:{} });
+  m.g = m.g || {}; m.st = m.st || {};
+  if(f === "g") m.g[k] = Math.round(v*1000)/1000;
+  else m.st[k] = { v:Math.round(v*100)/100, lv:p.lvUsed };
+  commitEdit(id);
+  const q = C.list.find(x=>x.id===id);
+  inp.value = f === "g" ? num3(q.g[k]) : num2(q.act[k]);
+}
+function resetPet(id){
+  delete state.my[id];
+  savePrefs(); compute();
+  const p = C.list.find(x=>x.id===id);
+  if(!p) return;
+  if(state.sel === id){ renderChips(p); renderSpecs(p); }
+  updateRow(p);
+  document.querySelectorAll(`.lrow[data-id="${id}"] .si`).forEach(el=>{ el.blur(); });
+  scheduleResort(id);
+}
+
+/* 버튼을 꾹 누르면 점점 빨라져요 (성장률은 0.001, 능력치는 1씩) */
+function startHold(b){
+  stopHold(true);
+  const stp = b.closest(".stp");
+  const id = Number(b.closest(".lrow").dataset.id), k = stp.dataset.k, f = stp.dataset.f, dir = Number(b.dataset.d);
+  const t0 = Date.now();
+  const tick = () => { const el = Date.now() - t0; adjust(id, k, f, dir * (el < 900 ? 1 : el < 1800 ? 5 : 20)); };
+  tick();
+  const h = { id, delay:null, timer:null };
+  h.delay = setTimeout(()=>{ h.timer = setInterval(tick, 90); }, 380);
+  hold = h;
+}
+function stopHold(silent){
+  if(!hold) return;
+  clearTimeout(hold.delay); clearInterval(hold.timer);
+  const id = hold.id; hold = null;
+  if(!silent) scheduleResort(id);
+}
+function bindRows(){
+  const rows = $("rows");
+  rows.addEventListener("pointerdown", e => {
+    const b = e.target.closest(".sb");
+    if(!b) return;
+    e.preventDefault(); startHold(b);
+  });
+  window.addEventListener("pointerup", () => stopHold());
+  window.addEventListener("pointercancel", () => stopHold());
+  rows.addEventListener("contextmenu", e => { if(e.target.closest(".sb")) e.preventDefault(); });
+  rows.addEventListener("click", e => {
+    const b = e.target.closest(".sb");
+    if(b){ if(e.detail === 0){ const stp = b.closest(".stp"); adjust(Number(b.closest(".lrow").dataset.id), stp.dataset.k, stp.dataset.f, Number(b.dataset.d)); } return; }
+    const r = e.target.closest(".rst");
+    if(r){ resetPet(Number(r.closest(".lrow").dataset.id)); return; }
+    if(e.target.closest(".ed")) return;
+    const row = e.target.closest(".lrow");
+    if(row) selectRow(row);
+  });
+  rows.addEventListener("change", e => { const inp = e.target.closest(".si"); if(inp) onTyped(inp); });
+  rows.addEventListener("keydown", e => { if(e.key === "Enter" && e.target.classList && e.target.classList.contains("lrow")) selectRow(e.target); });
 }
 
 function renderList(){
@@ -598,34 +646,29 @@ function renderList(){
   const q = state.q.trim().replace(/\s+/g,"").toLowerCase();
   const view = q ? ranked.filter(x=>x.p.name.replace(/\s+/g,"").toLowerCase().includes(q)) : ranked;
   const transCnt = C.list.filter(p=>p.isTrans).length;
-  $("lead").textContent = `탑승 가능한 ${C.list.length}마리를 ${tab.desc} ${tab.keys.length>1 ? "상승치" : "가장 많이 올라가는"} 순서로 보여줘요. ${state.basis === "grow" ? "레벨당 성장치 기준이에요." : `펫이 Lv.${state.lv}일 때 실제로 올라가는 수치 기준이고, 목록에는 소수점까지 보여줘요(게임에서는 소수점이 버려져요).`}` +
-    (state.trans ? ` 1환생 수치는 ${transCnt}마리에 적용됐어요.` : " 환생 전 수치 기준이에요.") + " 펫을 누르면 위에서 자세히 볼 수 있어요.";
+  const grow = state.basis === "grow";
+  $("lead").textContent = `탑승 가능한 ${C.list.length}마리를 ${tab.desc} ${tab.keys.length>1 ? "상승치" : "가장 많이 올라가는"} 순서로 보여줘요. ${grow ? "레벨당 성장치 기준이에요." : `펫이 Lv.${state.lv}일 때 실제로 올라가는 수치 기준이고, 목록에는 소수점까지 보여줘요(게임에서는 소수점이 버려져요).`}` +
+    (state.trans ? ` 1환생 수치는 ${transCnt}마리에 적용됐어요.` : " 환생 전 수치 기준이에요.") + " 펫을 누르면 위에서 자세히 볼 수 있고, 능력치와 성장률 옆의 − + 버튼으로 내 펫 값에 맞출 수 있어요.";
   $("lhScore").textContent = tab.label;
 
   const box = $("rows");
   box.innerHTML = "";
   if(!view.length){ box.innerHTML = `<div class="state">${q ? "검색 결과가 없어요." : "표시할 펫이 없어요."}</div>`; return; }
+  const stp = (k, f, val, label) => `<span class="stp" data-k="${k}" data-f="${f}"><button type="button" class="sb" data-d="-1" aria-label="${label} 줄이기">−</button><input class="si" type="number" step="any" inputmode="decimal" value="${val}" aria-label="${label}"><button type="button" class="sb" data-d="1" aria-label="${label} 늘리기">+</button></span>`;
   const frag = document.createDocumentFragment();
   view.forEach(({p, score, rank})=>{
-    const row = document.createElement("button");
-    row.type = "button"; row.dataset.id = p.id;
+    const row = document.createElement("div");
+    row.tabIndex = 0; row.dataset.id = p.id;
     row.className = "lrow" + (rank<=3 ? " t"+rank : "") + (sel && sel.id===p.id ? " sel" : "");
-    const sc = ([k,label]) => `<div class="sc ${k}${tab.keys.includes(k)?" hi":""}" data-l="${label}"><div class="v">+${fv(p.up[k])}</div><div class="b"><i style="width:${(p.up[k]/C.max[k]*100).toFixed(1)}%"></i></div>${state.basis === "grow" ? "" : `<div class="gr">성장률 ${f3(p.g[k])}</div>`}</div>`;
+    const sc = ([k,label]) => `<div class="sc ${k}${tab.keys.includes(k)?" hi":""}" data-k="${k}" data-l="${label}"><div class="v">+${fv(p.up[k])}</div><div class="b"><i style="width:${Math.min(100, p.up[k]/C.max[k]*100).toFixed(1)}%"></i></div><div class="ed">${grow ? "" : `<span class="el">능력치</span>${stp(k, "st", num2(p.act[k]), label + " 능력치")}`}<span class="el">성장률</span>${stp(k, "g", num3(p.g[k]), label + " 성장률")}</div></div>`;
     row.innerHTML = `
       <div class="rn">${rank}</div>
       <div class="thumb"></div>
-      <div class="pinfo"><div class="nm">${esc(p.name)}${p.isTrans && state.trans ? '<span class="tag">1환생</span>' : ""}${p.mine ? '<span class="tag">내 펫 값</span>' : ""}</div><div class="hw">${esc(p.how)}</div></div>
+      <div class="pinfo"><div class="nm">${esc(p.name)}${p.isTrans && state.trans ? '<span class="tag">1환생</span>' : ""}<span class="tag mytag"${p.mine ? "" : " hidden"}>내 펫 값</span></div><div class="hw">${esc(p.how)}</div><button type="button" class="rst"${p.mine ? "" : " hidden"}>되돌리기</button></div>
       <div class="scs">${KEYS.map(sc).join("")}</div>
       <div class="tot">${fv(score)}</div>`;
     const img = spriteImg(p.code); img.loading = "lazy";
     row.querySelector(".thumb").appendChild(img);
-    row.onclick = () => {
-      state.sel = p.id;
-      renderHero();
-      box.querySelectorAll(".lrow.sel").forEach(r=>r.classList.remove("sel"));
-      row.classList.add("sel");
-      $("hero").scrollIntoView({ behavior: smooth() ? "smooth" : "auto", block:"start" });
-    };
     frag.appendChild(row);
   });
   box.appendChild(frag);
@@ -642,6 +685,7 @@ function renderAll(scrollTop){
 
 function bind(){
   $("optTrans").checked = state.trans;
+  bindRows();
   const syncBasis = () => {
     $("basisActual").setAttribute("aria-pressed", String(state.basis === "actual"));
     $("basisGrow").setAttribute("aria-pressed", String(state.basis === "grow"));
