@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>쟈쟈오토 승차감 랭킹</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#e9ecef; --panel:#ffffff; --panel2:#f4f6f8;
+  --ink:#0f1318; --ink2:#4a5561; --ink3:#8a949f; --line:#d3d9df;
+  --acc:#1f5fbf; --gold:#c8901a;
+  --atk:#d4531f; --def:#1f6fd0; --spd:#1c9567;
+  --stage-top:#f8f9fa; --stage-bot:#d6dce2; --floor:rgba(15,19,24,.20);
+  --num:'Barlow Condensed','Noto Sans KR',sans-serif;
+}
+[data-theme="dark"]{
+  --bg:#0e1216; --panel:#161c22; --panel2:#1c242c;
+  --ink:#eef2f6; --ink2:#a7b3bf; --ink3:#74818d; --line:#2a343e;
+  --acc:#6ea6f5; --gold:#e4b04a;
+  --atk:#ff8a5c; --def:#6cb0ff; --spd:#4fd1a0;
+  --stage-top:#1d262f; --stage-bot:#0f1418; --floor:rgba(0,0,0,.55);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;line-height:1.5}
+button,input,summary{font-family:inherit;font-size:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+
+/* ===== 상단 내비 ===== */
+.nav{position:sticky;top:0;z-index:20;background:var(--panel);border-bottom:1px solid var(--line)}
+.nav-in{max-width:1120px;margin:0 auto;padding:0 18px;display:flex;align-items:stretch;gap:18px;height:56px}
+.brand{display:flex;align-items:center;font-weight:900;font-size:17px;letter-spacing:-.3px;white-space:nowrap}
+.navtabs{flex:1;display:flex;align-items:stretch;gap:2px;overflow-x:auto;scrollbar-width:none}
+.navtabs::-webkit-scrollbar{display:none}
+.ntab{flex:0 0 auto;background:none;border:0;border-bottom:3px solid transparent;padding:0 13px;font-weight:700;font-size:14.5px;color:var(--ink2);margin-top:3px}
+.ntab:hover{color:var(--ink)}
+.ntab[aria-pressed="true"]{color:var(--ink);border-bottom-color:var(--acc)}
+.ndiv{flex:0 0 1px;background:var(--line);margin:14px 8px}
+.theme{align-self:center;border:1px solid var(--line);background:var(--panel2);border-radius:8px;padding:6px 11px;font-size:13px;font-weight:700;color:var(--ink2);white-space:nowrap}
+.theme:hover{color:var(--ink);border-color:var(--ink3)}
+
+#global-nav{display:none!important}
+.menu-btn{align-self:center;display:flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--panel2);border-radius:8px;padding:6px 12px;font-size:14px;font-weight:700;color:var(--ink);white-space:nowrap}
+.menu-btn:hover{border-color:var(--ink3)}
+.menu-btn[aria-expanded="true"]{border-color:var(--acc);color:var(--acc)}
+.sitemenu{display:none;position:absolute;left:0;right:0;top:100%;background:var(--panel);border-bottom:1px solid var(--line);box-shadow:0 16px 30px rgba(0,0,0,.14);max-height:calc(100vh - 60px);overflow-y:auto}
+.sitemenu.open{display:block}
+.sitemenu-in{max-width:1120px;margin:0 auto;padding:14px 18px 18px;display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px}
+.sitemenu a{display:flex;align-items:center;gap:8px;word-break:keep-all;line-height:1.3;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--panel2);color:var(--ink);text-decoration:none;font-weight:700;font-size:14px}
+.sitemenu a:hover{border-color:var(--acc);color:var(--acc)}
+.sitemenu a.on{background:var(--acc);border-color:var(--acc);color:#fff}
+
+/* ===== 히어로 (쇼룸) ===== */
+.hero{position:relative;overflow:hidden;scroll-margin-top:56px;background:linear-gradient(180deg,var(--stage-top) 0%,var(--stage-bot) 100%);border-bottom:1px solid var(--line)}
+.ghost{position:absolute;right:max(2vw,calc(50% - 540px));top:50%;transform:translateY(-54%);font-family:var(--num);font-weight:700;font-size:clamp(220px,34vw,460px);line-height:.8;color:var(--ink);opacity:.055;pointer-events:none;user-select:none;letter-spacing:-.02em}
+.hero-in{position:relative;max-width:1120px;margin:0 auto;padding:44px 18px 30px;display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:20px;align-items:center}
+.hero-rank{font-size:15px;font-weight:700;color:var(--acc)}
+.hero-rank b{font-family:var(--num);font-size:30px;font-weight:700;color:var(--ink);margin:0 3px 0 6px}
+h1{font-size:clamp(40px,7vw,76px);font-weight:900;letter-spacing:-.04em;line-height:1.08;margin:6px 0 8px;word-break:keep-all}
+.hero-how{font-size:14px;color:var(--ink2);max-width:46ch}
+.tag{display:inline-block;margin-left:8px;vertical-align:middle;font-size:12px;font-weight:700;color:#8a5a00;background:#ffe9b8;border-radius:5px;padding:2px 8px;letter-spacing:0}
+[data-theme="dark"] .tag{background:#4a3a12;color:#ffd98a}
+.ranks{display:grid;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:6px 8px;margin-top:22px;max-width:600px}
+.rk{background:rgba(255,255,255,.55);border:1px solid var(--line);border-radius:9px;padding:6px 10px;text-align:left;display:flex;justify-content:space-between;align-items:baseline;gap:8px;white-space:nowrap}
+[data-theme="dark"] .rk{background:rgba(255,255,255,.04)}
+.rk:hover{border-color:var(--ink3)}
+.rk.cur{border-color:var(--acc);background:var(--panel)}
+.rk .l{font-size:12px;font-weight:700;color:var(--ink2);white-space:nowrap}
+.rk .n{font-family:var(--num);font-size:20px;font-weight:700;line-height:1;white-space:nowrap}
+.rk.cur .l{color:var(--acc)}
+.stage{position:relative;height:300px;display:flex;align-items:flex-end;justify-content:center}
+.stage .floor{position:absolute;bottom:18px;left:50%;width:62%;height:26px;transform:translateX(-50%);background:radial-gradient(ellipse at center,var(--floor) 0%,transparent 70%)}
+.stage img{position:relative;width:min(300px,78%);height:270px;object-fit:contain;image-rendering:pixelated;margin-bottom:18px}
+
+/* ===== 스펙 스트립 ===== */
+.specs{position:relative;max-width:1120px;margin:0 auto;padding:0 18px 36px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.sp{background:var(--panel);border:1px solid var(--line);border-top:3px solid var(--line);border-radius:4px 4px 10px 10px;padding:14px 18px 16px}
+.sp.hi.a{border-top-color:var(--atk)} .sp.hi.d{border-top-color:var(--def)} .sp.hi.s{border-top-color:var(--spd)}
+.sp .t{font-size:14px;font-weight:700;color:var(--ink2)}
+.sp .big{font-family:var(--num);font-weight:700;font-size:clamp(40px,6.4vw,66px);line-height:1;margin:4px 0 10px;font-variant-numeric:tabular-nums}
+.sp .big small{font-size:.5em;margin-right:2px;color:var(--ink3)}
+.sp.a .big{color:var(--atk)} .sp.d .big{color:var(--def)} .sp.s .big{color:var(--spd)}
+.track{height:5px;background:var(--line);border-radius:3px;overflow:hidden}
+.track i{display:block;height:100%;width:0;border-radius:3px;transition:width .7s cubic-bezier(.2,.7,.2,1)}
+.sp.a .track i{background:var(--atk)} .sp.d .track i{background:var(--def)} .sp.s .track i{background:var(--spd)}
+.sp .f{font-size:12.5px;color:var(--ink3);margin-top:9px;font-variant-numeric:tabular-nums}
+
+/* ===== 라인업 ===== */
+.lineup{max-width:1120px;margin:0 auto;padding:34px 18px 70px}
+.lineup h2{font-size:26px;font-weight:900;letter-spacing:-.03em}
+.lineup .lead{font-size:14px;color:var(--ink2);margin:4px 0 18px}
+.ctrl{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;margin-bottom:14px}
+.search{flex:1 1 200px;min-width:160px;max-width:320px;border:1px solid var(--line);background:var(--panel);border-radius:9px;padding:9px 13px;outline:none}
+.search:focus{border-color:var(--acc)}
+.chk{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:500;cursor:pointer;user-select:none}
+.chk input{width:17px;height:17px;accent-color:var(--acc);cursor:pointer}
+details.ratio{position:relative}
+details.ratio summary{list-style:none;cursor:pointer;border:1px solid var(--line);background:var(--panel);border-radius:9px;padding:8px 13px;font-size:14px;font-weight:700;color:var(--ink2)}
+details.ratio summary::-webkit-details-marker{display:none}
+details.ratio[open] summary{border-color:var(--acc);color:var(--ink)}
+.ratio-box{position:absolute;z-index:5;top:calc(100% + 6px);left:0;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:flex;gap:14px;box-shadow:0 12px 30px rgba(0,0,0,.14)}
+.ratio-box label{display:flex;flex-direction:column;gap:5px;font-size:13px;font-weight:700}
+.ratio-box input{width:70px;border:1px solid var(--line);background:var(--panel2);border-radius:8px;padding:6px 8px;text-align:right;font-variant-numeric:tabular-nums}
+.ratio-box .a{color:var(--atk)} .ratio-box .d{color:var(--def)} .ratio-box .s{color:var(--spd)}
+
+.lhead,.lrow{display:grid;grid-template-columns:54px 56px minmax(0,1.25fr) repeat(3,minmax(96px,1fr)) 86px;gap:14px;align-items:center}
+.lhead{padding:0 16px 8px;font-size:12.5px;font-weight:700;color:var(--ink3)}
+.lhead .r{text-align:right}
+.lrows{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.lrow{width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--line);padding:10px 16px;position:relative}
+.lrow:last-child{border-bottom:0}
+.lrow:hover{background:var(--panel2)}
+.lrow.sel{background:var(--panel2)}
+.lrow.sel::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--acc)}
+.rn{font-family:var(--num);font-weight:700;font-size:28px;line-height:1;color:var(--ink3);text-align:center;font-variant-numeric:tabular-nums}
+.lrow.t1 .rn{color:var(--gold)} .lrow.t2 .rn,.lrow.t3 .rn{color:var(--ink2)}
+.thumb{width:56px;height:56px;border-radius:9px;background:var(--panel2);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.lrow.sel .thumb{background:var(--panel)}
+.thumb img{max-width:100%;max-height:100%;image-rendering:pixelated;object-fit:contain}
+.nm{font-weight:800;font-size:16px;line-height:1.3}
+.nm .tag{font-size:11px;padding:1px 6px;margin-left:6px}
+.hw{font-size:12.5px;color:var(--ink3);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sc .v{font-family:var(--num);font-weight:700;font-size:21px;line-height:1.1;font-variant-numeric:tabular-nums;color:var(--ink3)}
+.sc.hi .v{color:var(--ink)}
+.sc .b{height:4px;background:var(--line);border-radius:2px;margin-top:5px;overflow:hidden}
+.sc .b i{display:block;height:100%;border-radius:2px;background:var(--ink3);opacity:.45}
+.sc.hi.a .v{color:var(--atk)} .sc.hi.d .v{color:var(--def)} .sc.hi.s .v{color:var(--spd)}
+.sc.hi.a .b i{background:var(--atk);opacity:1} .sc.hi.d .b i{background:var(--def);opacity:1} .sc.hi.s .b i{background:var(--spd);opacity:1}
+.tot{text-align:right;font-family:var(--num);font-weight:700;font-size:26px;font-variant-numeric:tabular-nums}
+.state{text-align:center;padding:60px 16px;color:var(--ink2);font-size:14.5px;line-height:1.8}
+.state.err{color:#d04646}
+.foot{margin-top:22px;font-size:12.5px;color:var(--ink3);line-height:1.8;max-width:80ch}
+
+@media (max-width:860px){
+  .hero-in{grid-template-columns:1fr;padding-top:30px;gap:0}
+  .stage{height:230px;order:-1}
+  .stage img{height:210px}
+  .ghost{top:30%}
+}
+@media (max-width:720px){
+  .nav-in{flex-wrap:wrap;height:auto;gap:0 10px}
+  .brand{font-size:15px;height:48px}
+  .sitemenu-in{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .sitemenu{max-height:calc(100vh - 100px)}
+  .theme{margin-left:auto;align-self:center}
+  .navtabs{order:3;flex:1 0 100%;height:44px;margin:0 -6px}
+  .hero{scroll-margin-top:96px}
+  .sp .big{font-size:31px;margin:2px 0 8px}
+  .ranks{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .specs{gap:8px;padding-bottom:26px}
+  .sp{padding:11px 11px 13px}
+  .sp .t{font-size:13px} .sp .f{font-size:11px}
+  .lhead{display:none}
+  .lrow{grid-template-columns:36px 48px minmax(0,1fr) 62px;grid-template-areas:"rn th in tot" "sc sc sc sc";gap:8px 10px;padding:12px 14px}
+  .rn{grid-area:rn;font-size:24px} .thumb{grid-area:th;width:48px;height:48px}
+  .pinfo{grid-area:in} .tot{grid-area:tot;font-size:22px}
+  .scs{grid-area:sc;display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .sc::before{content:attr(data-l);display:block;font-size:11px;font-weight:700;color:var(--ink3)}
+}
+@media (min-width:721px){ .scs{display:contents} }
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<nav class="nav" aria-label="랭킹 종류">
+  <div class="nav-in">
+    <button class="menu-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="siteMenu">☰ 메뉴</button>
+    <div class="brand">쟈쟈오토 승차감 랭킹</div>
+    <div class="navtabs" id="navtabs"></div>
+    <button class="theme" id="themeBtn" type="button">다크 모드</button>
+  </div>
+  <div class="sitemenu" id="siteMenu"><div class="sitemenu-in" id="siteMenuIn"></div></div>
+</nav>
+
+<section class="hero" id="hero" aria-live="polite">
+  <div class="ghost" id="ghost" aria-hidden="true"></div>
+  <div class="hero-in">
+    <div>
+      <p class="hero-rank" id="hRank"></p>
+      <h1 id="hName">불러오는 중</h1>
+      <p class="hero-how" id="hHow"></p>
+      <div class="ranks" id="hRanks"></div>
+    </div>
+    <div class="stage"><div class="floor"></div><span id="hImg" style="display:contents"></span></div>
+  </div>
+  <div class="specs" id="hSpecs"></div>
+</section>
+
+<main class="lineup">
+  <h2>전체 라인업</h2>
+  <p class="lead" id="lead"></p>
+  <div class="ctrl">
+    <input class="search" id="q" type="search" placeholder="펫 이름 검색" autocomplete="off" aria-label="펫 이름 검색">
+    <label class="chk"><input type="checkbox" id="optTrans" checked> 1환생 수치 적용</label>
+    <details class="ratio" id="ratioBox">
+      <summary id="ratioSum">탑승 반영률</summary>
+      <div class="ratio-box">
+        <label><span class="a">공격 %</span><input id="rA" type="number" min="0" max="200" step="1"></label>
+        <label><span class="d">방어 %</span><input id="rD" type="number" min="0" max="200" step="1"></label>
+        <label><span class="s">순발 %</span><input id="rS" type="number" min="0" max="200" step="1"></label>
+      </div>
+    </details>
+  </div>
+  <div class="lhead" aria-hidden="true">
+    <span>순위</span><span></span><span>펫</span><span>공격</span><span>방어</span><span>순발</span><span class="r" id="lhScore"></span>
+  </div>
+  <div class="lrows" id="rows"></div>
+  <p class="foot">
+    탑승 시 상승치는 펫 성장치에 탑승 반영률을 곱한 값이에요. 성장치는 도감과 같은 방식(등급 보정 포함)으로 계산하고,
+    1환생 수치 적용을 켜면 환생 가능한 펫은 환생 보너스가 더해진 성장치로 계산해요.
+    막대 길이는 탑승 가능한 펫 중 가장 높은 값을 100으로 놓은 비율이에요.
+    데이터는 접속할 때마다 새로 불러와서 새 펫이나 환생 정보가 올라오면 자동으로 반영돼요.
+  </p>
+</main>
+
+<script src="nav.js"></script>
+<script>
+/*LOGIC_START*/
+const RAW_BASE = "https://raw.githubusercontent.com/llumixxx/jaja/main/";
+const API_URL  = "https://sa000001.com/sa2/info/api/pet_data.php";
+const IMG_BASE = "./sprites/";
+const SAWORLD_IMG_BASE = "https://saworld.net/PetAnimation/";
+
+const num = v => { v = Number(v); return isFinite(v) ? v : 0; };
+const cleanName = s => String(s || "").replace(/^\uFEFF/, "").trim();
+
+function rankInfoB(sum){
+  if(sum>=100) return 475; if(sum>=95) return 495; if(sum>=90) return 515;
+  if(sum>=85) return 535;  if(sum>=80) return 555; return 575;
+}
+function disp(h,a,d,s){
+  return { h:h*4+a+d+s, a:h*0.1+a+d*0.1+s*0.05, d:h*0.1+a*0.1+d+s*0.05, s:s };
+}
+/* 성장치: 환생 데이터(t)가 있으면 계수에 환생치를 더하고 등급(B)은 원래 그대로 */
+function growthOf(r, t){
+  const B = rankInfoB(num(r.h0)+num(r.a0)+num(r.d0)+num(r.s0));
+  const lv = num(r.lvup);
+  const th = t ? num(t.h) : 0, ta = t ? num(t.a) : 0, td = t ? num(t.d) : 0, ts = t ? num(t.s) : 0;
+  const ph = num(r.h0)+lv+th, pa = num(r.a0)+lv+ta, pd = num(r.d0)+lv+td, ps = num(r.s0)+lv+ts;
+  return disp(ph*B/10000, pa*B/10000, pd*B/10000, ps*B/10000);
+}
+
+const TABS = [
+  { id:"all", group:"eff", label:"전체효율", desc:"공격, 방어, 순발을 모두 더한", keys:["a","d","s"] },
+  { id:"as",  group:"eff", label:"공순효율", desc:"공격과 순발을 더한",           keys:["a","s"] },
+  { id:"ad",  group:"eff", label:"공방효율", desc:"공격과 방어를 더한",           keys:["a","d"] },
+  { id:"ds",  group:"eff", label:"방순효율", desc:"방어와 순발을 더한",           keys:["d","s"] },
+  { id:"a",   group:"one", label:"공격력",   desc:"공격력이",                     keys:["a"] },
+  { id:"d",   group:"one", label:"방어력",   desc:"방어력이",                     keys:["d"] },
+  { id:"s",   group:"one", label:"순발력",   desc:"순발력이",                     keys:["s"] }
+];
+
+/* 탑승 가능 + 출시된 펫만 뽑아서 반영된 상승치까지 계산 */
+function buildList(rows, trans, opt){
+  const seen = new Set(), out = [];
+  for(const r of rows){
+    if(r.mount !== "가능") continue;
+    if(String(r.how||"").replace(/\s+/g,"") === "미출시") continue;
+    if(seen.has(r.id)) continue;
+    seen.add(r.id);
+    const t = opt.trans ? (trans[String(r.id)] || null) : null;
+    const g = growthOf(r, t);
+    out.push({
+      id:r.id, name:cleanName(r.name), how:String(r.how||""), code:r.imageCode, isTrans:!!t,
+      g:{ a:g.a, d:g.d, s:g.s },
+      up:{ a:g.a*opt.ra, d:g.d*opt.rd, s:g.s*opt.rs }
+    });
+  }
+  return out;
+}
+function scoreOf(p, tab){ return tab.keys.reduce((sum,k)=>sum+p.up[k], 0); }
+function rankList(list, tab){
+  return list.map(p=>({ p, score:scoreOf(p, tab) }))
+    .sort((x,y)=> y.score-x.score || x.p.name.localeCompare(y.p.name,"ko"))
+    .map((x,i)=>({ ...x, rank:i+1 }));
+}
+/*LOGIC_END*/
+
+/* ===== 화면 ===== */
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+const STORE = "rideRankPrefs2";
+const KEYS = [["a","공격"],["d","방어"],["s","순발"]];
+let ROWS = [], TRANS = {}, C = null;
+const state = { tab:"all", trans:true, q:"", sel:null, ra:0.30, rd:0.50, rs:0.30 };
+const f3 = v => v.toFixed(3);
+const pct = k => Math.round(state[k]*100);
+const curTab = () => TABS.find(t=>t.id===state.tab);
+const smooth = () => !(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches);
+
+function loadPrefs(){
+  try{
+    const p = JSON.parse(localStorage.getItem(STORE) || "{}");
+    if(p.tab && TABS.some(t=>t.id===p.tab)) state.tab = p.tab;
+    if(typeof p.trans==="boolean") state.trans = p.trans;
+    ["ra","rd","rs"].forEach(k=>{ if(typeof p[k]==="number" && p[k]>=0) state[k]=p[k]; });
+    if(p.theme) document.documentElement.setAttribute("data-theme", p.theme);
+    else if(window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches) document.documentElement.setAttribute("data-theme","dark");
+  }catch(e){}
+}
+function savePrefs(){
+  try{ localStorage.setItem(STORE, JSON.stringify({ tab:state.tab, trans:state.trans, ra:state.ra, rd:state.rd, rs:state.rs, theme:document.documentElement.getAttribute("data-theme") })); }catch(e){}
+}
+
+async function fetchJson(url){
+  const res = await fetch(url + (url.includes("?") ? "&" : "?") + "ts=" + Date.now(), { cache:"no-store" });
+  if(!res.ok) throw new Error(url + " " + res.status);
+  return res.json();
+}
+async function firstOk(urls, pick){
+  for(const u of urls){ try{ const v = pick(await fetchJson(u)); if(v) return v; }catch(e){} }
+  return null;
+}
+async function loadData(){
+  const rows = await firstOk(["./pet_data.json", RAW_BASE+"pet_data.json", API_URL],
+    d => Array.isArray(d) ? d : (Array.isArray(d.rows) && d.rows.length ? d.rows : null));
+  if(!rows) throw new Error("pet_data 로드 실패");
+  ROWS = rows;
+  TRANS = (await firstOk(["./pet_trans_data.json", RAW_BASE+"pet_trans_data.json"],
+    d => d && d.rows && !Array.isArray(d.rows) ? d.rows : null)) || {};
+}
+
+function spriteImg(code, cls){
+  const img = document.createElement("img");
+  img.alt = ""; if(cls) img.className = cls;
+  let step = 0;
+  img.onerror = () => {
+    step++;
+    if(step === 1) img.src = IMG_BASE + code + ".gif";
+    else if(step === 2) img.src = SAWORLD_IMG_BASE + code + ".gif";
+    else if(step === 3) img.src = IMG_BASE + "placeholder.gif";
+    else img.remove();
+  };
+  img.src = IMG_BASE + code + ".png";
+  return img;
+}
+
+/* 현재 설정으로 전체 계산 (7개 랭킹을 한 번에) */
+function compute(){
+  const list = buildList(ROWS, TRANS, { trans:state.trans, ra:state.ra, rd:state.rd, rs:state.rs });
+  const ranked = {}, rankOf = {};
+  TABS.forEach(t=>{
+    ranked[t.id] = rankList(list, t);
+    rankOf[t.id] = new Map(ranked[t.id].map(x=>[x.p.id, x.rank]));
+  });
+  const max = { a:1e-9, d:1e-9, s:1e-9 };
+  list.forEach(p=>KEYS.forEach(([k])=>{ if(p.up[k]>max[k]) max[k]=p.up[k]; }));
+  C = { list, ranked, rankOf, max };
+}
+function selectedPet(){
+  let p = state.sel != null ? C.list.find(x=>x.id===state.sel) : null;
+  return p || (C.ranked[state.tab][0] && C.ranked[state.tab][0].p) || null;
+}
+
+function renderNav(){
+  const box = $("navtabs");
+  box.innerHTML = "";
+  TABS.forEach((t,i)=>{
+    if(i>0 && TABS[i-1].group !== t.group){ const d = document.createElement("span"); d.className="ndiv"; box.appendChild(d); }
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "ntab"; b.textContent = t.label;
+    b.setAttribute("aria-pressed", String(t.id===state.tab));
+    b.onclick = () => { state.tab = t.id; state.sel = null; savePrefs(); renderAll(false); };
+    box.appendChild(b);
+  });
+}
+
+function renderHero(){
+  const tab = curTab(), p = selectedPet();
+  if(!p){ return; }
+  const rank = C.rankOf[tab.id].get(p.id);
+  $("hRank").innerHTML = `${esc(tab.label)}<b>${rank}</b>위<span style="color:var(--ink3);font-weight:500;margin-left:8px">${C.list.length}마리 중</span>`;
+  $("hName").innerHTML = esc(p.name) + (p.isTrans && state.trans ? '<span class="tag">1환생</span>' : "");
+  $("hHow").textContent = p.how;
+  $("ghost").textContent = rank;
+
+  const holder = $("hImg"); holder.innerHTML = ""; holder.appendChild(spriteImg(p.code));
+
+  $("hRanks").innerHTML = TABS.map(t=>`<button type="button" class="rk${t.id===tab.id?" cur":""}" data-tab="${t.id}"><span class="l">${esc(t.label)}</span><span class="n">${C.rankOf[t.id].get(p.id)}위</span></button>`).join("");
+  $("hRanks").querySelectorAll(".rk").forEach(b=>{
+    b.onclick = () => { state.tab = b.dataset.tab; state.sel = p.id; savePrefs(); renderAll(true); };
+  });
+
+  const ratioKey = { a:"ra", d:"rd", s:"rs" };
+  $("hSpecs").innerHTML = KEYS.map(([k,label])=>`
+    <div class="sp ${k}${tab.keys.includes(k)?" hi":""}">
+      <div class="t">${label} 상승</div>
+      <div class="big"><small>+</small>${f3(p.up[k])}</div>
+      <div class="track"><i data-w="${Math.max(2, p.up[k]/C.max[k]*100).toFixed(1)}%"></i></div>
+      <div class="f">성장치 ${f3(p.g[k])} × 반영 ${pct(ratioKey[k])}%</div>
+    </div>`).join("");
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    $("hSpecs").querySelectorAll(".track i").forEach(i=>{ i.style.width = i.dataset.w; });
+  }));
+}
+
+function renderList(){
+  const tab = curTab(), sel = selectedPet();
+  const ranked = C.ranked[tab.id];
+  const q = state.q.trim().replace(/\s+/g,"").toLowerCase();
+  const view = q ? ranked.filter(x=>x.p.name.replace(/\s+/g,"").toLowerCase().includes(q)) : ranked;
+  const transCnt = C.list.filter(p=>p.isTrans).length;
+  $("lead").textContent = `탑승 가능한 ${C.list.length}마리를 ${tab.desc} ${tab.keys.length>1 ? "상승치" : "가장 많이 올라가는"} 순서로 보여줘요.` +
+    (state.trans ? ` 1환생 수치는 ${transCnt}마리에 적용됐어요.` : " 환생 전 수치 기준이에요.") + " 펫을 누르면 위에서 자세히 볼 수 있어요.";
+  $("lhScore").textContent = tab.label;
+
+  const box = $("rows");
+  box.innerHTML = "";
+  if(!view.length){ box.innerHTML = `<div class="state">${q ? "검색 결과가 없어요." : "표시할 펫이 없어요."}</div>`; return; }
+  const frag = document.createDocumentFragment();
+  view.forEach(({p, score, rank})=>{
+    const row = document.createElement("button");
+    row.type = "button"; row.dataset.id = p.id;
+    row.className = "lrow" + (rank<=3 ? " t"+rank : "") + (sel && sel.id===p.id ? " sel" : "");
+    const sc = ([k,label]) => `<div class="sc ${k}${tab.keys.includes(k)?" hi":""}" data-l="${label}"><div class="v">+${f3(p.up[k])}</div><div class="b"><i style="width:${(p.up[k]/C.max[k]*100).toFixed(1)}%"></i></div></div>`;
+    row.innerHTML = `
+      <div class="rn">${rank}</div>
+      <div class="thumb"></div>
+      <div class="pinfo"><div class="nm">${esc(p.name)}${p.isTrans && state.trans ? '<span class="tag">1환생</span>' : ""}</div><div class="hw">${esc(p.how)}</div></div>
+      <div class="scs">${KEYS.map(sc).join("")}</div>
+      <div class="tot">${f3(score)}</div>`;
+    const img = spriteImg(p.code); img.loading = "lazy";
+    row.querySelector(".thumb").appendChild(img);
+    row.onclick = () => {
+      state.sel = p.id;
+      renderHero();
+      box.querySelectorAll(".lrow.sel").forEach(r=>r.classList.remove("sel"));
+      row.classList.add("sel");
+      $("hero").scrollIntoView({ behavior: smooth() ? "smooth" : "auto", block:"start" });
+    };
+    frag.appendChild(row);
+  });
+  box.appendChild(frag);
+}
+
+function renderAll(scrollTop){
+  renderNav();
+  compute();
+  $("ratioSum").textContent = `탑승 반영률 공 ${pct("ra")} 방 ${pct("rd")} 순 ${pct("rs")}`;
+  renderHero();
+  renderList();
+  if(scrollTop) $("hero").scrollIntoView({ behavior: smooth() ? "smooth" : "auto", block:"start" });
+}
+
+function bind(){
+  $("optTrans").checked = state.trans;
+  $("rA").value = pct("ra"); $("rD").value = pct("rd"); $("rS").value = pct("rs");
+  $("optTrans").onchange = e => { state.trans = e.target.checked; savePrefs(); renderAll(false); };
+  $("q").oninput = e => { state.q = e.target.value; if(C) renderList(); };
+  [["rA","ra"],["rD","rd"],["rS","rs"]].forEach(([id,k])=>{
+    $(id).oninput = e => { const v = parseFloat(e.target.value); if(isFinite(v) && v>=0){ state[k] = v/100; savePrefs(); renderAll(false); } };
+  });
+  const themeBtn = $("themeBtn");
+  const sync = () => { themeBtn.textContent = document.documentElement.getAttribute("data-theme")==="dark" ? "라이트 모드" : "다크 모드"; };
+  themeBtn.onclick = () => {
+    document.documentElement.setAttribute("data-theme", document.documentElement.getAttribute("data-theme")==="dark" ? "light" : "dark");
+    sync(); savePrefs();
+  };
+  document.addEventListener("click", e => { const d = $("ratioBox"); if(d.open && !d.contains(e.target)) d.open = false; });
+  sync();
+}
+
+/* 사이트 전체 메뉴: nav.js 의 SA_NAV_ITEMS 를 그대로 쓰고, 못 불러오면 기본 목록으로 */
+const FALLBACK_NAV = [
+  { href:"index.html", icon:"🎲", label:"환각 계산기" }, { href:"pokedex.html", icon:"🐾", label:"펫 도감" },
+  { href:"mypets.html", icon:"📋", label:"내 펫 관리" }, { href:"item.html", icon:"🗡️", label:"아이템도감" },
+  { href:"statcalc.html", icon:"⚔️", label:"능력치 계산기" }, { href:"simulator.html", icon:"🎰", label:"시뮬레이터" },
+  { href:"quiz.html", icon:"🧠", label:"퀴즈마스터" }, { href:"maps.html", icon:"🗺️", label:"지도정보" },
+  { href:"expcalc.html", icon:"📈", label:"경험치 계산기" }, { href:"sellcalc.html", icon:"💰", label:"판매 계산기" },
+  { href:"worldcup.html", icon:"🐾", label:"펫 이상형 월드컵" }, { href:"itemsim.html", icon:"📜", label:"아이템 시뮬레이터" },
+  { href:"minigame.html", icon:"🎮", label:"미니게임" }
+];
+function renderSiteMenu(){
+  let items = (typeof SA_NAV_ITEMS !== "undefined" && Array.isArray(SA_NAV_ITEMS)) ? SA_NAV_ITEMS.slice() : FALLBACK_NAV.slice();
+  const here = "ride_rank.html";
+  if(!items.some(i=>i.href===here)) items.splice(Math.min(2, items.length), 0, { href:here, icon:"🏎️", label:"쟈쟈오토 승차감 랭킹" });
+  const cur = location.pathname.split("/").pop() || "index.html";
+  $("siteMenuIn").innerHTML = items.map(i =>
+    `<a href="${esc(i.href)}"${(i.href===cur || (i.match && i.match.indexOf(cur)!==-1)) ? ' class="on"' : ""}><span>${esc(i.icon||"")}</span><span>${esc(i.label)}</span></a>`
+  ).join("");
+  const btn = $("menuBtn"), box = $("siteMenu");
+  const setOpen = o => { box.classList.toggle("open", o); btn.setAttribute("aria-expanded", String(o)); };
+  btn.onclick = e => { e.stopPropagation(); setOpen(!box.classList.contains("open")); };
+  document.addEventListener("click", e => { if(!box.contains(e.target)) setOpen(false); });
+  document.addEventListener("keydown", e => { if(e.key==="Escape") setOpen(false); });
+}
+
+(async function init(){
+  renderSiteMenu();
+  loadPrefs();
+  renderNav();
+  bind();
+  $("rows").innerHTML = `<div class="state">펫 데이터 불러오는 중…</div>`;
+  try{
+    await loadData();
+    renderAll(false);
+  }catch(e){
+    $("hName").textContent = "데이터를 불러오지 못했어요";
+    $("rows").innerHTML = `<div class="state err">pet_data.json을 찾을 수 없어요.<br>이 파일을 pet_data.json과 같은 폴더(레포 루트)에 올렸는지 확인해 주세요.</div>`;
+  }
+})();
+</script>
+</body>
+</html>
