@@ -424,7 +424,7 @@ function savePrefs(){
 }
 
 async function fetchJson(url){
-  const res = await fetch(url + (url.includes("?") ? "&" : "?") + "ts=" + Date.now(), { cache:"no-store" });
+  const res = await fetch(url, { cache:"no-cache" });
   if(!res.ok) throw new Error(url + " " + res.status);
   return res.json();
 }
@@ -441,18 +441,27 @@ async function loadData(){
     d => d && d.rows && !Array.isArray(d.rows) ? d.rows : null)) || {};
 }
 
-function spriteImg(code, cls){
+/* 펫 이미지: 한 번 찾은 주소는 기억해서 목록을 다시 그려도 404를 반복해서 보내지 않아요.
+   목록의 이미지는 화면 근처에 올 때만 불러와요. (GitHub Pages 요청 제한 방지) */
+const SPR = {};
+const spriteIO = ("IntersectionObserver" in window)
+  ? new IntersectionObserver(es => es.forEach(e => { if(e.isIntersecting){ spriteIO.unobserve(e.target); e.target._load(); } }), { rootMargin:"300px 0px" })
+  : null;
+function spriteImg(code, cls, deferred){
   const img = document.createElement("img");
-  img.alt = ""; if(cls) img.className = cls;
-  let step = 0;
-  img.onerror = () => {
-    step++;
-    if(step === 1) img.src = IMG_BASE + code + ".gif";
-    else if(step === 2) img.src = SAWORLD_IMG_BASE + code + ".gif";
-    else if(step === 3) img.src = IMG_BASE + "placeholder.gif";
-    else img.remove();
+  img.alt = ""; img.decoding = "async"; if(cls) img.className = cls;
+  const chain = [IMG_BASE + code + ".png", IMG_BASE + code + ".gif", SAWORLD_IMG_BASE + code + ".gif", IMG_BASE + "placeholder.gif"];
+  let i = 0;
+  const load = () => {
+    if(SPR[code] === false){ img.remove(); return; }
+    if(typeof SPR[code] === "string") i = Math.max(0, chain.indexOf(SPR[code]));
+    if(i >= chain.length){ SPR[code] = false; img.remove(); return; }
+    img.src = chain[i];
   };
-  img.src = IMG_BASE + code + ".png";
+  img.onload = () => { SPR[code] = chain[i]; };
+  img.onerror = () => { i++; load(); };
+  img._load = load;
+  if(!deferred) load();
   return img;
 }
 
@@ -728,7 +737,7 @@ function resetPet(id){
   scheduleResort(id);
 }
 
-/* 버튼을 꾹 누르면 점점 빨라져요 (성장률은 0.001, 능력치는 1씩) */
+/* 버튼을 꾹 누르면 점점 빠라져요 (성장률은 0.001, 능력치는 1씩) */
 function startHold(b){
   stopHold(true);
   const stp = b.closest(".stp");
@@ -786,6 +795,7 @@ function renderList(){
   $("lhScore").textContent = tab.label;
 
   const box = $("rows");
+  if(spriteIO) spriteIO.disconnect();
   box.innerHTML = "";
   if(!view.length){ box.innerHTML = `<div class="state">${q ? "검색 결과가 없어요." : "표시할 펫이 없어요."}</div>`; return; }
   const frag = document.createDocumentFragment();
@@ -800,11 +810,11 @@ function renderList(){
       <div class="pinfo"><div class="nm">${esc(p.name)}${p.isTrans && state.trans ? '<span class="tag">1환생</span>' : ""}<span class="tag mytag"${p.mine ? "" : " hidden"}>내 펫 값</span></div><div class="hw">${esc(p.how)}</div><button type="button" class="rst"${p.mine ? "" : " hidden"}>되돌리기</button></div>
       <div class="scs">${KEYS.map(sc).join("")}</div>
       <div class="tot">${fv(score)}</div>`;
-    const img = spriteImg(p.code); img.loading = "lazy";
-    row.querySelector(".thumb").appendChild(img);
+    row.querySelector(".thumb").appendChild(spriteImg(p.code, "", true));
     frag.appendChild(row);
   });
   box.appendChild(frag);
+  box.querySelectorAll(".thumb img").forEach(im => { if(spriteIO) spriteIO.observe(im); else im._load(); });
 }
 
 function renderAll(scrollTop){
