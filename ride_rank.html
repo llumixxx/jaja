@@ -76,7 +76,7 @@ h1{font-size:clamp(40px,7vw,76px);font-weight:900;letter-spacing:-.04em;line-hei
 .stage img{position:relative;width:min(300px,78%);height:270px;object-fit:contain;image-rendering:pixelated;margin-bottom:18px}
 
 /* ===== 스펙 스트립 ===== */
-.specs{position:relative;max-width:1120px;margin:0 auto;padding:0 18px 36px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.specs{position:relative;max-width:1120px;margin:0 auto;padding:0 18px 14px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
 .sp{background:var(--panel);border:1px solid var(--line);border-top:3px solid var(--line);border-radius:4px 4px 10px 10px;padding:14px 18px 16px}
 .sp.hi.a{border-top-color:var(--atk)} .sp.hi.d{border-top-color:var(--def)} .sp.hi.s{border-top-color:var(--spd)}
 .sp .t{font-size:14px;font-weight:700;color:var(--ink2)}
@@ -104,6 +104,36 @@ h1{font-size:clamp(40px,7vw,76px);font-weight:900;letter-spacing:-.04em;line-hei
 .lvbox input{width:68px;border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:7px 9px;text-align:right;font-variant-numeric:tabular-nums;outline:none}
 .lvbox input:focus{border-color:var(--acc)}
 .sp .f2{font-size:12px;color:var(--ink3);margin-top:3px;font-variant-numeric:tabular-nums}
+.sp .gr{font-size:12px;font-weight:700;color:var(--ink3);margin:-4px 0 9px;font-variant-numeric:tabular-nums}
+.sc .gr{font-size:11px;color:var(--ink3);margin-top:4px;font-variant-numeric:tabular-nums}
+.minewrap{position:relative;max-width:1120px;margin:0 auto;padding:0 18px 36px}
+details.mine{background:var(--panel);border:1px solid var(--line);border-radius:12px}
+details.mine summary{list-style:none;cursor:pointer;padding:13px 18px;font-weight:800;font-size:15px;display:flex;align-items:center;gap:10px}
+details.mine summary::-webkit-details-marker{display:none}
+details.mine summary::after{content:"\25BE";margin-left:auto;color:var(--ink3);transition:transform .2s}
+details.mine[open] summary::after{transform:rotate(180deg)}
+.mtag{font-size:11px;font-weight:700;color:#8a5a00;background:#ffe9b8;border-radius:5px;padding:1px 7px}
+[data-theme="dark"] .mtag{background:#4a3a12;color:#ffd98a}
+.mine-body{padding:2px 18px 18px;border-top:1px solid var(--line)}
+.mine-help{font-size:13px;color:var(--ink2);margin:12px 0;max-width:72ch;line-height:1.7}
+.mgrid{display:grid;grid-template-columns:64px repeat(2,minmax(0,140px));gap:8px 12px;align-items:center;margin-bottom:14px}
+.mgrid .mh{font-size:12px;font-weight:700;color:var(--ink3)}
+.mgrid .ml{font-weight:800;font-size:14px}
+.mgrid .ml.a{color:var(--atk)} .mgrid .ml.d{color:var(--def)} .mgrid .ml.s{color:var(--spd)}
+.mgrid input{width:100%;border:1px solid var(--line);background:var(--panel2);border-radius:8px;padding:7px 9px;text-align:right;font-variant-numeric:tabular-nums;outline:none}
+.mgrid input:focus{border-color:var(--acc)}
+.mres{overflow-x:auto}
+.mres table{border-collapse:collapse;width:100%;min-width:600px;font-variant-numeric:tabular-nums}
+.mres th{font-size:12px;font-weight:700;color:var(--ink3);text-align:right;padding:6px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+.mres td{text-align:right;padding:9px 10px;border-bottom:1px solid var(--line);font-size:14px;white-space:nowrap}
+.mres th:first-child,.mres td:first-child{text-align:left;font-weight:800}
+.mres tr:last-child td{border-bottom:0}
+.mres td.ap{font-family:var(--num);font-weight:700;font-size:20px}
+.mres .rise{color:var(--spd);font-weight:800}
+.mres .nochg{color:var(--ink3)}
+.mreset{margin-top:12px;border:1px solid var(--line);background:var(--panel2);border-radius:8px;padding:7px 13px;font-size:13px;font-weight:700;color:var(--ink2)}
+.mreset:hover{color:var(--ink);border-color:var(--ink3)}
+.mnote{font-size:12.5px;color:var(--ink3);margin-top:10px;line-height:1.7;max-width:80ch}
 .chk{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:500;cursor:pointer;user-select:none}
 .chk input{width:17px;height:17px;accent-color:var(--acc);cursor:pointer}
 details.ratio{position:relative}
@@ -159,7 +189,9 @@ details.ratio[open] summary{border-color:var(--acc);color:var(--ink)}
   .hero{scroll-margin-top:96px}
   .sp .big{font-size:31px;margin:2px 0 8px}
   .ranks{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .specs{gap:8px;padding-bottom:26px}
+  .specs{gap:8px;padding-bottom:12px}
+  .minewrap{padding-bottom:26px}
+  .mgrid{grid-template-columns:56px repeat(2,minmax(0,1fr))}
   .sp{padding:11px 11px 13px}
   .sp .t{font-size:13px} .sp .f{font-size:11px}
   .lhead{display:none}
@@ -196,6 +228,7 @@ details.ratio[open] summary{border-color:var(--acc);color:var(--ink)}
     <div class="stage"><div class="floor"></div><span id="hImg" style="display:contents"></span></div>
   </div>
   <div class="specs" id="hSpecs"></div>
+  <div class="minewrap" id="myPanel"></div>
 </section>
 
 <main class="lineup">
@@ -223,9 +256,11 @@ details.ratio[open] summary{border-color:var(--acc);color:var(--ink)}
   </div>
   <div class="lrows" id="rows"></div>
   <p class="foot">
-    실제 능력치 기준은 펫의 Lv.1 초기치에 레벨당 성장치를 (레벨-1)번 더한 값에 탑승 반영률을 곱해요. 예를 들어 펫 방어가 200이고 반영률이 50%면 +100이에요.
-    초기치와 성장치는 도감과 같은 방식(등급 보정 포함)으로 계산하고, 소수점은 그대로 보여줘서 게임 안에서는 버림 때문에 1 정도 차이가 날 수 있어요.
-    1환생 수치 적용을 켜면 환생 가능한 펫은 환생 보너스가 더해진 성장치로 계산하고, 초기치는 그대로예요. 펫 최대 레벨은 140으로 두었어요.
+    실제 능력치 기준은 펫의 Lv.1 초기치에 레벨당 성장률을 (레벨-1)번 더한 값에 탑승 반영률을 곱해요. 예를 들어 펫 방어가 200이고 반영률이 50%면 +100이에요.
+    게임에서는 탑승 수치의 소수점이 반올림되지 않고 버려져요. 방어 187에 50%를 곱하면 93.5인데 실제로는 +93이 올라갔어요. 그래서 맨 위 카드의 큰 숫자는 버림한 값이고, 목록에는 소수점까지 남겨서 보여줘요.
+    기본값은 도감 기준 평균 성장률로 계산해요. 펫마다 성장률이 달라서, 맨 위 카드 아래 "내 펫으로 계산하기"에 내 펫의 초기치와 성장률을 넣으면 그 펫 기준으로 바뀔어요.
+    성장률은 게임에 소수 셋째 자리까지만 나와서 경계값(예: 83.99)은 1 정도 차이가 날 수 있어요.
+    1환생 수치 적용을 켜면 환생 가능한 펫은 환생 보너스가 더해진 성장률로 계산하고, 초기치는 그대로예요. 펫 최대 레벨은 140으로 두었어요.
     막대 길이는 탑승 가능한 펫 중 가장 높은 값을 100으로 놓은 비율이에요.
     데이터는 접속할 때마다 새로 불러와서 새 펫이나 환생 정보가 올라오면 자동으로 반영돼요.
   </p>
@@ -265,6 +300,12 @@ function initOf(r){
   return disp(ip*ph, ip*pa, ip*pd, ip*ps);
 }
 
+/* 탑승 상승치는 소수점이 반올림이 아니라 버려져요 (게임 화면으로 확인).
+   성장률이 소수 셋째 자리까지만 보여서 생기는 아주 작은 오차(0.005)만 보정해요. */
+const APPLY_EPS = 0.005;
+const applied = x => Math.floor(x + APPLY_EPS);
+const pickNum = (v, d) => (typeof v === "number" && isFinite(v)) ? v : d;
+
 const TABS = [
   { id:"all", group:"eff", label:"전체효율", desc:"공격, 방어, 순발을 모두 더한", keys:["a","d","s"] },
   { id:"as",  group:"eff", label:"공순효율", desc:"공격과 순발을 더한",           keys:["a","s"] },
@@ -284,19 +325,40 @@ function buildList(rows, trans, opt){
     if(seen.has(r.id)) continue;
     seen.add(r.id);
     const t = opt.trans ? (trans[String(r.id)] || null) : null;
-    const g = growthOf(r, t), ini = initOf(r);
-    const n = Math.max(0, (opt.lv || 140) - 1);
+    const g0 = growthOf(r, t), i0 = initOf(r);
+    const my = (opt.my && opt.my[r.id]) || null;   /* 내 펫 값 (비워둔 칸은 기본값) */
+    const mg = (my && my.g) || {}, mi = (my && my.i) || {};
+    const g = { a:pickNum(mg.a, g0.a), d:pickNum(mg.d, g0.d), s:pickNum(mg.s, g0.s) };
+    const ini = { a:pickNum(mi.a, i0.a), d:pickNum(mi.d, i0.d), s:pickNum(mi.s, i0.s) };
+    const L = (my && typeof my.lv === "number") ? my.lv : (opt.lv || 140);
+    const n = Math.max(0, L - 1);
     const act = { a:ini.a+g.a*n, d:ini.d+g.d*n, s:ini.s+g.s*n };
     const base = opt.basis === "grow" ? g : act;
     out.push({
       id:r.id, name:cleanName(r.name), how:String(r.how||""), code:r.imageCode, isTrans:!!t,
-      g:{ a:g.a, d:g.d, s:g.s },
-      init:{ a:ini.a, d:ini.d, s:ini.s },
+      mine:!!my, lvUsed:L,
+      g, dg:{ a:g0.a, d:g0.d, s:g0.s },
+      init:ini, di:{ a:i0.a, d:i0.d, s:i0.s },
       act,
       up:{ a:base.a*opt.ra, d:base.d*opt.rd, s:base.s*opt.rs }
     });
   }
   return out;
+}
+/* 레벨 L 과 L+1 의 펫 능력치/탑승 상승치, 다음에 +1 오르는 레벨 */
+function projectMine(p, ratios){
+  const L = p.lvUsed;
+  return [["a","공격"],["d","방어"],["s","순발"]].map(([k,label])=>{
+    const r = ratios[k];
+    const stat = l => p.init[k] + p.g[k]*(l-1);
+    const st = stat(L), up = st*r, ap = applied(up);
+    let st1 = null, up1 = null, ap1 = null, nextLv = null;
+    if(L < 140){
+      st1 = stat(L+1); up1 = st1*r; ap1 = applied(up1);
+      for(let l=L+1; l<=140; l++){ if(applied(stat(l)*r) > ap){ nextLv = l; break; } }
+    }
+    return { k, label, st, up, ap, st1, up1, ap1, nextLv, atMax:L>=140 };
+  });
 }
 function scoreOf(p, tab){ return tab.keys.reduce((sum,k)=>sum+p.up[k], 0); }
 function rankList(list, tab){
@@ -312,8 +374,9 @@ const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">
 const STORE = "rideRankPrefs2";
 const KEYS = [["a","공격"],["d","방어"],["s","순발"]];
 let ROWS = [], TRANS = {}, C = null;
-const state = { tab:"all", trans:true, q:"", sel:null, ra:0.30, rd:0.50, rs:0.30, basis:"actual", lv:140 };
+const state = { tab:"all", trans:true, q:"", sel:null, ra:0.30, rd:0.50, rs:0.30, basis:"actual", lv:140, my:{} };
 const f3 = v => v.toFixed(3);
+const f2 = v => v.toFixed(2);
 const f1 = v => v.toFixed(1);
 const fv = v => state.basis === "grow" ? f3(v) : f1(v);
 const pct = k => Math.round(state[k]*100);
@@ -327,13 +390,14 @@ function loadPrefs(){
     if(typeof p.trans==="boolean") state.trans = p.trans;
     if(p.basis==="grow" || p.basis==="actual") state.basis = p.basis;
     if(typeof p.lv==="number" && p.lv>=1 && p.lv<=140) state.lv = Math.round(p.lv);
+    if(p.my && typeof p.my === "object") state.my = p.my;
     ["ra","rd","rs"].forEach(k=>{ if(typeof p[k]==="number" && p[k]>=0) state[k]=p[k]; });
     if(p.theme) document.documentElement.setAttribute("data-theme", p.theme);
     else if(window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches) document.documentElement.setAttribute("data-theme","dark");
   }catch(e){}
 }
 function savePrefs(){
-  try{ localStorage.setItem(STORE, JSON.stringify({ tab:state.tab, trans:state.trans, basis:state.basis, lv:state.lv, ra:state.ra, rd:state.rd, rs:state.rs, theme:document.documentElement.getAttribute("data-theme") })); }catch(e){}
+  try{ localStorage.setItem(STORE, JSON.stringify({ tab:state.tab, trans:state.trans, basis:state.basis, lv:state.lv, my:state.my, ra:state.ra, rd:state.rd, rs:state.rs, theme:document.documentElement.getAttribute("data-theme") })); }catch(e){}
 }
 
 async function fetchJson(url){
@@ -371,7 +435,7 @@ function spriteImg(code, cls){
 
 /* 현재 설정으로 전체 계산 (7개 랭킹을 한 번에) */
 function compute(){
-  const list = buildList(ROWS, TRANS, { trans:state.trans, basis:state.basis, lv:state.lv, ra:state.ra, rd:state.rd, rs:state.rs });
+  const list = buildList(ROWS, TRANS, { trans:state.trans, basis:state.basis, lv:state.lv, my:state.my, ra:state.ra, rd:state.rd, rs:state.rs });
   const ranked = {}, rankOf = {};
   TABS.forEach(t=>{
     ranked[t.id] = rankList(list, t);
@@ -399,36 +463,133 @@ function renderNav(){
   });
 }
 
+let lastSpriteId = null, mineOpen = false, mineFor = null, listTimer = null;
+
 function renderHero(){
-  const tab = curTab(), p = selectedPet();
+  const p = selectedPet();
   if(!p){ return; }
+  renderChips(p);
+  if(lastSpriteId !== p.id){
+    const holder = $("hImg"); holder.innerHTML = ""; holder.appendChild(spriteImg(p.code)); lastSpriteId = p.id;
+  }
+  renderSpecs(p);
+  if(mineFor !== p.id){ renderMine(p); mineFor = p.id; }
+  else { updateMineResult(p); }
+}
+
+function renderChips(p){
+  const tab = curTab();
   const rank = C.rankOf[tab.id].get(p.id);
   $("hRank").innerHTML = `${esc(tab.label)}<b>${rank}</b>위<span style="color:var(--ink3);font-weight:500;margin-left:8px">${C.list.length}마리 중</span>`;
-  $("hName").innerHTML = esc(p.name) + (p.isTrans && state.trans ? '<span class="tag">1환생</span>' : "");
+  $("hName").innerHTML = esc(p.name) + (p.isTrans && state.trans ? '<span class="tag">1환생</span>' : "") + (p.mine ? '<span class="tag">내 펫 값</span>' : "");
   $("hHow").textContent = p.how;
   $("ghost").textContent = rank;
-
-  const holder = $("hImg"); holder.innerHTML = ""; holder.appendChild(spriteImg(p.code));
-
   $("hRanks").innerHTML = TABS.map(t=>`<button type="button" class="rk${t.id===tab.id?" cur":""}" data-tab="${t.id}"><span class="l">${esc(t.label)}</span><span class="n">${C.rankOf[t.id].get(p.id)}위</span></button>`).join("");
   $("hRanks").querySelectorAll(".rk").forEach(b=>{
     b.onclick = () => { state.tab = b.dataset.tab; state.sel = p.id; savePrefs(); renderAll(true); };
   });
+}
 
+function renderSpecs(p){
+  const tab = curTab();
   const ratioKey = { a:"ra", d:"rd", s:"rs" };
-  $("hSpecs").innerHTML = KEYS.map(([k,label])=>`
+  const grow = state.basis === "grow";
+  $("hSpecs").innerHTML = KEYS.map(([k,label])=>{
+    const upv = p.up[k];
+    return `
     <div class="sp ${k}${tab.keys.includes(k)?" hi":""}">
-      <div class="t">${label} 상승${state.basis === "grow" ? " (레벨당)" : ` (Lv.${state.lv})`}</div>
-      <div class="big"><small>+</small>${fv(p.up[k])}</div>
-      <div class="track"><i data-w="${Math.max(2, p.up[k]/C.max[k]*100).toFixed(1)}%"></i></div>
-      ${state.basis === "grow"
-        ? `<div class="f">성장치 ${f3(p.g[k])} × 반영 ${pct(ratioKey[k])}%</div>`
-        : `<div class="f">펫 ${label} ${f1(p.act[k])} × 반영 ${pct(ratioKey[k])}%</div>
-           <div class="f2">Lv.${state.lv}: 초기치 ${f1(p.init[k])} + 성장치 ${f3(p.g[k])} × ${state.lv-1}</div>`}
-    </div>`).join("");
+      <div class="t">${label} 상승${grow ? " (레벨당)" : ` (Lv.${p.lvUsed})`}</div>
+      <div class="big"><small>+</small>${grow ? f3(upv) : applied(upv)}</div>
+      ${grow ? "" : `<div class="gr">성장률 ${f3(p.g[k])}</div>`}
+      <div class="track"><i data-w="${Math.max(2, upv/C.max[k]*100).toFixed(1)}%"></i></div>
+      ${grow
+        ? `<div class="f">성장률 ${f3(p.g[k])} × 반영 ${pct(ratioKey[k])}%</div>`
+        : `<div class="f">소수점 포함 +${f2(upv)} (소수점은 적용되지 않고 버려져요)</div>
+           <div class="f2">펫 ${label} ${f2(p.act[k])} × 반영 ${pct(ratioKey[k])}%</div>
+           <div class="f2">Lv.${p.lvUsed}: 초기치 ${f2(p.init[k])} + 성장률 ${f3(p.g[k])} × ${p.lvUsed-1}</div>`}
+    </div>`;
+  }).join("");
   requestAnimationFrame(()=>requestAnimationFrame(()=>{
     $("hSpecs").querySelectorAll(".track i").forEach(i=>{ i.style.width = i.dataset.w; });
   }));
+}
+
+/* ----- 내 펫으로 계산하기 ----- */
+function renderMine(p){
+  const box = $("myPanel");
+  box.innerHTML = `
+    <details class="mine" id="mineD"${mineOpen ? " open" : ""}>
+      <summary>내 펫으로 계산하기<span class="mtag" id="mineTag" hidden>내 펫 값 적용 중</span></summary>
+      <div class="mine-body">
+        <p class="mine-help">펫마다 성장률이 달라서, 게임 펫 정보창에 나온 초기치와 성장률을 그대로 넣으면 내 펫을 탔을 때 얼마나 올라가는지 계산해요. 칸을 비워두면 도감 기준 기본값을 써요. 펫 레벨을 바꿔서 다음 레벨에 수치가 더 오르는지도 확인할 수 있어요.</p>
+        <div class="mgrid">
+          <div class="mh"></div><div class="mh">초기치</div><div class="mh">성장률</div>
+          <div class="ml a">공격</div><input type="number" step="0.001" min="0" inputmode="decimal" data-f="i.a"><input type="number" step="0.001" min="0" inputmode="decimal" data-f="g.a">
+          <div class="ml d">방어</div><input type="number" step="0.001" min="0" inputmode="decimal" data-f="i.d"><input type="number" step="0.001" min="0" inputmode="decimal" data-f="g.d">
+          <div class="ml s">순발</div><input type="number" step="0.001" min="0" inputmode="decimal" data-f="i.s"><input type="number" step="0.001" min="0" inputmode="decimal" data-f="g.s">
+          <div class="ml">펫 레벨</div><input type="number" step="1" min="1" max="140" inputmode="numeric" data-f="lv"><div></div>
+        </div>
+        <div class="mres" id="mineRes"></div>
+        <p class="mnote">탑승 수치는 소수점이 버려져요. 성장률이 소수 셋째 자리까지만 보여서 경계값은 1 정도 차이가 날 수 있어요.</p>
+        <button type="button" class="mreset" id="mineReset">기본값으로 되돌리기</button>
+      </div>
+    </details>`;
+  const my = state.my[p.id] || {};
+  const setVal = (f, v) => { const el = box.querySelector(`[data-f="${f}"]`); el.value = (typeof v === "number" && isFinite(v)) ? v : ""; };
+  ["a","d","s"].forEach(k=>{ setVal("i."+k, my.i && my.i[k]); setVal("g."+k, my.g && my.g[k]); });
+  setVal("lv", my.lv);
+  box.querySelectorAll("input").forEach(el => { el.oninput = () => onMineInput(p.id); });
+  $("mineD").ontoggle = () => { mineOpen = $("mineD").open; };
+  $("mineReset").onclick = () => {
+    delete state.my[p.id]; savePrefs();
+    box.querySelectorAll("input").forEach(el => { el.value = ""; });
+    refreshAfterMine(p.id);
+  };
+  updateMineResult(p);
+}
+
+function onMineInput(id){
+  const box = $("myPanel");
+  const get = f => { const v = parseFloat(box.querySelector(`[data-f="${f}"]`).value); return (isFinite(v) && v >= 0) ? v : null; };
+  const lvRaw = get("lv");
+  const m = {
+    lv: lvRaw == null ? null : Math.min(140, Math.max(1, Math.round(lvRaw))),
+    i: { a:get("i.a"), d:get("i.d"), s:get("i.s") },
+    g: { a:get("g.a"), d:get("g.d"), s:get("g.s") }
+  };
+  const empty = m.lv == null && Object.values(m.i).every(v=>v==null) && Object.values(m.g).every(v=>v==null);
+  if(empty) delete state.my[id]; else state.my[id] = m;
+  savePrefs();
+  refreshAfterMine(id);
+}
+
+function refreshAfterMine(id){
+  compute();
+  const p = C.list.find(x=>x.id===id) || selectedPet();
+  if(!p) return;
+  renderChips(p); renderSpecs(p); updateMineResult(p);
+  clearTimeout(listTimer); listTimer = setTimeout(renderList, 200);
+}
+
+function updateMineResult(p){
+  const box = $("myPanel");
+  if(!box.querySelector("#mineRes")) return;
+  const tag = $("mineTag"); if(tag) tag.hidden = !p.mine;
+  /* 칸이 비어 있으면 기본값을 흐린 글씨로 보여줘요 */
+  ["a","d","s"].forEach(k=>{
+    box.querySelector(`[data-f="i.${k}"]`).placeholder = f2(p.di[k]);
+    box.querySelector(`[data-f="g.${k}"]`).placeholder = f3(p.dg[k]);
+  });
+  box.querySelector(`[data-f="lv"]`).placeholder = String(state.lv);
+  const L = p.lvUsed;
+  const rows = projectMine(p, { a:state.ra, d:state.rd, s:state.rs });
+  const next = r => r.atMax ? '<td class="nochg">최대 레벨</td><td class="nochg">-</td>'
+    : `<td>+${r.ap1}${r.ap1 > r.ap ? ` <span class="rise">(+${r.ap1 - r.ap})</span>` : ' <span class="nochg">(변화 없음)</span>'}</td>
+       <td>${r.nextLv ? `Lv.${r.nextLv}` : '<span class="nochg">Lv.140까지 없음</span>'}</td>`;
+  $("mineRes").innerHTML = `<table>
+    <thead><tr><th>항목</th><th>펫 능력치 (Lv.${L})</th><th>탑승 상승 (소수점 포함)</th><th>게임 적용 (버림)</th><th>${L < 140 ? `Lv.${L+1}에 적용` : "다음 레벨"}</th><th>다음 +1 오르는 레벨</th></tr></thead>
+    <tbody>${rows.map(r=>`<tr><td>${r.label}</td><td>${f2(r.st)}</td><td>+${f2(r.up)}</td><td class="ap">+${r.ap}</td>${next(r)}</tr>`).join("")}</tbody>
+  </table>`;
 }
 
 function renderList(){
@@ -437,7 +598,7 @@ function renderList(){
   const q = state.q.trim().replace(/\s+/g,"").toLowerCase();
   const view = q ? ranked.filter(x=>x.p.name.replace(/\s+/g,"").toLowerCase().includes(q)) : ranked;
   const transCnt = C.list.filter(p=>p.isTrans).length;
-  $("lead").textContent = `탑승 가능한 ${C.list.length}마리를 ${tab.desc} ${tab.keys.length>1 ? "상승치" : "가장 많이 올라가는"} 순서로 보여줘요. ${state.basis === "grow" ? "레벨당 성장치 기준이에요." : `펫이 Lv.${state.lv}일 때 실제로 올라가는 수치 기준이에요.`}` +
+  $("lead").textContent = `탑승 가능한 ${C.list.length}마리를 ${tab.desc} ${tab.keys.length>1 ? "상승치" : "가장 많이 올라가는"} 순서로 보여줘요. ${state.basis === "grow" ? "레벨당 성장치 기준이에요." : `펫이 Lv.${state.lv}일 때 실제로 올라가는 수치 기준이고, 목록에는 소수점까지 보여줘요(게임에서는 소수점이 버려져요).`}` +
     (state.trans ? ` 1환생 수치는 ${transCnt}마리에 적용됐어요.` : " 환생 전 수치 기준이에요.") + " 펫을 누르면 위에서 자세히 볼 수 있어요.";
   $("lhScore").textContent = tab.label;
 
@@ -449,11 +610,11 @@ function renderList(){
     const row = document.createElement("button");
     row.type = "button"; row.dataset.id = p.id;
     row.className = "lrow" + (rank<=3 ? " t"+rank : "") + (sel && sel.id===p.id ? " sel" : "");
-    const sc = ([k,label]) => `<div class="sc ${k}${tab.keys.includes(k)?" hi":""}" data-l="${label}"><div class="v">+${fv(p.up[k])}</div><div class="b"><i style="width:${(p.up[k]/C.max[k]*100).toFixed(1)}%"></i></div></div>`;
+    const sc = ([k,label]) => `<div class="sc ${k}${tab.keys.includes(k)?" hi":""}" data-l="${label}"><div class="v">+${fv(p.up[k])}</div><div class="b"><i style="width:${(p.up[k]/C.max[k]*100).toFixed(1)}%"></i></div>${state.basis === "grow" ? "" : `<div class="gr">성장률 ${f3(p.g[k])}</div>`}</div>`;
     row.innerHTML = `
       <div class="rn">${rank}</div>
       <div class="thumb"></div>
-      <div class="pinfo"><div class="nm">${esc(p.name)}${p.isTrans && state.trans ? '<span class="tag">1환생</span>' : ""}</div><div class="hw">${esc(p.how)}</div></div>
+      <div class="pinfo"><div class="nm">${esc(p.name)}${p.isTrans && state.trans ? '<span class="tag">1환생</span>' : ""}${p.mine ? '<span class="tag">내 펫 값</span>' : ""}</div><div class="hw">${esc(p.how)}</div></div>
       <div class="scs">${KEYS.map(sc).join("")}</div>
       <div class="tot">${fv(score)}</div>`;
     const img = spriteImg(p.code); img.loading = "lazy";
