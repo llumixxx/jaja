@@ -21,6 +21,7 @@ const SA_NAV_ITEMS = [
   { href: "sellcalc.html", icon: "💰", label: "판매 계산기" },
   { href: "worldcup.html", icon: "🐾", label: "펫 이상형 월드컵" },
   { href: "itemsim.html", icon: "📜", label: "아이템 시뮬레이터" },
+  { href: "petname.html", icon: "⌨️", label: "펫네임헬퍼" },
   // match: 이 페이지들에 있을 때도 메뉴에서 '미니게임'이 선택된 것으로 표시됩니다.
   { href: "minigame.html", icon: "🎮", label: "미니게임",
     match: ["jyajyarogue.html", "jajarogue.html", "petsurvival.html", "jajachess.html"] },
@@ -65,6 +66,8 @@ const SA_NAV_CREDIT =
 .sb-nav-list.open a:nth-child(14){transition-delay:.67s;}
 .sb-nav-list.open a:nth-child(15){transition-delay:.72s;}
 .sb-nav-list.open a:nth-child(16){transition-delay:.77s;}
+.sb-nav-list.open a:nth-child(17){transition-delay:.82s;}
+.sb-nav-list.open a:nth-child(18){transition-delay:.87s;}
 
 /* 사이드바(#sbNav)가 없는 페이지 — 화면을 꽉 쓰는 미니게임 같은 곳 — 은
    상단 가로 바로 대신 그립니다. 페이지가 #global-nav 를 따로 꾸며놨다면
