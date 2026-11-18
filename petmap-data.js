@@ -94,24 +94,24 @@ window.PETMAP = [
 
 /* 던전 입구 (바깥 지도 위 위치) — 던전 안에서 나오는 펫은 입구에 묶어서 보여줘요 */
 window.PETMAP_DUNGEONS = [
-  { name:"숲의 동굴",        map:"jaru",   px:[138,126] },
-  { name:"고야산의 동굴",    map:"jaru",   px:[53,397] },
-  { name:"아름산의 동굴",    map:"jaru",   px:[657,439] },
-  { name:"벽청의 동굴",      map:"jaru",   px:[264,521], alias:["벽청이 동굴"] },
-  { name:"라토토의 동굴",    map:"jaru",   px:[432,296], alias:["라토토의 복도"] },
-  { name:"쿠오산 소동굴",    map:"sinus",  px:[573,410] },
+  { name:"숲의 동굴",        map:"jaru",   px:[138,126], imgs:["maps/2606/cd0c9602d6dac7a3078b19f6ae0a40d1_1782237478_1694.png"] },
+  { name:"고야산의 동굴",    map:"jaru",   px:[53,397], imgs:["maps/2606/ce6ee534fb5232c72cfdaf4cf14503b0_1782237945_2042.png"] },
+  { name:"아름산의 동굴",    map:"jaru",   px:[657,439], imgs:["maps/2606/cd0c9602d6dac7a3078b19f6ae0a40d1_1782237465_5561.png"] },
+  { name:"벽청의 동굴",      map:"jaru",   px:[264,521], alias:["벽청이 동굴"], imgs:["maps/2606/cd0c9602d6dac7a3078b19f6ae0a40d1_1782237827_5333.png","maps/2606/cd0c9602d6dac7a3078b19f6ae0a40d1_1782237832_3074.png"] },
+  { name:"라토토의 동굴",    map:"jaru",   px:[432,296], alias:["라토토의 복도"], imgs:["maps/2606/cd0c9602d6dac7a3078b19f6ae0a40d1_1782237865_7366.png","maps/2606/cd0c9602d6dac7a3078b19f6ae0a40d1_1782237873_044.png"] },
+  { name:"쿠오산 소동굴",    map:"sinus",  px:[573,410], imgs:["maps/2606/ce6ee534fb5232c72cfdaf4cf14503b0_1782237983_8827.png"] },
   { name:"도둑의 동굴",      map:"sinus",  px:[221,398] },
   { name:"동쿠링 광산",      map:"sinus",  px:[392,246] },
-  { name:"쿠링으로의 길",    map:"sinus",  px:[412,318] },
-  { name:"속임수의 동굴",    map:"sinus",  px:[128,232] },
-  { name:"아스마르 광산",    map:"gaurin", px:[644,88] },
-  { name:"가우린 채석장",    map:"gaurin", px:[225,182] },
-  { name:"폐허가 된 탄광",   map:"gaurin", px:[960,298] },
-  { name:"어둠의 동굴",      map:"erebos", px:[492,142] },
+  { name:"쿠링으로의 길",    map:"sinus",  px:[412,318], imgs:["maps/2606/ce6ee534fb5232c72cfdaf4cf14503b0_1782238027_8996.png"] },
+  { name:"속임수의 동굴",    map:"sinus",  px:[128,232], imgs:["maps/2606/ce6ee534fb5232c72cfdaf4cf14503b0_1782238091_901.png"] },
+  { name:"아스마르 광산",    map:"gaurin", px:[644,88], imgs:["maps/2606/4268513e4c40cee9e8a8c1f714ef7eec_1782237188_1178.png"] },
+  { name:"가우린 채석장",    map:"gaurin", px:[225,182], imgs:["maps/2606/7af8735c42d805a8a677d820eeea962f_1782237325_3554.png"] },
+  { name:"폐허가 된 탄광",   map:"gaurin", px:[960,298], imgs:["maps/2606/feb1d4ced69e4b34dfb3373d9967356b_1782237117_5951.png"] },
+  { name:"어둠의 동굴",      map:"erebos", px:[492,142], imgs:["maps/2606/feb1d4ced69e4b34dfb3373d9967356b_1782236600_4341.png"] },
   { name:"용왕의 동굴",      map:"wonju",  px:[773,197] },
-  { name:"용암동굴",         map:"erebos", px:[228,298], alias:["용암 동굴"] },
-  { name:"스라인 지하동굴",  map:"pouren", px:[405,147] },
-  { name:"라토토대동굴",     map:"jaru",   px:[432,296] }
+  { name:"용암동굴",         map:"erebos", px:[228,298], alias:["용암 동굴"], imgs:["maps/2606/feb1d4ced69e4b34dfb3373d9967356b_1782236590_1967.png"] },
+  { name:"스라인 지하동굴",  map:"pouren", px:[405,147], imgs:["maps/2606/feb1d4ced69e4b34dfb3373d9967356b_1782236890_6733.png"] },
+  { name:"라토토대동굴",     map:"jaru",   px:[432,296], imgs:["maps/2606/ce6ee534fb5232c72cfdaf4cf14503b0_1782237930_9615.png"] }
 ];
 
 /* 좌표 없이 "○○ 부근"처럼 적힌 획득처 — 지도에 적힌 그 장소 좌표로 찍어요 */

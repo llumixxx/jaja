@@ -75,6 +75,14 @@
 .tip .lk a:hover{color:var(--hot)}
 .tip .hd{font-size:13px;font-weight:900;color:var(--warn);margin:0 30px 4px 0}
 .dist{margin-top:8px;font-size:12.5px;font-weight:800;color:#1c7a55;background:var(--ok-bg);border-radius:10px;padding:6px 10px}
+.dbtns{display:grid;gap:6px;margin-top:10px}
+.dbtns .btn{padding:9px 12px;font-size:13px}
+.dunbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:12px}
+.dunbar .btn{padding:8px 16px;font-size:13.5px}
+.dunpets{display:flex;flex-wrap:wrap;gap:6px;width:100%}
+.dp{display:inline-flex;align-items:center;gap:6px;background:var(--warn-bg);color:var(--warn);border-radius:10px;padding:3px 10px 3px 4px;font-size:12.5px;font-weight:700}
+.dp img{width:26px;height:26px;object-fit:contain;image-rendering:pixelated}
+.dp b{color:var(--ink)}
 .pm-note{margin-top:10px;font-size:12px;color:var(--ink3);line-height:1.7}
 @media (max-width:980px){
   .pm-layout{grid-template-columns:1fr}
@@ -126,7 +134,12 @@
     <section class="box pm-main">
       <div class="mapbar">
         <h2 id="mapName">-</h2><span class="cnt" id="mapCnt"></span>
-        <div class="me">내 좌표 <input class="f-input" id="meX" inputmode="numeric" placeholder="동"> <input class="f-input" id="meY" inputmode="numeric" placeholder="남"> <button class="btn ghost" id="meBtn" type="button">찍기</button></div>
+        <div class="me" id="meBox">내 좌표 <input class="f-input" id="meX" inputmode="numeric" placeholder="동"> <input class="f-input" id="meY" inputmode="numeric" placeholder="남"> <button class="btn ghost" id="meBtn" type="button">찍기</button></div>
+      </div>
+      <div class="dunbar" id="dunBar" hidden>
+        <button type="button" class="btn ghost" id="dunBack">← 바깥 지도로</button>
+        <div class="chips" id="dunTabs"></div>
+        <div class="dunpets" id="dunPets"></div>
       </div>
       <div class="viewer" id="viewer">
         <div class="stage" id="stage"><img class="mapimg" id="mapImg" alt=""><div id="pins"></div></div>
@@ -173,7 +186,7 @@ function build(rows){
       ENTRIES.push({ pet:p, map:d.dungeon.map, x:null, y:null, near:p.how, px:d.dungeon.px[0] + 16, py:d.dungeon.px[1] + 10, key:`${d.dungeon.map}|O:${d.dungeon.name}` });
       continue;
     }
-    if(d) ENTRIES.push({ pet:p, map:d.dungeon.map, dungeon:d.dungeon.name, floor:d.floor, x:d.x, y:d.y, px:d.dungeon.px[0], py:d.dungeon.px[1], key:`${d.dungeon.map}|D:${d.dungeon.name}` });
+    if(d) ENTRIES.push({ pet:p, map:d.dungeon.map, dungeon:d.dungeon.name, floor:d.floor, x:d.x, y:d.y, px:d.dungeon.px[0], py:d.dungeon.px[1], key:`${d.dungeon.map}|D@${d.dungeon.px[0]},${d.dungeon.px[1]}`, dobj:d.dungeon });
   }
   PETS.forEach(p => { p._cho = JM.chosung(p.name); });
 }
@@ -211,7 +224,7 @@ function apply(){
   placeTip();
 }
 function fit(){
-  const m = byMap[cur], vw = $("viewer").clientWidth, vh = $("viewer").clientHeight;
+  const m = DUN ? DUN.dims : byMap[cur], vw = $("viewer").clientWidth, vh = $("viewer").clientHeight;
   V.k = Math.min(vw/m.w, vh/m.h); V.min = V.k*.8; V.max = Math.max(4, V.k*6);
   V.x = (vw - m.w*V.k)/2; V.y = (vh - m.h*V.k)/2; apply();
 }
@@ -317,7 +330,11 @@ function showTip(k){
   }).join("");
   let dist = "";
   if(meXY && meXY.map === cur && !e0.dungeon && e0.x != null) dist = `<div class="dist">🧭 내 위치에서 ${dirText(e0.x - meXY.x, e0.y - meXY.y)}</div>`;
-  $("tip").innerHTML = `<button type="button" class="x" id="tipX" aria-label="닫기">✕</button>${e0.dungeon ? `<div class="hd">⛏ ${esc(e0.dungeon)} 입구 · 안쪽에서 나와요</div>` : ""}${rows}${dist}`;
+  const dnames = [...new Set(list.filter(e => e.dungeon).map(e => e.dungeon))];
+  const dbtns = [...new Map(list.filter(e => e.dobj && e.dobj.imgs).map(e => [e.dobj.name, e.dobj])).values()]
+    .map(d => `<button type="button" class="btn ghost dmap" data-d="${esc(d.name)}">🗺️ ${esc(d.name)} 안쪽 지도</button>`).join("");
+  $("tip").innerHTML = `<button type="button" class="x" id="tipX" aria-label="닫기">✕</button>${dnames.length ? `<div class="hd">⛏ ${esc(dnames.join(" · "))} 입구 · 안쪽에서 나와요</div>` : ""}${rows}${dist}${dbtns ? `<div class="dbtns">${dbtns}</div>` : ""}`;
+  $("tip").querySelectorAll(".dmap").forEach(b => b.onclick = ev => { ev.stopPropagation(); openDungeon(b.dataset.d); });
   $("tip").hidden = false; tipAt = e0; placeTip();
   $("tipX").onclick = ev => { ev.stopPropagation(); closeTip(); };
 }
@@ -333,6 +350,7 @@ function select(k, center){
   try{ history.replaceState(null, "", location.pathname + "?pet=" + encodeURIComponent(e.pet.name)); }catch(err){}
 }
 function setMap(id, keepSel){
+  if(DUN){ DUN = null; $("pins").style.display = ""; $("compass").style.display = ""; $("dunBar").hidden = true; $("meBox").style.visibility = ""; $("mapImg").onload = null; }
   cur = id; const m = byMap[id];
   if(!keepSel){ selKey = null; $("tip").hidden = true; tipAt = null; }
   $("mapName").textContent = m.name;
@@ -340,6 +358,36 @@ function setMap(id, keepSel){
   const img = $("mapImg");
   img.width = m.w; img.height = m.h; img.src = m.img;
   renderRegions(); renderList(); renderPins(); compass(); fit();
+}
+
+/* ===== 던전 안쪽 지도 ===== */
+let DUN = null;
+function openDungeon(name){
+  const d = window.PETMAP_DUNGEONS.find(x => x.name === name); if(!d || !d.imgs) return;
+  DUN = { d, idx:0, dims:{ w:800, h:600 } };
+  $("tip").hidden = true; tipAt = null;
+  $("pins").style.display = "none"; $("compass").style.display = "none";
+  $("dunBar").hidden = false; $("meBox").style.visibility = "hidden";
+  renderDunBar(); loadDunImg(); renderList();
+}
+function renderDunBar(){
+  const d = DUN.d, ins = ENTRIES.filter(e => e.dobj && e.dobj.px[0] === d.px[0] && e.dobj.px[1] === d.px[1] && e.dobj.map === d.map);
+  $("mapName").textContent = d.name;
+  $("mapCnt").textContent = `${byMap[d.map].name} · 안쪽 지도`;
+  $("dunTabs").innerHTML = d.imgs.length > 1 ? d.imgs.map((_, i) => `<button type="button" class="chip${i === DUN.idx ? " on" : ""}" data-i="${i}">${i ? "다음 장" : "첫 장"}</button>`).join("") : "";
+  $("dunPets").innerHTML = ins.filter(e => e.dungeon === d.name).map(e => `<span class="dp">${e.pet.imageCode ? `<img src="${IMG(e.pet.imageCode)}" alt="" onerror="this.remove()">` : ""}<b>${esc(e.pet.name)}</b> ${esc(e.floor || "")}${e.x != null ? ` (${e.x}, ${e.y})` : ""}</span>`).join("");
+}
+function loadDunImg(){
+  const img = $("mapImg"), src = DUN.d.imgs[DUN.idx];
+  img.onload = () => { DUN.dims = { w:img.naturalWidth, h:img.naturalHeight }; img.width = img.naturalWidth; img.height = img.naturalHeight; fit(); };
+  img.removeAttribute("width"); img.removeAttribute("height"); img.src = src;
+}
+function closeDungeon(){
+  if(!DUN) return;
+  const back = DUN.d.map; DUN = null;
+  $("pins").style.display = ""; $("compass").style.display = ""; $("dunBar").hidden = true; $("meBox").style.visibility = "";
+  $("mapImg").onload = null;
+  setMap(back);
 }
 
 /* ===== 연결 ===== */
@@ -362,6 +410,8 @@ function bind(){
   });
   ["meX","meY"].forEach(id => $(id).addEventListener("keydown", e => { if(e.key === "Enter") $("meBtn").click(); }));
   document.addEventListener("keydown", e => { if(e.key === "Escape") closeTip(); });
+  $("dunBack").onclick = closeDungeon;
+  $("dunTabs").addEventListener("click", e => { const b = e.target.closest("[data-i]"); if(!b || !DUN) return; DUN.idx = Number(b.dataset.i); renderDunBar(); loadDunImg(); });
 }
 
 /* ===== 시작 ===== */
