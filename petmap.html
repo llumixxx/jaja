@@ -169,6 +169,10 @@ function build(rows){
       continue;
     }
     const d = window.PETMAP_DUNGEON_FIND(p.how);
+    if(d && d.outside){   /* 입구 바로 앞 (던전 밖) — 입구 핀 옆에 펫 핀으로 */
+      ENTRIES.push({ pet:p, map:d.dungeon.map, x:null, y:null, near:p.how, px:d.dungeon.px[0] + 16, py:d.dungeon.px[1] + 10, key:`${d.dungeon.map}|O:${d.dungeon.name}` });
+      continue;
+    }
     if(d) ENTRIES.push({ pet:p, map:d.dungeon.map, dungeon:d.dungeon.name, floor:d.floor, x:d.x, y:d.y, px:d.dungeon.px[0], py:d.dungeon.px[1], key:`${d.dungeon.map}|D:${d.dungeon.name}` });
   }
   PETS.forEach(p => { p._cho = JM.chosung(p.name); });
@@ -308,11 +312,11 @@ function showTip(k){
   const e0 = list[0];
   const rows = list.map(e => {
     const p = e.pet, attrs = ATTR.filter(([a]) => Number(p[a]) > 0).map(([a, l, c]) => `<span style="color:${c};font-weight:800">${l}${Math.round(Number(p[a])/10)}</span>`).join(" ");
-    return `<div class="row"><span class="im">${p.imageCode ? `<img src="${IMG(p.imageCode)}" alt="" onerror="this.remove()">` : ""}</span><div><b>${esc(p.name)}</b> ${attrs}<small>${esc(e.dungeon ? `${e.dungeon}${e.floor ? " " + e.floor : ""}${e.x != null ? ` (${e.x}, ${e.y})` : ""}` : e.near ? `${e.near} · 약 (${e.x}, ${e.y})` : `${byMap[e.map].name} (${e.x}, ${e.y})`)}</small>
+    return `<div class="row"><span class="im">${p.imageCode ? `<img src="${IMG(p.imageCode)}" alt="" onerror="this.remove()">` : ""}</span><div><b>${esc(p.name)}</b> ${attrs}<small>${esc(e.dungeon ? `${e.dungeon}${e.floor ? " " + e.floor : ""}${e.x != null ? ` (${e.x}, ${e.y})` : ""}` : e.near ? `${e.near}${e.x != null ? ` · 약 (${e.x}, ${e.y})` : ""}` : `${byMap[e.map].name} (${e.x}, ${e.y})`)}</small>
       <div class="lk"><a href="pokedex.html#${encodeURIComponent(p.id)}">🐾 도감</a><a href="index.html?pet=${encodeURIComponent(p.name)}">🎲 환각 계산</a></div></div></div>`;
   }).join("");
   let dist = "";
-  if(meXY && meXY.map === cur && !e0.dungeon) dist = `<div class="dist">🧭 내 위치에서 ${dirText(e0.x - meXY.x, e0.y - meXY.y)}</div>`;
+  if(meXY && meXY.map === cur && !e0.dungeon && e0.x != null) dist = `<div class="dist">🧭 내 위치에서 ${dirText(e0.x - meXY.x, e0.y - meXY.y)}</div>`;
   $("tip").innerHTML = `<button type="button" class="x" id="tipX" aria-label="닫기">✕</button>${e0.dungeon ? `<div class="hd">⛏ ${esc(e0.dungeon)} 입구 · 안쪽에서 나와요</div>` : ""}${rows}${dist}`;
   $("tip").hidden = false; tipAt = e0; placeTip();
   $("tipX").onclick = ev => { ev.stopPropagation(); closeTip(); };

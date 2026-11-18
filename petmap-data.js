@@ -138,6 +138,7 @@ window.PETMAP_DUNGEON_FIND = function(how){
       if(i < 0) continue;
       const rest = how.slice(i + n.length);
       const fl = rest.match(/^\s*((?:지하\s*)?\d+층)?\s*(?:\(\s*(\d+)\s*[，,]\s*(\d+)\s*\))?/);
+      if(/^\s*입구/.test(rest)) return { dungeon:d, outside:true };   /* "○○ 입구 부근" = 던전 밖, 입구 바로 앞 */
       return { dungeon:d, floor:fl && fl[1] ? fl[1].replace(/\s+/g, " ") : "", x:fl && fl[2] ? Number(fl[2]) : null, y:fl && fl[3] ? Number(fl[3]) : null };
     }
   }
