@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>쟈쟈 펫 위치 지도</title>
+<meta name="description" content="쟈쟈서버 펫을 어디서 잡는지 지역 지도 위에 핀으로 보여줘요">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700;900&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="jaja-mate.css">
+<style>
+.sim-tabs{display:inline-flex;gap:4px;padding:5px;border-radius:18px;background:var(--seg);margin-bottom:18px}
+.sim-tabs a{display:inline-flex;align-items:center;gap:7px;padding:11px 22px;border-radius:14px;font-weight:800;font-size:15px;color:var(--ink2);text-decoration:none;white-space:nowrap}
+.sim-tabs a.on{background:var(--solid);color:var(--ink);box-shadow:0 2px 8px rgba(40,90,150,.18)}
+.pm-layout{display:grid;grid-template-columns:330px minmax(0,1fr);gap:22px;align-items:start}
+.pm-side{position:sticky;top:78px;max-height:calc(100vh - 98px);display:flex;flex-direction:column;padding:22px}
+.pm-side .f-title:first-child{margin-top:0}
+.regions{display:flex;flex-wrap:wrap;gap:6px}
+.regions .chip{padding:6px 12px;font-size:12.5px}
+.plist{margin-top:12px;overflow:auto;flex:1;min-height:120px;display:grid;gap:4px;align-content:start;padding-right:4px}
+.pi{display:grid;grid-template-columns:38px 1fr auto;gap:10px;align-items:center;width:100%;text-align:left;border:0;background:var(--soft-w);border-radius:12px;padding:5px 10px 5px 5px;transition:background .15s,transform .15s var(--ease)}
+.pi:hover{background:var(--hover-bg);transform:translateX(2px)}
+.pi.on{background:linear-gradient(90deg,var(--up-bg),var(--soft-w));box-shadow:inset 0 0 0 1.5px rgba(90,168,234,.55)}
+.pi .im{width:38px;height:38px;border-radius:10px;background:var(--img-bg);display:flex;align-items:center;justify-content:center}
+.pi .im img{max-width:34px;max-height:34px;image-rendering:pixelated}
+.pi b{display:block;font-size:14px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pi small{display:block;font-size:11.5px;color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pi .co{font-size:11.5px;font-weight:800;color:var(--hot);font-variant-numeric:tabular-nums;white-space:nowrap}
+.pi .co.dg{color:var(--warn)}
+.plist-h{font-size:12px;font-weight:800;color:var(--ink3);margin:8px 2px 2px}
+.nomap{font-size:13px;color:var(--ink2);background:var(--warn-bg);border-radius:12px;padding:10px 12px;margin-top:10px;line-height:1.6}
+.nomap b{color:var(--warn)}
+
+.pm-main{padding:18px}
+.mapbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:12px}
+.mapbar h2{font-size:22px;font-weight:900;letter-spacing:-.03em}
+.mapbar .cnt{font-size:13px;color:var(--ink3);font-weight:700}
+.me{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:var(--ink2)}
+.me input{width:64px;padding:7px 8px;text-align:center;border-radius:10px;font-size:14px}
+.me .btn{padding:7px 14px;font-size:13px}
+.viewer{position:relative;height:min(72vh,720px);min-height:380px;border-radius:20px;overflow:hidden;background:#0b2238;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}
+.viewer.drag{cursor:grabbing}
+.stage{position:absolute;left:0;top:0;transform-origin:0 0}
+.stage img.mapimg{display:block;max-width:none;pointer-events:none}
+.pin{position:absolute;width:0;height:0;z-index:2}
+.pin .pb{position:absolute;left:0;top:0;transform-origin:50% 100%;cursor:pointer}
+.pin .bub{position:absolute;left:-19px;top:-46px;width:38px;height:38px;border-radius:50% 50% 50% 4px;transform:rotate(-45deg);background:#fff;border:3px solid var(--acc-strong);box-shadow:0 4px 10px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center}
+.pin .bub img{transform:rotate(45deg);max-width:28px;max-height:28px;image-rendering:pixelated}
+.pin .bub .n{transform:rotate(45deg);font-size:12px;font-weight:900;color:var(--acc-strong)}
+.pin .num{position:absolute;left:10px;top:-52px;min-width:18px;height:18px;padding:0 4px;border-radius:9px;background:#ef7d3c;color:#fff;font-size:11px;font-weight:900;display:flex;align-items:center;justify-content:center;transform:rotate(0)}
+.pin.dg .bub{border-color:#e0a000;background:#fff7e3}
+.pin.on{z-index:5}
+.pin.on .bub{border-color:#ef3c6b;animation:pinb 1s var(--ease) infinite alternate}
+@keyframes pinb{from{box-shadow:0 0 0 0 rgba(239,60,107,.6),0 4px 10px rgba(0,0,0,.4)}to{box-shadow:0 0 0 10px rgba(239,60,107,0),0 4px 10px rgba(0,0,0,.4)}}
+.pin.dim{opacity:.35}
+.pin.me .bub{border-color:#2aa974;background:#e6fff3}
+.pin.me .bub .n{color:#1c7a55}
+.ring{position:absolute;left:-9px;top:-9px;width:18px;height:18px;border-radius:50%;border:2px solid #ef3c6b;opacity:0}
+.pin.on .ring{animation:ring 1.6s ease-out infinite}
+@keyframes ring{0%{transform:scale(.4);opacity:1}100%{transform:scale(3.4);opacity:0}}
+.zoom{position:absolute;right:12px;top:12px;display:grid;gap:6px;z-index:10}
+.zoom button{width:40px;height:40px;border-radius:12px;border:0;background:rgba(255,255,255,.92);color:#16508f;font-size:20px;font-weight:900;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.zoom button.sm{font-size:12px}
+.compass{position:absolute;left:12px;bottom:12px;z-index:10;background:rgba(255,255,255,.9);border-radius:12px;padding:6px 10px;font-size:12px;font-weight:800;color:#16508f;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.tip{position:absolute;z-index:20;width:280px;max-height:calc(100% - 20px);overflow:auto;max-width:calc(100% - 24px);background:var(--card);backdrop-filter:blur(14px);border:1px solid var(--line2);border-radius:18px;padding:14px;box-shadow:0 14px 34px rgba(0,0,0,.35);cursor:default}
+.tip .x{position:absolute;right:8px;top:8px;width:28px;height:28px;border-radius:50%;border:0;background:var(--seg);color:var(--ink2)}
+.tip .row{display:grid;grid-template-columns:52px 1fr;gap:10px;align-items:center;padding:6px 0;border-top:1px solid var(--line2)}
+.tip .row:first-of-type{border-top:0}
+.tip .im{width:52px;height:52px;border-radius:12px;background:var(--img-bg);display:flex;align-items:center;justify-content:center}
+.tip .im img{max-width:46px;max-height:46px;image-rendering:pixelated}
+.tip b{font-size:15px;font-weight:900}
+.tip small{display:block;font-size:12px;color:var(--ink2)}
+.tip .lk{display:flex;gap:6px;margin-top:5px;flex-wrap:wrap}
+.tip .lk a{font-size:11.5px;font-weight:800;text-decoration:none;background:var(--seg);border-radius:8px;padding:3px 8px;color:var(--ink2)}
+.tip .lk a:hover{color:var(--hot)}
+.tip .hd{font-size:13px;font-weight:900;color:var(--warn);margin:0 30px 4px 0}
+.dist{margin-top:8px;font-size:12.5px;font-weight:800;color:#1c7a55;background:var(--ok-bg);border-radius:10px;padding:6px 10px}
+.pm-note{margin-top:10px;font-size:12px;color:var(--ink3);line-height:1.7}
+@media (max-width:980px){
+  .pm-layout{grid-template-columns:1fr}
+  .pm-side{position:static;max-height:none}
+  .plist{max-height:300px}
+  .viewer{height:62vh}
+}
+@media (max-width:520px){ .sim-tabs{display:grid;grid-template-columns:1fr 1fr;width:100%} .sim-tabs a{justify-content:center;padding:10px 6px;font-size:14px} .me{margin-left:0;width:100%} }
+</style>
+<script src="jaja-mate.js"></script>
+</head>
+<body>
+
+<header class="top"><div class="top-in">
+  <button class="toggle-btn" id="toggleBtn" type="button" aria-label="메뉴 열기">☰</button>
+  <a class="brand" href="index.html">SA 쟈쟈<small>JAJA SERVER TOOLS</small></a>
+  <span class="top-page">📍 펫 위치 지도</span>
+  <button class="top-dark" id="darkBtn" type="button" aria-label="다크모드"><span class="moon">🌙</span><span class="sun">☀️</span></button>
+</div></header>
+
+<div class="sb-backdrop" id="sbBackdrop"></div>
+<div class="sidebar" id="sidebar">
+  <div class="sb-head">
+    <div class="sb-logo"><span class="sb-logo-dot"></span>SA 쟈쟈</div>
+    <div class="sb-sub">JAJA SERVER TOOLS</div>
+  </div>
+  <div class="sb-nav" id="sbNav" data-expanded="true"></div>
+  <div class="sb-filler">
+    <div class="sb-mascot">📍</div>
+    <div class="sb-filler-title">펫 이름을 검색하면<br>지도에 핀이 꽂혀요</div>
+    <div class="sb-filler-sub">내 좌표를 넣으면 방향도 알려줘요</div>
+  </div>
+  <div class="sb-footer"><span class="sb-footer-txt" id="loadStatusSb">로딩중...</span></div>
+</div>
+
+<main class="shell">
+  <nav class="sim-tabs" aria-label="지도 종류">
+    <a href="maps.html">🗺️ 지도 모음</a>
+    <a href="petmap.html" class="on" aria-current="page">📍 펫 위치</a>
+  </nav>
+  <div class="pm-layout">
+    <aside class="box pm-side">
+      <div class="f-title">펫 검색</div>
+      <input id="q" class="f-input" type="search" placeholder="펫 이름 (초성 가능)" autocomplete="off" aria-label="펫 검색">
+      <div class="f-title">지역 <small>숫자 = 펫 수</small></div>
+      <div class="regions" id="regions"></div>
+      <div class="plist" id="plist"></div>
+    </aside>
+    <section class="box pm-main">
+      <div class="mapbar">
+        <h2 id="mapName">-</h2><span class="cnt" id="mapCnt"></span>
+        <div class="me">내 좌표 <input class="f-input" id="meX" inputmode="numeric" placeholder="동"> <input class="f-input" id="meY" inputmode="numeric" placeholder="남"> <button class="btn ghost" id="meBtn" type="button">찍기</button></div>
+      </div>
+      <div class="viewer" id="viewer">
+        <div class="stage" id="stage"><img class="mapimg" id="mapImg" alt=""><div id="pins"></div></div>
+        <div class="zoom"><button type="button" id="zIn" aria-label="확대">+</button><button type="button" id="zOut" aria-label="축소">−</button><button type="button" class="sm" id="zFit">맞춤</button></div>
+        <div class="compass" id="compass"></div>
+        <div class="tip" id="tip" hidden></div>
+      </div>
+      <p class="pm-note">핀은 획득처 좌표를 지도에 맞춰 찍은 거라 몇 칸 정도 어긋날 수 있어요. 노란 핀은 던전 입구예요 (안쪽 층·좌표는 눌러서 확인). 지도: 공홈 지도 정보 (뿌야의 스톤에이지 외).</p>
+    </section>
+  </div>
+</main>
+<p class="foot">쟈쟈서버 편의기능 made by 팔레트 카키</p>
+
+<script src="nav.js"></script>
+<script src="petmap-data.js"></script>
+<script>
+(function(){
+"use strict";
+const { $, esc } = JM;
+const MAPS = window.PETMAP, byMap = Object.fromEntries(MAPS.map(m => [m.id, m]));
+const IMG = code => code ? `./sprites/${code}.gif` : "";
+const ATTR = [["earth","지","#4aa84a"],["water","수","#3d8ee0"],["fire","화","#e5604a"],["wind","풍","#d29a00"]];
+let PETS = [], ENTRIES = [], cur = MAPS[0].id, selKey = null, meXY = null, query = "";
+
+/* ===== 데이터 ===== */
+function build(rows){
+  PETS = rows.filter(r => String(r.how || "").replace(/\s+/g, "") !== "미출시").map(r => ({ ...r, name:String(r.name || "").replace(/^﻿/, "") }));
+  ENTRIES = [];
+  for(const p of PETS){
+    const f = window.PETMAP_FIND(p.how);
+    if(f){
+      const [px, py] = window.PETMAP_TO_PX(f.map, f.x, f.y);
+      ENTRIES.push({ pet:p, map:f.map.id, x:f.x, y:f.y, px:Math.max(10, Math.min(f.map.w - 10, px)), py:Math.max(10, Math.min(f.map.h - 10, py)), key:`${f.map.id}|${f.x},${f.y}` });
+      continue;
+    }
+    const d = window.PETMAP_DUNGEON_FIND(p.how);
+    if(d) ENTRIES.push({ pet:p, map:d.dungeon.map, dungeon:d.dungeon.name, floor:d.floor, x:d.x, y:d.y, px:d.dungeon.px[0], py:d.dungeon.px[1], key:`${d.dungeon.map}|D:${d.dungeon.name}` });
+  }
+  PETS.forEach(p => { p._cho = JM.chosung(p.name); });
+}
+const inMap = id => ENTRIES.filter(e => e.map === id);
+const matchQ = p => !query || p.name.includes(query) || p._cho.includes(JM.expandClusters(query));
+
+/* ===== 왼쪽 ===== */
+function renderRegions(){
+  $("regions").innerHTML = MAPS.map(m => `<button type="button" class="chip${m.id === cur ? " on" : ""}" data-m="${m.id}">${esc(m.name)}<span class="cnt">${inMap(m.id).length}</span></button>`).join("");
+}
+function entryRow(e){
+  const co = e.dungeon ? `<span class="co dg">${esc(e.floor || "던전")}</span>` : `<span class="co">${e.x}, ${e.y}</span>`;
+  return `<button type="button" class="pi${selKey === e.key ? " on" : ""}" data-k="${esc(e.key)}" data-m="${e.map}"><span class="im">${e.pet.imageCode ? `<img src="${IMG(e.pet.imageCode)}" alt="" loading="lazy" onerror="this.remove()">` : ""}</span><span><b>${esc(e.pet.name)}</b><small>${esc(e.dungeon ? e.dungeon + (e.floor ? " " + e.floor : "") : byMap[e.map].name)}</small></span>${co}</button>`;
+}
+function renderList(){
+  let html = "";
+  if(query){
+    const hits = ENTRIES.filter(e => matchQ(e.pet));
+    const noMap = PETS.filter(p => matchQ(p) && !ENTRIES.some(e => e.pet === p)).slice(0, 6);
+    html += hits.length ? `<div class="plist-h">검색 결과 ${hits.length}</div>` + hits.map(entryRow).join("") : "";
+    if(noMap.length) html += `<div class="nomap">${noMap.map(p => `<b>${esc(p.name)}</b> — ${esc(p.how || "획득처 정보 없음")}`).join("<br>")}<br><small>지도에 찍을 좌표가 없는 획득처예요</small></div>`;
+    if(!hits.length && !noMap.length) html = '<div class="nomap">검색 결과가 없어요</div>';
+  } else {
+    const list = inMap(cur).slice().sort((a, b) => (a.dungeon ? 1 : 0) - (b.dungeon ? 1 : 0) || a.pet.name.localeCompare(b.pet.name, "ko"));
+    html = list.length ? list.map(entryRow).join("") : '<div class="nomap">이 지역엔 좌표가 있는 펫이 없어요</div>';
+  }
+  $("plist").innerHTML = html;
+}
+
+/* ===== 지도 보기 (확대·이동) ===== */
+const V = { k:1, x:0, y:0, min:.2, max:4 };
+function apply(){
+  $("stage").style.transform = `translate(${V.x}px,${V.y}px) scale(${V.k})`;
+  document.querySelectorAll(".pin .pb").forEach(el => { el.style.transform = `scale(${(1/V.k)*Math.max(.8, Math.min(1.2, V.k))})`; });
+  placeTip();
+}
+function fit(){
+  const m = byMap[cur], vw = $("viewer").clientWidth, vh = $("viewer").clientHeight;
+  V.k = Math.min(vw/m.w, vh/m.h); V.min = V.k*.8; V.max = Math.max(4, V.k*6);
+  V.x = (vw - m.w*V.k)/2; V.y = (vh - m.h*V.k)/2; apply();
+}
+function zoomAt(f, cx, cy){
+  const nk = Math.max(V.min, Math.min(V.max, V.k*f));
+  V.x = cx - (cx - V.x)*nk/V.k; V.y = cy - (cy - V.y)*nk/V.k; V.k = nk; apply();
+}
+function centerOn(px, py, k){
+  const vw = $("viewer").clientWidth, vh = $("viewer").clientHeight;
+  if(k) V.k = Math.max(V.min, Math.min(V.max, k));
+  V.x = vw/2 - px*V.k; V.y = (vw < 560 ? vh*.22 : vh/2) - py*V.k; apply();
+}
+function bindViewer(){
+  const vw = $("viewer"), pts = new Map(); let last = null, moved = 0, pinch = null;
+  vw.addEventListener("wheel", e => { e.preventDefault(); const r = vw.getBoundingClientRect(); zoomAt(e.deltaY < 0 ? 1.18 : 1/1.18, e.clientX - r.left, e.clientY - r.top); }, { passive:false });
+  vw.addEventListener("pointerdown", e => {
+    if(e.target.closest(".zoom,.tip")) return;
+    pts.set(e.pointerId, { x:e.clientX, y:e.clientY }); try{ vw.setPointerCapture(e.pointerId); }catch(_e){}
+    moved = 0; last = { x:e.clientX, y:e.clientY }; vw.classList.add("drag");
+    if(pts.size === 2){ const [a, b] = [...pts.values()]; pinch = { d:Math.hypot(a.x - b.x, a.y - b.y) }; }
+  });
+  vw.addEventListener("pointermove", e => {
+    if(!pts.has(e.pointerId)) return;
+    pts.set(e.pointerId, { x:e.clientX, y:e.clientY });
+    if(pts.size === 2 && pinch){
+      const [a, b] = [...pts.values()], d = Math.hypot(a.x - b.x, a.y - b.y), r = vw.getBoundingClientRect();
+      zoomAt(d/pinch.d, (a.x + b.x)/2 - r.left, (a.y + b.y)/2 - r.top); pinch.d = d; moved += 10; return;
+    }
+    const dx = e.clientX - last.x, dy = e.clientY - last.y; last = { x:e.clientX, y:e.clientY };
+    moved += Math.abs(dx) + Math.abs(dy); V.x += dx; V.y += dy; apply();
+  });
+  const up = e => {
+    pts.delete(e.pointerId); if(pts.size < 2) pinch = null;
+    if(!pts.size) vw.classList.remove("drag");
+    if(pts.size === 1) last = { ...[...pts.values()][0] };
+    if(moved < 6 && !pts.size){
+      const pin = document.elementFromPoint(e.clientX, e.clientY)?.closest?.(".pin");
+      if(pin && pin.dataset.k) select(pin.dataset.k, false);
+      else if(!e.target.closest(".tip")) closeTip();
+    }
+  };
+  vw.addEventListener("pointerup", up); vw.addEventListener("pointercancel", up);
+  $("zIn").onclick = () => zoomAt(1.3, vw.clientWidth/2, vw.clientHeight/2);
+  $("zOut").onclick = () => zoomAt(1/1.3, vw.clientWidth/2, vw.clientHeight/2);
+  $("zFit").onclick = fit;
+  let lastW = vw.clientWidth;
+  window.addEventListener("resize", () => { if(Math.abs(vw.clientWidth - lastW) > 30){ lastW = vw.clientWidth; fit(); } });
+}
+
+/* ===== 핀 ===== */
+function groups(){
+  const g = new Map();
+  inMap(cur).forEach(e => { if(!g.has(e.key)) g.set(e.key, []); g.get(e.key).push(e); });
+  return g;
+}
+function renderPins(){
+  const html = [];
+  for(const [k, list] of groups()){
+    const e = list[0], dim = query && !list.some(x => matchQ(x.pet));
+    const inner = e.dungeon ? '<span class="n">⛏</span>' : (e.pet.imageCode ? `<img src="${IMG(e.pet.imageCode)}" alt="" onerror="this.remove()">` : '<span class="n">?</span>');
+    html.push(`<div class="pin${e.dungeon ? " dg" : ""}${selKey === k ? " on" : ""}${dim ? " dim" : ""}" data-k="${esc(k)}" style="left:${e.px}px;top:${e.py}px"><span class="ring"></span><div class="pb"><div class="bub">${inner}</div>${list.length > 1 ? `<span class="num">${list.length}</span>` : ""}</div></div>`);
+  }
+  if(meXY && meXY.map === cur){
+    const [px, py] = window.PETMAP_TO_PX(byMap[cur], meXY.x, meXY.y);
+    html.push(`<div class="pin me" style="left:${px}px;top:${py}px"><div class="pb"><div class="bub"><span class="n">나</span></div></div></div>`);
+  }
+  $("pins").innerHTML = html.join("");
+  apply();
+}
+function compass(){
+  const a = window.PETMAP_AXES(byMap[cur]);
+  const ang = v => Math.round(Math.atan2(v[1], v[0])*180/Math.PI);
+  const arrow = deg => ["→","↘","↓","↙","←","↖","↑","↗"][((Math.round(deg/45)%8) + 8)%8];
+  $("compass").textContent = `동 ${arrow(ang(a.east))}  남 ${arrow(ang(a.south))}`;
+}
+
+/* ===== 말풍선 ===== */
+let tipAt = null;
+function closeTip(){ $("tip").hidden = true; tipAt = null; selKey = null; document.querySelectorAll(".pin.on").forEach(p => p.classList.remove("on")); document.querySelectorAll(".pi.on").forEach(p => p.classList.remove("on")); try{ history.replaceState(null, "", location.pathname); }catch(e){} }
+function placeTip(){
+  if(!tipAt || $("tip").hidden) return;
+  const vw = $("viewer"), t = $("tip");
+  if(vw.clientWidth < 560){ t.style.left = "10px"; t.style.top = Math.max(10, vw.clientHeight - t.offsetHeight - 10) + "px"; return; }
+  let x = V.x + tipAt.px*V.k + 22, y = V.y + tipAt.py*V.k - 40;
+  if(x + t.offsetWidth > vw.clientWidth - 10) x = V.x + tipAt.px*V.k - t.offsetWidth - 22;
+  x = Math.max(10, Math.min(vw.clientWidth - t.offsetWidth - 10, x));
+  y = Math.max(10, Math.min(vw.clientHeight - t.offsetHeight - 10, y));
+  t.style.left = x + "px"; t.style.top = y + "px";
+}
+function dirText(dx, dy){
+  const parts = [];
+  if(Math.abs(dx) >= 1) parts.push((dx > 0 ? "동" : "서") + " " + Math.abs(dx));
+  if(Math.abs(dy) >= 1) parts.push((dy > 0 ? "남" : "북") + " " + Math.abs(dy));
+  return parts.length ? parts.join(", ") + "칸" : "바로 여기";
+}
+function showTip(k){
+  const list = inMap(cur).filter(e => e.key === k); if(!list.length) return;
+  const e0 = list[0];
+  const rows = list.map(e => {
+    const p = e.pet, attrs = ATTR.filter(([a]) => Number(p[a]) > 0).map(([a, l, c]) => `<span style="color:${c};font-weight:800">${l}${Math.round(Number(p[a])/10)}</span>`).join(" ");
+    return `<div class="row"><span class="im">${p.imageCode ? `<img src="${IMG(p.imageCode)}" alt="" onerror="this.remove()">` : ""}</span><div><b>${esc(p.name)}</b> ${attrs}<small>${esc(e.dungeon ? `${e.dungeon}${e.floor ? " " + e.floor : ""}${e.x != null ? ` (${e.x}, ${e.y})` : ""}` : `${byMap[e.map].name} (${e.x}, ${e.y})`)}</small>
+      <div class="lk"><a href="pokedex.html#${encodeURIComponent(p.id)}">🐾 도감</a><a href="index.html?pet=${encodeURIComponent(p.name)}">🎲 환각 계산</a></div></div></div>`;
+  }).join("");
+  let dist = "";
+  if(meXY && meXY.map === cur && !e0.dungeon) dist = `<div class="dist">🧭 내 위치에서 ${dirText(e0.x - meXY.x, e0.y - meXY.y)}</div>`;
+  $("tip").innerHTML = `<button type="button" class="x" id="tipX" aria-label="닫기">✕</button>${e0.dungeon ? `<div class="hd">⛏ ${esc(e0.dungeon)} 입구 · 안쪽에서 나와요</div>` : ""}${rows}${dist}`;
+  $("tip").hidden = false; tipAt = e0; placeTip();
+  $("tipX").onclick = ev => { ev.stopPropagation(); closeTip(); };
+}
+function select(k, center){
+  const mapId = k.split("|")[0];
+  if(mapId !== cur){ setMap(mapId, true); }
+  selKey = k;
+  document.querySelectorAll(".pin").forEach(p => p.classList.toggle("on", p.dataset.k === k));
+  document.querySelectorAll(".pi").forEach(p => p.classList.toggle("on", p.dataset.k === k));
+  const e = inMap(cur).find(x => x.key === k); if(!e) return;
+  if(center){ const vw = $("viewer"); centerOn(e.px, e.py, Math.max(V.k, Math.min(vw.clientWidth/byMap[cur].w, vw.clientHeight/byMap[cur].h)*2.2)); }
+  showTip(k);
+  try{ history.replaceState(null, "", location.pathname + "?pet=" + encodeURIComponent(e.pet.name)); }catch(err){}
+}
+function setMap(id, keepSel){
+  cur = id; const m = byMap[id];
+  if(!keepSel){ selKey = null; $("tip").hidden = true; tipAt = null; }
+  $("mapName").textContent = m.name;
+  $("mapCnt").textContent = `펫 ${inMap(id).length}종`;
+  const img = $("mapImg");
+  img.width = m.w; img.height = m.h; img.src = m.img;
+  renderRegions(); renderList(); renderPins(); compass(); fit();
+}
+
+/* ===== 연결 ===== */
+function bind(){
+  $("regions").addEventListener("click", e => { const b = e.target.closest("[data-m]"); if(!b) return; query = ""; $("q").value = ""; setMap(b.dataset.m); });
+  $("plist").addEventListener("click", e => { const b = e.target.closest(".pi"); if(!b) return; select(b.dataset.k, true); renderList(); if(innerWidth <= 980) $("viewer").scrollIntoView({ behavior:"smooth", block:"center" }); });
+  let qt;
+  $("q").addEventListener("input", e => { clearTimeout(qt); qt = setTimeout(() => {
+    query = e.target.value.trim(); renderList(); renderPins();
+    const hits = ENTRIES.filter(x => matchQ(x.pet));
+    if(query && hits.length && !hits.some(h => h.map === cur)) setMap(hits[0].map);
+    else if(query && hits.length === 1) select(hits[0].key, true);
+  }, 160); });
+  $("meBtn").addEventListener("click", () => {
+    const x = Math.round(Number($("meX").value)), y = Math.round(Number($("meY").value));
+    if(!isFinite(x) || !isFinite(y) || $("meX").value === "" || $("meY").value === ""){ meXY = null; renderPins(); return; }
+    meXY = { map:cur, x, y }; renderPins();
+    const [px, py] = window.PETMAP_TO_PX(byMap[cur], x, y); centerOn(px, py);
+    if(selKey) showTip(selKey);
+  });
+  ["meX","meY"].forEach(id => $(id).addEventListener("keydown", e => { if(e.key === "Enter") $("meBtn").click(); }));
+  document.addEventListener("keydown", e => { if(e.key === "Escape") closeTip(); });
+}
+
+/* ===== 시작 ===== */
+async function load(){
+  const tries = ["./pet_data.json", "https://sa000001.com/sa2/info/api/pet_data.php"];
+  for(const u of tries){
+    try{ const r = await fetch(u + "?ts=" + Date.now(), { cache:"no-store" }); if(!r.ok) continue; const d = await r.json(); const rows = d.rows || d; if(Array.isArray(rows) && rows.length) return rows; }catch(e){}
+  }
+  return [];
+}
+(async function(){
+  bind(); bindViewer();
+  const rows = await load();
+  build(rows);
+  $("loadStatusSb").textContent = `지도에 찍힌 펫 ${ENTRIES.length}종`;
+  const want = new URL(location.href).searchParams.get("pet");
+  const hit = want && (ENTRIES.find(e => e.pet.name === want) || ENTRIES.find(e => e.pet.name.includes(want)));
+  setMap(hit ? hit.map : cur);
+  if(hit){ requestAnimationFrame(() => { select(hit.key, true); renderList(); }); }
+})();
+})();
+</script>
+</body>
+</html>

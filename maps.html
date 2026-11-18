@@ -157,6 +157,11 @@ body {
 
 @media(max-width:520px){ .page-title{font-size:26px;} .main-inner{padding:16px 14px 60px;}
   .big-viewer-body{min-height:180px;} .big-viewer-body img{max-height:50vh;} }
+/* 지도 탭 (지도 모음 / 펫 위치) */
+.sim-tabs{display:flex;justify-content:center;gap:4px;width:max-content;max-width:100%;margin:6px auto 4px;padding:5px;border-radius:18px;background:var(--s2)}
+.sim-tabs a{display:inline-flex;align-items:center;gap:7px;padding:10px 22px;border-radius:14px;font-weight:800;font-size:15px;color:var(--t2);text-decoration:none;white-space:nowrap}
+.sim-tabs a.on{background:var(--white);color:var(--t1);box-shadow:0 2px 8px rgba(40,90,150,.18)}
+@media (max-width:520px){ .sim-tabs{display:grid;grid-template-columns:1fr 1fr;width:100%;margin-top:52px} .sim-tabs a{justify-content:center;padding:10px 6px;font-size:14px} }
 </style>
 </head>
 <body>
@@ -186,6 +191,11 @@ body {
 
 <div class="main" id="main">
 <div class="main-inner">
+
+  <nav class="sim-tabs" aria-label="지도 종류">
+    <a href="maps.html" class="on" aria-current="page">🗺️ 지도 모음</a>
+    <a href="petmap.html">📍 펫 위치</a>
+  </nav>
 
   <div class="page-head">
     <div class="wind-badge"><span class="wind-badge-dot"></span><span>SA JYAJYA · MAP INFO</span></div>
