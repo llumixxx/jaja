@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>쟈쟈 슬롯 강화 시뮬레이터</title>
+<meta name="description" content="쟈쟈서버 슬롯 강화를 직접 해보고, 목표 단계까지 드는 평균 스톤과 강화석 개수를 확인해요">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700;900&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="jaja-mate.css">
+<style>
+.en-layout{display:grid;gap:22px;align-items:start;grid-template-columns:minmax(300px,340px) minmax(0,1fr) minmax(320px,400px)}
+@media (max-width:1380px){ .en-layout{grid-template-columns:minmax(300px,340px) minmax(0,1fr)} .en-side{grid-column:1/-1} }
+@media (max-width:980px){ .en-layout{grid-template-columns:minmax(0,1fr)} }
+.en-prices{display:grid;gap:10px}
+.en-prices label{display:grid;gap:5px;font-size:12.5px;font-weight:700;color:var(--ink2)}
+.en-rule{margin-top:18px;font-size:12.5px;color:var(--ink2);line-height:1.8;background:var(--tint);border-radius:16px;padding:12px 14px}
+.en-rule b{color:var(--hot)}
+.en-hero{display:grid;grid-template-columns:auto 1fr;gap:22px;align-items:center}
+.en-lv{width:150px;height:150px;border-radius:34px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--hover-bg),var(--solid));box-shadow:var(--shadow-c);transition:transform .25s var(--ease)}
+.en-lv b{font-size:64px;font-weight:900;letter-spacing:-.05em;line-height:1;font-variant-numeric:tabular-nums;color:var(--ink3)}
+.en-lv small{font-size:12.5px;font-weight:800;color:var(--ink3);margin-top:4px}
+.en-lv.t1 b{color:#3aab7d} .en-lv.t2 b{color:#2f7fd6} .en-lv.t3 b{color:#9b6fd6}
+.en-lv.t4{background:linear-gradient(135deg,#fff6d6,#ffe1a0)} .en-lv.t4 b{color:#b06a00}
+[data-theme="dark"] .en-lv.t4{background:linear-gradient(135deg,#4a3a14,#3a2c10)} [data-theme="dark"] .en-lv.t4 b{color:#ffcf6b}
+.en-lv.bump{animation:enbump .45s var(--ease)}
+@keyframes enbump{0%{transform:scale(1)}35%{transform:scale(1.14) rotate(-2deg)}100%{transform:none}}
+.en-lv.boom{animation:enboom .5s ease}
+@keyframes enboom{20%{transform:translateX(-8px) rotate(-3deg)}40%{transform:translateX(8px) rotate(3deg)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+.en-pips{display:flex;gap:5px;margin-bottom:10px}
+.en-pips i{flex:1;height:10px;border-radius:5px;background:var(--track);transition:background .3s}
+.en-pips i.on{background:linear-gradient(90deg,#5aa8ea,#22b6c9)}
+.en-pips i.hot.on{background:linear-gradient(90deg,#f5a623,#ef7d3c)}
+.en-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.en-chips span{background:var(--tint);border-radius:10px;padding:3px 10px;font-size:13px;font-weight:800;font-variant-numeric:tabular-nums}
+.en-next{background:var(--soft-w);border-radius:18px;padding:12px 16px;box-shadow:inset 0 0 0 1px var(--line);font-size:13.5px;line-height:1.8}
+.en-next b{font-weight:900}
+.en-next .keep{color:var(--ok);font-weight:800} .en-next .boomtxt{color:var(--dn);font-weight:800}
+.en-msg{margin:16px 0 4px;min-height:44px;border-radius:16px;padding:11px 16px;font-size:14.5px;font-weight:800;background:var(--seg);color:var(--ink2);transition:background .25s,color .25s}
+.en-msg.ok{background:var(--ok-bg);color:var(--ok)}
+.en-msg.keep{background:var(--warn-bg);color:var(--warn)}
+.en-msg.boom{background:var(--dn-bg);color:var(--dn)}
+.en-msg.srv{box-shadow:0 0 0 2px rgba(245,166,35,.55)}
+.en-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+.en-actions .btn:first-child{padding:14px 40px;font-size:17px}
+.en-auto{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:14px;font-size:13.5px;font-weight:700;color:var(--ink2)}
+.en-auto select{width:auto;padding:9px 38px 9px 14px}
+.en-chk{display:inline-flex;align-items:center;gap:6px;cursor:pointer}
+.en-log{margin-top:16px;max-height:260px;overflow:auto;display:grid;gap:5px;font-size:12.5px}
+.en-log div{padding:6px 12px;border-radius:10px;background:var(--soft-w);font-variant-numeric:tabular-nums}
+.en-log .ok{color:var(--ok)} .en-log .keep{color:var(--warn)} .en-log .boom{color:var(--dn);background:var(--dn-bg)}
+.en-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.en-stats div{background:var(--tint);border-radius:14px;padding:8px 12px}
+.en-stats span{display:block;font-size:11.5px;font-weight:700;color:var(--ink2)}
+.en-stats b{font-size:18px;font-weight:900;font-variant-numeric:tabular-nums}
+.en-stats .wide{grid-column:1/-1}
+.en-stats .wide b{color:var(--hot)}
+.sc-small{margin-left:auto;padding:7px 16px!important;font-size:13px!important}
+table.t.en-exp{min-width:0}
+.en-exp td,.en-exp th{font-size:12.5px}
+.t tr.cur td{background:rgba(90,168,234,.16);font-weight:800}
+.t td.keepc{color:var(--ok);font-weight:800} .t td.boomc{color:var(--dn);font-weight:800}
+.en-mc{margin-top:14px}
+.en-mc #enMCOut{margin-top:10px;font-size:13px;line-height:1.8;color:var(--ink2)}
+.en-mc b{color:var(--hot)}
+.en-tables{margin-top:22px}
+.en-two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;margin-top:14px}
+@media (max-width:980px){ .en-two{grid-template-columns:minmax(0,1fr)} }
+@media (max-width:640px){
+  .en-hero{grid-template-columns:1fr;justify-items:center;text-align:center}
+  .en-lv{width:128px;height:128px}
+  .en-lv b{font-size:54px}
+  .en-pips,.en-chips{justify-content:center}
+  .en-actions .btn:first-child{flex:1}
+}
+</style>
+<script src="jaja-mate.js"></script>
+</head>
+<body>
+
+<header class="top"><div class="top-in">
+  <button class="toggle-btn" id="toggleBtn" type="button" aria-label="메뉴 열기">☰</button>
+  <a class="brand" href="index.html">SA 쟈쟈<small>JAJA SERVER TOOLS</small></a>
+  <span class="top-page">⚒ 슬롯 강화 시뮬레이터</span>
+  <button class="top-dark" id="darkBtn" type="button" aria-label="다크모드"><span class="moon">🌙</span><span class="sun">☀️</span></button>
+</div></header>
+
+<div class="sb-backdrop" id="sbBackdrop"></div>
+<div class="sidebar" id="sidebar">
+  <div class="sb-head">
+    <div class="sb-logo"><span class="sb-logo-dot"></span>SA 쟈쟈</div>
+    <div class="sb-sub">JAJA SERVER TOOLS</div>
+  </div>
+  <div class="sb-nav" id="sbNav" data-expanded="true"></div>
+  <div class="sb-filler">
+    <div class="sb-mascot">⚒</div>
+    <div class="sb-filler-title">강화석 1개 + 스톤으로<br>한 번씩 도전!</div>
+    <div class="sb-filler-sub">+5부터는 실패하면 +1로 떨어질 수 있어요</div>
+  </div>
+  <div class="sb-footer"><span class="sb-footer-txt">공홈 강화 안내 기준</span></div>
+</div>
+
+<main class="shell">
+  <div class="page-head">
+    <h1 class="page-title">슬롯 강화 시뮬레이터</h1>
+    <p class="page-sub">무기·머리·몸 칸 강화를 직접 해보고, 목표 단계까지 드는 평균 스톤과 강화석을 확인해요</p>
+  </div>
+  <div class="en-layout">
+    <aside class="box en-ctl">
+      <div class="box-h"><span class="ico">⚒</span><h2>설정</h2></div>
+      <div class="f-title">강화할 칸</div>
+      <div class="f-seg" id="enKind"></div>
+      <div class="f-title">지금 단계</div>
+      <div id="enStartBox"></div>
+      <div class="f-title">강화석 가격 <small>모르면 0</small></div>
+      <div class="en-prices">
+        <label>강화석 1개 (스톤)<input class="f-input" id="enStonePrice" type="number" inputmode="numeric" min="0" value="0"></label>
+      </div>
+      <div class="en-rule" id="enRule"></div>
+    </aside>
+
+    <section class="box en-main">
+      <div class="box-h"><span class="ico b">🔥</span><h2>강화</h2></div>
+      <div class="en-hero" id="enHero"></div>
+      <div class="en-msg" id="enMsg"></div>
+      <div class="en-actions">
+        <button class="btn" id="enTry" type="button">강화</button>
+        <button class="btn ghost" id="enNew" type="button">+0부터 다시</button>
+      </div>
+      <div class="en-auto">
+        <span>목표</span>
+        <select id="enTarget" class="f-input" aria-label="목표 단계"></select>
+        <button class="btn ghost" id="enAuto" type="button">목표까지 자동</button>
+        <label class="en-chk"><input type="checkbox" id="enKeep" checked> 떨어져도 계속</label>
+      </div>
+      <div class="en-log" id="enLog"></div>
+    </section>
+
+    <section class="box en-side">
+      <div class="box-h"><span class="ico">📊</span><h2>통계</h2><button class="btn ghost sc-small" id="enClear" type="button">초기화</button></div>
+      <div class="en-stats" id="enStats"></div>
+      <div class="f-title" style="margin-top:18px">목표별 평균 <small>지금 단계에서 출발</small></div>
+      <div class="tbl-wrap"><table class="t en-exp" id="enExpect"></table></div>
+      <div class="en-mc">
+        <button class="btn ghost" id="enMC" type="button">목표까지 1,000번 돌려보기</button>
+        <div id="enMCOut"></div>
+      </div>
+    </section>
+  </div>
+
+  <section class="box en-tables">
+    <div class="box-h"><span class="ico b">📋</span><h2>강화 표</h2></div>
+    <div class="tbl-wrap"><table class="t" id="enRates"></table></div>
+    <div class="en-two">
+      <div><div class="f-title" style="margin-top:14px">무기 칸</div><div class="tbl-wrap"><table class="t" id="enGainW"></table></div></div>
+      <div><div class="f-title" style="margin-top:14px">머리 · 몸 칸 (투구 · 갑옷)</div><div class="tbl-wrap"><table class="t" id="enGainA"></table></div></div>
+    </div>
+  </section>
+</main>
+<p class="foot">쟈쟈서버 편의기능 made by 팔레트 카키 · 확률·비용은 공홈 슬롯강화 안내 기준</p>
+
+<script src="nav.js"></script>
+<script>
+(function(){
+"use strict";
+const { $, esc } = JM;
+/* ===== 쟈쟈 슬롯 강화 (공홈 안내 기준) =====
+   도전 단계 +1~+10 성공률, 소모 스톤, 실패 시 하락(+1로) 확률. +2~+4 실패는 단계 유지.
+   강화석은 단계와 관계없이 도전할 때마다 1개. */
+const MAX = 10;
+const RATE = [100, 80, 60, 50, 40, 40, 30, 20, 20, 10];
+const COST = [18100, 32150, 54240, 71630, 132090, 239250, 274890, 331260, 401760, 472995];
+const DROP = [0, 0, 0, 0, 60, 60, 70, 80, 80, 90];       /* 실패했을 때 +1로 떨어질 확률(%) */
+const DROP_TO = 1;
+const GAIN = {
+  weapon:[{atk:1},{atk:1},{atk:1},{atk:2},{atk:2},{atk:2,pen:5,hit:5},{atk:2},{atk:4,pen:10,hit:5},{atk:5},{atk:5,pen:15,hit:5}],
+  armor: [{def:1},{def:1},{def:1},{def:2,hp:5},{def:2},{def:2,shd:5,hp:5},{def:2},{def:4,shd:5,hp:5},{def:5},{def:5,shd:10,hp:10}]
+};
+const KINDS = { weapon:{ label:"무기 칸", sub:"무기" }, armor:{ label:"머리·몸 칸", sub:"투구·갑옷" } };
+const LABEL = { atk:"공격력", def:"방어력", hp:"내구력", pen:"관통", hit:"명중", shd:"쉴드" };
+const ORDER = ["atk", "def", "hp", "pen", "hit", "shd"];
+const rate = t => RATE[t - 1], cost = t => COST[t - 1], drop = t => DROP[t - 1];
+function cum(kind, lv){ const o = {}; for(let i = 0; i < lv; i++){ const g = GAIN[kind][i]; for(const k in g) o[k] = (o[k] || 0) + g[k]; } return o; }
+
+/* 기대값: start에서 target까지 평균 시도 수, 하락 횟수, 스톤(강화석 값 포함).
+   E_k = A_k + B_k·X (X = +1에서 다시 시작했을 때의 기대값) 꼴로 뒤에서부터 풀어요 */
+function expected(start, target, stonePrice){
+  if(start >= target) return { attempts:0, drops:0, cost:0, stones:0 };
+  const solve = (perTry, perDrop) => {
+    const A = new Array(MAX + 1).fill(0), B = new Array(MAX + 1).fill(0);
+    for(let k = target - 1; k >= 0; k--){
+      const t = k + 1, p = rate(t)/100, d = drop(t)/100, c = perTry(t);
+      if(!d){ A[k] = c/p + A[k + 1]; B[k] = B[k + 1]; }
+      else {
+        const q = p + (1 - p)*d;                        /* 단계가 바뀌는 확률 (성공 or 하락) */
+        A[k] = (c + p*A[k + 1] + (1 - p)*d*perDrop)/q;
+        B[k] = (p*B[k + 1] + (1 - p)*d)/q;
+      }
+    }
+    const X = target > DROP_TO ? A[DROP_TO]/(1 - B[DROP_TO]) : 0;
+    return A[start] + B[start]*X;
+  };
+  return {
+    attempts: solve(() => 1, 0),
+    drops: solve(() => 0, 1),
+    cost: solve(t => cost(t) + (stonePrice || 0), 0)
+  };
+}
+function runOnce(start, target, stonePrice){
+  let lv = start, attempts = 0, drops = 0, money = 0;
+  while(lv < target){
+    const t = lv + 1;
+    attempts++; money += cost(t) + (stonePrice || 0);
+    if(Math.random()*100 < rate(t)) lv = t;
+    else if(Math.random()*100 < drop(t)){ drops++; lv = DROP_TO; }
+  }
+  return { attempts, drops, cost:money };
+}
+
+/* ===== 상태 ===== */
+const KEY = "jaja-enh";
+const S = { kind:"weapon", lv:0, stonePrice:0, target:10, keep:true,
+  st:{ tries:0, ok:0, fail:0, drop:0, best:0, stoneCost:0, used:0 } };
+let LOG = [], running = false, msg = null;
+try{ const d = JSON.parse(localStorage.getItem(KEY) || "{}"); Object.keys(S).forEach(k => { if(d[k] !== undefined && k !== "st") S[k] = d[k]; }); if(d.st) Object.assign(S.st, d.st); }catch(e){}
+const save = () => { try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} };
+const clampLv = v => Math.max(0, Math.min(MAX, Math.round(Number(v) || 0)));
+S.lv = clampLv(S.lv); S.target = Math.max(1, Math.min(MAX, Math.round(S.target) || 10));
+if(!KINDS[S.kind]) S.kind = "weapon";
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+function fmtS(n){ n = Math.round(n); return n >= 1e8 ? (n/1e8).toFixed(n >= 1e10 ? 0 : 1) + "억" : n >= 1e4 ? (Math.round(n/1e3)/10).toLocaleString() + "만" : n.toLocaleString(); }
+const fmtN = n => n >= 100 ? Math.round(n).toLocaleString() : n >= 10 ? n.toFixed(1) : n.toFixed(2);
+const gainText = g => ORDER.filter(k => g[k]).map(k => `${LABEL[k]} +${g[k]}`).join(" · ");
+const tierOf = lv => lv >= 10 ? 4 : lv >= 7 ? 3 : lv >= 5 ? 2 : lv >= 1 ? 1 : 0;
+
+/* ===== 강화 한 번 ===== */
+function attempt(){
+  if(S.lv >= MAX) return null;
+  const t = S.lv + 1, p = rate(t);
+  S.st.tries++; S.st.used++; S.st.stoneCost += cost(t);
+  const r = { t, p, ok: Math.random()*100 < p, drop:false };
+  if(r.ok){ S.lv = t; S.st.ok++; S.st.best = Math.max(S.st.best, t); }
+  else { S.st.fail++; if(drop(t) && Math.random()*100 < drop(t)){ r.drop = true; S.st.drop++; S.lv = DROP_TO; } }
+  return r;
+}
+function describe(r){
+  if(r.ok) return { cls:"ok", text:`🎉 +${r.t} 강화 성공! (${r.p}%)` };
+  if(r.drop) return { cls:"boom", text:`💥 +${r.t} 강화 실패… 칸이 +${DROP_TO}로 떨어졌어요 (${r.p}%)` };
+  return { cls:"keep", text:`😮 +${r.t} 강화 실패… 단계는 그대로예요 (${r.p}%)` };
+}
+function pushLog(r, quiet){
+  const d = describe(r);
+  LOG.unshift({ cls:d.cls, text:`#${S.st.tries} ${d.text}` });
+  if(LOG.length > 80) LOG.length = 80;
+  if(!quiet) msg = d;
+}
+
+/* ===== 그리기 ===== */
+function renderCtl(){
+  $("enKind").innerHTML = Object.keys(KINDS).map(k => `<button type="button" data-v="${k}" class="${k === S.kind ? "on" : ""}">${KINDS[k].label}</button>`).join("");
+  $("enRule").innerHTML = `도전할 때마다 <b>강화석 1개 + 스톤</b>이 들어요. 최대 <b>+10</b>.<br><b>+2~+4</b> 실패: 단계 그대로<br><b>+5 이상</b> 실패: 확률적으로 <b>+1로 하락</b> (60~90%)<br>칸에 붙는 강화라 장비를 바꿔도 단계는 남아요. 빈 칸은 효과가 없어요.`;
+  $("enTarget").innerHTML = Array.from({ length:MAX }, (_, i) => `<option value="${i + 1}"${i + 1 === S.target ? " selected" : ""}>+${i + 1}</option>`).join("");
+  $("enStonePrice").value = S.stonePrice; $("enKeep").checked = S.keep;
+  if(!$("enStartBox").firstChild) $("enStartBox").innerHTML = `<div class="stp"><button type="button" class="sb" data-d="-1" aria-label="단계 내리기">−</button><input class="si" type="number" inputmode="numeric" id="enLvIn" min="0" max="${MAX}"><button type="button" class="sb" data-d="1" aria-label="단계 올리기">+</button></div>`;
+}
+function renderHero(){
+  const t = S.lv, kind = S.kind, next = t + 1;
+  if($("enLvIn") && document.activeElement !== $("enLvIn")) $("enLvIn").value = t;
+  const pips = Array.from({ length:MAX }, (_, i) => `<i class="${i < t ? "on" : ""}${i >= 4 ? " hot" : ""}"></i>`).join("");
+  const cumT = gainText(cum(kind, t));
+  let nextHtml;
+  if(t >= MAX) nextHtml = `<div class="en-next">🏆 최대 강화(+10) 달성!<br>+0부터 다시 해볼까요?</div>`;
+  else nextHtml = `<div class="en-next">다음 도전 <b>+${next}</b> · 성공률 <b>${rate(next)}%</b><br>
+      강화석 <b>1개</b> + 스톤 <b>${cost(next).toLocaleString()}</b>${S.stonePrice ? ` <small>(강화석 값 포함 ${fmtS(cost(next) + S.stonePrice)})</small>` : ""}<br>
+      실패하면 ${drop(next) ? `<span class="boomtxt">${drop(next)}% 확률로 +${DROP_TO}로 하락</span>` : '<span class="keep">단계 그대로</span>'}<br>
+      성공하면 ${esc(gainText(GAIN[kind][next - 1]))}</div>`;
+  $("enHero").innerHTML = `<div class="en-lv t${tierOf(t)}" id="enLv"><b>+${t}</b><small>${KINDS[kind].label}</small></div>
+    <div><div class="en-pips">${pips}</div><div class="en-chips">${cumT ? cumT.split(" · ").map(x => `<span>${esc(x)}</span>`).join("") : "<span>강화 효과 없음</span>"}</div>${nextHtml}</div>`;
+  const m = $("enMsg");
+  if(msg){ m.className = "en-msg " + msg.cls; m.textContent = msg.text; } else { m.className = "en-msg"; m.textContent = "강화를 눌러보세요!"; }
+  $("enTry").disabled = running || t >= MAX;
+  $("enAuto").textContent = running ? "멈춤" : "목표까지 자동";
+  $("enNew").disabled = running;
+}
+function renderStats(){
+  const s = S.st;
+  const box = (l, v, w) => `<div${w ? ' class="wide"' : ""}><span>${l}</span><b>${v}</b></div>`;
+  $("enStats").innerHTML = box("시도", s.tries.toLocaleString()) + box("성공", s.ok.toLocaleString()) + box("실패", s.fail.toLocaleString()) + box("+1로 하락", s.drop.toLocaleString()) +
+    box("최고 단계", "+" + s.best) + box("성공률", s.tries ? (s.ok/s.tries*100).toFixed(1) + "%" : "-") +
+    box("강화석 사용", s.used.toLocaleString() + "개") + box("스톤 사용", fmtS(s.stoneCost)) +
+    box(S.stonePrice ? "총 비용 (강화석 값 포함)" : "총 비용 (강화석 값 0으로 계산)", fmtS(s.stoneCost + s.used*S.stonePrice), true);
+}
+function renderExpect(){
+  let h = `<thead><tr><th>목표</th><th>평균 시도<br><small>= 강화석</small></th><th>평균 하락</th><th>평균 스톤</th></tr></thead><tbody>`;
+  if(S.lv >= MAX) h += `<tr><td colspan="4" style="text-align:center">이미 +10이에요</td></tr>`;
+  for(let t = S.lv + 1; t <= MAX; t++){
+    const x = expected(S.lv, t, S.stonePrice);
+    h += `<tr class="${t === S.target ? "cur" : ""}"><td>+${t}</td><td>${fmtN(x.attempts)}</td><td>${fmtN(x.drops)}</td><td>${fmtS(x.cost)}</td></tr>`;
+  }
+  $("enExpect").innerHTML = h + "</tbody>";
+}
+function renderLog(){ $("enLog").innerHTML = LOG.map(l => `<div class="${l.cls}">${esc(l.text)}</div>`).join(""); }
+function renderTables(){
+  let h = `<thead><tr><th>도전 단계</th><th>성공률</th><th>실패하면</th><th>소모 스톤</th><th>무기 칸</th><th>머리·몸 칸</th></tr></thead><tbody>`;
+  for(let t = 1; t <= MAX; t++){
+    h += `<tr class="${t === S.lv + 1 ? "cur" : ""}"><td>+${t}</td><td>${rate(t)}%</td><td class="${drop(t) ? "boomc" : "keepc"}">${t === 1 ? "-" : drop(t) ? `하락 ${drop(t)}% → +${DROP_TO}` : "단계 유지"}</td><td>${cost(t).toLocaleString()}</td><td>${esc(gainText(GAIN.weapon[t - 1]))}</td><td>${esc(gainText(GAIN.armor[t - 1]))}</td></tr>`;
+  }
+  $("enRates").innerHTML = h + "</tbody>";
+  const gain = kind => {
+    let r = `<thead><tr><th>단계</th><th>그 단계에서</th><th>누적</th></tr></thead><tbody>`;
+    for(let t = 1; t <= MAX; t++) r += `<tr class="${kind === S.kind && t === S.lv ? "cur" : ""}"><td>+${t}</td><td>${esc(gainText(GAIN[kind][t - 1]))}</td><td>${esc(gainText(cum(kind, t)))}</td></tr>`;
+    return r + "</tbody>";
+  };
+  $("enGainW").innerHTML = gain("weapon"); $("enGainA").innerHTML = gain("armor");
+}
+function render(){ renderHero(); renderStats(); renderExpect(); renderLog(); renderTables(); save(); }
+function flash(r){
+  const el = $("enLv"); if(!el || !r) return;
+  el.classList.remove("bump", "boom"); void el.offsetWidth;
+  el.classList.add(r.drop ? "boom" : r.ok ? "bump" : "boom");
+}
+
+/* ===== 동작 ===== */
+function doTry(){
+  if(running) return;
+  const r = attempt(); if(!r) return;
+  pushLog(r); render(); flash(r);
+  JM.haptic(r.drop ? 40 : 14);
+}
+async function autoRun(){
+  if(running){ running = false; return; }
+  if(S.lv >= S.target){ msg = { cls:"keep", text:"이미 목표 단계예요. 목표를 올려보세요." }; render(); return; }
+  running = true; let n = 0, drops = 0;
+  while(running && S.lv < S.target && n < 400000){
+    const r = attempt(); if(!r) break; n++;
+    const quiet = n > 40;
+    if(!quiet || r.drop || (r.ok && r.t >= 7)) pushLog(r, true);
+    if(r.drop){
+      drops++;
+      if(!S.keep){ msg = { cls:"boom", text:describe(r).text + "  ·  자동 강화를 멈췄어요" }; running = false; render(); flash(r); return; }
+    }
+    if(!quiet){ render(); flash(r); await sleep(80); }
+    else if(n % 400 === 0){ render(); await sleep(0); }
+  }
+  const done = S.lv >= S.target;
+  msg = done ? { cls:"ok", text:`🏆 +${S.target} 달성! 총 ${n.toLocaleString()}번 시도 (강화석 ${n.toLocaleString()}개), +${DROP_TO} 하락 ${drops.toLocaleString()}번` } : { cls:"keep", text:`멈췄어요 (${n.toLocaleString()}번 시도)` };
+  running = false; render();
+}
+async function monteCarlo(){
+  const btn = $("enMC"), out = $("enMCOut");
+  if(S.lv >= S.target){ out.textContent = "목표가 지금 단계보다 높아야 해요."; return; }
+  btn.disabled = true; const N = 1000, A = [], D = [], C = [];
+  for(let i = 0; i < N; i++){
+    const r = runOnce(S.lv, S.target, S.stonePrice);
+    A.push(r.attempts); D.push(r.drops); C.push(r.cost);
+    if(i % 40 === 39){ out.textContent = `돌리는 중… ${i + 1}/${N}`; await sleep(0); }
+  }
+  const q = (arr, p) => { const a = arr.slice().sort((x, y) => x - y); return a[Math.min(a.length - 1, Math.floor(a.length*p))]; };
+  out.innerHTML = `+${S.lv} → <b>+${S.target}</b> · ${N.toLocaleString()}번 돌린 결과<br>
+    강화석(시도): 중앙값 <b>${fmtN(q(A, .5))}</b>개 · 운 나쁜 10%는 <b>${fmtN(q(A, .9))}</b>개 이상<br>
+    +${DROP_TO} 하락: 중앙값 <b>${fmtN(q(D, .5))}</b>번 · 운 나쁜 10%는 <b>${fmtN(q(D, .9))}</b>번 이상<br>
+    스톤: 중앙값 <b>${fmtS(q(C, .5))}</b> · 운 나쁜 10%는 <b>${fmtS(q(C, .9))}</b> 이상`;
+  btn.disabled = false;
+}
+function bind(){
+  $("enKind").addEventListener("click", e => { const b = e.target.closest("button"); if(!b) return; S.kind = b.dataset.v; msg = null; renderCtl(); render(); });
+  $("enStartBox").addEventListener("click", e => { const b = e.target.closest(".sb"); if(!b || running) return; S.lv = clampLv(S.lv + Number(b.dataset.d)); msg = null; render(); });
+  $("enStartBox").addEventListener("change", e => { if(e.target.id === "enLvIn"){ S.lv = clampLv(e.target.value); msg = null; render(); } });
+  $("enStonePrice").addEventListener("change", e => { S.stonePrice = Math.max(0, Math.round(Number(e.target.value) || 0)); e.target.value = S.stonePrice; render(); });
+  $("enTarget").addEventListener("change", e => { S.target = Number(e.target.value); render(); });
+  $("enKeep").addEventListener("change", e => { S.keep = e.target.checked; save(); });
+  $("enTry").addEventListener("click", doTry);
+  $("enAuto").addEventListener("click", autoRun);
+  $("enNew").addEventListener("click", () => { if(running) return; S.lv = 0; msg = { cls:"", text:"+0부터 다시 시작해요" }; render(); });
+  $("enMC").addEventListener("click", monteCarlo);
+  $("enClear").addEventListener("click", () => { Object.keys(S.st).forEach(k => { S.st[k] = 0; }); LOG = []; msg = null; $("enMCOut").textContent = ""; render(); });
+}
+renderCtl(); bind(); render();
+window.__ENH = { expected, runOnce };
+})();
+</script>
+</body>
+</html>
