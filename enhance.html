@@ -170,7 +170,7 @@ table.t.en-exp{min-width:0}
   <div class="sb-filler">
     <div class="sb-mascot">⚒</div>
     <div class="sb-filler-title">강화석 1개 + 스톤으로<br>한 번씩 도전!</div>
-    <div class="sb-filler-sub">+5부터는 실패하면 +1로 떨어질 수 있어요</div>
+    <div class="sb-filler-sub">+5부터는 실패하면 +1로 떨어져요</div>
   </div>
   <div class="sb-footer"><span class="sb-footer-txt">공홈 슬롯강화 안내 기준</span></div>
 </div>
@@ -243,7 +243,7 @@ const { $, esc } = JM;
 const MAX = 10;
 const RATE = [100, 80, 60, 50, 40, 40, 30, 20, 20, 10];
 const COST = [18100, 32150, 54240, 71630, 132090, 239250, 274890, 331260, 401760, 472995];
-const DROP = [0, 0, 0, 0, 60, 60, 70, 80, 80, 90];       /* 실패했을 때 +1로 떨어질 확률(%) */
+const DROP = [0, 0, 0, 0, 100, 100, 100, 100, 100, 100]; /* 실패했을 때 +1로 떨어질 확률(%) — +5 이상은 실패하면 무조건 +1 */
 const DROP_TO = 1;
 const GAIN = {
   weapon:[{atk:1},{atk:1},{atk:1},{atk:2},{atk:2},{atk:2,pen:5,hit:5},{atk:2},{atk:4,pen:10,hit:5},{atk:5},{atk:5,pen:15,hit:5}],
@@ -375,7 +375,7 @@ function renderPanel(){
   let res;
   if(last && last.slot === k){ const d = describe(last); res = `<div class="res ${d.cls}">${esc(d.text)}</div>`; }
   else if(full) res = `<div class="res ok">최대 강화(+10)입니다.</div>`;
-  else res = `<div class="res">${drop(nx) ? `실패하면 ${drop(nx)}% 확률로 +${DROP_TO}(으)로 떨어집니다.` : "실패해도 단계는 그대로, 강화석과 스톤만 사라집니다."}</div>`;
+  else res = `<div class="res">${drop(nx) ? `실패하면 +${DROP_TO}(으)로 떨어집니다.` : "실패해도 단계는 그대로, 강화석과 스톤만 사라집니다."}</div>`;
   $("enBody").innerHTML = `
     <div class="en-top">${tileHTML(k)}
       <div><div class="en-name">${sd.label} 칸</div><div class="dia">${dia}</div></div>
@@ -425,7 +425,7 @@ function renderExpect(){
 function renderTables(){
   let h = `<thead><tr><th>도전 단계</th><th>성공률</th><th>실패하면</th><th>소모 스톤</th><th>무기 칸</th><th>머리 · 몸 칸</th></tr></thead><tbody>`;
   for(let t = 1; t <= MAX; t++){
-    h += `<tr class="${t === curLv() + 1 ? "cur" : ""}"><td>+${t}</td><td>${rate(t)}%</td><td class="${t === 1 ? "" : drop(t) ? "boomc" : "keepc"}">${t === 1 ? "-" : drop(t) ? `하락 ${drop(t)}% → +${DROP_TO}` : "단계 유지"}</td><td>${cost(t).toLocaleString()}</td><td>${esc(gainText(GAIN.weapon[t - 1]))}</td><td>${esc(gainText(GAIN.armor[t - 1]))}</td></tr>`;
+    h += `<tr class="${t === curLv() + 1 ? "cur" : ""}"><td>+${t}</td><td>${rate(t)}%</td><td class="${t === 1 ? "" : drop(t) ? "boomc" : "keepc"}">${t === 1 ? "-" : drop(t) ? `+${DROP_TO}로 하락` : "단계 유지"}</td><td>${cost(t).toLocaleString()}</td><td>${esc(gainText(GAIN.weapon[t - 1]))}</td><td>${esc(gainText(GAIN.armor[t - 1]))}</td></tr>`;
   }
   h += `<tr><td>합계</td><td></td><td></td><td>${COST.reduce((a, b) => a + b, 0).toLocaleString()}</td><td>${esc(gainText(cum("weapon", MAX)))}</td><td>${esc(gainText(cum("armor", MAX)))}</td></tr>`;
   $("enRates").innerHTML = h + "</tbody>";
