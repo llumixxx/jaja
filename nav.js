@@ -14,7 +14,7 @@ const SA_NAV_ITEMS = [
   { href: "mypets.html", icon: "📋", label: "내 펫 관리" },
   { href: "item.html", icon: "🗡️", label: "아이템도감" },
   { href: "statcalc.html", icon: "⚔️", label: "능력치 계산기" },
-  { href: "simulator.html", icon: "🎰", label: "시뮬레이터", match: ["enhance.html"] },
+  { href: "simulators.html", icon: "🎰", label: "시뮬레이터", match: ["simulator.html", "enhance.html"] },
   { href: "quiz.html", icon: "🧠", label: "퀴즈마스터" },
   { href: "maps.html", icon: "🗺️", label: "지도정보" },
   { href: "expcalc.html", icon: "📈", label: "경험치 계산기" },

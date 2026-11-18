@@ -167,12 +167,13 @@ table.t.en-exp{min-width:0}
 
 <main class="shell">
   <nav class="sim-tabs" aria-label="시뮬레이터 종류">
+    <a href="simulators.html">🏠 고르기</a>
     <a href="simulator.html">🎰 환각 시뮬</a>
     <a href="enhance.html" class="on" aria-current="page">⚒ 강화 시뮬</a>
   </nav>
 
   <div class="gw">
-    <a class="gw-x" href="simulator.html" title="환각 시뮬로" aria-label="환각 시뮬로">✕</a>
+    <a class="gw-x" href="simulators.html" title="시뮬레이터 고르기로" aria-label="시뮬레이터 고르기로">✕</a>
     <div class="gw-in">
       <section class="gp">
         <div class="plate">장비 칸</div>
@@ -289,13 +290,14 @@ const ROWS = {
 
 /* ===== 상태 ===== */
 const KEY = "jaja-enh2";
-const S = { lv:{ weapon:0, head:0, body:0 }, on:{ weapon:true, head:true, body:true }, sel:"body", stonePrice:0, target:10, keep:true,
+const S = { lv:{ weapon:0, head:0, body:0 }, on:{ weapon:true, head:true, body:true }, sel:"body", stonePrice:150000, pv:2, target:10, keep:true,
   st:{ tries:0, ok:0, fail:0, drop:0, best:0, stoneCost:0, used:0 } };
 let LOG = [], running = false, last = null;
 try{
   const d = JSON.parse(localStorage.getItem(KEY) || "{}");
   if(d.lv) Object.assign(S.lv, d.lv); if(d.on) Object.assign(S.on, d.on); if(d.st) Object.assign(S.st, d.st);
-  ["sel","stonePrice","target","keep"].forEach(k => { if(d[k] !== undefined) S[k] = d[k]; });
+  ["sel","target","keep"].forEach(k => { if(d[k] !== undefined) S[k] = d[k]; });
+  if(d.pv === 2 && d.stonePrice !== undefined) S.stonePrice = d.stonePrice;   /* 예전 기본값(0)은 15만으로 바꿔요 */
 }catch(e){}
 const clampLv = v => Math.max(0, Math.min(MAX, Math.round(Number(v) || 0)));
 Object.keys(S.lv).forEach(k => { S.lv[k] = clampLv(S.lv[k]); });
@@ -391,7 +393,7 @@ function renderStats(){
   $("enStats").innerHTML = box("시도", s.tries.toLocaleString()) + box("성공", s.ok.toLocaleString()) + box("실패", s.fail.toLocaleString()) +
     box("+1로 하락", s.drop.toLocaleString()) + box("최고 단계", "+" + s.best) + box("성공률", s.tries ? (s.ok/s.tries*100).toFixed(1) + "%" : "-") +
     box("강화석", s.used.toLocaleString() + "개") + box("스톤", fmtS(s.stoneCost)) + box("강화석 값", S.stonePrice ? fmtS(s.used*S.stonePrice) : "0") +
-    box(S.stonePrice ? "총 비용 (강화석 값 포함)" : "총 비용 (강화석 값 0으로 계산)", fmtS(s.stoneCost + s.used*S.stonePrice), true);
+    box(S.stonePrice ? `총 비용 (강화석 개당 ${fmtS(S.stonePrice)} 포함)` : "총 비용 (강화석 값 0으로 계산)", fmtS(s.stoneCost + s.used*S.stonePrice), true);
   $("enLog").innerHTML = LOG.length ? LOG.map(l => `<div class="${l.cls}">${esc(l.text)}</div>`).join("") : '<div style="color:var(--ink3)">강화를 누르면 여기에 쌓여요</div>';
 }
 function renderExpect(){
