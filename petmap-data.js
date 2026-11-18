@@ -36,7 +36,7 @@ window.PETMAP = [
          [160,680,372,388],[216,647,392,323],[254,657,495,297],[248,711,553,343],[231,715,555,360],[264,763,680,377],[223,788,648,428],
          [216,846,762,455],[255,896,868,488],[145,841,612,532],[210,900,790,540]] },
   { id:"erebos", name:"화산섬 에레보스", match:["화산섬 에레보스","에레보스"], img:"maps/2606/feb1d4ced69e4b34dfb3373d9967356b_1782236308_8428.png", w:800, h:460,
-    pts:[[362,115,480,130],[349,126,492,142],[217,227,437,297],[130,148,228,298],[342,234,612,225]] }
+    pts:[[362,115,480,130],[349,126,492,142],[217,227,437,297],[130,148,228,298],[342,239,612,225]] }
 ];
 
 /* 게임좌표 → 지도 픽셀 */
@@ -107,8 +107,28 @@ window.PETMAP_DUNGEONS = [
   { name:"아스마르 광산",    map:"gaurin", px:[644,88] },
   { name:"가우린 채석장",    map:"gaurin", px:[225,182] },
   { name:"폐허가 된 탄광",   map:"gaurin", px:[960,298] },
-  { name:"어둠의 동굴",      map:"erebos", px:[492,142] }
+  { name:"어둠의 동굴",      map:"erebos", px:[492,142] },
+  { name:"용왕의 동굴",      map:"wonju",  px:[773,197] },
+  { name:"용암동굴",         map:"erebos", px:[228,298], alias:["용암 동굴"] },
+  { name:"스라인 지하동굴",  map:"pouren", px:[405,147] },
+  { name:"라토토대동굴",     map:"jaru",   px:[432,296] }
 ];
+
+/* 좌표 없이 "○○ 부근"처럼 적힌 획득처 — 지도에 적힌 그 장소 좌표로 찍어요 */
+window.PETMAP_PLACES = [
+  { name:"온천랜드",     map:"erebos", x:342, y:239 },
+  { name:"다나마을",     map:"gaurin", x:499, y:167 },
+  { name:"쟈쟈마을",     map:"jaru",   x:569, y:376 },
+  { name:"마리너스 마을", map:"sinus",  x:114, y:662, alias:["마리너스마을"] }
+];
+window.PETMAP_PLACE_FIND = function(how){
+  how = String(how || "");
+  if(/복권|선물|보상|이벤트/.test(how)) return null;      /* 마을 이름이 들어가도 장소가 아닌 경우 */
+  for(const p of window.PETMAP_PLACES){
+    if([p.name].concat(p.alias || []).some(n => how.includes(n))) return p;
+  }
+  return null;
+};
 window.PETMAP_DUNGEON_FIND = function(how){
   how = String(how || "").replace(/\s+/g, " ");
   for(const d of window.PETMAP_DUNGEONS){

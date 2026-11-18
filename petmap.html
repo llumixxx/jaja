@@ -162,6 +162,12 @@ function build(rows){
       ENTRIES.push({ pet:p, map:f.map.id, x:f.x, y:f.y, px:Math.max(10, Math.min(f.map.w - 10, px)), py:Math.max(10, Math.min(f.map.h - 10, py)), key:`${f.map.id}|${f.x},${f.y}` });
       continue;
     }
+    const pl = window.PETMAP_PLACE_FIND(p.how);
+    if(pl){
+      const mp = byMap[pl.map], [px, py] = window.PETMAP_TO_PX(mp, pl.x, pl.y);
+      ENTRIES.push({ pet:p, map:pl.map, x:pl.x, y:pl.y, near:p.how, px, py, key:`${pl.map}|${pl.x},${pl.y}` });
+      continue;
+    }
     const d = window.PETMAP_DUNGEON_FIND(p.how);
     if(d) ENTRIES.push({ pet:p, map:d.dungeon.map, dungeon:d.dungeon.name, floor:d.floor, x:d.x, y:d.y, px:d.dungeon.px[0], py:d.dungeon.px[1], key:`${d.dungeon.map}|D:${d.dungeon.name}` });
   }
@@ -175,8 +181,8 @@ function renderRegions(){
   $("regions").innerHTML = MAPS.map(m => `<button type="button" class="chip${m.id === cur ? " on" : ""}" data-m="${m.id}">${esc(m.name)}<span class="cnt">${inMap(m.id).length}</span></button>`).join("");
 }
 function entryRow(e){
-  const co = e.dungeon ? `<span class="co dg">${esc(e.floor || "던전")}</span>` : `<span class="co">${e.x}, ${e.y}</span>`;
-  return `<button type="button" class="pi${selKey === e.key ? " on" : ""}" data-k="${esc(e.key)}" data-m="${e.map}"><span class="im">${e.pet.imageCode ? `<img src="${IMG(e.pet.imageCode)}" alt="" loading="lazy" onerror="this.remove()">` : ""}</span><span><b>${esc(e.pet.name)}</b><small>${esc(e.dungeon ? e.dungeon + (e.floor ? " " + e.floor : "") : byMap[e.map].name)}</small></span>${co}</button>`;
+  const co = e.dungeon ? `<span class="co dg">${esc(e.floor || "던전")}</span>` : `<span class="co">${e.near ? "부근" : e.x + ", " + e.y}</span>`;
+  return `<button type="button" class="pi${selKey === e.key ? " on" : ""}" data-k="${esc(e.key)}" data-m="${e.map}"><span class="im">${e.pet.imageCode ? `<img src="${IMG(e.pet.imageCode)}" alt="" loading="lazy" onerror="this.remove()">` : ""}</span><span><b>${esc(e.pet.name)}</b><small>${esc(e.dungeon ? e.dungeon + (e.floor ? " " + e.floor : "") : e.near || byMap[e.map].name)}</small></span>${co}</button>`;
 }
 function renderList(){
   let html = "";
@@ -302,7 +308,7 @@ function showTip(k){
   const e0 = list[0];
   const rows = list.map(e => {
     const p = e.pet, attrs = ATTR.filter(([a]) => Number(p[a]) > 0).map(([a, l, c]) => `<span style="color:${c};font-weight:800">${l}${Math.round(Number(p[a])/10)}</span>`).join(" ");
-    return `<div class="row"><span class="im">${p.imageCode ? `<img src="${IMG(p.imageCode)}" alt="" onerror="this.remove()">` : ""}</span><div><b>${esc(p.name)}</b> ${attrs}<small>${esc(e.dungeon ? `${e.dungeon}${e.floor ? " " + e.floor : ""}${e.x != null ? ` (${e.x}, ${e.y})` : ""}` : `${byMap[e.map].name} (${e.x}, ${e.y})`)}</small>
+    return `<div class="row"><span class="im">${p.imageCode ? `<img src="${IMG(p.imageCode)}" alt="" onerror="this.remove()">` : ""}</span><div><b>${esc(p.name)}</b> ${attrs}<small>${esc(e.dungeon ? `${e.dungeon}${e.floor ? " " + e.floor : ""}${e.x != null ? ` (${e.x}, ${e.y})` : ""}` : e.near ? `${e.near} · 약 (${e.x}, ${e.y})` : `${byMap[e.map].name} (${e.x}, ${e.y})`)}</small>
       <div class="lk"><a href="pokedex.html#${encodeURIComponent(p.id)}">🐾 도감</a><a href="index.html?pet=${encodeURIComponent(p.name)}">🎲 환각 계산</a></div></div></div>`;
   }).join("");
   let dist = "";
