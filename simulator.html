@@ -413,6 +413,8 @@ body {
 .sim-tabs a{display:inline-flex;align-items:center;gap:7px;padding:10px 22px;border-radius:14px;font-weight:800;font-size:15px;color:var(--t2);text-decoration:none;transition:background .2s,color .2s}
 .sim-tabs a:hover{color:var(--t1)}
 .sim-tabs a.on{background:var(--white);color:var(--t1);box-shadow:0 2px 8px rgba(40,90,150,.18)}
+.sim-tabs a{white-space:nowrap}
+@media (max-width:520px){ .sim-tabs{display:grid;grid-template-columns:repeat(3,1fr);width:100%;margin-top:52px} .sim-tabs a{justify-content:center;padding:10px 6px;font-size:13.5px;gap:4px} }
 </style>
 </head>
 <body>
