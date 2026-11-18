@@ -208,6 +208,20 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--t1);
 .slot.filled .s-off{display:block;}
 .slot .s-off:hover{background:var(--err);color:#fff;}
 .slot.soon{cursor:default;opacity:.5;}
+.slot .s-en{position:absolute;top:5px;right:22px;font-size:10px;font-weight:900;padding:2px 6px;border-radius:6px;background:linear-gradient(135deg,#f5a623,#ef7d3c);color:#fff;font-family:'Nunito',sans-serif;}
+.slot.ench .s-name{font-family:'Nunito',sans-serif;font-weight:900;color:#d97a12;}
+.en-row{border:1.5px solid var(--border);border-radius:13px;padding:10px 12px;margin-top:8px;background:var(--white);}
+.en-head{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:800;color:var(--t1);}
+.en-head .lv{margin-left:auto;font-family:'Nunito',sans-serif;font-weight:900;font-size:17px;color:#e07a10;}
+.en-head .nm small{font-weight:600;color:var(--t3);margin-left:5px;font-size:11px;}
+.en-steps{display:grid;grid-template-columns:repeat(11,1fr);gap:3px;margin-top:8px;}
+.en-steps button{border:1.5px solid var(--border);background:var(--s1);color:var(--t2);border-radius:8px;padding:5px 0;font-size:11px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;}
+.en-steps button.lit{background:#fff1d6;border-color:#f5c26b;color:#b86400;}
+.en-steps button.on{background:linear-gradient(135deg,#f5a623,#ef7d3c);border-color:transparent;color:#fff;}
+[data-theme="dark"] .en-steps button.lit{background:#3a2c10;border-color:#7a5a1e;color:#ffcf6b;}
+.en-gain{font-size:11.5px;color:var(--t2);margin-top:7px;line-height:1.6;}
+.en-gain b{color:#d97a12;}
+.en-off{opacity:.55;}
 .slot.soon:hover{transform:none;border-color:var(--border2);}
 @keyframes equipPop{0%{transform:scale(.86)}60%{transform:scale(1.07)}100%{transform:scale(1)}}
 .slot.pop{animation:equipPop .34s cubic-bezier(.22,1,.36,1);}
@@ -549,8 +563,23 @@ var SLOTS = [
   {k:'soul',   label:'소울',     icon:'🌟', type:'soul',    rare:null},
   {k:'trinity',label:'삼위일체', icon:'🔮', type:'trinity', rare:'totem'},
   {k:'totem',  label:'토템',     icon:'🗿', type:'totem',   rare:'totem'},
-  {k:'enchant',label:'강화',     icon:'⚒',  type:'soon',    rare:null}
+  {k:'enchant',label:'강화',     icon:'⚒',  type:'enchant', rare:null}
 ];
+/* ===== 슬롯 강화 (무기·투구·갑옷 칸, +1~+10) — 칸에 붙는 강화라 장비를 바꿔도 단계는 유지 =====
+   무기칸: 공 1/1/1/2/2/2/2/4/5/5, 관통 +6:5 +8:10 +10:15, 명중 +6/+8/+10 각 5
+   머리·몸칸: 방 1/1/1/2/2/2/2/4/5/5, 쉴드 +6:5 +8:5 +10:10, 내구 +4/+6/+8 각 5, +10:10 */
+var ENH_MAX=10;
+var ENH_SLOTS=[{k:'weapon',label:'무기칸',kind:'weapon'},{k:'head',label:'투구칸',kind:'armor'},{k:'body',label:'갑옷칸',kind:'armor'}];
+var ENH_GAIN={
+  weapon:[{atk:1},{atk:1},{atk:1},{atk:2},{atk:2},{atk:2,pen:5,hit:5},{atk:2},{atk:4,pen:10,hit:5},{atk:5},{atk:5,pen:15,hit:5}],
+  armor: [{def:1},{def:1},{def:1},{def:2,hp:5},{def:2},{def:2,shield:5,hp:5},{def:2},{def:4,shield:5,hp:5},{def:5},{def:5,shield:10,hp:10}]
+};
+var ENH_NAME={atk:'공격',def:'방어',hp:'내구',pen:'관통',hit:'명중',shield:'쉴드'};
+function enhKind(slotKey){ for(var i=0;i<ENH_SLOTS.length;i++) if(ENH_SLOTS[i].k===slotKey) return ENH_SLOTS[i].kind; return null; }
+function enhLv(slotKey){ return Math.max(0,Math.min(ENH_MAX,num(S.en&&S.en[slotKey]))); }
+function enhSum(kind, lv){ var o={}; for(var i=0;i<lv;i++){ var g=ENH_GAIN[kind][i]; for(var k in g) o[k]=(o[k]||0)+g[k]; } return o; }
+function enhGain(slotKey){ var kd=enhKind(slotKey); return kd?enhSum(kd, enhLv(slotKey)):{}; }
+function enhText(g){ var a=[]; ['atk','def','hp','pen','hit','shield'].forEach(function(k){ if(g[k]) a.push(ENH_NAME[k]+' +'+g[k]); }); return a.join(' · '); }
 function slotDef(k){ for(var i=0;i<SLOTS.length;i++) if(SLOTS[i].k===k) return SLOTS[i]; return null; }
 var TYPE_LABEL={weapon:'무기',head:'투구',body:'갑옷',acc:'악세서리',totem:'토템',trinity:'삼위일체'};
 var PART_COLOR={weapon:'#e0684a',head:'#2f7fd6',body:'#2f7fd6',acc:'#9b6fd6',totem:'#3aab7d',trinity:'#22b6c9'};
@@ -574,7 +603,8 @@ var ITEMS=[], ROLL='max', QUERY='', PART_F='전체', SORT='default', SHOWN=40, S
 var S = {
   reb:0, lv:140, a:{vit:0,hel:0,str:0,spd:0}, base:{atk:0,def:0,hp:0,dex:0},
   eq:{},                       /* slotKey → {uid, r, o:{}} */
-  soul:{on:false, grade:'영웅', lv:1000, st:{atk:0,def:0,dex:0}, sp:{hit:0,crit:0,eva:0}}
+  soul:{on:false, grade:'영웅', lv:1000, st:{atk:0,def:0,dex:0}, sp:{hit:0,crit:0,eva:0}},
+  en:{weapon:0, head:0, body:0}  /* 슬롯 강화 단계 */
 };
 
 function byId(id){ return document.getElementById(id); }
@@ -652,6 +682,15 @@ function calc(){
       if(gk==='atk'||gk==='def'||gk==='dex'||gk==='hp'){ out[gk]+=g[gk]; parts[gk].item+=g[gk]; }
       else if(PCT_KEYS.indexOf(gk)>=0) pct[gk]+=g[gk];
       else ex[gk]+=g[gk];
+    }
+  }
+  /* 슬롯 강화: 그 칸에 장비를 끼고 있을 때만 적용 */
+  for(var ei=0; ei<ENH_SLOTS.length; ei++){
+    var ek=ENH_SLOTS[ei].k; if(!S.eq[ek]||!findItem(S.eq[ek].uid)) continue;
+    var eg=enhGain(ek);
+    for(var gk2 in eg){
+      if(gk2==='atk'||gk2==='def'||gk2==='hp'){ out[gk2]+=eg[gk2]; parts[gk2].item+=eg[gk2]; }
+      else ex[gk2]+=eg[gk2];
     }
   }
   var setOn=[];
@@ -735,8 +774,11 @@ function renderEquip(){
   var h='', r=calc();
   for(var i=0;i<SLOTS.length;i++){
     var sl=SLOTS[i];
-    if(sl.type==='soon'){
-      h+='<div class="slot soon"><div class="s-label">'+sl.label+'</div><div class="s-icon"><span class="ghost">'+sl.icon+'</span></div><div class="s-empty">준비중</div></div>';
+    if(sl.type==='enchant'){
+      var anyEn=enhLv('weapon')||enhLv('head')||enhLv('body');
+      h+='<div class="slot ench'+(anyEn?' filled':'')+(SELSLOT==='enchant'?' sel':'')+'" data-slot="enchant" style="--rc:#f5a623">'+
+         '<div class="s-label">강화</div><div class="s-icon"><span class="ghost">'+sl.icon+'</span></div>'+
+         '<div class="s-name">+'+enhLv('weapon')+' / +'+enhLv('head')+' / +'+enhLv('body')+'</div></div>';
     } else if(sl.type==='soul'){
       var on=S.soul.on, sc=RARITY_COLOR[S.soul.grade]||'#e070a8';
       h+='<div class="slot'+(on?' filled':'')+(SELSLOT==='soul'?' sel':'')+'" data-slot="soul" style="--rc:'+sc+'">'+
@@ -748,6 +790,7 @@ function renderEquip(){
       h+='<div class="slot'+(it?' filled':'')+(SELSLOT===sl.k?' sel':'')+'" data-slot="'+sl.k+'" style="--rc:'+rc+'">'+
          '<button class="s-off" data-off="'+sl.k+'">×</button>'+
          (it&&e.r&&e.r!=='없음'?'<span class="s-rare">'+e.r+'</span>':'')+
+         (it&&enhLv(sl.k)?'<span class="s-en">+'+enhLv(sl.k)+'</span>':'')+
          '<div class="s-label">'+sl.label+'</div>'+
          '<div class="s-icon">'+(it?'<img src="'+iconUrl(it.gfx)+'" alt="" onerror="this.style.visibility=\'hidden\'">':'<span class="ghost">'+sl.icon+'</span>')+'</div>'+
          (it?'<div class="s-name">'+esc(it.name)+'</div>':'<div class="s-empty">비어있음</div>')+'</div>';
@@ -771,6 +814,7 @@ function renderOpt(){
   var nameEl=byId('optName'), subEl=byId('optSub'), body=byId('optBody'), del=byId('btnUnequipOne');
   if(!SELSLOT){ nameEl.textContent='장비를 선택해줘'; subEl.textContent='장비창에서 착용한 칸을 누르면 옵션과 레어리티를 조정할 수 있어'; body.innerHTML=''; del.style.display='none'; return; }
   if(SELSLOT==='soul'){ renderSoulEditor(); return; }
+  if(SELSLOT==='enchant'){ renderEnchEditor(); return; }
   var e=S.eq[SELSLOT], it=e?findItem(e.uid):null, sd=slotDef(SELSLOT);
   if(!it){ SELSLOT=null; renderOpt(); return; }
   del.style.display=''; del.textContent='해제';
@@ -790,6 +834,7 @@ function renderOpt(){
     for(var gk in g) gs.push(OPT_NAME[gk]+' +'+g[gk]+(PCT_KEYS.indexOf(gk)>=0?'%':''));
     h+='<div class="rare-gain">'+(gs.length?('레어리티 추가 옵션 · '+gs.join(' / ')):'레어리티 없음 — 추가 옵션 없음')+'</div>';
   }
+  if(enhKind(SELSLOT)) h+='<div class="f-section" style="margin-top:14px;">슬롯 강화</div>'+enhRowHTML(SELSLOT, sd.label+'칸');
   /* 옵션 min~max */
   h+='<div class="f-section" style="margin-top:14px;">아이템 옵션 (최소~최대 범위에서 지정)</div>';
   var any=false;
@@ -808,6 +853,23 @@ function renderOpt(){
   else h+='<div class="preset-wrap"><button class="mini-btn" data-roll="min">최소</button><button class="mini-btn" data-roll="avg">평균</button><button class="mini-btn" data-roll="max">최대</button></div>';
   if(it.setEff) h+='<div class="rare-gain" style="margin-top:10px;">'+esc(it.setEff)+' · 같은 세트 2개 이상 착용 시 1회 적용</div>';
   body.innerHTML=h;
+}
+function enhRowHTML(k, label){
+  var lv=enhLv(k), g=enhSum(enhKind(k), lv), on=!!(S.eq[k]&&findItem(S.eq[k].uid));
+  var steps=''; for(var i=0;i<=ENH_MAX;i++) steps+='<button type="button" data-en="'+k+'" data-lv="'+i+'" class="'+(i===lv?'on':(i<lv?'lit':''))+'">'+(i?'+'+i:'0')+'</button>';
+  var next=lv<ENH_MAX?enhText(ENH_GAIN[enhKind(k)][lv]):'';
+  return '<div class="en-row'+(on?'':' en-off')+'"><div class="en-head"><span class="nm">'+label+(on?'':'<small>장비 없음 · 끼면 적용</small>')+'</span><span class="lv">+'+lv+'</span></div>'+
+    '<div class="en-steps">'+steps+'</div>'+
+    '<div class="en-gain">'+(lv?'누적 <b>'+enhText(g)+'</b>':'강화 안 함')+(next?'<br>다음 단계(+'+(lv+1)+') '+next:'<br>최대 강화')+'</div></div>';
+}
+function renderEnchEditor(){
+  byId('optName').textContent='슬롯 강화';
+  byId('optSub').textContent='무기·투구·갑옷 칸 강화 (+1~+10) · 칸에 붙는 강화라 장비를 바꿔도 단계는 그대로';
+  var del=byId('btnUnequipOne'); del.style.display=''; del.textContent='강화 초기화';
+  var h='';
+  for(var i=0;i<ENH_SLOTS.length;i++) h+=enhRowHTML(ENH_SLOTS[i].k, ENH_SLOTS[i].label);
+  h+='<div class="rare-gain" style="margin-top:12px;">무기칸 +6·+8·+10에서 관통·명중, 머리·몸칸 +4부터 내구, +6·+8·+10에서 쉴드가 붙어. 칸에 장비를 끼고 있을 때만 결과에 더해져.</div>';
+  byId('optBody').innerHTML=h;
 }
 function renderSoulEditor(){
   var g=SOUL_GRADE[S.soul.grade], body=byId('optBody');
@@ -1089,6 +1151,7 @@ byId('btnReset').addEventListener('click', function(){ S.a={vit:0,hel:0,str:0,sp
 byId('btnUnequipAll').addEventListener('click', function(){ S.eq={}; S.soul.on=false; SELSLOT=null; renderAll(); });
 byId('btnUnequipOne').addEventListener('click', function(){
   if(SELSLOT==='soul'){ S.soul.on=!S.soul.on; renderAll(); return; }
+  if(SELSLOT==='enchant'){ S.en={weapon:0,head:0,body:0}; renderAll(); return; }
   if(SELSLOT){ delete S.eq[SELSLOT]; SELSLOT=null; renderAll(); }
 });
 
@@ -1132,6 +1195,7 @@ byId('eqGrid').addEventListener('click', function(e){
   var sl=e.target.closest('[data-slot]'); if(!sl) return;
   var key=sl.getAttribute('data-slot');
   if(key==='soul'){ SELSLOT='soul'; if(!S.soul.on) S.soul.on=true; renderAll(); return; }
+  if(key==='enchant'){ SELSLOT=(SELSLOT==='enchant'?null:'enchant'); renderEquip(); renderOpt(); return; }
   if(S.eq[key]){ SELSLOT=(SELSLOT===key?null:key); renderEquip(); renderOpt(); return; }
   var sd=slotDef(key); PART_F=TYPE_LABEL[sd.type]||'전체'; SHOWN=STEP;
   var chips=byId('partFilter').querySelectorAll('[data-p]');
@@ -1160,6 +1224,8 @@ byId('eqGrid').addEventListener('drop', function(e){
 
 /* 옵션 편집 */
 byId('optBody').addEventListener('click', function(e){
+  var enb=e.target.closest('[data-en]');
+  if(enb){ if(!S.en) S.en={weapon:0,head:0,body:0}; S.en[enb.getAttribute('data-en')]=num(enb.getAttribute('data-lv')); renderAll(); return; }
   var rb=e.target.closest('[data-rare]');
   if(rb && SELSLOT && S.eq[SELSLOT]){ S.eq[SELSLOT].r=rb.getAttribute('data-rare'); renderAll(); return; }
   var sg=e.target.closest('[data-sg]');
@@ -1239,6 +1305,7 @@ function loadLocal(){
       S.reb=num(d.S.reb); S.lv=num(d.S.lv)||140;
       S.a=d.S.a||S.a; S.base=d.S.base||S.base; S.eq=d.S.eq||{};
       if(d.S.soul) S.soul=d.S.soul;
+      if(d.S.en) S.en=d.S.en;
     }
     if(d.roll) ROLL=d.roll;
   }catch(e){}
